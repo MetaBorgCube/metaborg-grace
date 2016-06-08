@@ -1,0 +1,20 @@
+module Analysis
+
+language
+
+  observer : editor-analyze
+  context  : legacy
+  
+references
+
+  reference _ : editor-resolve
+  hover _     : editor-hover
+
+menus
+  
+  menu: "Analysis" (openeditor)
+
+    action: "Show analyzed AST" = debug-show-analyzed
+    action: "Show analyzed AST and PP" = debug-show-analyzed-pp
+    action: "Show desugared AST" = debug-show-desugared
+    action: "Show desugared AST and PP" = debug-show-desugared-pp

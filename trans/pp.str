@@ -1,0 +1,42 @@
+module pp
+
+imports
+
+  libstratego-gpp
+  runtime/refactoring/-
+  pp/grace-parenthesize
+  pp/grace-pp
+
+rules
+
+  editor-format:
+    (node, _, ast, path, project-path) -> (filename, result)
+    with
+      ext      := <get-extension> path
+    ; filename := <guarantee-extension(|$[pp.[ext]])> path
+    ; result   := <pp-debug> node
+
+rules
+  
+  pp-grace-string =
+    parenthesize-grace
+    ; prettyprint-grace-start-symbols
+    ; !V([], <id>)
+    ; box2text-string(|120)
+      
+  pp-partial-grace-string =
+    parenthesize-grace
+    ; prettyprint-grace
+    ; !V([], <id>)
+    ; box2text-string(|120)
+      
+  pp-debug :
+    ast -> result
+    with
+       result := <pp-grace-string> ast
+    <+ <bottomup(try(not(is-string); not(is-list); not(pp-grace-string); debug(!"cannot pp ")))> ast
+    ;  result := ""
+
+rules
+  
+  construct-textual-change = construct-textual-change(pp-partial-grace-string, parenthesize, override-reconstruction, resugar)

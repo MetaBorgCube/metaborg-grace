@@ -1,0 +1,11 @@
+var a := outer;
+var a := outer.outer;
+var a := outer . outer . outer;
+var a := outer.outer.outer.outer;
+var a := outer.outer.outer.outer.outer;
+var a := outer.outer.outer.outer.outer.outer.outer.outer.outer.outer.outer;
+var a := outer.value;
+var a := outer.bar(1,2,6);
+var a := outer.outer.doThis(3) timesTo("foo");
+var a := outer + 1;
+var a := ! outer;

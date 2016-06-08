@@ -1,0 +1,179 @@
+module grace
+
+imports
+
+  General
+  KeywordRejections
+
+context-free start-symbols
+  
+  Program
+  Exp
+
+context-free syntax
+
+  Program.Program               = <<CodeSequence*> <EOF>>
+  
+  CodeSequence.Dialect          = <dialect <STRING>>
+  CodeSequence.Import           = <import <STRING> as <ID>>
+  CodeSequence.Assignment       = <<Assignment> ;
+
+>
+  CodeSequence.Declaration 		= <<Declaration> ;
+
+> {avoid}
+  CodeSequence.Expression       = <<Exp> ;
+
+>
+
+  Assignment.Assignment         = <<ID> := <Exp>>
+  
+  // def must be initialized
+  Declaration.Constant          = <def <ID> <Annotations> <TypeAnn> = <Exp>> 
+  // var has optional init
+  Declaration.Variable          = <var <ID> <Annotations> <TypeAnn> <VarInit>> 
+  Declaration.ActualType        = <<MethodName> <Annotations> <Params> <MethodType>> 
+  
+  VarInit.VarInit               = <:= <Exp>>
+  VarInit.NoVarInit             = <>
+  TypeAnn.TypeAnn               = <: <Type><ArgType>>
+  TypeAnn.NoTypeAnn             = <>
+  Type.Type                     = <<ID>>
+  
+  Declaration.ClassDecl         = <class <MethodNames+> <MethodBody>>
+  Declaration.TraitDecl         = <trait <MethodNames+> <MethodBody>>
+  Declaration.TypeDeclDirect    = <type <ID> <ArgType> <Annotations> = <TypeDeclTarget>>
+  Declaration.TypeDeclDirectW   = <type <ID> <ArgType> <Annotations> = <TypeDeclTarget> <Where>> {prefer}
+  
+  TypeDeclTarget.DirectType     = < { <TypeRule*> } >
+  TypeDeclTarget.TypeExp        = <<TypeExp>>
+  
+//  Exp.Type                      = TypeExp
+  TypeExp.TypeExpKW             = <type { <TypeRule*> } <Where>>
+  TypeRule.TypeRule             = [ [Prefix] [MethodNames+] [TypeRuleRightHand] ;]
+  TypeRuleRightHand.TypeRuleRightHand = [-> [TypeExp][ArgType]]
+  TypeRuleRightHand.NoTypeRuleRightHand = []
+  
+  Where.Where                   = <where <{TypeConf ","}+>>
+  Where.NoWhere                 = <>
+  TypeConf.TypeConf             = [[TypeExp] <: [TypeExp]]
+  TypeExp.Union                 = <<ID> + <ID>>
+  TypeExp.Subtract              = <<ID> - <ID>>
+  TypeExp.Intersect             = <<ID> & <ID>>
+  TypeExp.Variant               = <<ID> | <ID>>
+  TypeExp.TypeID                = <<ID>>
+
+  Declaration.MethodDecl        = <method <Prefix> <MethodNames+> <MethodType> <MethodBody> <Where>> 
+  MethodNames.MethodID          = <<MethodName> <ArgType> <Annotations> <Params>>
+  MethodNames.MethodOp          = <<OperatorCF> <ArgType> <Annotations> <Params>>
+  
+  Prefix.Prefix                 = "prefix"
+  Prefix.NoPrefix               = <>
+  
+  MethodName.ID                 = <<ID>>
+  
+  ArgType.ArgType               = < [[ <{ID ","}*> ]] >
+  ArgType.NoArgType             = <>
+  
+  Annotations.Annotations       = <is <{Annotation ","}+>>
+  Annotations.NoAnnotations     = <>
+  
+  Annotation.Public             = "public"
+  Annotation.Readable           = "readable"
+  Annotation.Writeable          = "writable"
+  Annotation.Confidential       = "confidential"
+  Annotation.Manifest           = "manifest"
+  Annotation.Overrides          = "overrides"
+  
+  Params.Params                 = <(<{Param ", "}*>)>
+  Params.NoParams               = <>
+  Param.Param                   = <<ID><TypeAnn>>
+  PrefixParam.SingleParam       = <<Param>>
+  PrefixParam.SingleParamParen  = <(<Param>)>
+  
+  MethodType.MethodType         = [-> [ID]]
+  MethodType.NoMethodType       = []
+    
+  MethodBody.MethodBody         = <{
+    <CodeSequence*>
+}>
+  
+  Exp.ObjectDecl                = <object {
+    <Inherit>
+    <Use>
+    <CodeSequence*>
+}>
+  
+  Inherit.Inherit               = <inherit <Exp> <Alias> <Exclude>;>
+  Inherit.NoInherit             = <>
+  
+  Alias.Alias                   = <alias <ID> as <ID>>
+  Alias.NoAlias                 = <>
+  
+  Exclude.Exclude               = <exclude <{ID ", "}*>>
+  Exclude.NoExclude             = <>
+  
+  Use.Use                       = <use <Exp> <Alias> <Exclude>;>
+  Use.NoUse                     = <>
+  
+  // simple expressions
+//  Exp.Var                       = ID // foobar; Var("foobar") | self; Self() | self.outer.foobar; Chain([Self(), Outer(), Var("foobar")])
+  Exp.Number                    = <<NUM>>
+  Exp.String                    = <<STRING>>
+  Exp.True                      = "true"
+  Exp.False                     = "false"
+  
+  // simple "built-in" identifiers
+  Exp.Self                       = "self"
+//  ID.Outer                      = <<Outer>>
+  
+  Exp.Outer                      = "outer"
+  Exp.PlaceHolder                = "_"
+  
+  Exp                           = <(<Exp>)>                                    {bracket}
+
+  Exp.MCall                     = <<Exp> . <MethodName> <ArgType>>             {left, avoid}
+  Exp.MCallOp                   = <<Exp> <OperatorCF> <ArgType> <CallArgs>>    {left, prefer}
+  Exp.MCallOpEx                 = <<Exp> <OperatorCF> <ArgType> <Exp>>         {left}
+  Exp.MCallWDot                 = <<Exp> . <Part+>>                            {left, prefer}
+  Exp.MCallImpl                 = <<Part+>>
+  Exp.MCallPrefixOp             = <<OperatorCF> <ArgType> <CallArgs>>          {left, prefer}
+  Exp.MCallPrefixOpExp          = <<OperatorCF> <ArgType> <Exp>>               {left}
+  
+  Exp.MCallCanonical            = <<Prefix> <Exp> . <MethodName> <ArgType> <CallArgs>>
+  
+  OperatorCF.OperatorCF         = <<Operator>>
+    
+  Part.Part                     = <<MethodName> <ArgType> <CallArgs>>
+  
+  // arguments between parenthesis
+  CallArgs.ArgsParen            = <(<{Exp ","}+>)> {left}
+  CallArgs.NoArgs               = <>
+//  ArgsParen.ArgsParen           = [ ( [{Exp ","}*] ) ]                          {prefer}
+  
+  // arguments that are valid without parenthesis
+  CallArgs.ArgBlock             = <<Block>>
+  CallArgs.ArgNumber            = <<NUM>>
+  CallArgs.ArgString            = <<STRING>>
+  CallArgs.ArgLineup            = <<Lineup>>
+  
+  Exp.LineupExp                 = <<Lineup>>
+  Lineup.Lineup                 = <[ <{Exp ","}*> ]>
+  Exp.Ellipsis                  = "..." // needs to yield _runtime_ error
+  Exp.BlockExp                  = <<Block>>
+  Block.Block                   = <{ <CodeSequence*> }>
+  Block.BlockWParams            = <{ <BlockParams>
+    <CodeSequence*>
+}>          {prefer}
+  
+  Exp.Return                    = <return <Exp>>
+  
+  BlockParams.BlockParams       = [ [ArgType] [{Param ","}*] -> ]
+
+  
+context-free priorities
+    
+    { left: Exp.MCallWDot Exp.MCall } >
+    { left: Exp.MCallOp Exp.MCallOpEx } >
+    { left: Exp.MCallImpl } > //  Exp.MCallOnOuters  
+    { left: Exp.MCallCanonical }

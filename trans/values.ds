@@ -1,0 +1,20 @@
+module trans/values
+
+imports
+
+  src-gen/ds-signatures/Grace-sig
+  trans/store
+
+signature
+
+  sorts
+    V // value
+    C // code
+   
+   constructors
+             //  params         code     store at declaration
+   StoredMethod: List(String) * List(CodeSequence) * H -> C
+   
+  variables
+    v : V
+    c : C

@@ -1,0 +1,21 @@
+module syntax-visibility
+
+language Grace
+
+test object with visibilities [[object {
+    def a = 1; // Confidential access to a
+    def b is public = 2; // Public access to b
+    def c is readable = 2; // Public access to c
+    var d := 3; // Confidential access and assignment
+    var e is readable; // Public access and confidential assignment
+    var f is writable; // Confidential access, public assignment
+    var g is public; // Public access and assignment
+    var h is readable, writable; // Public access and assignment
+};]] parse succeeds
+
+test var readable [[var a is readable; //  readable]] parse succeeds
+test var writable [[var b is writable; // public]] parse succeeds
+test var nothing  [[var d := 3; // comment with confidential keyword]] parse succeeds
+test var readable and writable [[var b is writable, writable := a; // access public]] parse succeeds
+test var double writeable [[var b is writable, writable; // public writeable]] parse succeeds
+test var readible and writable no init [[var f is readable, writable;]] parse succeeds

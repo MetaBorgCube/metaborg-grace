@@ -1,0 +1,228 @@
+module trans/desugar/desugar
+
+imports
+    
+    libstratego-lib
+    libstratego-gpp
+    libstratego-aterm
+    src-gen/signatures/grace-sig
+    src-gen/signatures/General-sig
+
+rules
+
+  desugar-all = innermost(desugar)
+  
+  desugar = 
+//            desugar-methodOp-to-methodId <+
+//            
+//            desugar-method-call <+
+//            desugar-method-call-operator <+
+//            desugar-method-call-operator-exp <+
+//            desugar-method-call-prefix <+
+//            desugar-method-call-prefix-exp <+
+//            desugar-method-call-into-canonical <+
+            
+            desugar-class-declaration <+
+            
+            desugar-flatten-methodID <+
+            
+            desugar-block <+
+            desugar-block-to-object <+
+//            desugar-arg-number <+
+//            desugar-arg-block <+
+//            desugar-arg-string <+
+//            desugar-arg-lineup <+
+            desugar-self-in-id <+
+            
+            desugar-flatten-objectdecl <+
+            desugar-flatten-declaration <+
+            desugar-fail
+            
+  desugar-all-post = innermost(desugar-post)
+  
+  desugar-post = desugar-fail
+  
+  desugar-pre = desugar-program <+ desugar-fail
+
+  desugar-program: Program(a, b) -> Program([Expression(ObjectDecl(NoInherit(), NoUse(), a))], b)
+
+  // a reference to a method is just calling it as a method with no params
+//  desugar-ID: ID(a) -> MCallCanonical(NoPrefix(), Self(), a, [], [])
+  
+  desugar-flatten-methodID: [ MethodID(
+      ID(name1)
+    , NoArgType()
+    , NoAnnotations()
+    , Params(params1)
+    )
+  , MethodID(
+      ID(name2)
+    , NoArgType()
+    , NoAnnotations()
+    , Params(params2)
+    )
+  ] -> [MethodID(
+      ID(<concat-strings> [name1, "_", name2])
+    , NoArgType()
+    , NoAnnotations()
+    , Params(<concat> [params1,params2])
+    )]
+  
+  
+  // Flatten things in lists in the objectdecl list.
+  desugar-flatten-objectdecl: ObjectDecl(a, b, xs) -> ObjectDecl(a, b, ys)
+    where
+      ys := <flatten-list> xs;
+      <not(eq)> (xs, ys)
+        
+  desugar-flatten-declaration: Declaration([a, b]) ->
+      [Declaration(a), Declaration(b)]
+
+//  desugar-arg-number: ArgNumber(a) -> Number(a)
+//  desugar-arg-string: ArgString(a) -> String(a)  
+//  desugar-arg-block:  ArgBlock(a)  -> Block(a)
+//  desugar-arg-lineup: ArgLineup(a) -> a
+
+  desugar-self-in-id: ID(Self()) -> Self()
+  
+  desugar-block:
+    Block(BlockWParams(a, b)) -> BlockWParams(a, b)
+   
+  desugar-block:
+    Block(a) -> BlockWParams(BlockParams(NoArgType(), []), a) 
+
+  desugar-block-to-object:
+    BlockWParams(BlockParams(_, params), code)-> 
+      ObjectDecl(
+        NoInherit(),
+        NoUse(),
+        [ Declaration(
+            MethodDecl(
+              NoPrefix()
+            , [MethodID(ID("apply"), NoArgType(), NoAnnotations(), params)]
+            , NoMethodType()
+            , code
+            , NoWhere()
+            )
+          )
+        ]
+      )
+
+  desugar-block-to-object:
+    BlockWParams(BlockParams(NoArgType(), []), code)-> 
+      ObjectDecl(
+        NoInherit(),
+        NoUse(),
+        [ Declaration(
+            MethodDecl(
+              NoPrefix()
+            , [MethodID(ID("apply"), NoArgType(), NoAnnotations(), NoParams())]
+            , NoMethodType()
+            , code
+            , NoWhere()
+            )
+          )
+        ]
+      )
+
+  methodId-to-nameList:
+    (MethodID(name, _, _, _), list) -> [list, <name-to-string> name]
+    
+//  methodId-to-annotationList:
+//    (MethodID(_, _, annotation, _), list) -> [list, <unpack-or-emptylist> annotation]
+  
+  methodId-to-paramList:
+    (MethodID(_, _, _, Params(param)), list) -> [list,  param]
+    
+//  methodId-to-paramList:
+//    (MethodID(_, _, _, NoParams()), list) -> [list,  []]
+//    
+//  desugar-method-call-operator:
+//    MCallOp(receiver, name, typing, argument) -> 
+//      MCallWDot(receiver, [ Part(name, typing, argument) ] )
+//  
+//  desugar-method-call-operator-exp:
+//    MCallOpEx(receiver, name, typing, argument) ->
+//      MCallOp(receiver, name, typing, argument)
+//    
+//  desugar-method-call-prefix:
+//    MCallPrefixOp(operator, typing, argument) ->
+//      MCallPrefixOpExp(operator, typing, argument)
+//  
+//  desugar-method-call-prefix-exp:
+//    MCallPrefixOpExp(operator, typing, argument) ->
+//      MCallCanonical(Prefix(), argument, operator, typing, [])
+//      
+//  desugar-method-call-into-canonical:
+//    MCallWDot(receiver, partList) ->
+//      MCallCanonical(NoPrefix(), receiver, newName, types, arguments)
+//      where
+//        names := <flatten-list> <foldl(part-to-nameList)> (partList, []);
+//        types-sofar := <flatten-list> <foldl(part-to-typeList)> (partList, []);
+//        types := <type-or-notype> types-sofar;
+//        arguments := <arg-or-noargs> <flatten-list> <foldl(part-to-argList)> (partList, []); 
+//        newName := <concat-strings> <separate-by> ("_", names)
+//
+//  desugar-method-call:
+//    MCall(receiver, name, typing) -> 
+//      MCallWDot(receiver, [ Part(name, typing, []) ] )
+//
+//  desugar-methodOp-to-methodId:
+//    MethodOp(a, b, c, d) -> MethodID(a, b, c, d)
+//    
+//  desugar-methodOp-to-methodId:
+//    MethodOp(a, b, c, d) -> MethodID(a, b, c, d)
+
+  desugar-class-declaration:
+    ClassDecl(mIDs,MethodBody(code)) ->
+    MethodDecl(NoPrefix(),mIDs,NoMethodType(),MethodBody([Expression(ObjectDecl(NoInherit(),NoUse(),code))]),NoWhere())
+
+//    ClassDecl(classNames, code) ->
+//    MethodDecl(
+//      NoPrefix(), // prefix
+//      [MethodID(ID(className), NoArgType(), NoAnnotations(), paramList)],
+//      NoMethodType(), // methodType
+//      code,
+//      NoWhere() // where clause
+//    )
+//      with
+//        names     := <flatten-list> <foldl(methodId-to-nameList)> (classNames, []);
+//        className := <concat-strings> <separate-by> ("_", names);
+//        paramList := <flatten-list> <foldl(methodId-to-paramList)> (classNames, [])
+
+  part-to-nameList:
+    (Part(name, _, _), list) -> [list, <name-to-string> name]
+  
+  part-to-typeList:
+    (Part(_, NoArgType(), _), list) -> [list, []]
+  part-to-typeList:
+    (Part(_, ArgType(type), _), list) -> [list, type]
+  part-to-typeList:
+    (Part(_, else, _), list) -> [list, else]  
+
+  type-or-notype:
+    [] -> NoArgType()
+  type-or-notype:
+    [a|as] -> ArgType([a|as])
+   
+  arg-or-noargs:
+    [] -> NoArgs()
+  arg-or-noargs:
+    [x|[]] -> x
+  arg-or-noargs:
+    [x|xs] -> ArgsParen([x|xs])
+
+  part-to-argList:
+    (Part(_, _, args), list) -> [list, args]
+  
+  name-to-string:
+    ID(a) -> a
+      where
+        <is-string> a
+  name-to-string: a -> a
+  
+  unpack-or-emptylist: NoArgType() -> []
+  unpack-or-emptylist: a -> a
+  
+  // if no strategy may be applied, fail
+  desugar-fail: a -> <fail>

@@ -1,0 +1,47 @@
+module General
+
+lexical syntax
+
+  ID             = [a-zA-Z] [a-zA-Z0-9\'\_]* Assign?
+  Assign         = ":="
+  NUM.Integer    = [0-9]+ // prefer neg int over neg operator
+  NUM.Decimal    = [0-9]* "." [0-9]+
+  NUM.RadixNum   = [0-9]+ [xX] [a-zA-Z0-9]+ // some radix number
+  NUM.SciNum     = [0-9]* "."? [0-9]+ [eE] "-"? [0-9]+ // scientific notation
+  Operator       = [\!\?\@\#\%\^\&\|\~\=\+\-\*\/\\\>\<\:\.\$]+
+  STRING         = "\"" StringChar* "\"" 
+  StringChar     = ~[\"\n] 
+  StringChar     = "\\\"" 
+  StringChar     = BackSlashChar 
+  BackSlashChar  = "\\" 
+  LAYOUT         = [\ \n\r] // tabs are not allowed! 
+  LAYOUT         = "//" ~[\n\r]* NewLineEOF 
+  NewLineEOF     = [\n\r]
+  NewLineCR      = [\r]
+  NewLineCR      = [\n\r]
+  NewLineEOF     = EOF 
+  EOF            =  
+
+lexical restrictions
+
+  // Ensure greedy matching for lexicals
+  
+  NUM           -/- [a-zA-Z0-9\_]
+  ID            -/- [a-zA-Z0-9\_]
+  
+  Operator      -/- [\!\?\@\#\%\^\&\|\~\=\+\-\*\/\\\>\<\:\.\$]
+  
+  // EOF may not be followed by any char
+  
+  EOF           -/- ~[]
+  
+  // Backslash chars in strings may not be followed by " 
+  
+  BackSlashChar -/- [\"]
+
+context-free restrictions
+
+  // Ensure greedy matching for comments
+  
+  LAYOUT? -/- [\ \n\r]
+  LAYOUT? -/- [\/].[\/]

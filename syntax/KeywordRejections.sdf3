@@ -1,0 +1,48 @@
+module KeywordRejections
+
+imports
+
+  General
+
+lexical syntax
+
+  ID = "alias" {reject}                   
+  ID = "as" {reject}
+  ID = "class" {reject}
+  ID = "def" {reject}
+  ID = "dialect" {reject}
+  ID = "exclude" {reject}
+  ID = "import" {reject}
+  ID = "inherit" {reject}
+  ID = "is" {reject}
+  ID = "method" {reject}
+  ID = "object" {reject}
+  ID = "outer" {reject}
+  ID = "prefix" {reject}                  
+  ID = "required" {reject}
+  ID = "return" {reject}
+  ID = "self" {reject}
+  ID = "Self" {reject}
+  ID = "trait" {reject}
+  ID = "type" {reject}
+  ID = "use" {reject}
+  ID = "var" {reject}
+  ID = "where" {reject}
+  
+  ID = "true" {reject}
+  ID = "false" {reject}
+
+  Operator = "." {reject}
+  Operator = "..." {reject}
+  Operator = ":=" {reject}
+  Operator = "=" {reject}
+  Operator = ";" {reject}
+  Operator = "{" {reject}
+  Operator = "}" {reject}
+  Operator = "[" {reject}
+  Operator = "]" {reject}
+  Operator = "(" {reject}
+  Operator = ")" {reject}
+  Operator = ":" {reject}
+  Operator = "->" {reject}
+  

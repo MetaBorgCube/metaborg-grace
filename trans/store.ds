@@ -1,0 +1,27 @@
+module trans/store
+
+imports
+  trans/values
+
+signature
+  sort aliases
+    H = Map(String, V)
+    CH = Map(String, C) // codeheap
+  
+  variables
+    H : H
+    CH : CH
+  
+  constructors
+    read: String --> V
+    write: String * V --> V
+    writeCode: String * C --> C
+    readCode: String --> C
+
+rules
+
+  read    (n) ::  H -->  H[n].
+  readCode(n) :: CH --> CH[n].
+
+  write    (n, v)    ::  H --> v    ::  H {n |--> v   ,  H}.
+  writeCode(n, code) :: CH --> code :: CH {n |--> code, CH}.

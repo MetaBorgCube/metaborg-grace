@@ -1,0 +1,142 @@
+module trans/semantics
+
+imports
+  src-gen/ds-signatures/Grace-sig
+  trans/values
+  trans/store
+
+signature
+  
+  constructors
+    NumV: Int -> V
+    StringV: String -> V
+    BoolV: Bool -> V
+    Done: V
+    Stored: C
+    
+  arrows
+    Exp --> V
+    CodeSequence --> V
+    Declaration --> V
+    Assignment --> V
+    CallArgs --> V
+    List(CodeSequence) --> V
+    C -code-> C
+    C --> V
+    Program -init-> V
+    
+  native operators
+    parseNumber: String -> Int
+    print: V -> V
+    nativeIBinOp: String * Int * Int -> Int
+    
+rules
+
+  Program(cs, _) -init-> cs'
+    where
+      cs :: H {}, CH {} --> cs' :: H _, CH _.
+  
+  ObjectDecl(Inherit(_, _, _), NoUse(), cs) :: H, CH --> cs'
+    where
+      // create empty object
+      // evalute inherit (recurse) and merge into
+      // evaluate traits and merge into (override inherit)
+      // evaluate local method definitions and merge (override inherit and traits)
+      // evaluate fields and statements.
+      
+      cs :: H, CH --> cs'. // execute with stores
+//      H => H'; // make sure store reused when coming out of scope
+//      CH => CH'.
+
+  ObjectDecl(NoInherit(), NoUse(), cs) :: H, CH --> cs'
+    where
+      // create empty object
+      // evalute inherit (recurse) and merge into
+      // evaluate traits and merge into (override inherit)
+      // evaluate local method definitions and merge (override inherit and traits)
+      // evaluate fields and statements.
+      
+      cs :: H, CH --> cs'. // execute with stores
+//      H => H'; // make sure store reused when coming out of scope
+//      CH => CH'.
+     
+     
+  Expression(e) --> e.
+  Declaration(e) --> e.
+  Assignment(e) --> e.
+    
+  cs : List(CodeSequence) --> v
+  where
+    case cs of {
+        [] =>
+            Done() => v
+        [code|[]] =>
+            code --> v
+        [code | cs'] =>
+            code --> _;
+            cs' --> v
+    }.
+  
+  Number(s) --> NumV(parseNumber(s)).
+  ArgNumber(s) --> NumV(parseNumber(s)).
+  String(s) --> StringV(s).
+  True() --> BoolV(true).
+  False() --> BoolV(false).
+  
+  Constant(name, _, _, e1) --> Done()
+    where
+      e1 --> v1;
+      write(name, v1) --> _.
+
+//  Var(name) --> read(name).
+
+  Variable(name, NoAnnotations(), NoTypeAnn(), VarInit(v1)) --> Done()
+    where
+      write(name, v1) --> _.
+      
+//  Assignment(name, v1) --> Done()
+//    where
+//      write(name, v1) --> _.
+  
+//  MethodDecl(
+//    NoPrefix(),
+//    [MethodID(ID(name), NoArgType(), NoAnnotations(), NoParams())],
+//    NoMethodType(),
+//    MethodBody(cs),
+//    NoWhere()
+//  ) :: H --> Done() :: H
+//    where
+//      writeCode(name, StoredMethod([], cs, H)) -code-> _.
+//   
+   // storing a method
+//   StoredMethod([], _, _) -code-> Stored().
+//   
+//   // executing a stored method
+//   StoredMethod([], cs, H) --> v 
+//     where
+//       cs :: H --> v.
+
+   // calling method on self with no parameters
+//   MCall(Self(), ID(name), NoArgType()) --> v
+//     where
+//       readCode(name) --> v.
+   
+//   MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).
+
+//   MethodDecl(
+//     NoPrefix(),
+//     [MethodID(ID(name),NoArgType(),NoAnnotations(),NoParams())],
+//     NoMethodType(),
+//     MethodBody(
+//       [Expression(ObjectDecl(NoInherit(),NoUse(),cs))]
+//     ),
+//     NoWhere()
+//   ) --> Done().
+//   
+//  TraitDecl(
+//    [MethodID(ID(name), NoArgType(), NoAnnotations(), NoParams())],
+//    MethodBody(cs)
+//  ) --> Done().
+//  
+  
+   

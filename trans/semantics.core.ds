@@ -1,0 +1,255 @@
+module trans/semantics_varschemes_typeannos_noaliases_factorized_explimpl_factorized_explicated_copyprop_constantprop_unfactorized_unfactorized
+
+imports 
+
+signature
+    sorts
+      Program
+      CodeSequence
+      Assignment
+      VarInit
+      TypeAnn
+      Type
+      TypeDeclTarget
+      TypeRule
+      TypeRuleRightHand
+      Where
+      TypeConf
+      TypeExp
+      Declaration
+      MethodNames
+      Prefix
+      MethodName
+      ArgType
+      Annotations
+      Annotation
+      Params
+      Param
+      PrefixParam
+      MethodType
+      MethodBody
+      Inherit
+      Alias
+      Exclude
+      Use
+      Part
+      CallArgs
+      Lineup
+      Block
+      Exp
+      BlockParams
+      V
+      C
+      read__Arrow
+      write__Arrow
+      writeCode__Arrow
+      readCode__Arrow
+    constructors
+      NumV : Int -> V 
+      StringV : String -> V 
+      BoolV : Bool -> V 
+      Done : V 
+      Stored : C 
+      Program : List(CodeSequence) * String -> Program 
+      Dialect : String -> CodeSequence 
+      Import : String * String -> CodeSequence 
+      Assignment : Assignment -> CodeSequence 
+      Declaration : Declaration -> CodeSequence 
+      Expression : Exp -> CodeSequence 
+      Assignment : String * Exp -> Assignment 
+      Constant : String * Annotations * TypeAnn * Exp -> Declaration 
+      Variable : String * Annotations * TypeAnn * VarInit -> Declaration 
+      ActualType : MethodName * Annotations * Params * MethodType -> Declaration 
+      VarInit : Exp -> VarInit 
+      NoVarInit : VarInit 
+      TypeAnn : Type * ArgType -> TypeAnn 
+      NoTypeAnn : TypeAnn 
+      Type : String -> Type 
+      ClassDecl : List(MethodNames) * MethodBody -> Declaration 
+      TraitDecl : List(MethodNames) * MethodBody -> Declaration 
+      TypeDeclDirect : String * ArgType * Annotations * TypeDeclTarget -> Declaration 
+      TypeDeclDirectW : String * ArgType * Annotations * TypeDeclTarget * Where -> Declaration 
+      DirectType : List(TypeRule) -> TypeDeclTarget 
+      TypeExp : TypeExp -> TypeDeclTarget 
+      TypeExpKW : List(TypeRule) * Where -> TypeExp 
+      TypeRule : Prefix * List(MethodNames) * TypeRuleRightHand -> TypeRule 
+      TypeRuleRightHand : TypeExp * ArgType -> TypeRuleRightHand 
+      NoTypeRuleRightHand : TypeRuleRightHand 
+      Where : List(TypeConf) -> Where 
+      NoWhere : Where 
+      TypeConf : TypeExp * TypeExp -> TypeConf 
+      Union : String * String -> TypeExp 
+      Subtract : String * String -> TypeExp 
+      Intersect : String * String -> TypeExp 
+      Variant : String * String -> TypeExp 
+      TypeID : String -> TypeExp 
+      MethodDecl : Prefix * List(MethodNames) * MethodType * MethodBody * Where -> Declaration 
+      MethodID : MethodName * ArgType * Annotations * Params -> MethodNames 
+      MethodOp : String * ArgType * Annotations * Params -> MethodNames 
+      Prefix : Prefix 
+      NoPrefix : Prefix 
+      ID : String -> MethodName 
+      ArgType : List(String) -> ArgType 
+      NoArgType : ArgType 
+      Annotations : List(Annotation) -> Annotations 
+      NoAnnotations : Annotations 
+      Public : Annotation 
+      Readable : Annotation 
+      Writeable : Annotation 
+      Confidential : Annotation 
+      Manifest : Annotation 
+      Overrides : Annotation 
+      Params : List(Param) -> Params 
+      NoParams : Params 
+      Param : String * TypeAnn -> Param 
+      SingleParam : Param -> PrefixParam 
+      SingleParamParen : Param -> PrefixParam 
+      MethodType : String -> MethodType 
+      NoMethodType : MethodType 
+      MethodBody : List(CodeSequence) -> MethodBody 
+      ObjectDecl : Inherit * Use * List(CodeSequence) -> Exp 
+      Inherit : Exp * Alias * Exclude -> Inherit 
+      NoInherit : Inherit 
+      Alias : String * String -> Alias 
+      NoAlias : Alias 
+      Exclude : List(String) -> Exclude 
+      NoExclude : Exclude 
+      Use : Exp * Alias * Exclude -> Use 
+      NoUse : Use 
+      Var : String -> Exp 
+      Number : String -> Exp 
+      String : String -> Exp 
+      True : Exp 
+      False : Exp 
+      Self : Exp 
+      Outer : Exp 
+      PlaceHolder : Exp 
+      MCall : Exp * MethodName * ArgType -> Exp 
+      MCallOp : Exp * String * ArgType * CallArgs -> Exp 
+      MCallOpEx : Exp * String * ArgType * Exp -> Exp 
+      MCallWDot : Exp * List(Part) -> Exp 
+      MCallImpl : List(Part) -> Exp 
+      MCallPrefixOp : String * ArgType * CallArgs -> Exp 
+      MCallPrefixOpExp : String * ArgType * Exp -> Exp 
+      MCallCanonical : Prefix * Exp * MethodName * ArgType * CallArgs -> Exp 
+      Part : MethodName * ArgType * CallArgs -> Part 
+      ArgsParen : List(Exp) -> CallArgs 
+      NoArgs : CallArgs 
+      ArgBlock : Block -> CallArgs 
+      ArgNumber : String -> CallArgs 
+      ArgString : String -> CallArgs 
+      ArgLineup : Lineup -> CallArgs 
+      LineupExp : Lineup -> Exp 
+      Lineup : List(Exp) -> Lineup 
+      Ellipsis : Exp 
+      BlockExp : Block -> Exp 
+      Block : List(CodeSequence) -> Block 
+      BlockWParams : BlockParams * List(CodeSequence) -> Block 
+      Return : Exp -> Exp 
+      BlockParams : ArgType * List(Param) -> BlockParams 
+      StoredMethod : List(String) * List(CodeSequence) * Map(String,V) -> C 
+      read : String -> read__Arrow {meta-function}
+      write : String * V -> write__Arrow {meta-function}
+      writeCode : String * C -> writeCode__Arrow {meta-function}
+      readCode : String -> readCode__Arrow {meta-function}
+    native constructors
+    native operators
+      parseNumber : String -> Int
+      print : V -> V
+    arrows
+       Exp :: Map(String,V), Map(String,C) -default-> V :: Map(String,V), Map(String,C)
+       CodeSequence :: Map(String,V), Map(String,C) -default-> V :: Map(String,V), Map(String,C)
+       Declaration :: Map(String,V), Map(String,C) -default-> V :: Map(String,V), Map(String,C)
+       Assignment :: Map(String,V), Map(String,C) -default-> V :: Map(String,V), Map(String,C)
+       List(CodeSequence) :: Map(String,V), Map(String,C) -default-> V :: Map(String,V), Map(String,C)
+       C  -code-> C 
+       C :: Map(String,V), Map(String,C) -default-> V :: Map(String,V), Map(String,C)
+       Program :: Map(String,V), Map(String,C) -init-> V :: Map(String,V), Map(String,C)
+       read__Arrow :: Map(String,V), Map(String,C) -default-> V :: Map(String,V), Map(String,C)
+       write__Arrow :: Map(String,V), Map(String,C) -default-> V :: Map(String,V), Map(String,C)
+       writeCode__Arrow :: Map(String,V), Map(String,C) -default-> C :: Map(String,V), Map(String,C)
+       readCode__Arrow :: Map(String,V), Map(String,C) -default-> C :: Map(String,V), Map(String,C)
+    native datatypes
+    variables
+      v : V
+      c : C
+      H : Map(String,V)
+      CH : Map(String,C)
+
+rules
+
+  writeCode(n, code) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> code :: Map(String,V) l_string_v_1, Map(String,C) {n |--> code} + l_string_c_1.
+
+  write(n, _lifted_13) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> _lifted_13 :: Map(String,V) {n |--> _lifted_13} + l_string_v_1, Map(String,C) l_string_c_1.
+
+  Variable(name, NoAnnotations(), NoTypeAnn(), VarInit(_lifted_20)) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> Done() :: Map(String,V) l_string_v_3, Map(String,C) l_string_c_3
+  where
+    _lifted_20 :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> _lifted_46 :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2;
+    write(name, _lifted_46) :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2 -default-> _ :: Map(String,V) l_string_v_3, Map(String,C) l_string_c_3.
+
+  Var(name) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> _lifted_48 :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2
+  where
+    read(name) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> _lifted_48 :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2.
+
+  True() :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> BoolV(true) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1.
+
+  String(s) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> StringV(s) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1.
+
+  readCode(n) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> l_string_c_1[n] :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1.
+
+  read(n) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> l_string_v_1[n] :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1.
+
+  Program(cs, _) -init-> cs'
+  where
+    cs :: Map(String,V) {}, Map(String,C) {} -default-> cs' :: Map(String,V) _, Map(String,C) _.
+
+  ObjectDecl(_, _, cs) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> cs' :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1
+  where
+    cs :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> cs' :: Map(String,V) _, Map(String,C) _.
+
+  Number(s) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> NumV(parseNumber(s)) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1.
+
+  MCall(Self(), ID(name), NoArgType()) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> _lifted_49 :: Map(String,V) l_string_v_3, Map(String,C) l_string_c_3
+  where
+    readCode(name) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> _lifted_36 :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2;
+    _lifted_36 :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2 -default-> _lifted_49 :: Map(String,V) l_string_v_3, Map(String,C) l_string_c_3.
+
+  False() :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> BoolV(false) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1.
+
+  Expression(e) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> _lifted_52 :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2
+  where
+    e :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> _lifted_52 :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2.
+
+  Declaration(e) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> _lifted_54 :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2
+  where
+    e :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> _lifted_54 :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2.
+
+  Constant(name, _, _, e1) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> Done() :: Map(String,V) l_string_v_3, Map(String,C) l_string_c_3
+  where
+    e1 :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> _lifted_40 :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2;
+    write(name, _lifted_40) :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2 -default-> _ :: Map(String,V) l_string_v_3, Map(String,C) l_string_c_3.
+
+  Assignment(e) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> _lifted_56 :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2
+  where
+    e :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> _lifted_56 :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2.
+
+  Assignment(name, _lifted_42) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> Done() :: Map(String,V) l_string_v_3, Map(String,C) l_string_c_3
+  where
+    _lifted_42 :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> _lifted_57 :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2;
+    write(name, _lifted_57) :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2 -default-> _ :: Map(String,V) l_string_v_3, Map(String,C) l_string_c_3.
+
+  cs : List(CodeSequence) :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> v :: Map(String,V) l_string_v_3, Map(String,C) l_string_c_3
+  where
+    case cs of {
+      [  ] =>
+        Done() => v : V;
+        l_string_v_1 => l_string_v_3;
+        l_string_c_1 => l_string_c_3
+      [ code | [  ] ] =>
+        code :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> v : V :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2;
+        l_string_v_2 => l_string_v_3;
+        l_string_c_2 => l_string_c_3
+      [ code | cs' ] =>
+        code :: Map(String,V) l_string_v_1, Map(String,C) l_string_c_1 -default-> _ :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2;
+        cs' :: Map(String,V) l_string_v_2, Map(String,C) l_string_c_2 -default-> v : V :: Map(String,V) l_string_v_3, Map(String,C) l_string_c_3
+    }.

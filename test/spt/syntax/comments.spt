@@ -1,0 +1,11 @@
+module syntax-comments
+
+language Grace
+
+test single comment [[
+	//comment
+]] parse succeeds
+
+test print with comment [[
+	print "Hello World" //comment
+]] parse succeeds

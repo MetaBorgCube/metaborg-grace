@@ -1,0 +1,62 @@
+module analysis
+
+imports
+
+  pp
+  src-gen/signatures/grace-sig
+  trans/desugar/desugar
+
+rules // Analysis
+
+  editor-analyze:
+    (ast, path, project-path) -> (ast', error*, warning*, info*)
+    with
+      ast'     := <id> ast
+    ; error*   := <collect-all(constraint-error)> ast'
+    ; warning* := <collect-all(constraint-warning)> ast'
+    ; info*    := <collect-all(constraint-info)> ast'
+  
+  constraint-error = fail
+  constraint-warning = fail
+  constraint-info = fail
+  
+rules // Editor services
+  
+  editor-resolve:
+    (node, position, ast, path, project-path) -> <fail>
+
+  editor-hover:
+    (node, position, ast, path, project-path) -> <fail>
+
+rules // Debugging
+
+  debug-show-analyzed:
+    (_, _, ast, path, _) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"analyzed.aterm")> path;
+      result   := ast
+
+  debug-show-analyzed-pp:
+    (selection, _, ast, path, _) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"analyzed-pp.grace")> path;
+      result   := <pp-debug> ast
+  
+  desugar-complete: ast -> <desugar-all-post> <desugar-all> <desugar-pre> ast 
+  desugar-test    : ast -> ast
+    where
+      <debug(!"testing strategy, ast: ")> ast 
+  
+  debug-show-desugared:
+    (_, _, ast, path, _) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"desugared.aterm")> path;
+      result   := <desugar-complete> ast
+
+  debug-show-desugared-pp:
+    (_, _, ast, path, _) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"desugared-pp.grace")> path;
+      to-pp    := <desugar-all-post> <desugar-all> <desugar-pre> ast;
+      <debug(!"to-pp")> to-pp;
+      result   := <pp-debug> to-pp
