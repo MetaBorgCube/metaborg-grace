@@ -1,0 +1,26 @@
+module trans/environment
+
+imports
+  trans/values
+
+signature
+  sort aliases
+    Env = Map(String, Int)
+
+  variables
+    E : Env
+
+  constructors
+    bindName: String * Int --> Env
+    readName: String --> Int
+
+rules
+
+  bindName(x, i) :: E --> {x |--> i, E}
+    where print(StringV("bind to r/w")) => _.
+  
+  Env E |- bindName(x, i) --> {x |--> i, E}.
+
+  readName(x) :: E --> E[x].
+  
+  Env E |- readName(x) --> E[x].

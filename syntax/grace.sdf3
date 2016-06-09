@@ -100,7 +100,7 @@ context-free syntax
   
   Exp.ObjectDecl                = <object {
     <Inherit>
-    <Use>
+    <Use*>
     <CodeSequence*>
 }>
   
@@ -114,7 +114,6 @@ context-free syntax
   Exclude.NoExclude             = <>
   
   Use.Use                       = <use <Exp> <Alias> <Exclude>;>
-  Use.NoUse                     = <>
   
   // simple expressions
 //  Exp.Var                       = ID // foobar; Var("foobar") | self; Self() | self.outer.foobar; Chain([Self(), Outer(), Var("foobar")])

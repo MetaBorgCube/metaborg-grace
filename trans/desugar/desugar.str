@@ -44,7 +44,7 @@ rules
   
   desugar-pre = desugar-program <+ desugar-fail
 
-  desugar-program: Program(a, b) -> Program([Expression(ObjectDecl(NoInherit(), NoUse(), a))], b)
+  desugar-program: Program(a, b) -> Program([Expression(ObjectDecl(NoInherit(), [], a))], b)
 
   // a reference to a method is just calling it as a method with no params
 //  desugar-ID: ID(a) -> MCallCanonical(NoPrefix(), Self(), a, [], [])
@@ -95,7 +95,7 @@ rules
     BlockWParams(BlockParams(_, params), code)-> 
       ObjectDecl(
         NoInherit(),
-        NoUse(),
+        [],
         [ Declaration(
             MethodDecl(
               NoPrefix()
@@ -112,7 +112,7 @@ rules
     BlockWParams(BlockParams(NoArgType(), []), code)-> 
       ObjectDecl(
         NoInherit(),
-        NoUse(),
+        [],
         [ Declaration(
             MethodDecl(
               NoPrefix()
@@ -175,7 +175,7 @@ rules
 
   desugar-class-declaration:
     ClassDecl(mIDs,MethodBody(code)) ->
-    MethodDecl(NoPrefix(),mIDs,NoMethodType(),MethodBody([Expression(ObjectDecl(NoInherit(),NoUse(),code))]),NoWhere())
+    MethodDecl(NoPrefix(),mIDs,NoMethodType(),MethodBody([Expression(ObjectDecl(NoInherit(),[],code))]),NoWhere())
 
 //    ClassDecl(classNames, code) ->
 //    MethodDecl(

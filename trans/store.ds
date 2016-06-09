@@ -5,23 +5,35 @@ imports
 
 signature
   sort aliases
-    H = Map(String, V)
-    CH = Map(String, C) // codeheap
-  
+    Heap = Map(Int, V)
+    OHeap = Map(Int, O)
+
   variables
-    H : H
-    CH : CH
-  
+    H : Heap
+    OH : OHeap
+
   constructors
-    read: String --> V
-    write: String * V --> V
-    writeCode: String * C --> C
-    readCode: String --> C
+    read: Int --> V
+    readO: Int --> O
+    allocate: V --> Int
+    allocateO: O --> Int
+    write: Int * V --> V
+    writeO: Int * O --> O
 
 rules
 
-  read    (n) ::  H -->  H[n].
-  readCode(n) :: CH --> CH[n].
+  read(addr) :: H --> H[addr].
+  readO(addr) :: OH --> OH[addr].
 
-  write    (n, v)    ::  H --> v    ::  H {n |--> v   ,  H}.
-  writeCode(n, code) :: CH --> code :: CH {n |--> code, CH}.
+  allocate(v) --> addr
+  where
+    fresh => addr;
+    write(addr, v) --> _.
+  
+  allocateO(o) --> addr
+  where
+    fresh => addr;
+    writeO(addr, o) --> _.
+
+  write(addr, v) :: H --> v :: Heap {addr |--> v, H}.
+  writeO(addr, o) :: OH --> o :: OHeap {addr |--> o, OH}.

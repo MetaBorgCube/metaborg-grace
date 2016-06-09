@@ -1,38 +1,30 @@
-//var a := 5;
-//method f {
-//   a;
-//};
-//a := 41;
-//f;
-//def a = object { 2; };
-//trait b {
-//  method ++ (other) { self.concat(other); };
-//};
-//
-//object {
-//    inherit a;
-//    use b;
-//    5;
-//};
-
-//1 * 2 + 4 - 1 + 4;
 //class something {
 //  1;
 //};
-
+//
 //trait useful {
 //  method a { 5; };
 //};
-
+//
 //method something {
 //  object {
 //    1;
 //  };
 //};
-//
-//object {
+def q = 4;
+object {
 //  inherit something;
-//  2;
-//};
-
+//  use useful;
+//  use otheruseful;
+  3;
+  def a = object { 8; };
+  a;
+  object {
+    object {
+      6;
+      a;
+    };
+  };
+};
+//a;
 5;

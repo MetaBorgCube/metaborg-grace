@@ -7,14 +7,20 @@ imports
 
 signature
 
+  constructors
+    NumV: Int -> V
+    StringV: String -> V
+    BoolV: Bool -> V
+    Done: V
+
   sorts
     V // value
-    C // code
-   
-   constructors
-             //  params         code     store at declaration
-   StoredMethod: List(String) * List(CodeSequence) * H -> C
-   
+    O // object
+
   variables
     v : V
-    c : C
+    o : O
+
+  native operators
+    parseNumber: String -> Int
+    print: V -> V

@@ -2,79 +2,79 @@ module trans/semantics
 
 imports
   src-gen/ds-signatures/Grace-sig
+  
   trans/values
   trans/store
+  trans/environment
 
 signature
   
   constructors
-    NumV: Int -> V
-    StringV: String -> V
-    BoolV: Bool -> V
-    Done: V
-    Stored: C
+    Object: Env * Env * List(CodeSequence) -> O // the enclosing object env, env of object, and its evaluted value
+    Trait: Env -> V
+    Method: Env * List(CodeSequence) -> V // env of declaration and code
+    Binding: Env -> V
+    NoObject: O
     
   arrows
     Exp --> V
+    Exp -o-> O
     CodeSequence --> V
     Declaration --> V
     Assignment --> V
     CallArgs --> V
     List(CodeSequence) --> V
-    C -code-> C
-    C --> V
     Program -init-> V
     
   native operators
-    parseNumber: String -> Int
-    print: V -> V
     nativeIBinOp: String * Int * Int -> Int
     
 rules
 
   Program(cs, _) -init-> cs'
     where
-      cs :: H {}, CH {} --> cs' :: H _, CH _.
+      cs :: Env {"root" |--> fresh}, Heap {} --> cs' :: Heap _.
   
-  ObjectDecl(Inherit(_, _, _), NoUse(), cs) :: H, CH --> cs'
+  Env eEnc |- ObjectDecl(Inherit(inhExp,_,_), [Use(useExp,_,_)], cs) :: E -o-> Object(eEnc, e', cs)
     where
-      // create empty object
-      // evalute inherit (recurse) and merge into
-      // evaluate traits and merge into (override inherit)
-      // evaluate local method definitions and merge (override inherit and traits)
-      // evaluate fields and statements.
+      // 1. create empty object
+      // 2. bind self (env + {})
+      // 3. evalute inherit (recurse) and merge into
+      // 4. evaluate traits and merge into (override inherit)
+      // 5. evaluate local method definitions and merge (override inherit and traits)
+      // 6. evaluate fields and statements. (deferred)
+      Object(eEnc, E, cs) => self; // create blank object 1
       
-      cs :: H, CH --> cs'. // execute with stores
-//      H => H'; // make sure store reused when coming out of scope
-//      CH => CH'.
+      E |- bindName("self", allocateO(self)) --> eSelf; // 2
+      
+      inhExp :: Env eSelf -o-> Object(eInh, eInhEnc, csInh); // 3
+      
+      Env eInhEnc |- csInh :: Env eInh --> _ :: Env EAfterInh; //
+      
+      useExp :: Env eInh --> Trait(eTrait); // 4
+      
+      {eTrait, EAfterInh} => e'.
+  
+  
+  // object can be immediatly evaluated
+  Object(eEnc, e, cs) --> v
+    where
+      Env eEnc |- cs :: Env e --> v.
 
-  ObjectDecl(NoInherit(), NoUse(), cs) :: H, CH --> cs'
-    where
-      // create empty object
-      // evalute inherit (recurse) and merge into
-      // evaluate traits and merge into (override inherit)
-      // evaluate local method definitions and merge (override inherit and traits)
-      // evaluate fields and statements.
-      
-      cs :: H, CH --> cs'. // execute with stores
-//      H => H'; // make sure store reused when coming out of scope
-//      CH => CH'.
-     
-     
   Expression(e) --> e.
   Declaration(e) --> e.
   Assignment(e) --> e.
     
-  cs : List(CodeSequence) --> v
+  cs : List(CodeSequence) :: Env e --> v :: Env eFinal
   where
     case cs of {
         [] =>
             Done() => v
         [code|[]] =>
-            code --> v
+            code :: Env e --> v :: Env eFinal
         [code | cs'] =>
-            code --> _;
-            cs' --> v
+            code :: Env e --> _ :: Env e';
+            cs' :: Env e' --> v :: Env eFinal
     }.
   
   Number(s) --> NumV(parseNumber(s)).
@@ -83,17 +83,29 @@ rules
   True() --> BoolV(true).
   False() --> BoolV(false).
   
-  Constant(name, _, _, e1) --> Done()
+  Constant(name, _, _, e1) --> Done() :: Env e'
     where
       e1 --> v1;
-      write(name, v1) --> _.
+      print(StringV("Binding constant")) => _;
+      print(v1) => _;
+      bindName(name, allocate(v1)) --> e';
+      print(StringV("After constant binding: ")) => _;
+      print(Binding(e')) => _.
 
-//  Var(name) --> read(name).
-
-  Variable(name, NoAnnotations(), NoTypeAnn(), VarInit(v1)) --> Done()
+  // just an implicit method call with no args
+  MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) :: Env e --> v
     where
-      write(name, v1) --> _.
-      
+      print(StringV("reading from environment")) => _;
+      print(Binding(e)) => _;
+      readName(name) => i;
+      print(NumV(i)) => _;
+      read(i) => v;
+      print(v) => _.
+
+//  Variable(name, NoAnnotations(), NoTypeAnn(), VarInit(v1)) --> Done()
+//    where
+//      write(name, v1) --> _.
+//      
 //  Assignment(name, v1) --> Done()
 //    where
 //      write(name, v1) --> _.
@@ -107,36 +119,27 @@ rules
 //  ) :: H --> Done() :: H
 //    where
 //      writeCode(name, StoredMethod([], cs, H)) -code-> _.
-//   
-   // storing a method
-//   StoredMethod([], _, _) -code-> Stored().
-//   
-//   // executing a stored method
-//   StoredMethod([], cs, H) --> v 
-//     where
-//       cs :: H --> v.
-
-   // calling method on self with no parameters
-//   MCall(Self(), ID(name), NoArgType()) --> v
-//     where
-//       readCode(name) --> v.
    
-//   MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).
+   MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).
 
-//   MethodDecl(
-//     NoPrefix(),
-//     [MethodID(ID(name),NoArgType(),NoAnnotations(),NoParams())],
-//     NoMethodType(),
-//     MethodBody(
-//       [Expression(ObjectDecl(NoInherit(),NoUse(),cs))]
-//     ),
-//     NoWhere()
-//   ) --> Done().
-//   
-//  TraitDecl(
-//    [MethodID(ID(name), NoArgType(), NoAnnotations(), NoParams())],
-//    MethodBody(cs)
-//  ) --> Done().
-//  
+   MethodDecl(
+     NoPrefix(),
+     [MethodID(ID(name),NoArgType(),NoAnnotations(),NoParams())],
+     NoMethodType(),
+     MethodBody(
+       [Expression(ObjectDecl(NoInherit(),[], cs))]
+     ),
+     NoWhere()
+   ) :: Env e --> Binding(bindName(name, allocate(Method(e, cs)))). // saves method and returns binding that includes this method
+   
+  TraitDecl(
+    [MethodID(ID(mName), NoArgType(), NoAnnotations(), NoParams())],
+    MethodBody(cs)
+  ) --> t
+    where
+      cs --> sm@Method(_, _);
+      bindName(mName, allocate(sm)) => e';
+      Trait(e') => t.
+  
   
    
