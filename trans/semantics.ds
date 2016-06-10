@@ -119,6 +119,8 @@ rules
       readName(name) --> i;
       print(NumV(i)) => _;
       readO(i) --> Method([], e, cs);
+      print(StringV("environment from the stored method")) => _;
+      print(Binding(e)) => _;
       cs :: Env e --> v;
       print(v) => _.
 
@@ -152,9 +154,14 @@ rules
     NoWhere()
   ) :: Env e --> Done() :: Env e'
     where
-      Method([], e, cs) => o;
+      print(StringV("declaring method")) => _;
+//      Method([], {}, cs) => o;
+      fresh => i;
+      {name |--> i, e} => eNew;
+      print(Binding(eNew)) => _;
+      writeO(i, Method([], eNew, cs)) --> _; // add itself to its own evironment
       print(Binding(e)) => _;
-      bindName(name, allocateO(o)) --> e'; // saves and returns done 
+      bindName(name, i) --> e'; // saves and returns done 
       print(Binding(e')) => _. 
   
   O Object(_, _, eEnc) |- MCallWDot(Outer(),[Part(ID(name),NoArgType(),NoArgs())]) --> v

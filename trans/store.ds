@@ -38,4 +38,7 @@ rules
     writeO(addr, o) --> _.
 
   write(addr, v) :: H --> v :: Heap {addr |--> v, H}.
-  writeO(addr, o) :: OH --> o :: OHeap {addr |--> o, OH}.
+  writeO(addr, o) :: OH --> o :: OHeap {addr |--> o, OH}
+    where 
+      print(StringV("attempting to write")) => _;
+      print(NumV(addr)) => _.
