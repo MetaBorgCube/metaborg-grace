@@ -116,7 +116,7 @@ rules
       print(getHeap(H)) => _;
       print(getOHeap(OH)) => _;
       print(StringV(name)) => _;
-      readName(name) => i;
+      readName(name) --> i;
       print(NumV(i)) => _;
       readO(i) --> Method([], e, cs);
       cs :: Env e --> v;
@@ -154,9 +154,8 @@ rules
     where
       Method([], e, cs) => o;
       print(Binding(e)) => _;
-      bindName(name, allocateO(o)) => e'; // saves and returns done 
+      bindName(name, allocateO(o)) --> e'; // saves and returns done 
       print(Binding(e')) => _. 
-  
   
   O Object(_, _, eEnc) |- MCallWDot(Outer(),[Part(ID(name),NoArgType(),NoArgs())]) --> v
     where
