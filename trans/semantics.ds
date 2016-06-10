@@ -12,7 +12,7 @@ signature
   constructors
     Object: O * O * Env -> O // the enclosing object, inherited object, and its bound names
     Trait: Env -> O // basically just a list of mappings of function names to memory locations
-    Method: List(String) * Env * List(CodeSequence) -> V // env of declaration and code
+    Method: List(String) * Env * List(CodeSequence) -> O // env of declaration and code
     NoObject: O
     
   arrows
@@ -35,7 +35,7 @@ rules
 
   Program(cs, _) -init-> cs'
     where
-      O NoObject() |- cs :: Env {"root" |--> fresh}, Heap {}, OHeap {} --> cs' :: Heap _, OHeap _.
+      O NoObject() |- cs :: Env {"root" |--> fresh}, Heap {}, OHeap {} --> cs' :: Env _, Heap _, OHeap _.
   
 //  Env eEnc |- ObjectDecl(Inherit(inhExp,_,_), [Use(useExp,_,_)], cs) :: E -o-> Object(eEnc, e', cs)
 //    where
@@ -100,13 +100,26 @@ rules
       print(Binding(e')) => _.
 
   // just an implicit method call with no args
-  MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) :: Env e --> v
+//  MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) --> v
+//    where
+//      print(StringV("reading from environment")) => _;
+////      print(Binding(e)) => _;
+//      readName(name) => i;
+//      print(NumV(i)) => _;
+//      read(i) => v;
+//      print(v) => _.
+
+  MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) :: E, H, OH --> v
     where
-      print(StringV("reading from environment")) => _;
-      print(Binding(e)) => _;
+      print(StringV("reading real method from environment")) => _;
+      print(Binding(E)) => _;
+      print(getHeap(H)) => _;
+      print(getOHeap(OH)) => _;
+      print(StringV(name)) => _;
       readName(name) => i;
       print(NumV(i)) => _;
-      read(i) => v;
+      readO(i) --> Method([], e, cs);
+      cs :: Env e --> v;
       print(v) => _.
 
 //  Variable(name, NoAnnotations(), NoTypeAnn(), VarInit(v1)) --> Done()
@@ -134,29 +147,34 @@ rules
     [MethodID(ID(name),NoArgType(),NoAnnotations(),NoParams())],
     NoMethodType(),
     MethodBody(
-      [Expression(ObjectDecl(NoInherit(),[], cs))]
+      cs
     ),
     NoWhere()
-  ) :: Env e --> Binding(bindName(name, allocate(Method([], e, cs)))). // saves method and returns binding that includes this method
+  ) :: Env e --> Done() :: Env e'
+    where
+      Method([], e, cs) => o;
+      print(Binding(e)) => _;
+      bindName(name, allocateO(o)) => e'; // saves and returns done 
+      print(Binding(e')) => _. 
   
   
   O Object(_, _, eEnc) |- MCallWDot(Outer(),[Part(ID(name),NoArgType(),NoArgs())]) --> v
     where
       print(StringV("reading from outer")) => _;
       print(Binding(eEnc)) => _;
-      Env eEnc |- readName(name) --> i;
+      eEnc[name] => i;
       print(NumV(i)) => _;
       read(i) => v;
       Done() => v. 
    
-  TraitDecl(
-    [MethodID(ID(mName), NoArgType(), NoAnnotations(), NoParams())],
-    MethodBody(cs)
-  ) -o-> Trait(e')
-    where
-      cs --> sm@Method(_, _, _);
-      bindName(mName, allocate(sm)) => e';
-      Trait(e') => t.
+//  TraitDecl(
+//    [MethodID(ID(mName), NoArgType(), NoAnnotations(), NoParams())],
+//    MethodBody(cs)
+//  ) -o-> Trait(e')
+//    where
+//      cs --> sm@Method(_, _, _);
+//      bindName(mName, allocate(sm)) => e';
+//      Trait(e') => t.
   
   
    

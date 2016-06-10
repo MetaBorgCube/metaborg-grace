@@ -19,6 +19,8 @@ signature
     allocateO: O --> Int
     write: Int * V --> V
     writeO: Int * O --> O
+    getHeap: Heap -> V
+    getOHeap: OHeap -> V
 
 rules
 

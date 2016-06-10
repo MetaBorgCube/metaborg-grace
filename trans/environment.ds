@@ -17,19 +17,19 @@ signature
     
 rules
 
-  bindName(x, i) :: E --> {x |--> i, E}
-    where print(StringV("bind to r/w")) => _.
+  bindName(x, i) :: E --> {x |--> i, E}.
+//    where print(StringV("bind to r/w")) => _.
   
-  Env E |- bindName(x, i) --> {x |--> i, E}
-    where print(StringV("vind to r/o")) => _.
+  Env E |- bindName(x, i) --> {x |--> i, E}.
+//    where print(StringV("vind to r/o")) => _.
 
-  Env eRO |- readName(x) :: Env eRW --> e[x]
-    where 
-      print(StringV("read")) => _;
-      print(Binding(eRO)) => _';
-      print(Binding(eRW)) => _';
-      {eRO, eRW} => e;
-      print(Binding(e)) => _'.
+  Env eRO |- readName(x) :: Env eRW --> eRW[x].
+//    where 
+//      print(StringV("read")) => _;
+//      print(Binding(eRO)) => _';
+//      print(Binding(eRW)) => _';
+//      {eRO, eRW} => e.
+//      print(Binding(e)) => _'.
 //  
 //  Env E |- readName(x) --> E[x]
 //    where print(StringV("read from r/w")) => _.
