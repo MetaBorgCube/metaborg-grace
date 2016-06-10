@@ -10,21 +10,23 @@ imports
 signature
   
   constructors
-    Object: Env * Env * List(CodeSequence) -> O // the enclosing object env, env of object, and its evaluted value
-    Trait: Env -> V
-    Method: Env * List(CodeSequence) -> V // env of declaration and code
-    Binding: Env -> V
+    Object: O * O * Env -> O // the enclosing object, inherited object, and its bound names
+    Trait: Env -> O // basically just a list of mappings of function names to memory locations
+    Method: List(String) * Env * List(CodeSequence) -> V // env of declaration and code
     NoObject: O
     
   arrows
     Exp --> V
-    Exp -o-> O
     CodeSequence --> V
     Declaration --> V
     Assignment --> V
     CallArgs --> V
     List(CodeSequence) --> V
     Program -init-> V
+    
+    Exp -o-> O
+    Declaration -o-> O
+    
     
   native operators
     nativeIBinOp: String * Int * Int -> Int
@@ -33,33 +35,38 @@ rules
 
   Program(cs, _) -init-> cs'
     where
-      cs :: Env {"root" |--> fresh}, Heap {} --> cs' :: Heap _.
+      O NoObject() |- cs :: Env {"root" |--> fresh}, Heap {}, OHeap {} --> cs' :: Heap _, OHeap _.
   
-  Env eEnc |- ObjectDecl(Inherit(inhExp,_,_), [Use(useExp,_,_)], cs) :: E -o-> Object(eEnc, e', cs)
+//  Env eEnc |- ObjectDecl(Inherit(inhExp,_,_), [Use(useExp,_,_)], cs) :: E -o-> Object(eEnc, e', cs)
+//    where
+//      // 1. create empty object
+//      // 2. bind self (env + {})
+//      // 3. evalute inherit (recurse) and merge into
+//      // 4. evaluate traits and merge into (override inherit)
+//      // 5. evaluate local method definitions and merge (override inherit and traits)
+//      // 6. evaluate fields and statements. (deferred)
+//      Object(eEnc,  E, cs) => self; // create blank object 1
+//      
+//      E |- bindName("self", allocateO(self)) --> eSelf; // 2
+//      
+//      inhExp :: Env eSelf -o-> Object(eInh, eInhEnc, csInh); // 3
+//      
+//      Env eInhEnc |- csInh :: Env eInh --> _ :: Env EAfterInh; //
+//      
+//      useExp :: Env eInh --> Trait(eTrait); // 4
+//      
+//      {eTrait, EAfterInh} => e'.
+//  
+  
+//  Object(oEnc, oInh, env) --> v
+//    where
+//      print(StringV("evalutating object after defer")) => _;
+//      Env eEnc |- cs :: Env e --> v.
+      
+  O encO |- ObjectDecl(NoInherit(), [], cs) :: E --> v
     where
-      // 1. create empty object
-      // 2. bind self (env + {})
-      // 3. evalute inherit (recurse) and merge into
-      // 4. evaluate traits and merge into (override inherit)
-      // 5. evaluate local method definitions and merge (override inherit and traits)
-      // 6. evaluate fields and statements. (deferred)
-      Object(eEnc, E, cs) => self; // create blank object 1
-      
-      E |- bindName("self", allocateO(self)) --> eSelf; // 2
-      
-      inhExp :: Env eSelf -o-> Object(eInh, eInhEnc, csInh); // 3
-      
-      Env eInhEnc |- csInh :: Env eInh --> _ :: Env EAfterInh; //
-      
-      useExp :: Env eInh --> Trait(eTrait); // 4
-      
-      {eTrait, EAfterInh} => e'.
-  
-  
-  // object can be immediatly evaluated
-  Object(eEnc, e, cs) --> v
-    where
-      Env eEnc |- cs :: Env e --> v.
+      print(StringV("directly evaluating object")) => _;
+      O Object(encO, NoObject(), E) |- cs :: Env {} --> v.
 
   Expression(e) --> e.
   Declaration(e) --> e.
@@ -120,24 +127,34 @@ rules
 //    where
 //      writeCode(name, StoredMethod([], cs, H)) -code-> _.
    
-   MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).
+  MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).
 
-   MethodDecl(
-     NoPrefix(),
-     [MethodID(ID(name),NoArgType(),NoAnnotations(),NoParams())],
-     NoMethodType(),
-     MethodBody(
-       [Expression(ObjectDecl(NoInherit(),[], cs))]
-     ),
-     NoWhere()
-   ) :: Env e --> Binding(bindName(name, allocate(Method(e, cs)))). // saves method and returns binding that includes this method
+  MethodDecl(
+    NoPrefix(),
+    [MethodID(ID(name),NoArgType(),NoAnnotations(),NoParams())],
+    NoMethodType(),
+    MethodBody(
+      [Expression(ObjectDecl(NoInherit(),[], cs))]
+    ),
+    NoWhere()
+  ) :: Env e --> Binding(bindName(name, allocate(Method([], e, cs)))). // saves method and returns binding that includes this method
+  
+  
+  O Object(_, _, eEnc) |- MCallWDot(Outer(),[Part(ID(name),NoArgType(),NoArgs())]) --> v
+    where
+      print(StringV("reading from outer")) => _;
+      print(Binding(eEnc)) => _;
+      Env eEnc |- readName(name) --> i;
+      print(NumV(i)) => _;
+      read(i) => v;
+      Done() => v. 
    
   TraitDecl(
     [MethodID(ID(mName), NoArgType(), NoAnnotations(), NoParams())],
     MethodBody(cs)
-  ) --> t
+  ) -o-> Trait(e')
     where
-      cs --> sm@Method(_, _);
+      cs --> sm@Method(_, _, _);
       bindName(mName, allocate(sm)) => e';
       Trait(e') => t.
   
