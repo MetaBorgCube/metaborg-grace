@@ -25,6 +25,7 @@ rules
             desugar-class-declaration <+
             
             desugar-flatten-methodID <+
+            desugar-flatten-methodPart <+
             
             desugar-block <+
             desugar-block-to-object <+
@@ -67,7 +68,12 @@ rules
     , NoAnnotations()
     , Params(<concat> [params1,params2])
     )]
+    
+  desugar-flatten-methodPart: [Part(ID(name1),NoArgType(),args1),Part(ID(name2),NoArgType(),args2)] ->
+    [Part(ID(<concat-strings> [name1, "_", name2]),NoArgType(), ArgsParen(<map(desugar-arg)> [args1, args2]))]
   
+  desugar-flatten-methodPart: [Part(ID(name1),NoArgType(), ArgsParen(args)),Part(ID(name2),NoArgType(),args2)] ->
+    [Part(ID(<concat-strings> [name1, "_", name2]),NoArgType(), ArgsParen(<map(desugar-arg)> <concat> [args, [args2]]))]
   
   // Flatten things in lists in the objectdecl list.
   desugar-flatten-objectdecl: ObjectDecl(a, b, xs) -> ObjectDecl(a, b, ys)
@@ -78,9 +84,10 @@ rules
   desugar-flatten-declaration: Declaration([a, b]) ->
       [Declaration(a), Declaration(b)]
 
-//  desugar-arg-number: ArgNumber(a) -> Number(a)
-//  desugar-arg-string: ArgString(a) -> String(a)  
-//  desugar-arg-block:  ArgBlock(a)  -> Block(a)
+  desugar-arg: ArgNumber(a) -> Number(a)
+  desugar-arg: ArgString(a) -> String(a)  
+  desugar-arg:  ArgBlock(a) ->  Block(a)
+  desugar-arg:            a -> a
 //  desugar-arg-lineup: ArgLineup(a) -> a
 
   desugar-self-in-id: ID(Self()) -> Self()
