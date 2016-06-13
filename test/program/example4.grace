@@ -7,6 +7,7 @@ method f(c) {
 
 method g {
   6;
+  f(3);
 };
 
 4;
@@ -14,5 +15,3 @@ method g {
 f(6);
 
 g;
-
-f(10);

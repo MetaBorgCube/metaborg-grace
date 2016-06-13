@@ -16,6 +16,7 @@ signature
     NoObject: O
     Wrapped: V -> CodeSequence
     
+    saveConstMethod: Env * String * V --> Env
     getParamNames: Params --> List(String)
     
   arrows
@@ -125,15 +126,21 @@ rules
       
       // creating a constant method for the parameter
       print(StringV("Binding constant")) => _;
-      fresh => i;
-      writeO(i, Method([], e, [Wrapped(pv1)])) --> _;
-      bindName(pName, i) --> e';  // saves and returns done
+      
+      saveConstMethod(e, pName, pv1) --> e';
+      
       print(Binding(e')) => _;
       print(Binding({e', e})) => _;
       
       cs :: Env {e', e} --> v; // add the parameter constant method to the env
       print(v) => _;
       print(StringV("==========")) => _.
+ 
+  saveConstMethod(startEnv, name, v) --> e'
+    where 
+      fresh => i;
+      writeO(i, Method([], startEnv, [Wrapped(v)])) --> _;
+      bindName(name, i) --> e'.  // saves and returns done
 
   MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).
 
@@ -163,7 +170,6 @@ rules
   ) :: Env e --> Done() :: Env e'
     where
       getParamNames(ps) => pNames;
-    
       print(StringV("Declaring method")) => _;
 //      Method([], {}, cs) => o;
       fresh => i;
@@ -179,10 +185,10 @@ rules
   Constant(name, _, _, e1) :: Env e --> Done() :: Env e'
     where
       print(StringV("Binding constant")) => _;
-      fresh => i;
       e1 --> v1;
-      writeO(i, Method([], e, [Wrapped(v1)])) --> _;
-      bindName(name, i) --> e';  // saves and returns done
+      
+      saveConstMethod(e, name, v1) --> e';
+      
       print(Binding(e')) => _;
       print(StringV("==========")) => _.
   
