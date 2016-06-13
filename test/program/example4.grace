@@ -1,13 +1,10 @@
 def a = 3;
 
-method f {
-  4;
+method f(c) {
   5;
-  f;
+  c;
 };
 
-7;
+4;
 
-//a;
-
-f;
+f(6);

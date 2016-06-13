@@ -14,6 +14,7 @@ signature
     Trait: Env -> O // basically just a list of mappings of function names to memory locations
     Method: List(String) * Env * List(CodeSequence) -> O // env of declaration and code
     NoObject: O
+    Wrapped: V -> CodeSequence
     
   arrows
     Exp --> V
@@ -70,6 +71,7 @@ rules
 
   Expression(e) --> e.
   Declaration(e) --> e.
+  Wrapped(v) --> v.
   Assignment(e) --> e.
     
   cs : List(CodeSequence) :: Env e --> v :: Env eFinal
@@ -89,15 +91,6 @@ rules
   String(s) --> StringV(s).
   True() --> BoolV(true).
   False() --> BoolV(false).
-  
-  Constant(name, _, _, e1) --> Done() :: Env e'
-    where
-      e1 --> v1;
-      print(StringV("Binding constant")) => _;
-      print(v1) => _;
-      bindName(name, allocate(v1)) --> e';
-      print(StringV("After constant binding: ")) => _;
-      print(Binding(e')) => _.
 
   // just an implicit method call with no args
 //  MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) --> v
@@ -109,9 +102,10 @@ rules
 //      read(i) => v;
 //      print(v) => _.
 
-  MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) :: E, H, OH --> v
+  MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) :: E, H, OH --> v :: E, H, OH
     where
       print(StringV("reading real method from environment")) => _;
+      print(StringV(name)) => _;
       print(Binding(E)) => _;
       print(getHeap(H)) => _;
       print(getOHeap(OH)) => _;
@@ -122,7 +116,29 @@ rules
       print(StringV("environment from the stored method")) => _;
       print(Binding(e)) => _;
       cs :: Env e --> v;
-      print(v) => _.
+      print(v) => _;
+      print(StringV("==========")) => _.
+      
+  MCallImpl([Part(ID(name),NoArgType(),ArgsParen([exp]))]) :: E, H, OH --> v :: E, H, OH
+    where
+      exp --> pv1;
+      readName(name) --> i;
+      print(NumV(i)) => _;
+      readO(i) --> Method([pName], e, cs);
+      print(StringV("environment from the stored method")) => _;
+      print(Binding(e)) => _;
+      
+      // creating a constant method for the parameter
+      print(StringV("Binding constant")) => _;
+      fresh => i;
+      writeO(i, Method([], e, [Wrapped(pv1)])) --> _;
+      bindName(pName, i) --> e';  // saves and returns done
+      print(Binding(e')) => _;
+      print(Binding({e', e})) => _;
+      
+      cs :: Env {e', e} --> v; // add the parameter constant method to the env
+      print(v) => _;
+      print(StringV("==========")) => _.
 
 //  Variable(name, NoAnnotations(), NoTypeAnn(), VarInit(v1)) --> Done()
 //    where
@@ -146,7 +162,9 @@ rules
 
   MethodDecl(
     NoPrefix(),
-    [MethodID(ID(name),NoArgType(),NoAnnotations(),NoParams())],
+    [MethodID(ID(name),NoArgType(),NoAnnotations(),
+      Params([Param(paramName,NoTypeAnn())])
+    )],
     NoMethodType(),
     MethodBody(
       cs
@@ -154,15 +172,27 @@ rules
     NoWhere()
   ) :: Env e --> Done() :: Env e'
     where
-      print(StringV("declaring method")) => _;
+      print(StringV("Declaring method")) => _;
 //      Method([], {}, cs) => o;
       fresh => i;
-      {name |--> i, e} => eNew;
+      {name |--> i, e} => eNew; // add itself to its own evironment
       print(Binding(eNew)) => _;
-      writeO(i, Method([], eNew, cs)) --> _; // add itself to its own evironment
+      writeO(i, Method([paramName], eNew, cs)) --> _; 
       print(Binding(e)) => _;
       bindName(name, i) --> e'; // saves and returns done 
-      print(Binding(e')) => _. 
+      print(Binding(e')) => _;
+      print(StringV("==========")) => _. 
+  
+  // for now constants will just be a method returning the evaluated value
+  Constant(name, _, _, e1) :: Env e --> Done() :: Env e'
+    where
+      print(StringV("Binding constant")) => _;
+      fresh => i;
+      e1 --> v1;
+      writeO(i, Method([], e, [Wrapped(v1)])) --> _;
+      bindName(name, i) --> e';  // saves and returns done
+      print(Binding(e')) => _;
+      print(StringV("==========")) => _.
   
   O Object(_, _, eEnc) |- MCallWDot(Outer(),[Part(ID(name),NoArgType(),NoArgs())]) --> v
     where
