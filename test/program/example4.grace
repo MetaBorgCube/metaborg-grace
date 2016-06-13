@@ -1,17 +1,23 @@
-def a = 3;
-
-method f(c) {
-  5;
+method f(c,d,a,b,e) {
+  a;
+  b;
   c;
+  d;
+  e;
 };
 
-method g {
-  6;
-  f(3);
+method g(a) {
+ a;
 };
 
-4;
+method if(a) else (b) {
+  a;
+  b;
+};
 
-f(6);
+f(1,2,3,4,5);
 
-g;
+
+g 1;
+
+if 10 else 12;

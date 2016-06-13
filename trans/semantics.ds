@@ -18,6 +18,8 @@ signature
     
     saveConstMethod: Env * String * V --> Env
     getParamNames: Params --> List(String)
+    saveConstants: Env * List(String) * List(V) --> Env
+    evalArgs: CallArgs --> List(V)
     
   arrows
     Exp --> V
@@ -26,8 +28,10 @@ signature
     Assignment --> V
     CallArgs --> V
     List(CodeSequence) --> V
+//    List(V) --> V
     
     Params --> List(String)
+//    CallArgs --> List(V)
     
     Program -init-> V
     
@@ -114,45 +118,85 @@ rules
       cs :: Env e --> v;
       print(v) => _;
       print(StringV("==========")) => _.
-      
-  MCallImpl([Part(ID(name),NoArgType(),ArgsParen([actualArgs]))]) :: E, H, OH --> v :: E, H, OH
+
+  saveConstants(startEnv, names, values) --> eFinal
     where
-      actualArgs --> pv1;
+      case names of {
+        [] =>
+          {} => eFinal
+        [n | []] =>
+          values => [ v | [] ];
+          saveConstMethod(startEnv, n, v) --> e';
+          e' => eFinal
+        [n | ns] =>
+          values => [v|vs];
+          saveConstMethod(startEnv, n, v) --> e;
+          saveConstants(startEnv, ns, vs) --> em;
+          {em, e} => eFinal
+      }.
+        
+  evalArgs(ArgsParen(actualArgs)) --> agvs: List(V)
+    where
+      case actualArgs of {
+        [] =>
+          [] => agvs
+        [ arg | [] ] =>
+          arg --> pv1;
+         [pv1] => agvs
+        [ arg | args ] => 
+          arg --> pv1;
+          evalArgs(ArgsParen(args)) --> pvs;
+          [pv1 | pvs ] => agvs
+      }.    
+
+  evalArgs(NoArgs()) --> [].
+  evalArgs(v) --> [v].
+      
+  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
+    where
+      print(StringV("calling real method")) => _;
+      
       readName(name) --> i;
-      print(NumV(i)) => _;
-      readO(i) --> Method([pName], e, cs);
-      print(StringV("environment from the stored method")) => _;
-      print(Binding(e)) => _;
       
-      // creating a constant method for the parameter
-      print(StringV("Binding constant")) => _;
+      print(StringV("evaluating arguments to values")) => _;
+      evalArgs(arguments) --> actualArgsVs;
+      print(StringV("done evaluating arguments to values")) => _;
       
-      saveConstMethod(e, pName, pv1) --> e';
+      readO(i) --> Method(names, e, cs);
       
-      print(Binding(e')) => _;
-      print(Binding({e', e})) => _;
+      saveConstants(e, names, actualArgsVs) --> e';
+      
+//      saveConstMethod(e, pName, pv1) --> e'; // creating a constant method for the parameter 
+//      readO(i) --> Method([pName], e, cs);
       
       cs :: Env {e', e} --> v; // add the parameter constant method to the env
+      
+      print(StringV("environment from the stored method")) => _;
+      print(Binding(e)) => _;
+      print(StringV("Binding constant")) => _;
+      print(Binding(e')) => _;
+      print(Binding({e', e})) => _;
       print(v) => _;
       print(StringV("==========")) => _.
- 
+
   saveConstMethod(startEnv, name, v) --> e'
     where 
       fresh => i;
       writeO(i, Method([], startEnv, [Wrapped(v)])) --> _;
-      bindName(name, i) --> e'.  // saves and returns done
+      bindName(name, i) --> e'.
 
   MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).
 
-  getParamNames(Params(pList)) --> paramNames // [Param("c",NoTypeAnn),Param("d",NoTypeAnn)]
+  getParamNames(pList) --> paramNames
     where
       case pList of {
-        [] =>
+        Params([]) =>
           [] => paramNames
-        [Param(name, _) | [] ] =>
+        Params([Param(name, _) | [] ]) =>
           [name] => paramNames
-        [Param(name, _) | otherNames ] =>
-          [ name | getParamNames(Params(otherNames)) ] => paramNames
+        Params([Param(name, _) | otherNames ]) =>
+          getParamNames(Params(otherNames)) --> names;
+          [ name | names ] => paramNames
       }.
       
   getParamNames(NoParams()) --> [].
@@ -169,15 +213,16 @@ rules
     NoWhere()
   ) :: Env e --> Done() :: Env e'
     where
-      getParamNames(ps) => pNames;
       print(StringV("Declaring method")) => _;
-//      Method([], {}, cs) => o;
+      
+      getParamNames(ps) => pNames;
       fresh => i;
       {name |--> i, e} => eNew; // add itself to its own evironment
-      print(Binding(eNew)) => _;
       writeO(i, Method(pNames, eNew, cs)) --> _; 
-      print(Binding(e)) => _;
       bindName(name, i) --> e'; // saves and returns done 
+      
+      print(Binding(e)) => _;
+      print(Binding(eNew)) => _;
       print(Binding(e')) => _;
       print(StringV("==========")) => _. 
   
@@ -185,8 +230,8 @@ rules
   Constant(name, _, _, e1) :: Env e --> Done() :: Env e'
     where
       print(StringV("Binding constant")) => _;
-      e1 --> v1;
       
+      e1 --> v1;
       saveConstMethod(e, name, v1) --> e';
       
       print(Binding(e')) => _;
