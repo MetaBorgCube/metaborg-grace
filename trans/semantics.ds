@@ -16,6 +16,8 @@ signature
     NoObject: O
     Wrapped: V -> CodeSequence
     
+    getParamNames: Params --> List(String)
+    
   arrows
     Exp --> V
     CodeSequence --> V
@@ -23,6 +25,9 @@ signature
     Assignment --> V
     CallArgs --> V
     List(CodeSequence) --> V
+    
+    Params --> List(String)
+    
     Program -init-> V
     
     Exp -o-> O
@@ -92,16 +97,6 @@ rules
   True() --> BoolV(true).
   False() --> BoolV(false).
 
-  // just an implicit method call with no args
-//  MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) --> v
-//    where
-//      print(StringV("reading from environment")) => _;
-////      print(Binding(e)) => _;
-//      readName(name) => i;
-//      print(NumV(i)) => _;
-//      read(i) => v;
-//      print(v) => _.
-
   MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) :: E, H, OH --> v :: E, H, OH
     where
       print(StringV("reading real method from environment")) => _;
@@ -119,9 +114,9 @@ rules
       print(v) => _;
       print(StringV("==========")) => _.
       
-  MCallImpl([Part(ID(name),NoArgType(),ArgsParen([exp]))]) :: E, H, OH --> v :: E, H, OH
+  MCallImpl([Part(ID(name),NoArgType(),ArgsParen([actualArgs]))]) :: E, H, OH --> v :: E, H, OH
     where
-      exp --> pv1;
+      actualArgs --> pv1;
       readName(name) --> i;
       print(NumV(i)) => _;
       readO(i) --> Method([pName], e, cs);
@@ -140,30 +135,25 @@ rules
       print(v) => _;
       print(StringV("==========")) => _.
 
-//  Variable(name, NoAnnotations(), NoTypeAnn(), VarInit(v1)) --> Done()
-//    where
-//      write(name, v1) --> _.
-//      
-//  Assignment(name, v1) --> Done()
-//    where
-//      write(name, v1) --> _.
-  
-//  MethodDecl(
-//    NoPrefix(),
-//    [MethodID(ID(name), NoArgType(), NoAnnotations(), NoParams())],
-//    NoMethodType(),
-//    MethodBody(cs),
-//    NoWhere()
-//  ) :: H --> Done() :: H
-//    where
-//      writeCode(name, StoredMethod([], cs, H)) -code-> _.
-   
   MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).
+
+  getParamNames(Params(pList)) --> paramNames // [Param("c",NoTypeAnn),Param("d",NoTypeAnn)]
+    where
+      case pList of {
+        [] =>
+          [] => paramNames
+        [Param(name, _) | [] ] =>
+          [name] => paramNames
+        [Param(name, _) | otherNames ] =>
+          [ name | getParamNames(Params(otherNames)) ] => paramNames
+      }.
+      
+  getParamNames(NoParams()) --> [].
 
   MethodDecl(
     NoPrefix(),
     [MethodID(ID(name),NoArgType(),NoAnnotations(),
-      Params([Param(paramName,NoTypeAnn())])
+      ps // [Param(paramName,NoTypeAnn())]
     )],
     NoMethodType(),
     MethodBody(
@@ -172,12 +162,14 @@ rules
     NoWhere()
   ) :: Env e --> Done() :: Env e'
     where
+      getParamNames(ps) => pNames;
+    
       print(StringV("Declaring method")) => _;
 //      Method([], {}, cs) => o;
       fresh => i;
       {name |--> i, e} => eNew; // add itself to its own evironment
       print(Binding(eNew)) => _;
-      writeO(i, Method([paramName], eNew, cs)) --> _; 
+      writeO(i, Method(pNames, eNew, cs)) --> _; 
       print(Binding(e)) => _;
       bindName(name, i) --> e'; // saves and returns done 
       print(Binding(e')) => _;
