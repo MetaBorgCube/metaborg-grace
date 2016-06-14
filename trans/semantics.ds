@@ -74,7 +74,7 @@ rules
 //      print(StringV("evalutating object after defer")) => _;
 //      Env eEnc |- cs :: Env e --> v.
       
-  O encO |- ObjectDecl(NoInherit(), [], cs) :: E --> v
+  O encO |- ObjectDecl(NoInherit(), [], cs) :: E --> v :: E
     where
       print(StringV("directly evaluating object")) => _;
       O Object(encO, NoObject(), E) |- cs :: Env {} --> v.
@@ -154,30 +154,31 @@ rules
       
   MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
     where
+      name != "base_add";
       print(StringV("calling real method")) => _;
-      
+      print(StringV(name)) => _;
       readName(name) --> i;
-      
-      print(StringV("evaluating arguments to values")) => _;
       evalArgs(arguments) --> actualArgsVs;
-      print(StringV("done evaluating arguments to values")) => _;
-      
       readO(i) --> Method(names, e, cs);
-      
       saveConstants(e, names, actualArgsVs) --> e';
+      cs :: Env {e', e} --> v. // add the parameter constant method to the env
       
-//      saveConstMethod(e, pName, pv1) --> e'; // creating a constant method for the parameter 
-//      readO(i) --> Method([pName], e, cs);
+  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
+    where
+      name == "base_add";
+      print(StringV("calling base_add method")) => _;
+      print(StringV(name)) => _;
+      print(StringV("evaluating base operation add")) => _;
+      evalArgs(arguments) --> [NumV(i1)| [NumV(i2) | [] ] ];
+      NumV(nativeIBinOp("+", i1, i2)) => v.
       
-      cs :: Env {e', e} --> v; // add the parameter constant method to the env
-      
-      print(StringV("environment from the stored method")) => _;
-      print(Binding(e)) => _;
-      print(StringV("Binding constant")) => _;
-      print(Binding(e')) => _;
-      print(Binding({e', e})) => _;
-      print(v) => _;
-      print(StringV("==========")) => _.
+//      print(StringV("environment from the stored method")) => _;
+//      print(Binding(e)) => _;
+//      print(StringV("Binding constant")) => _;
+//      print(Binding(e')) => _;
+//      print(Binding({e', e})) => _;
+//      print(v) => _;
+//      print(StringV("==========")) => _.
 
   saveConstMethod(startEnv, name, v) --> e'
     where 

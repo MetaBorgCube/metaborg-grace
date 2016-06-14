@@ -4,6 +4,7 @@ method f(c,d,a,b,e) {
   c;
   d;
   e;
+//  base_add(21,21);
 };
 
 method g(a) {
@@ -17,6 +18,9 @@ method if(a) else (b) {
 
 f(1,2,3,4,5);
 
+object {
+  4;
+};
 
 g 1;
 
