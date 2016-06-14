@@ -119,8 +119,9 @@ context-free syntax
 //  Exp.Var                       = ID // foobar; Var("foobar") | self; Self() | self.outer.foobar; Chain([Self(), Outer(), Var("foobar")])
   Exp.Number                    = <<NUM>>
   Exp.String                    = <<STRING>>
-  Exp.True                      = "true"
-  Exp.False                     = "false"
+  Exp.Boolean                   = <<Boolean>>
+  Boolean.True                  = "true"
+  Boolean.False                 = "false"
   
   // simple "built-in" identifiers
   Exp.Self                       = "self"
@@ -155,6 +156,7 @@ context-free syntax
   CallArgs.ArgNumber            = <<NUM>>
   CallArgs.ArgString            = <<STRING>>
   CallArgs.ArgLineup            = <<Lineup>>
+  CallArgs.ArgBoolean           = <<Boolean>>
   
   Exp.LineupExp                 = <<Lineup>>
   Lineup.Lineup                 = <[ <{Exp ","}*> ]>

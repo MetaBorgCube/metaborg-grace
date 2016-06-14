@@ -21,6 +21,8 @@ signature
     writeO: Int * O --> O
     getHeap: Heap -> V
     getOHeap: OHeap -> V
+    
+    Stored: O -> V
 
 rules
 
@@ -40,5 +42,8 @@ rules
   write(addr, v) :: H --> v :: Heap {addr |--> v, H}.
   writeO(addr, o) :: OH --> o :: OHeap {addr |--> o, OH}
     where 
-      print(StringV("attempting to write")) => _;
-      print(NumV(addr)) => _.
+      print(StringV("attempting to write to objectstore")) => _;
+      print(StringV("objectstore: ")) => _;
+      print(getOHeap(OH)) => _;
+      print(NumV(addr)) => _;
+      print(Stored(o)) => _.

@@ -23,6 +23,7 @@ signature
     
   arrows
     Exp --> V
+    Boolean --> V
     CodeSequence --> V
     Declaration --> V
     Assignment --> V
@@ -41,12 +42,13 @@ signature
     
   native operators
     nativeIBinOp: String * Int * Int -> Int
+    nativeIfThenElse: Bool * V * V -> V
     
 rules
 
   Program(cs, _) -init-> cs'
     where
-      O NoObject() |- cs :: Env {"root" |--> fresh}, Heap {}, OHeap {} --> cs' :: Env _, Heap _, OHeap _.
+      O NoObject() |- cs :: Env {}, Heap {}, OHeap {} --> cs' :: Env _, Heap _, OHeap _.
   
 //  Env eEnc |- ObjectDecl(Inherit(inhExp,_,_), [Use(useExp,_,_)], cs) :: E -o-> Object(eEnc, e', cs)
 //    where
@@ -98,44 +100,36 @@ rules
   
   Number(s) --> NumV(parseNumber(s)).
   ArgNumber(s) --> NumV(parseNumber(s)).
+  ArgBoolean(s) --> s.
   String(s) --> StringV(s).
   True() --> BoolV(true).
   False() --> BoolV(false).
+  Boolean(s) --> s.
 
-  MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) :: E, H, OH --> v :: E, H, OH
-    where
-      print(StringV("reading real method from environment")) => _;
-      print(StringV(name)) => _;
-      print(Binding(E)) => _;
-      print(getHeap(H)) => _;
-      print(getOHeap(OH)) => _;
-      print(StringV(name)) => _;
-      readName(name) --> i;
-      print(NumV(i)) => _;
-      readO(i) --> Method([], e, cs);
-      print(StringV("environment from the stored method")) => _;
-      print(Binding(e)) => _;
-      cs :: Env e --> v;
-      print(v) => _;
-      print(StringV("==========")) => _.
 
-  saveConstants(startEnv, names, values) --> eFinal
+  saveConstants(startEnv, names, values) :: OH --> eFinal :: OH''
     where
       case names of {
         [] =>
-          {} => eFinal
+          {} => eFinal;
+          OH => OH''
         [n | []] =>
           values => [ v | [] ];
-          saveConstMethod(startEnv, n, v) --> e';
-          e' => eFinal
+          saveConstMethod(startEnv, n, v) :: OH --> eFinal :: OH'';
         [n | ns] =>
           values => [v|vs];
-          saveConstMethod(startEnv, n, v) --> e;
-          saveConstants(startEnv, ns, vs) --> em;
+          saveConstMethod(startEnv, n, v) :: OH --> e :: OH';
+          saveConstants(startEnv, ns, vs) :: OH' --> em :: OH'';
           {em, e} => eFinal
       }.
-        
-  evalArgs(ArgsParen(actualArgs)) --> agvs: List(V)
+  
+  saveConstMethod(startEnv, name, v) :: E, OH --> e' :: OH'
+    where 
+      fresh => i;
+      writeO(i, Method([], startEnv, [Wrapped(v)])) :: OH  --> _ :: OH';
+      bindName(name, i) :: E --> e'.
+
+  evalArgs(ArgsParen(actualArgs)) :: E, H, OH --> agvs: List(V)
     where
       case actualArgs of {
         [] =>
@@ -145,46 +139,66 @@ rules
          [pv1] => agvs
         [ arg | args ] => 
           arg --> pv1;
-          evalArgs(ArgsParen(args)) --> pvs;
+          evalArgs(ArgsParen(args)) :: E, H, OH --> pvs;
           [pv1 | pvs ] => agvs
       }.    
 
   evalArgs(NoArgs()) --> [].
   evalArgs(v) --> [v].
-      
-  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
+
+  MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) :: E, H, OH --> v :: E, H, OH
     where
-      name != "base_add";
-      print(StringV("calling real method")) => _;
-      print(StringV(name)) => _;
-      readName(name) --> i;
-      evalArgs(arguments) --> actualArgsVs;
-      readO(i) --> Method(names, e, cs);
-      saveConstants(e, names, actualArgsVs) --> e';
-      cs :: Env {e', e} --> v. // add the parameter constant method to the env
-      
+      readO(readName(name)) --> Method([], e, cs);
+      cs :: Env {E, e} --> v. // add local env constants (dynamic scoping)
+  
   MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
     where
       name == "base_add";
+      print(StringV("evaluating arguments")) => _;
+//      print(arguments) => _;
+      evalArgs(arguments) :: E, H, OH --> [NumV(i1), NumV(i2)];
       print(StringV("calling base_add method")) => _;
-      print(StringV(name)) => _;
-      print(StringV("evaluating base operation add")) => _;
-      evalArgs(arguments) --> [NumV(i1)| [NumV(i2) | [] ] ];
-      NumV(nativeIBinOp("+", i1, i2)) => v.
-      
-//      print(StringV("environment from the stored method")) => _;
-//      print(Binding(e)) => _;
-//      print(StringV("Binding constant")) => _;
-//      print(Binding(e')) => _;
-//      print(Binding({e', e})) => _;
-//      print(v) => _;
-//      print(StringV("==========")) => _.
+      NumV(nativeIBinOp("+", i1, i2)) => v;
+      print(v) => _.
+        
+  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
+    where
+      name == "base_ifThenElse";
+      print(StringV("evaluating arguments")) => _;
+//      print(arguments) => _;
+      evalArgs(arguments) :: E, H, OH --> [BoolV(b), e1, e2];
+      print(StringV("calling base_add method")) => _;
+      nativeIfThenElse(b, e1, e2) => v;
+//      case b of {
+//        true =>
+//          e1 :: E, H, OH --> v
+//        otherwise =>
+//          e2 :: E, H, OH --> v
+//      };
+      print(v) => _.
 
-  saveConstMethod(startEnv, name, v) --> e'
-    where 
-      fresh => i;
-      writeO(i, Method([], startEnv, [Wrapped(v)])) --> _;
-      bindName(name, i) --> e'.
+  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
+    where
+      name != "base_add";
+      name != "base_ifThenElse";
+      print(StringV("calling real method")) => _;
+      readName(name) :: E --> i;
+      print(StringV("read name")) => _;
+      evalArgs(arguments) --> actualArgsVs;
+      print(StringV("evaluated args")) => _;
+      print(getOHeap(OH)) => _;
+      readO(i) :: OH --> Method(names, e, cs);
+      print(StringV("read method")) => _;
+      print(getOHeap(OH)) => _;
+      saveConstants(e, names, actualArgsVs) :: E, H, OH --> e' :: OH';
+      print(StringV("saved constants")) => _;
+      print(getOHeap(OH')) => _;
+      {E, e} => e''; // add local env constants (dynamic scoping)
+      {e', e''} => e'''; // add constants
+      cs :: Env e''', H, OH' --> v; // add the parameter constant method to the env
+      print(StringV("evalutated code")) => _;
+      print(v) => _.
+
 
   MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).
 
@@ -212,15 +226,16 @@ rules
       cs
     ),
     NoWhere()
-  ) :: Env e --> Done() :: Env e'
+  ) :: Env e, OH --> Done() :: Env e', OHeap OH'
     where
       print(StringV("Declaring method")) => _;
-      
-      getParamNames(ps) => pNames;
+      print(getOHeap(OH)) => _;
+      getParamNames(ps) --> pNames;
       fresh => i;
       {name |--> i, e} => eNew; // add itself to its own evironment
-      writeO(i, Method(pNames, eNew, cs)) --> _; 
-      bindName(name, i) --> e'; // saves and returns done 
+      writeO(i, Method(pNames, eNew, cs)) :: OH --> _ :: OHeap OH'; 
+      print(StringV("method written")) => _;
+      bindName(name, i) :: Env e --> e'; // saves and returns done 
       
       print(Binding(e)) => _;
       print(Binding(eNew)) => _;
@@ -255,6 +270,3 @@ rules
 //      cs --> sm@Method(_, _, _);
 //      bindName(mName, allocate(sm)) => e';
 //      Trait(e') => t.
-  
-  
-   
