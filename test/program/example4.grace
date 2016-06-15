@@ -8,4 +8,11 @@ def a = object {
   base_print "hoi";
 };
 
-a;
+method f (e,g) {
+  e;
+  g;
+};
+
+f(1,2);
+
+base_print(3);

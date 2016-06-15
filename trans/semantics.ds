@@ -145,6 +145,7 @@ rules
 
   evalArgs(ArgsParen(actualArgs)) :: E, H, OH --> agvs: List(V)
     where
+      print(StringV("evalArgs (ArgsParen)")) => _;
       case actualArgs of {
         [] =>
           [] => agvs
@@ -157,8 +158,8 @@ rules
           [pv1 | pvs ] => agvs
       }.    
 
-  evalArgs(NoArgs()) --> [].
-  evalArgs(v) --> [v].
+  evalArgs(NoArgs()) --> [] where print(StringV("evalArgs (NoArgs)")) => _.
+  evalArgs(v) --> [v] where print(StringV("evalArgs (direct)")) => _.
 
   MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) :: E, H, OH --> v :: E, H, OH
     where
@@ -168,9 +169,11 @@ rules
   MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
     where
       name == "base_print";
+      print(StringV("executing base_print (StringV)")) => _;
       print(StringV("evaluating arguments")) => _;
 //      print(arguments) => _;
-      evalArgs(arguments) :: E, H, OH --> [StringV(s1)];
+      evalArgs(arguments) :: E, H, OH --> argVs;
+      argVs => [StringV(s1)];
       print(StringV("calling base_print method")) => _;
       nativeSPrint(s1) => _;
       Done() => v.
@@ -178,6 +181,7 @@ rules
   MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
     where
       name == "base_print";
+      print(StringV("executing base_print (NumV)")) => _;
       print(StringV("evaluating arguments")) => _;
 //      print(arguments) => _;
       evalArgs(arguments) :: E, H, OH --> [NumV(i1)];
@@ -234,6 +238,28 @@ rules
       print(StringV("evalutated code")) => _;
       print(v) => _.
 
+  MCallCanonical(NoPrefix(),receiver,ID(name),NoArgType(),NoArgs()) :: OH --> v :: OH
+    where
+      print(StringV("method call with receiver")) => _;
+      
+      receiver --> WrappedO(Object(_, _, receiverEnv)); // MCallImpl([Part(ID("a"),NoArgType(),NoArgs())])
+      
+      print(Binding(receiverEnv)) => _;
+      print(getOHeap(OH)) => _;
+      
+      readName(name) :: Env receiverEnv --> i; // read address from receiver environment
+      
+      readO(i) :: OH --> Method(names, e, cs); // read method from heap
+      
+      cs :: Env {e, receiverEnv}, OH --> v; // merge env from method with object env and execute
+      
+      print(v) => _;
+      
+      print(NumV(i)) => _;
+      
+      Done() => v;
+      
+      print(StringV("==========")) => _. 
 
   MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).
 
