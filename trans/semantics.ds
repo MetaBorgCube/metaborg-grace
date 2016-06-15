@@ -15,6 +15,7 @@ signature
     Method: List(String) * Env * List(CodeSequence) -> O // env of declaration and code
     NoObject: O
     Wrapped: V -> CodeSequence
+    WrappedO: O -> V
     
     saveConstMethod: Env * String * V --> Env
     getParamNames: Params --> List(String)
@@ -43,6 +44,8 @@ signature
   native operators
     nativeIBinOp: String * Int * Int -> Int
     nativeIfThenElse: Bool * V * V -> V
+    nativeSPrint: String -> String
+    nativeIPrint: Int -> Int
     
 rules
 
@@ -76,36 +79,44 @@ rules
 //      print(StringV("evalutating object after defer")) => _;
 //      Env eEnc |- cs :: Env e --> v.
       
-  O encO |- ObjectDecl(NoInherit(), [], cs) :: E --> v :: E
+  O encO |- ObjectDecl(NoInherit(), [], cs)  :: E, H, OH -->
+                WrappedO(Object(Object(encO, NoObject(), E), NoObject(), E')) :: E', H', OH'
     where
       print(StringV("directly evaluating object")) => _;
-      O Object(encO, NoObject(), E) |- cs :: Env {} --> v.
+      print(getOHeap(OH)) => _;
+      O Object(encO, NoObject(), E) |- cs :: E, H, OH  --> _ :: E', H', OH';
+      print(StringV("done directly evaluating object")) => _;
+      print(getOHeap(OH')) => _;
+      print(StringV("==========")) => _.
 
   Expression(e) --> e.
   Declaration(e) --> e.
   Wrapped(v) --> v.
   Assignment(e) --> e.
     
-  cs : List(CodeSequence) :: Env e --> v :: Env eFinal
+  cs : List(CodeSequence) :: Env e, H, OH --> v :: Env eFinal, H'', OH''
   where
     case cs of {
         [] =>
-            Done() => v
+            Done() => v;
+            e => eFinal;
+            H => H'';
+            OH => OH''
         [code|[]] =>
-            code :: Env e --> v :: Env eFinal
+            code :: Env e, H, OH --> v :: Env eFinal, H'', OH''
         [code | cs'] =>
-            code :: Env e --> _ :: Env e';
-            cs' :: Env e' --> v :: Env eFinal
+            code :: Env e --> _ :: Env e', H', OH';
+            cs' :: Env e', H', OH' --> v :: Env eFinal, H'', OH''
     }.
   
   Number(s) --> NumV(parseNumber(s)).
   ArgNumber(s) --> NumV(parseNumber(s)).
   ArgBoolean(s) --> s.
+  ArgString(s) --> StringV(s).
   String(s) --> StringV(s).
   True() --> BoolV(true).
   False() --> BoolV(false).
   Boolean(s) --> s.
-
 
   saveConstants(startEnv, names, values) :: OH --> eFinal :: OH''
     where
@@ -123,11 +134,14 @@ rules
           {em, e} => eFinal
       }.
   
-  saveConstMethod(startEnv, name, v) :: E, OH --> e' :: OH'
+  saveConstMethod(startEnv, name, v) :: E, H, OH --> e' :: H', OH'
     where 
+      print(StringV("saving const method")) => _;
+      print(getOHeap(OH)) => _;
       fresh => i;
-      writeO(i, Method([], startEnv, [Wrapped(v)])) :: OH  --> _ :: OH';
-      bindName(name, i) :: E --> e'.
+      writeO(i, Method([], startEnv, [Wrapped(v)])) :: H, OH  --> _ :: H', OH';
+      bindName(name, i) :: E --> e';
+      print(StringV("==========")) => _.
 
   evalArgs(ArgsParen(actualArgs)) :: E, H, OH --> agvs: List(V)
     where
@@ -150,6 +164,26 @@ rules
     where
       readO(readName(name)) --> Method([], e, cs);
       cs :: Env {E, e} --> v. // add local env constants (dynamic scoping)
+
+  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
+    where
+      name == "base_print";
+      print(StringV("evaluating arguments")) => _;
+//      print(arguments) => _;
+      evalArgs(arguments) :: E, H, OH --> [StringV(s1)];
+      print(StringV("calling base_print method")) => _;
+      nativeSPrint(s1) => _;
+      Done() => v.
+      
+  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
+    where
+      name == "base_print";
+      print(StringV("evaluating arguments")) => _;
+//      print(arguments) => _;
+      evalArgs(arguments) :: E, H, OH --> [NumV(i1)];
+      print(StringV("calling base_print method")) => _;
+      nativeIPrint(i1) => _;
+      Done() => v.
   
   MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
     where
@@ -181,6 +215,7 @@ rules
     where
       name != "base_add";
       name != "base_ifThenElse";
+      name != "base_print";
       print(StringV("calling real method")) => _;
       readName(name) :: E --> i;
       print(StringV("read name")) => _;
@@ -243,16 +278,20 @@ rules
       print(StringV("==========")) => _. 
   
   // for now constants will just be a method returning the evaluated value
-  Constant(name, _, _, e1) :: Env e --> Done() :: Env e'
+  Constant(name, _, _, e1) :: E, H, OH --> Done() :: E'', H'', OH''
     where
       print(StringV("Binding constant")) => _;
+      print(getOHeap(OH)) => _;
       
-      e1 --> v1;
-      saveConstMethod(e, name, v1) --> e';
+      e1 :: E, H, OH --> v1 :: E', H', OH';
       
-      print(Binding(e')) => _;
+      print(getOHeap(OH')) => _;
+      
+      saveConstMethod(E, name, v1) :: H', OH' --> E'' :: H'', OH'';
+      
+      print(Binding(E')) => _;
       print(StringV("==========")) => _.
-  
+
   O Object(_, _, eEnc) |- MCallWDot(Outer(),[Part(ID(name),NoArgType(),NoArgs())]) --> v
     where
       print(StringV("reading from outer")) => _;

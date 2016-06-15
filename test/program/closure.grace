@@ -6,7 +6,7 @@ method f {
 
 def a = 5;
 
-f;
+base_print(f);
 
 // 5 according to minigrace
 // 5 according to kernan
