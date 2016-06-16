@@ -169,7 +169,7 @@ rules
       print(StringV("executing base_print (StringV)")) => _;
       print(StringV("evaluating arguments")) => _;
       print(WrappedArgs(arguments)) => _;
-      evalArgs(arguments) :: E, H, OH --> [a] : List(V);
+      evalArgs(arguments) --> [a] : List(V);
       print(StringV("calling base_print method")) => _;
       nativePrint(a) => _;
       Done() => v.
@@ -179,7 +179,7 @@ rules
       name == "base_add";
       print(StringV("evaluating arguments")) => _;
 //      print(arguments) => _;
-      evalArgs(arguments) :: E, H, OH --> [NumV(i1), NumV(i2)];
+      evalArgs(arguments) --> [NumV(i1), NumV(i2)];
       print(StringV("calling base_add method")) => _;
       NumV(nativeIBinOp("+", i1, i2)) => v;
       print(v) => _.
@@ -189,7 +189,7 @@ rules
       name == "base_ifThenElse";
       print(StringV("evaluating arguments")) => _;
 //      print(arguments) => _;
-      evalArgs(arguments) :: E, H, OH --> [BoolV(b), e1, e2];
+      evalArgs(arguments) --> [BoolV(b), e1, e2];
       print(StringV("calling base_add method")) => _;
       nativeIfThenElse(b, e1, e2) => v;
       print(v) => _.
@@ -208,7 +208,7 @@ rules
       readO(i) :: OH --> Method(names, e, cs);
       print(StringV("read method")) => _;
       print(getOHeap(OH)) => _;
-      saveConstants(e, names, actualArgsVs) :: E, H, OH --> e' :: OH';
+      saveConstants(e, names, actualArgsVs) --> e' :: OH';
       print(StringV("saved constants")) => _;
       print(getOHeap(OH')) => _;
       {E, e} => e''; // add local env constants (dynamic scoping)
@@ -242,22 +242,16 @@ rules
 
   MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).
 
-  getParamNames(pList) :: E, H, OH --> paramNames :: E', H', OH'
+  getParamNames(pList) --> paramNames
     where
       print(StringV("getting param names")) => _;
       case pList of {
         Params([]) =>
-          [] => paramNames;
-          E => E';
-          H => H';
-          OH => OH'
+          [] => paramNames
         Params([Param(name, _) | [] ]) =>
-          [name] => paramNames;
-          E => E';
-          H => H';
-          OH => OH'
+          [name] => paramNames
         Params([Param(name, _) | otherNames ]) =>
-          getParamNames(Params(otherNames)) :: E, H, OH --> names :: E', H', OH';
+          getParamNames(Params(otherNames)) --> names;
           [ name | names ] => paramNames
       }.
       
@@ -265,27 +259,20 @@ rules
     where
       print(StringV("getting param names for NoParams()")) => _.
 
-  MethodDecl(
-    NoPrefix(),
+  MethodDecl(NoPrefix(),
     [MethodID(ID(name),NoArgType(),NoAnnotations(),
       ps // [Param(paramName,NoTypeAnn())]
-    )],
-    NoMethodType(),
-    MethodBody(
-      cs
-    ),
-    NoWhere()
-  ) :: E, OH --> Done() :: Env e', OHeap OH'
+    )], NoMethodType(), MethodBody( cs ), NoWhere() ) :: E, OH --> Done() :: Env e'
     where
       print(StringV("Declaring method")) => _;
       print(getOHeap(OH)) => _;
-      getParamNames(ps) :: E, OH --> pNames;
+      getParamNames(ps) --> pNames;
       fresh => i;
       {name |--> i, E} => eNew; // add itself to its own evironment
       print(StringV("writing")) => _;
-      writeO(i, Method(pNames, eNew, cs)) :: OH --> _ :: OHeap OH'; 
+      writeO(i, Method(pNames, eNew, cs))--> _; 
       print(StringV("method written")) => _;
-      bindName(name, i) :: E --> e'; // saves and returns done 
+      bindName(name, i) --> e'; // saves and returns done 
       
       print(Binding(E)) => _;
       print(Binding(eNew)) => _;
@@ -293,18 +280,13 @@ rules
       print(StringV("==========")) => _. 
   
   // for now constants will just be a method returning the evaluated value
-  Constant(name, _, _, e1) :: E, H, OH --> Done() :: E'', H'', OH''
+  Constant(name, _, _, e1) :: E --> Done() :: E''
     where
       print(StringV("Binding constant")) => _;
-      print(getOHeap(OH)) => _;
       
-      e1 :: E, H, OH --> v1 :: E', H', OH';
+      e1 --> v1;
+      saveConstMethod(E, name, v1) --> E'';
       
-      print(getOHeap(OH')) => _;
-      
-      saveConstMethod(E, name, v1) :: E', H', OH' --> E'' :: H'', OH'';
-      
-      print(Binding(E')) => _;
       print(StringV("==========")) => _.
 
   O Object(_, _, eEnc) |- MCallWDot(Outer(),[Part(ID(name),NoArgType(),NoArgs())]) --> v

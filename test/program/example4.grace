@@ -1,6 +1,7 @@
 def a = object { 
   def b = 3;
   method f {
+    base_print "f in a invoked";
     4;
   };
   5;
@@ -15,6 +16,8 @@ method f (e,g) {
 };
 
 f(1,2);
+
+a.f;
 
 base_add(1,2);
 base_print 1;
