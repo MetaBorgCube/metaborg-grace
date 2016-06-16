@@ -17,5 +17,4 @@ method f (e,g) {
 f(1,2);
 
 base_add(1,2);
-base_print(1);
-
+base_print 1;
