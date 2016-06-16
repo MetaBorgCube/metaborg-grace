@@ -132,13 +132,12 @@ rules
           {em, e} => eFinal
       }.
   
-  saveConstMethod(startEnv, name, v) :: E, H, OH --> e' :: E, H', OH'
+  saveConstMethod(startEnv, name, v) --> e'
     where 
       print(StringV("saving const method")) => _;
-      print(getOHeap(OH)) => _;
       fresh => i;
-      writeO(i, Method([], startEnv, [Wrapped(v)])) :: H, OH  --> _ :: H', OH';
-      bindName(name, i) :: E --> e';
+      writeO(i, Method([], startEnv, [Wrapped(v)])) --> _;
+      bindName(name, i) --> e';
       print(StringV("==end saving const method==")) => _.
 
   evalArgs(ArgsParen(actualArgs)) :: E, H, OH --> agvs: List(V) :: E', H', OH'
