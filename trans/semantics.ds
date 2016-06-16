@@ -104,8 +104,10 @@ rules
         [code|[]] =>
             code :: E --> v :: Env eFinal
         [code | cs'] =>
-            code :: E --> _ :: Env e';
-            cs' :: Env e' --> v :: Env eFinal
+            code :: E --> _ :: E';
+            print(StringV("after 1 of many cs execs")) => _;
+            print(Binding(E')) => _;
+            cs' :: E' --> v :: Env eFinal
     }.
   
   Number(s) --> NumV(parseNumber(s)).
@@ -140,9 +142,10 @@ rules
       bindName(name, i) --> e';
       print(StringV("==end saving const method==")) => _.
 
-  evalArgs(ArgsParen(actualArgs)) --> agvs: List(V)
+  evalArgs(ArgsParen(actualArgs)) :: OH --> agvs: List(V)
     where
       print(StringV("evalArgs (ArgsParen)")) => _;
+      print(getOHeap(OH)) => _;
       case actualArgs of {
         [] =>
           [] => agvs
@@ -158,12 +161,12 @@ rules
   evalArgs(NoArgs()) --> [] where print(StringV("evalArgs (NoArgs)")) => _.
   evalArgs(v) --> [v] where print(StringV("evalArgs (direct)")) => _.
 
-  MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) :: E, H, OH --> v :: E, H, OH
+  MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) :: E, H, OH --> v :: E, H
     where
       readO(readName(name)) --> Method([], e, cs);
       cs :: Env {E, e} --> v. // add local env constants (dynamic scoping)
 
-  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
+  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H --> v :: E, H
     where
       name == "base_print";
       print(StringV("executing base_print (StringV)")) => _;
@@ -174,7 +177,7 @@ rules
       nativePrint(a) => _;
       Done() => v.
 
-  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
+  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H --> v :: E, H
     where
       name == "base_add";
       print(StringV("evaluating arguments")) => _;
@@ -184,45 +187,68 @@ rules
       NumV(nativeIBinOp("+", i1, i2)) => v;
       print(v) => _.
         
-  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
+  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H --> v :: E, H
     where
       name == "base_ifThenElse";
       print(StringV("evaluating arguments")) => _;
-//      print(arguments) => _;
-      evalArgs(arguments) --> [BoolV(b), e1, e2];
-      print(StringV("calling base_add method")) => _;
-      nativeIfThenElse(b, e1, e2) => v;
+      
+      evalArgs(arguments) --> [BoolV(b), v1, v2];
+      
+      print(v1) => _;
+      print(v2) => _;
+         
+      case b of {
+        true =>
+          v1 => WrappedO(Object(oEnc, oInh, E')); 
+          readName("apply") :: E' --> i; // read address from receiver environment
+          readO(i) --> Method(names, e, cs); // read method from heap
+          cs :: Env {e, E'} --> v // merge env from method with object env and execute
+        false => 
+          v2 => WrappedO(Object(oEnc, oInh, E'));
+          readName("apply") :: E' --> i; // read address from receiver environment
+          readO(i) --> Method(names, e, cs); // read method from heap
+          cs :: Env {e, E'} --> v // merge env from method with object env and execute
+        otherwise =>
+          {} => E'
+      };
       print(v) => _.
 
-  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
+  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E --> v :: E
     where
       name != "base_add";
       name != "base_ifThenElse";
       name != "base_print";
       print(StringV("calling real method")) => _;
+      print(StringV(name)) => _;
       readName(name) :: E --> i;
       print(StringV("read name")) => _;
       evalArgs(arguments) --> actualArgsVs;
       print(StringV("evaluated args")) => _;
-      print(getOHeap(OH)) => _;
-      readO(i) :: OH --> Method(names, e, cs);
+      readO(i) --> Method(names, e, cs);
       print(StringV("read method")) => _;
-      print(getOHeap(OH)) => _;
-      saveConstants(e, names, actualArgsVs) --> e' :: OH';
+      saveConstants(e, names, actualArgsVs) --> e';
       print(StringV("saved constants")) => _;
-      print(getOHeap(OH')) => _;
       {E, e} => e''; // add local env constants (dynamic scoping)
       {e', e''} => e'''; // add constants
-      cs :: Env e''', H, OH' --> v; // add the parameter constant method to the env
+      
+      print(StringV("calling method with following comps:")) => _;
+      print(Binding(e''')) => _;
+      cs :: Env e''' --> v; // add the parameter constant method to the env
       print(StringV("evalutated code")) => _;
-      print(v) => _.
+      print(v) => _;
+      print(StringV("==end calling real method==")) => _.
 
-  MCallCanonical(NoPrefix(),receiver,ID(name),NoArgType(),NoArgs()) :: OH --> v :: OH
+  MCallCanonical(NoPrefix(),receiver,ID(name),NoArgType(),NoArgs()) :: E, OH --> v :: E
     where
       print(StringV("method call with receiver")) => _;
+      print(StringV("startenv")) => _;
+      print(Binding(E)) => _;
+      print(StringV("startheap")) => _;
+      print(getOHeap(OH)) => _;
       
       receiver --> WrappedO(Object(_, _, receiverEnv)); // MCallImpl([Part(ID("a"),NoArgType(),NoArgs())])
       
+      print(StringV("receiverEnv")) => _;
       print(Binding(receiverEnv)) => _;
       print(getOHeap(OH)) => _;
       
@@ -230,14 +256,16 @@ rules
       
       readO(i) :: OH --> Method(names, e, cs); // read method from heap
       
-      cs :: Env {e, receiverEnv}, OH --> v; // merge env from method with object env and execute
+      cs :: Env {e, receiverEnv}, OH --> v :: E''; // merge env from method with object env and execute
       
       print(v) => _;
       
       print(NumV(i)) => _;
       
-      Done() => v;
+//      Done() => v;
       
+      print(StringV("endenv")) => _;
+      print(Binding(E'')) => _;
       print(StringV("==end method call with receiver==")) => _. 
 
   MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).

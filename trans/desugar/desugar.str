@@ -27,6 +27,7 @@ rules
             desugar-flatten-methodID <+
             desugar-flatten-methodPart <+
             
+            desugar-blockExp <+
             desugar-block <+
             desugar-block-to-object <+
 //            desugar-arg-number <+
@@ -92,31 +93,16 @@ rules
 
   desugar-self-in-id: ID(Self()) -> Self()
   
+  desugar-blockExp: BlockExp(e) -> e
+  
   desugar-block:
     Block(BlockWParams(a, b)) -> BlockWParams(a, b)
    
   desugar-block:
-    Block(a) -> BlockWParams(BlockParams(NoArgType(), []), a) 
+    Block(a) -> BlockWParams(BlockParams(NoArgType(), NoParams()), a) 
 
   desugar-block-to-object:
-    BlockWParams(BlockParams(_, params), code)-> 
-      ObjectDecl(
-        NoInherit(),
-        [],
-        [ Declaration(
-            MethodDecl(
-              NoPrefix()
-            , [MethodID(ID("apply"), NoArgType(), NoAnnotations(), params)]
-            , NoMethodType()
-            , code
-            , NoWhere()
-            )
-          )
-        ]
-      )
-
-  desugar-block-to-object:
-    BlockWParams(BlockParams(NoArgType(), []), code)-> 
+    BlockWParams(BlockParams(NoArgType(), NoParams()), code)-> 
       ObjectDecl(
         NoInherit(),
         [],
@@ -125,11 +111,27 @@ rules
               NoPrefix()
             , [MethodID(ID("apply"), NoArgType(), NoAnnotations(), NoParams())]
             , NoMethodType()
-            , code
+            , MethodBody(code)
             , NoWhere()
             )
           )
         ]
+      )
+      
+  desugar-block-to-object:
+    BlockWParams(BlockParams(argType, params), code)-> 
+      ObjectDecl(
+        NoInherit(),
+        [],
+        [Declaration(
+            MethodDecl(
+            NoPrefix()
+          , [MethodID(ID("apply"), argType, NoAnnotations(), Params(params))]
+          , NoMethodType()
+          , MethodBody(code)
+          , NoWhere()
+          )
+        )]
       )
 
   methodId-to-nameList:
