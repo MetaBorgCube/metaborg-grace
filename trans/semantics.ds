@@ -118,45 +118,53 @@ rules
   False() --> BoolV(false).
   Boolean(s) --> s.
 
-  saveConstants(startEnv, names, values) :: OH --> eFinal :: OH''
+  saveConstants(startEnv, names, values) :: E, H, OH --> eFinal :: E'', H'', OH''
     where
       case names of {
         [] =>
           {} => eFinal;
+          E => E'';
+          H => H'';
           OH => OH''
         [n | []] =>
           values => [ v | [] ];
-          saveConstMethod(startEnv, n, v) :: OH --> eFinal :: OH'';
+          saveConstMethod(startEnv, n, v) :: E, H, OH --> eFinal :: E'', H'', OH'';
         [n | ns] =>
           values => [v|vs];
-          saveConstMethod(startEnv, n, v) :: OH --> e :: OH';
-          saveConstants(startEnv, ns, vs) :: OH' --> em :: OH'';
+          saveConstMethod(startEnv, n, v) :: E, H, OH --> e :: E', H', OH';
+          saveConstants(startEnv, ns, vs) :: E', H', OH' --> em :: E'', H'', OH'';
           {em, e} => eFinal
       }.
   
-  saveConstMethod(startEnv, name, v) :: E, H, OH --> e' :: H', OH'
+  saveConstMethod(startEnv, name, v) :: E, H, OH --> e' :: E, H', OH'
     where 
       print(StringV("saving const method")) => _;
       print(getOHeap(OH)) => _;
       fresh => i;
       writeO(i, Method([], startEnv, [Wrapped(v)])) :: H, OH  --> _ :: H', OH';
       bindName(name, i) :: E --> e';
-      print(StringV("==========")) => _.
+      print(StringV("==end saving const method==")) => _.
 
-  evalArgs(ArgsParen(actualArgs)) :: E, H, OH --> agvs: List(V)
+  evalArgs(ArgsParen(actualArgs)) :: E, H, OH --> agvs: List(V) :: E', H', OH'
     where
       print(StringV("evalArgs (ArgsParen)")) => _;
       case actualArgs of {
         [] =>
-          [] => agvs
+          [] => agvs;
+          E => E';
+          H => H';
+          OH => OH'
         [ arg | [] ] =>
           arg --> pv1;
-         [pv1] => agvs
+          E => E';
+          H => H';
+          OH => OH';
+          [pv1] => agvs
         [ arg | args ] => 
           arg --> pv1;
-          evalArgs(ArgsParen(args)) :: E, H, OH --> pvs;
+          evalArgs(ArgsParen(args)) :: E, H, OH --> pvs :: E', H', OH';
           [pv1 | pvs ] => agvs
-      }.    
+      }.
 
   evalArgs(NoArgs()) --> [] where print(StringV("evalArgs (NoArgs)")) => _.
   evalArgs(v) --> [v] where print(StringV("evalArgs (direct)")) => _.
@@ -263,19 +271,28 @@ rules
 
   MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).
 
-  getParamNames(pList) --> paramNames
+  getParamNames(pList) :: E, H, OH --> paramNames :: E', H', OH'
     where
+      print(StringV("getting param names")) => _;
       case pList of {
         Params([]) =>
-          [] => paramNames
+          [] => paramNames;
+          E => E';
+          H => H';
+          OH => OH'
         Params([Param(name, _) | [] ]) =>
-          [name] => paramNames
+          [name] => paramNames;
+          E => E';
+          H => H';
+          OH => OH'
         Params([Param(name, _) | otherNames ]) =>
-          getParamNames(Params(otherNames)) --> names;
+          getParamNames(Params(otherNames)) :: E, H, OH --> names :: E', H', OH';
           [ name | names ] => paramNames
       }.
       
-  getParamNames(NoParams()) --> [].
+  getParamNames(NoParams()) --> []
+    where
+      print(StringV("getting param names for NoParams()")) => _.
 
   MethodDecl(
     NoPrefix(),
@@ -287,18 +304,19 @@ rules
       cs
     ),
     NoWhere()
-  ) :: Env e, OH --> Done() :: Env e', OHeap OH'
+  ) :: E, OH --> Done() :: Env e', OHeap OH'
     where
       print(StringV("Declaring method")) => _;
       print(getOHeap(OH)) => _;
-      getParamNames(ps) --> pNames;
+      getParamNames(ps) :: E, OH --> pNames;
       fresh => i;
-      {name |--> i, e} => eNew; // add itself to its own evironment
+      {name |--> i, E} => eNew; // add itself to its own evironment
+      print(StringV("writing")) => _;
       writeO(i, Method(pNames, eNew, cs)) :: OH --> _ :: OHeap OH'; 
       print(StringV("method written")) => _;
-      bindName(name, i) :: Env e --> e'; // saves and returns done 
+      bindName(name, i) :: E --> e'; // saves and returns done 
       
-      print(Binding(e)) => _;
+      print(Binding(E)) => _;
       print(Binding(eNew)) => _;
       print(Binding(e')) => _;
       print(StringV("==========")) => _. 
@@ -313,7 +331,7 @@ rules
       
       print(getOHeap(OH')) => _;
       
-      saveConstMethod(E, name, v1) :: H', OH' --> E'' :: H'', OH'';
+      saveConstMethod(E, name, v1) :: E', H', OH' --> E'' :: H'', OH'';
       
       print(Binding(E')) => _;
       print(StringV("==========")) => _.

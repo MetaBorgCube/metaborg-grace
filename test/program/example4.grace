@@ -15,4 +15,4 @@ method f (e,g) {
 
 f(1,2);
 
-base_print(3);
+base_print(f(1,2));
