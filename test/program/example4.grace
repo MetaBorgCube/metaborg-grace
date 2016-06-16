@@ -6,6 +6,7 @@ def a = object {
   5;
   b;
   base_print "hoi";
+  base_print 1;
 };
 
 method f (e,g) {
@@ -15,4 +16,6 @@ method f (e,g) {
 
 f(1,2);
 
-base_print(f(1,2));
+base_add(1,2);
+base_print(1);
+

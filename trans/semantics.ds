@@ -16,6 +16,7 @@ signature
     NoObject: O
     Wrapped: V -> CodeSequence
     WrappedO: O -> V
+    WrappedArgs: CallArgs -> V
     
     saveConstMethod: Env * String * V --> Env
     getParamNames: Params --> List(String)
@@ -30,6 +31,7 @@ signature
     Assignment --> V
     CallArgs --> V
     List(CodeSequence) --> V
+    
 //    List(V) --> V
     
     Params --> List(String)
@@ -44,8 +46,7 @@ signature
   native operators
     nativeIBinOp: String * Int * Int -> Int
     nativeIfThenElse: Bool * V * V -> V
-    nativeSPrint: String -> String
-    nativeIPrint: Int -> Int
+    nativePrint: V -> V
     
 rules
 
@@ -93,7 +94,7 @@ rules
   Declaration(e) --> e.
   Wrapped(v) --> v.
   Assignment(e) --> e.
-    
+  
   cs : List(CodeSequence) :: Env e, H, OH --> v :: Env eFinal, H'', OH''
   where
     case cs of {
@@ -179,24 +180,12 @@ rules
       name == "base_print";
       print(StringV("executing base_print (StringV)")) => _;
       print(StringV("evaluating arguments")) => _;
-//      print(arguments) => _;
-      evalArgs(arguments) :: E, H, OH --> argVs;
-      argVs => [StringV(s1)];
+      print(WrappedArgs(arguments)) => _;
+      evalArgs(arguments) :: E, H, OH --> [a] : List(V);
       print(StringV("calling base_print method")) => _;
-      nativeSPrint(s1) => _;
+      nativePrint(a) => _;
       Done() => v.
-      
-  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
-    where
-      name == "base_print";
-      print(StringV("executing base_print (NumV)")) => _;
-      print(StringV("evaluating arguments")) => _;
-//      print(arguments) => _;
-      evalArgs(arguments) :: E, H, OH --> [NumV(i1)];
-      print(StringV("calling base_print method")) => _;
-      nativeIPrint(i1) => _;
-      Done() => v.
-  
+
   MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
     where
       name == "base_add";
@@ -215,12 +204,6 @@ rules
       evalArgs(arguments) :: E, H, OH --> [BoolV(b), e1, e2];
       print(StringV("calling base_add method")) => _;
       nativeIfThenElse(b, e1, e2) => v;
-//      case b of {
-//        true =>
-//          e1 :: E, H, OH --> v
-//        otherwise =>
-//          e2 :: E, H, OH --> v
-//      };
       print(v) => _.
 
   MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H, OH --> v :: E, H, OH
