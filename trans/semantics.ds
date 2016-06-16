@@ -140,24 +140,18 @@ rules
       bindName(name, i) --> e';
       print(StringV("==end saving const method==")) => _.
 
-  evalArgs(ArgsParen(actualArgs)) :: E, H, OH --> agvs: List(V) :: E', H', OH'
+  evalArgs(ArgsParen(actualArgs)) --> agvs: List(V)
     where
       print(StringV("evalArgs (ArgsParen)")) => _;
       case actualArgs of {
         [] =>
-          [] => agvs;
-          E => E';
-          H => H';
-          OH => OH'
+          [] => agvs
         [ arg | [] ] =>
           arg --> pv1;
-          E => E';
-          H => H';
-          OH => OH';
           [pv1] => agvs
         [ arg | args ] => 
           arg --> pv1;
-          evalArgs(ArgsParen(args)) :: E, H, OH --> pvs :: E', H', OH';
+          evalArgs(ArgsParen(args)) --> pvs;
           [pv1 | pvs ] => agvs
       }.
 
