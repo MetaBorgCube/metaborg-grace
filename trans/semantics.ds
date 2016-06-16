@@ -112,7 +112,8 @@ rules
   
   Number(s) --> NumV(parseNumber(s)).
   ArgNumber(s) --> NumV(parseNumber(s)).
-  ArgBoolean(s) --> s.
+  ArgBoolean(True()) --> BoolV(true).
+  ArgBoolean(False()) --> BoolV(false).
   ArgString(s) --> StringV(s).
   String(s) --> StringV(s).
   True() --> BoolV(true).

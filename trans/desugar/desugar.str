@@ -34,6 +34,8 @@ rules
 //            desugar-arg-block <+
 //            desugar-arg-string <+
 //            desugar-arg-lineup <+
+            desugar-arg-noargs <+
+            desugar-arg-argsparen <+
             desugar-self-in-id <+
             
             desugar-flatten-objectdecl <+
@@ -90,6 +92,10 @@ rules
   desugar-arg:  ArgBlock(a) ->  Block(a)
   desugar-arg:            a -> a
 //  desugar-arg-lineup: ArgLineup(a) -> a
+
+  desugar-arg-noargs: ArgsParen([NoArgs(), b]) -> ArgsParen([b])
+  desugar-arg-noargs: ArgsParen([b, NoArgs()]) -> ArgsParen([b])
+  desugar-arg-argsparen: ArgsParen([NoArgs()]) -> NoArgs()
 
   desugar-self-in-id: ID(Self()) -> Self()
   
