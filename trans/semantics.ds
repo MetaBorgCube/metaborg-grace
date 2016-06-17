@@ -71,21 +71,22 @@ rules
       print(getOHeap(OH')) => _;
       printS("==========") => _.
   
-  cs : List(CodeSequence) :: E --> v :: Env eFinal
+  cs : List(CodeSequence) :: E --> v' :: Env eFinal
   where
     print(StringV("executing codeseq")) => _;
     case cs of {
         [] =>
           print(StringV("emptylist")) => _;
-          Done() => v;
+          Done() => v';
           E => eFinal
         [code | cs'] =>
           print(StringV("1 of many cs execs")) => _;
           print(Binding(E)) => _;
 //          print(code) => _; // TODO error here (premisefailure).
-          code :: E --> _ :: E';
+          code :: E --> v :: E';
+          print(v) => _;
           print(StringV("first executed")) => _;
-          cs' :: E' --> v :: Env eFinal
+          cs' :: E' --> v' :: Env eFinal
         otherwise => 
           print(StringV("invalid cs")) => _
     }.
