@@ -1,0 +1,32 @@
+module trans/desugar/lower
+
+imports
+
+    libstratego-lib
+    libstratego-gpp
+    libstratego-aterm
+    src-gen/signatures/grace-sig
+    src-gen/signatures/grace-lowered-sig
+    src-gen/signatures/General-sig
+
+rules
+
+  lower-all = lower
+  
+  lower = 
+          lower-mcallimpl <+
+          lower-fail
+  
+  lower-mcallimpl: 
+    MCallImpl([Part(ID(name),NoArgType(),args)]) -> MCallImplL(name,NoArgType(), aList)
+      where
+        aList := <flatten-list> <lower-arguments> args
+  
+  lower-arguments: ArgNumber(a) -> [Number(a)]
+  lower-arguments: ArgString(a) -> [String(a)]
+  lower-arguments: NoArgs() -> []
+  lower-arguments: ArgsParen(as) -> as
+  lower-arguments: a -> a
+  
+  
+  lower-fail: a -> <fail>

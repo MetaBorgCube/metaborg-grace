@@ -23,10 +23,12 @@ rules
   Env E |- bindName(x, i) --> {x |--> i, E}.
 //    where print(StringV("vind to r/o")) => _.
 
-  Env eRO |- readName(x) :: Env eRW --> eRW[x].
-//    where 
-//      print(StringV("read")) => _;
-//      print(Binding(eRO)) => _';
+  readName(x) :: E --> E[x]
+    where 
+      print(StringV("read")) => _;
+      print(Binding(E)) => _;
+      print(StringV(x)) => _;
+      print(NumV(E[x])) => _.
 //      print(Binding(eRW)) => _';
 //      {eRO, eRW} => e.
 //      print(Binding(e)) => _'.

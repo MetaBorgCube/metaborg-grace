@@ -2,6 +2,7 @@ module trans/semantics
 
 imports
   src-gen/ds-signatures/Grace-sig
+  src-gen/ds-signatures/Grace-lowered-sig
   
   trans/values
   trans/store
@@ -10,14 +11,6 @@ imports
 signature
   
   constructors
-    Object: O * O * Env -> O // the enclosing object, inherited object, and its bound names
-    Trait: Env -> O // basically just a list of mappings of function names to memory locations
-    Method: List(String) * Env * List(CodeSequence) -> O // env of declaration and code
-    NoObject: O
-    Wrapped: V -> CodeSequence
-    WrappedO: O -> V
-    WrappedArgs: CallArgs -> V
-    
     saveConstMethod: Env * String * V --> Env
     getParamNames: Params --> List(String)
     saveConstants: Env * List(String) * List(V) --> Env
@@ -40,8 +33,7 @@ signature
     Program -init-> V
     
     Exp -o-> O
-    Declaration -o-> O
-    
+    Declaration -o-> O   
     
   native operators
     nativeIBinOp: String * Int * Int -> Int
@@ -50,66 +42,11 @@ signature
     
 rules
 
-  Program(cs, _) -init-> cs'
-    where
-      O NoObject() |- cs :: Env {}, Heap {}, OHeap {} --> cs' :: Env _, Heap _, OHeap _.
-  
-//  Env eEnc |- ObjectDecl(Inherit(inhExp,_,_), [Use(useExp,_,_)], cs) :: E -o-> Object(eEnc, e', cs)
-//    where
-//      // 1. create empty object
-//      // 2. bind self (env + {})
-//      // 3. evalute inherit (recurse) and merge into
-//      // 4. evaluate traits and merge into (override inherit)
-//      // 5. evaluate local method definitions and merge (override inherit and traits)
-//      // 6. evaluate fields and statements. (deferred)
-//      Object(eEnc,  E, cs) => self; // create blank object 1
-//      
-//      E |- bindName("self", allocateO(self)) --> eSelf; // 2
-//      
-//      inhExp :: Env eSelf -o-> Object(eInh, eInhEnc, csInh); // 3
-//      
-//      Env eInhEnc |- csInh :: Env eInh --> _ :: Env EAfterInh; //
-//      
-//      useExp :: Env eInh --> Trait(eTrait); // 4
-//      
-//      {eTrait, EAfterInh} => e'.
-//  
-  
-//  Object(oEnc, oInh, env) --> v
-//    where
-//      print(StringV("evalutating object after defer")) => _;
-//      Env eEnc |- cs :: Env e --> v.
-      
-  O encO |- ObjectDecl(NoInherit(), [], cs)  :: E, H, OH -->
-                WrappedO(Object(Object(encO, NoObject(), E), NoObject(), E')) :: E', H', OH'
-    where
-      print(StringV("directly evaluating object")) => _;
-      print(getOHeap(OH)) => _;
-      O Object(encO, NoObject(), E) |- cs :: E, H, OH  --> _ :: E', H', OH';
-      print(StringV("done directly evaluating object")) => _;
-      print(getOHeap(OH')) => _;
-      print(StringV("==========")) => _.
-
   Expression(e) --> e.
   Declaration(e) --> e.
   Wrapped(v) --> v.
   Assignment(e) --> e.
-  
-  cs : List(CodeSequence) :: E --> v :: Env eFinal
-  where
-    case cs of {
-        [] =>
-            Done() => v;
-            E => eFinal
-        [code|[]] =>
-            code :: E --> v :: Env eFinal
-        [code | cs'] =>
-            code :: E --> _ :: E';
-            print(StringV("after 1 of many cs execs")) => _;
-            print(Binding(E')) => _;
-            cs' :: E' --> v :: Env eFinal
-    }.
-  
+
   Number(s) --> NumV(parseNumber(s)).
   ArgNumber(s) --> NumV(parseNumber(s)).
   ArgBoolean(True()) --> BoolV(true).
@@ -120,14 +57,44 @@ rules
   False() --> BoolV(false).
   Boolean(s) --> s.
 
+  Program(cs, _) -init-> cs'
+    where
+      O NoObject() |- cs :: Env {}, Heap {}, OHeap {} --> cs' :: Env _, Heap _, OHeap _.
+  
+  O encO |- ObjectDecl(NoInherit(), [], cs)  :: E, H, OH -->
+                WrappedO(Object(Object(encO, NoObject(), E), NoObject(), E')) :: E', H', OH'
+    where
+      printS("directly evaluating object") => _;
+      print(getOHeap(OH)) => _;
+      O Object(encO, NoObject(), E) |- cs :: E, H, OH  --> _ :: E', H', OH';
+      printS("done directly evaluating object") => _;
+      print(getOHeap(OH')) => _;
+      printS("==========") => _.
+  
+  cs : List(CodeSequence) :: E --> v :: Env eFinal
+  where
+    print(StringV("executing codeseq")) => _;
+    case cs of {
+        [] =>
+          print(StringV("emptylist")) => _;
+          Done() => v;
+          E => eFinal
+        [code | cs'] =>
+          print(StringV("1 of many cs execs")) => _;
+          print(Binding(E)) => _;
+//          print(code) => _; // TODO error here (premisefailure).
+          code :: E --> _ :: E';
+          print(StringV("first executed")) => _;
+          cs' :: E' --> v :: Env eFinal
+        otherwise => 
+          print(StringV("invalid cs")) => _
+    }.
+
   saveConstants(startEnv, names, values) --> eFinal
     where
       case names of {
         [] =>
           {} => eFinal
-        [n | []] =>
-          values => [ v | [] ];
-          saveConstMethod(startEnv, n, v) --> eFinal;
         [n | ns] =>
           values => [v|vs];
           saveConstMethod(startEnv, n, v) --> e;
@@ -137,119 +104,114 @@ rules
   
   saveConstMethod(startEnv, name, v) --> e'
     where 
-      print(StringV("saving const method")) => _;
+      printS("saving const method") => _;
       fresh => i;
       writeO(i, Method([], startEnv, [Wrapped(v)])) --> _;
       bindName(name, i) --> e';
-      print(StringV("==end saving const method==")) => _.
+      printS("==end saving const method==") => _.
 
   evalArgs(ArgsParen(actualArgs)) :: OH --> agvs: List(V)
     where
-      print(StringV("evalArgs (ArgsParen)")) => _;
+      printS("evalArgs (ArgsParen)") => _;
       print(getOHeap(OH)) => _;
       case actualArgs of {
         [] =>
+          printS("evalArgs: emptylist") => _;
           [] => agvs
-        [ arg | [] ] =>
-          arg --> pv1;
-          [pv1] => agvs
         [ arg | args ] => 
+          printS("evalArgs: more items") => _;
           arg --> pv1;
           evalArgs(ArgsParen(args)) --> pvs;
           [pv1 | pvs ] => agvs
       }.
 
-  evalArgs(NoArgs()) --> [] where print(StringV("evalArgs (NoArgs)")) => _.
-  evalArgs(v) --> [v] where print(StringV("evalArgs (direct)")) => _.
+  evalArgs(NoArgs()) --> [] where printS("evalArgs (NoArgs)") => _.
+  evalArgs(v) --> [v] where printS("evalArgs (direct)") => _.
 
-  MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) :: E, H, OH --> v :: E, H
+  MCallImplL(name, _, []) :: E --> v :: E
+    where
+      print(StringV("new method call on lowered")) => _;
+      print(NumV(readName(name))) => _;
+      readO(readName(name)) --> obj;
+      print(Stored(obj)) => _;
+      obj => Method(ns, e, cs);
+      print(Binding(e)) => _;
+      cs :: Env {E, e} --> v.
+  
+  MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) :: E, H --> v :: E, H
     where
       readO(readName(name)) --> Method([], e, cs);
       cs :: Env {E, e} --> v. // add local env constants (dynamic scoping)
 
-  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H --> v :: E, H
+  MCallImpl([Part(ID("base_print"),NoArgType(),arguments)]) :: E, H --> v :: E, H
     where
-      name == "base_print";
-      print(StringV("executing base_print (StringV)")) => _;
-      print(StringV("evaluating arguments")) => _;
+      printS("executing base_print (StringV)") => _;
+      printS("evaluating arguments") => _;
       print(WrappedArgs(arguments)) => _;
       evalArgs(arguments) --> [a] : List(V);
-      print(StringV("calling base_print method")) => _;
+      printS("calling base_print method") => _;
       nativePrint(a) => _;
       Done() => v.
 
   MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H --> v :: E, H
     where
       name == "base_add";
-      print(StringV("evaluating arguments")) => _;
-//      print(arguments) => _;
+      printS("evaluating arguments") => _;
       evalArgs(arguments) --> [NumV(i1), NumV(i2)];
-      print(StringV("calling base_add method")) => _;
+      printS("calling base_add method") => _;
       NumV(nativeIBinOp("+", i1, i2)) => v;
-      print(v) => _.
-        
-  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H --> v :: E, H
-    where
-      name == "base_ifThenElse";
-      print(StringV("evaluating arguments")) => _;
-      
-      evalArgs(arguments) --> [BoolV(b), v1, v2];
-      
-      print(v1) => _;
-      print(v2) => _;
-         
-      case b of {
-        true =>
-          v1 => WrappedO(Object(oEnc, oInh, E')); 
-          readName("apply") :: E' --> i; // read address from receiver environment
-          readO(i) --> Method(names, e, cs); // read method from heap
-          cs :: Env {e, E'} --> v // merge env from method with object env and execute
-        false => 
-          v2 => WrappedO(Object(oEnc, oInh, E'));
-          readName("apply") :: E' --> i; // read address from receiver environment
-          readO(i) --> Method(names, e, cs); // read method from heap
-          cs :: Env {e, E'} --> v // merge env from method with object env and execute
-        otherwise =>
-          {} => E'
-      };
       print(v) => _.
 
   MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E --> v :: E
     where
       name != "base_add";
-      name != "base_ifThenElse";
       name != "base_print";
-      print(StringV("calling real method")) => _;
-      print(StringV(name)) => _;
+      
+      printS("calling real method") => _;
+      printS(name) => _;
+      
       readName(name) :: E --> i;
-      print(StringV("read name")) => _;
+      
+      printS("read name") => _;
+      
       evalArgs(arguments) --> actualArgsVs;
-      print(StringV("evaluated args")) => _;
+      
+      printS("evaluated args") => _;
+      
       readO(i) --> Method(names, e, cs);
-      print(StringV("read method")) => _;
+      
+      printS("read method") => _;
+      
       saveConstants(e, names, actualArgsVs) --> e';
-      print(StringV("saved constants")) => _;
+      
+      printS("saved constants") => _;
+      print(Binding(E)) => _;
+      print(Binding(e)) => _;
+      print(Binding(e')) => _;
+      
       {E, e} => e''; // add local env constants (dynamic scoping)
       {e', e''} => e'''; // add constants
       
-      print(StringV("calling method with following comps:")) => _;
+      printS("calling method with following comps:") => _;
       print(Binding(e''')) => _;
+      
       cs :: Env e''' --> v; // add the parameter constant method to the env
-      print(StringV("evalutated code")) => _;
+      
+      printS("evalutated code") => _;
       print(v) => _;
-      print(StringV("==end calling real method==")) => _.
+      printS("==end calling real method==") => _.
 
   MCallCanonical(NoPrefix(),receiver,ID(name),NoArgType(),NoArgs()) :: E, OH --> v :: E
     where
-      print(StringV("method call with receiver")) => _;
-      print(StringV("startenv")) => _;
+      printS("method call with receiver") => _;
+      printS("startenv") => _;
       print(Binding(E)) => _;
-      print(StringV("startheap")) => _;
+      printS("startheap") => _;
       print(getOHeap(OH)) => _;
       
       receiver --> WrappedO(Object(_, _, receiverEnv)); // MCallImpl([Part(ID("a"),NoArgType(),NoArgs())])
       
-      print(StringV("receiverEnv")) => _;
+      printS("receiverEnv") => _;
       print(Binding(receiverEnv)) => _;
       print(getOHeap(OH)) => _;
       
@@ -261,19 +223,19 @@ rules
       
       print(v) => _;
       
-      print(NumV(i)) => _;
+      printI(i) => _;
       
 //      Done() => v;
       
-      print(StringV("endenv")) => _;
+      printS("endenv") => _;
       print(Binding(E'')) => _;
-      print(StringV("==end method call with receiver==")) => _. 
+      printS("==end method call with receiver==") => _. 
 
   MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).
 
   getParamNames(pList) --> paramNames
     where
-      print(StringV("getting param names")) => _;
+      printS("getting param names") => _;
       case pList of {
         Params([]) =>
           [] => paramNames
@@ -286,44 +248,49 @@ rules
       
   getParamNames(NoParams()) --> []
     where
-      print(StringV("getting param names for NoParams()")) => _.
+      printS("getting param names for NoParams()") => _.
 
   MethodDecl(NoPrefix(),
     [MethodID(ID(name),NoArgType(),NoAnnotations(),
       ps // [Param(paramName,NoTypeAnn())]
     )], NoMethodType(), MethodBody( cs ), NoWhere() ) :: E, OH --> Done() :: Env e'
     where
-      print(StringV("Declaring method")) => _;
+      printS("Declaring method") => _;
       print(getOHeap(OH)) => _;
+      
       getParamNames(ps) --> pNames;
       fresh => i;
       {name |--> i, E} => eNew; // add itself to its own evironment
-      print(StringV("writing")) => _;
+      
+      printS("writing") => _;
+      
       writeO(i, Method(pNames, eNew, cs))--> _; 
-      print(StringV("method written")) => _;
+      
+      printS("method written") => _;
+      
       bindName(name, i) --> e'; // saves and returns done 
       
       print(Binding(E)) => _;
       print(Binding(eNew)) => _;
       print(Binding(e')) => _;
-      print(StringV("==========")) => _. 
+      printS("==========") => _. 
   
   // for now constants will just be a method returning the evaluated value
   Constant(name, _, _, e1) :: E --> Done() :: E''
     where
-      print(StringV("Binding constant")) => _;
+      printS("Binding constant") => _;
       
       e1 --> v1;
       saveConstMethod(E, name, v1) --> E'';
       
-      print(StringV("==========")) => _.
+      printS("==========") => _.
 
   O Object(_, _, eEnc) |- MCallWDot(Outer(),[Part(ID(name),NoArgType(),NoArgs())]) --> v
     where
-      print(StringV("reading from outer")) => _;
+      printS("reading from outer") => _;
       print(Binding(eEnc)) => _;
       eEnc[name] => i;
-      print(NumV(i)) => _;
+      printI(i) => _;
       read(i) => v;
       Done() => v. 
    

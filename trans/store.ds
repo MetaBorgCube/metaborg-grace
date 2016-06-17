@@ -27,7 +27,12 @@ signature
 rules
 
   read(addr) :: H --> H[addr].
-  readO(addr) :: OH --> OH[addr].
+  readO(addr) :: OH --> OH[addr]
+    where
+      print(StringV("reading from heap")) => _;
+      print(getOHeap(OH)) => _;
+      print(NumV(addr)) => _;
+      print(Stored(OH[addr])) => _.
 
   allocate(v) --> addr
   where

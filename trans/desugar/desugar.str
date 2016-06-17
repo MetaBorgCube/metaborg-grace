@@ -7,21 +7,14 @@ imports
     libstratego-aterm
     src-gen/signatures/grace-sig
     src-gen/signatures/General-sig
+    
+    trans/desugar/lower
 
 rules
 
   desugar-all = innermost(desugar)
   
   desugar = 
-//            desugar-methodOp-to-methodId <+
-//            
-//            desugar-method-call <+
-//            desugar-method-call-operator <+
-//            desugar-method-call-operator-exp <+
-//            desugar-method-call-prefix <+
-//            desugar-method-call-prefix-exp <+
-//            desugar-method-call-into-canonical <+
-            
             desugar-class-declaration <+
             
             desugar-flatten-methodID <+
@@ -30,10 +23,6 @@ rules
             desugar-blockExp <+
             desugar-block <+
             desugar-block-to-object <+
-//            desugar-arg-number <+
-//            desugar-arg-block <+
-//            desugar-arg-string <+
-//            desugar-arg-lineup <+
             desugar-arg-noargs <+
             desugar-arg-argsparen <+
             desugar-self-in-id <+
@@ -42,9 +31,10 @@ rules
             desugar-flatten-declaration <+
             desugar-fail
             
+            
   desugar-all-post = innermost(desugar-post)
   
-  desugar-post = desugar-fail
+  desugar-post = lower-all
   
   desugar-pre = desugar-program <+ desugar-fail
 
@@ -77,6 +67,8 @@ rules
   
   desugar-flatten-methodPart: [Part(ID(name1),NoArgType(), ArgsParen(args)),Part(ID(name2),NoArgType(),args2)] ->
     [Part(ID(<concat-strings> [name1, "_", name2]),NoArgType(), ArgsParen(<map(desugar-arg)> <concat> [args, [args2]]))]
+  
+  
   
   // Flatten things in lists in the objectdecl list.
   desugar-flatten-objectdecl: ObjectDecl(a, b, xs) -> ObjectDecl(a, b, ys)
@@ -142,69 +134,13 @@ rules
 
   methodId-to-nameList:
     (MethodID(name, _, _, _), list) -> [list, <name-to-string> name]
-    
-//  methodId-to-annotationList:
-//    (MethodID(_, _, annotation, _), list) -> [list, <unpack-or-emptylist> annotation]
-  
+
   methodId-to-paramList:
     (MethodID(_, _, _, Params(param)), list) -> [list,  param]
-    
-//  methodId-to-paramList:
-//    (MethodID(_, _, _, NoParams()), list) -> [list,  []]
-//    
-//  desugar-method-call-operator:
-//    MCallOp(receiver, name, typing, argument) -> 
-//      MCallWDot(receiver, [ Part(name, typing, argument) ] )
-//  
-//  desugar-method-call-operator-exp:
-//    MCallOpEx(receiver, name, typing, argument) ->
-//      MCallOp(receiver, name, typing, argument)
-//    
-//  desugar-method-call-prefix:
-//    MCallPrefixOp(operator, typing, argument) ->
-//      MCallPrefixOpExp(operator, typing, argument)
-//  
-//  desugar-method-call-prefix-exp:
-//    MCallPrefixOpExp(operator, typing, argument) ->
-//      MCallCanonical(Prefix(), argument, operator, typing, [])
-//      
-//  desugar-method-call-into-canonical:
-//    MCallWDot(receiver, partList) ->
-//      MCallCanonical(NoPrefix(), receiver, newName, types, arguments)
-//      where
-//        names := <flatten-list> <foldl(part-to-nameList)> (partList, []);
-//        types-sofar := <flatten-list> <foldl(part-to-typeList)> (partList, []);
-//        types := <type-or-notype> types-sofar;
-//        arguments := <arg-or-noargs> <flatten-list> <foldl(part-to-argList)> (partList, []); 
-//        newName := <concat-strings> <separate-by> ("_", names)
-//
-//  desugar-method-call:
-//    MCall(receiver, name, typing) -> 
-//      MCallWDot(receiver, [ Part(name, typing, []) ] )
-//
-//  desugar-methodOp-to-methodId:
-//    MethodOp(a, b, c, d) -> MethodID(a, b, c, d)
-//    
-//  desugar-methodOp-to-methodId:
-//    MethodOp(a, b, c, d) -> MethodID(a, b, c, d)
 
   desugar-class-declaration:
     ClassDecl(mIDs,MethodBody(code)) ->
     MethodDecl(NoPrefix(),mIDs,NoMethodType(),MethodBody([Expression(ObjectDecl(NoInherit(),[],code))]),NoWhere())
-
-//    ClassDecl(classNames, code) ->
-//    MethodDecl(
-//      NoPrefix(), // prefix
-//      [MethodID(ID(className), NoArgType(), NoAnnotations(), paramList)],
-//      NoMethodType(), // methodType
-//      code,
-//      NoWhere() // where clause
-//    )
-//      with
-//        names     := <flatten-list> <foldl(methodId-to-nameList)> (classNames, []);
-//        className := <concat-strings> <separate-by> ("_", names);
-//        paramList := <flatten-list> <foldl(methodId-to-paramList)> (classNames, [])
-
   part-to-nameList:
     (Part(name, _, _), list) -> [list, <name-to-string> name]
   
