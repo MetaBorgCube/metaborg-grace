@@ -8,19 +8,49 @@ imports
     src-gen/signatures/grace-sig
     src-gen/signatures/grace-lowered-sig
     src-gen/signatures/General-sig
-
+    
+    trans/desugar/desugar-common
+    
 rules
 
   lower-all = lower
   
   lower = 
           lower-mcallimpl <+
+          lower-mdecl <+
           lower-fail
   
   lower-mcallimpl: 
     MCallImpl([Part(ID(name),NoArgType(),args)]) -> MCallImplL(name,NoArgType(), aList)
       where
         aList := <flatten-list> <lower-arguments> args
+  
+  lower-mdecl:
+    MethodDecl(
+              prefix
+            , [ 
+                MethodID(
+                  ID(name)
+                , argType
+                , annotations
+                , ps
+                )
+              ]
+            , methodType
+            , MethodBody(
+                cs
+              )
+            , wherec
+            ) -> MethodDeclL(prefix,name,argType,annotations, paramNames, paramTypes, methodType, cs, wherec)
+      where
+        (paramNames, paramTypes) := <lower-params> ps
+  
+  lower-params: NoParams() -> []
+  lower-params: Params(ps) -> <lower-params> ps
+  lower-params: [Param(n, typeAnn)] -> ([n], [typeAnn])
+  lower-params: [Param(n, typeAnn) | bs] -> ([n | ns ], [typeAnn | tas])
+    where
+      (ns, tas) := <lower-params> bs
   
   lower-arguments: ArgNumber(a) -> [Number(a)]
   lower-arguments: ArgString(a) -> [String(a)]

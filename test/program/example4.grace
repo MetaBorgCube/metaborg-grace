@@ -1,6 +1,6 @@
-//method print(s) { 
-//  base_print(s);
-//};
+method print(s) { 
+  base_print(s);
+};
 //
 //def a = object { method apply(a) { base_print "ugly 'lambda' invoked"; }; };
 //def b = { a -> base_print "pretty lambda invoked"; };
@@ -15,8 +15,13 @@
 //
 //5 + 5;
 
+def c = 42;
 method a { 
-  base_print "hoi";
-  };
+//  base_print(base_add(c,d));
+//  def b = 3;
+  c;  
+};
 
-a;
+def e = a;
+
+print(e);

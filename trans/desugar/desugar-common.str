@@ -1,0 +1,23 @@
+module trans/desugar/desugar-common
+
+imports
+    
+    libstratego-lib
+    libstratego-gpp
+    libstratego-aterm
+    src-gen/signatures/grace-sig
+    src-gen/signatures/grace-lowered-sig
+    src-gen/signatures/General-sig
+    
+rules
+
+
+  methodId-to-nameList:
+    (MethodID(name, _, _, _), list) -> [list, <name-to-string> name]
+
+  methodId-to-paramList:
+    (MethodID(_, _, _, Params(param)), list) -> [list,  param]
+  
+  name-to-string: ID(a) -> a where <is-string> a
+  name-to-string: a -> a
+  

@@ -8,6 +8,7 @@ imports
     src-gen/signatures/grace-sig
     src-gen/signatures/General-sig
     
+    trans/desugar/desugar-common
     trans/desugar/lower
 
 rules
@@ -132,11 +133,6 @@ rules
         )]
       )
 
-  methodId-to-nameList:
-    (MethodID(name, _, _, _), list) -> [list, <name-to-string> name]
-
-  methodId-to-paramList:
-    (MethodID(_, _, _, Params(param)), list) -> [list,  param]
 
   desugar-class-declaration:
     ClassDecl(mIDs,MethodBody(code)) ->
@@ -166,12 +162,7 @@ rules
   part-to-argList:
     (Part(_, _, args), list) -> [list, args]
   
-  name-to-string:
-    ID(a) -> a
-      where
-        <is-string> a
-  name-to-string: a -> a
-  
+
   unpack-or-emptylist: NoArgType() -> []
   unpack-or-emptylist: a -> a
   

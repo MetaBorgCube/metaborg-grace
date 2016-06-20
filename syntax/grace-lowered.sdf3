@@ -9,3 +9,5 @@ imports
 context-free syntax
 
   Exp.MCallImplL = <<STRING> <ArgType> <Exp*>>
+  Declaration.MethodDeclL =
+    <<Prefix> <STRING> <ArgType> <Annotations> <STRING*> <TypeAnn*> <MethodType> <CodeSequence*> <Where>>

@@ -9,14 +9,10 @@ imports
   trans/environment
 
 signature
-  
-  constructors
-    saveConstMethod: Env * String * V --> Env
-    getParamNames: Params --> List(String)
-    saveConstants: Env * List(String) * List(V) --> Env
-    evalArgs: CallArgs --> List(V)
-    
+
   arrows
+    Program -init-> V
+    
     Exp --> V
     Boolean --> V
     CodeSequence --> V
@@ -24,16 +20,17 @@ signature
     Assignment --> V
     CallArgs --> V
     List(CodeSequence) --> V
-    
-//    List(V) --> V
-    
     Params --> List(String)
-//    CallArgs --> List(V)
-    
-    Program -init-> V
     
     Exp -o-> O
     Declaration -o-> O   
+  
+    List(Exp) -ea-> List(V)
+    
+  constructors
+    saveConstMethod: Env * String * V --> Env
+    getParamNames: Params --> List(String)
+    saveConstants: Env * List(String) * List(V) --> Env
     
   native operators
     nativeIBinOp: String * Int * Int -> Int
@@ -79,25 +76,34 @@ rules
           print(StringV("emptylist")) => _;
           Done() => v';
           E => eFinal
+        [code | [] ] =>  //needed for final value
+          code :: E --> v' :: Env eFinal
         [code | cs'] =>
-          print(StringV("1 of many cs execs")) => _;
+          print(StringV("one of many cs execs")) => _;
           print(Binding(E)) => _;
-//          print(code) => _; // TODO error here (premisefailure).
           code :: E --> v :: E';
           print(v) => _;
           print(StringV("first executed")) => _;
           cs' :: E' --> v' :: Env eFinal
         otherwise => 
-          print(StringV("invalid cs")) => _
+          print(StringV("invalid cs")) => _;
+          Done() => v;
+          E => eFinal
     }.
 
-  saveConstants(startEnv, names, values) --> eFinal
+  saveConstants(startEnv, names, values: List(V)) --> eFinal
     where
+      print(StringV("saving constants")) => _;
       case names of {
         [] =>
-          {} => eFinal
+          print(StringV("empty const list")) => _;
+          startEnv => eFinal
         [n | ns] =>
+          print(StringV("nonempty const list")) => _;
           values => [v|vs];
+          print(Binding(startEnv)) => _;
+          print(v) => _;
+          print(StringV(n)) => _;
           saveConstMethod(startEnv, n, v) --> e;
           saveConstants(startEnv, ns, vs) --> em;
           {em, e} => eFinal
@@ -105,102 +111,52 @@ rules
   
   saveConstMethod(startEnv, name, v) --> e'
     where 
-      printS("saving const method") => _;
+      print(StringV("saving const method")) => _;
       fresh => i;
       writeO(i, Method([], startEnv, [Wrapped(v)])) --> _;
       bindName(name, i) --> e';
-      printS("==end saving const method==") => _.
-
-  evalArgs(ArgsParen(actualArgs)) :: OH --> agvs: List(V)
+      print(StringV("==end saving const method==")) => _.
+  
+  [] : List(Exp) -ea-> []
     where
-      printS("evalArgs (ArgsParen)") => _;
-      print(getOHeap(OH)) => _;
-      case actualArgs of {
-        [] =>
-          printS("evalArgs: emptylist") => _;
-          [] => agvs
-        [ arg | args ] => 
-          printS("evalArgs: more items") => _;
-          arg --> pv1;
-          evalArgs(ArgsParen(args)) --> pvs;
-          [pv1 | pvs ] => agvs
-      }.
-
-  evalArgs(NoArgs()) --> [] where printS("evalArgs (NoArgs)") => _.
-  evalArgs(v) --> [v] where printS("evalArgs (direct)") => _.
-
-  MCallImplL(name, _, []) :: E --> v :: E
+      print(StringV("ea 0")) => _.
+  
+  [arg] : List(Exp) -ea-> [v]
     where
+      print(StringV("ea 1")) => _;
+      arg --> v.
+  
+  [arg | more] : List(Exp) -ea-> [v | vs]
+    where
+      print(StringV("ea 1 and more")) => _;
+      arg --> v;
+      more -ea-> vs : List(V).
+  
+  MCallImplL(name, _, args) :: E --> v :: E
+    where
+      name != "base_print";
+      name != "base_add";
       print(StringV("new method call on lowered")) => _;
       print(NumV(readName(name))) => _;
       readO(readName(name)) --> obj;
       print(Stored(obj)) => _;
       obj => Method(ns, e, cs);
       print(Binding(e)) => _;
-      cs :: Env {E, e} --> v.
+      print(StringV("now evaluating args")) => _;
+      args -ea-> vs;
+      
+      saveConstants(e, ns: List(String), vs: List(V)) --> e';
+      
+      cs :: Env {E, e'} --> v;
+      print(StringV("==done new method call on lowered==")) => _.
+      
+  MCallImplL("base_print", _, [v]) :: E --> Done() :: E
+    where
+      nativePrint(v) => _.
   
-  MCallImpl([Part(ID(name),NoArgType(),NoArgs())]) :: E, H --> v :: E, H
+  MCallImplL("base_add", _, [NumV(i1), NumV(i2)]) :: E --> v :: E
     where
-      readO(readName(name)) --> Method([], e, cs);
-      cs :: Env {E, e} --> v. // add local env constants (dynamic scoping)
-
-  MCallImpl([Part(ID("base_print"),NoArgType(),arguments)]) :: E, H --> v :: E, H
-    where
-      printS("executing base_print (StringV)") => _;
-      printS("evaluating arguments") => _;
-      print(WrappedArgs(arguments)) => _;
-      evalArgs(arguments) --> [a] : List(V);
-      printS("calling base_print method") => _;
-      nativePrint(a) => _;
-      Done() => v.
-
-  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E, H --> v :: E, H
-    where
-      name == "base_add";
-      printS("evaluating arguments") => _;
-      evalArgs(arguments) --> [NumV(i1), NumV(i2)];
-      printS("calling base_add method") => _;
-      NumV(nativeIBinOp("+", i1, i2)) => v;
-      print(v) => _.
-
-  MCallImpl([Part(ID(name),NoArgType(),arguments)]) :: E --> v :: E
-    where
-      name != "base_add";
-      name != "base_print";
-      
-      printS("calling real method") => _;
-      printS(name) => _;
-      
-      readName(name) :: E --> i;
-      
-      printS("read name") => _;
-      
-      evalArgs(arguments) --> actualArgsVs;
-      
-      printS("evaluated args") => _;
-      
-      readO(i) --> Method(names, e, cs);
-      
-      printS("read method") => _;
-      
-      saveConstants(e, names, actualArgsVs) --> e';
-      
-      printS("saved constants") => _;
-      print(Binding(E)) => _;
-      print(Binding(e)) => _;
-      print(Binding(e')) => _;
-      
-      {E, e} => e''; // add local env constants (dynamic scoping)
-      {e', e''} => e'''; // add constants
-      
-      printS("calling method with following comps:") => _;
-      print(Binding(e''')) => _;
-      
-      cs :: Env e''' --> v; // add the parameter constant method to the env
-      
-      printS("evalutated code") => _;
-      print(v) => _;
-      printS("==end calling real method==") => _.
+      NumV(nativeIBinOp("+", i1, i2)) => v.
 
   MCallCanonical(NoPrefix(),receiver,ID(name),NoArgType(),NoArgs()) :: E, OH --> v :: E
     where
@@ -251,16 +207,13 @@ rules
     where
       printS("getting param names for NoParams()") => _.
 
-  MethodDecl(NoPrefix(),
-    [MethodID(ID(name),NoArgType(),NoAnnotations(),
-      ps // [Param(paramName,NoTypeAnn())]
-    )], NoMethodType(), MethodBody( cs ), NoWhere() ) :: E, OH --> Done() :: Env e'
+  MethodDeclL(_, name, _, _, pNames, _, _, cs, _) :: E, OH --> Done() :: Env e'
     where
       printS("Declaring method") => _;
       print(getOHeap(OH)) => _;
       
-      getParamNames(ps) --> pNames;
       fresh => i;
+      
       {name |--> i, E} => eNew; // add itself to its own evironment
       
       printS("writing") => _;
@@ -269,22 +222,17 @@ rules
       
       printS("method written") => _;
       
-      bindName(name, i) --> e'; // saves and returns done 
+      bindName(name, i) --> e'; 
       
       print(Binding(E)) => _;
       print(Binding(eNew)) => _;
       print(Binding(e')) => _;
       printS("==========") => _. 
   
-  // for now constants will just be a method returning the evaluated value
+  // constants will just be a method returning the evaluated value
   Constant(name, _, _, e1) :: E --> Done() :: E''
     where
-      printS("Binding constant") => _;
-      
-      e1 --> v1;
-      saveConstMethod(E, name, v1) --> E'';
-      
-      printS("==========") => _.
+      saveConstMethod(E, name, e1) --> E''.
 
   O Object(_, _, eEnc) |- MCallWDot(Outer(),[Part(ID(name),NoArgType(),NoArgs())]) --> v
     where
@@ -294,12 +242,3 @@ rules
       printI(i) => _;
       read(i) => v;
       Done() => v. 
-   
-//  TraitDecl(
-//    [MethodID(ID(mName), NoArgType(), NoAnnotations(), NoParams())],
-//    MethodBody(cs)
-//  ) -o-> Trait(e')
-//    where
-//      cs --> sm@Method(_, _, _);
-//      bindName(mName, allocate(sm)) => e';
-//      Trait(e') => t.
