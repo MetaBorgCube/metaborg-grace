@@ -42,10 +42,10 @@ rules
               )
             , wherec
             ) -> MethodDeclL(prefix,name,argType,annotations, paramNames, paramTypes, methodType, cs, wherec)
-      where
+      with
         (paramNames, paramTypes) := <lower-params> ps
   
-  lower-params: NoParams() -> []
+  lower-params: NoParams() -> ([], [])
   lower-params: Params(ps) -> <lower-params> ps
   lower-params: [Param(n, typeAnn)] -> ([n], [typeAnn])
   lower-params: [Param(n, typeAnn) | bs] -> ([n | ns ], [typeAnn | tas])

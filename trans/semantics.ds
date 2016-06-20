@@ -29,7 +29,6 @@ signature
     
   constructors
     saveConstMethod: Env * String * V --> Env
-    getParamNames: Params --> List(String)
     saveConstants: Env * List(String) * List(V) --> Env
     
   native operators
@@ -190,45 +189,12 @@ rules
 
   MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).
 
-  getParamNames(pList) --> paramNames
+  MethodDeclL(_, name, _, _, pNames, _, _, cs, _) :: E --> Done() :: Env e'
     where
-      printS("getting param names") => _;
-      case pList of {
-        Params([]) =>
-          [] => paramNames
-        Params([Param(name, _) | [] ]) =>
-          [name] => paramNames
-        Params([Param(name, _) | otherNames ]) =>
-          getParamNames(Params(otherNames)) --> names;
-          [ name | names ] => paramNames
-      }.
-      
-  getParamNames(NoParams()) --> []
-    where
-      printS("getting param names for NoParams()") => _.
-
-  MethodDeclL(_, name, _, _, pNames, _, _, cs, _) :: E, OH --> Done() :: Env e'
-    where
-      printS("Declaring method") => _;
-      print(getOHeap(OH)) => _;
-      
       fresh => i;
-      
-      {name |--> i, E} => eNew; // add itself to its own evironment
-      
-      printS("writing") => _;
-      
-      writeO(i, Method(pNames, eNew, cs))--> _; 
-      
-      printS("method written") => _;
-      
-      bindName(name, i) --> e'; 
-      
-      print(Binding(E)) => _;
-      print(Binding(eNew)) => _;
-      print(Binding(e')) => _;
-      printS("==========") => _. 
-  
+      writeO(i, Method(pNames, {name |--> i, E}, cs)) --> _; 
+      bindName(name, i) --> e'. 
+        
   // constants will just be a method returning the evaluated value
   Constant(name, _, _, e1) :: E --> Done() :: E''
     where
