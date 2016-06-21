@@ -11,14 +11,25 @@ imports
     
     trans/desugar/desugar-common
     
+    trans/desugar/lower-booleans
+    
+    
+    
 rules
 
   lower-all = lower
   
   lower = 
-          lower-mcallimpl <+
+          lower-boolean-to-object <+
           lower-mdecl <+
+          lower-mcallop <+
+          lower-mcallimpl <+
+          lower-mcallcanonical <+
           lower-fail
+  
+  lower-mcallop:
+    MCallOp(recv, name, argtype, args) ->
+      MCallCanonicalL(recv, <name-to-string> name, argtype, <lower-arguments> args)
   
   lower-mcallimpl: 
     MCallImpl([Part(ID(name),NoArgType(),args)]) -> MCallImplL(name,NoArgType(), aList)
@@ -26,24 +37,22 @@ rules
         aList := <flatten-list> <lower-arguments> args
   
   lower-mdecl:
-    MethodDecl(
-              prefix
-            , [ 
-                MethodID(
-                  ID(name)
-                , argType
-                , annotations
-                , ps
-                )
-              ]
-            , methodType
-            , MethodBody(
-                cs
-              )
-            , wherec
-            ) -> MethodDeclL(prefix,name,argType,annotations, paramNames, paramTypes, methodType, cs, wherec)
+    MethodDecl(prfx, [MethodID(mName, argType, annotations, ps)], methodType, MethodBody(cs), wherec) ->
+      MethodDeclL(prfx,name,argType,annotations, paramNames, paramTypes, methodType, cs, wherec)
       with
-        (paramNames, paramTypes) := <lower-params> ps
+        (paramNames, paramTypes) := <lower-params> ps;
+        name := <name-to-string> mName 
+
+  lower-mdecl:
+    MethodDecl(prfx, [MethodOp(mName, argType, annotations, ps)], methodType, MethodBody(cs), wherec) ->
+      MethodDeclL(prfx,name,argType,annotations, paramNames, paramTypes, methodType, cs, wherec)
+      with
+        (paramNames, paramTypes) := <lower-params> ps;
+        name := <name-to-string> mName 
+  
+  lower-mcallcanonical: 
+    MCallCanonical(_, recv, ID(name), argType, args) ->
+      MCallCanonicalL(recv, name, argType, <lower-arguments> args)
   
   lower-params: NoParams() -> ([], [])
   lower-params: Params(ps) -> <lower-params> ps
@@ -54,6 +63,7 @@ rules
   
   lower-arguments: ArgNumber(a) -> [Number(a)]
   lower-arguments: ArgString(a) -> [String(a)]
+  lower-arguments: ArgBoolean(a) -> [Boolean(a)]
   lower-arguments: NoArgs() -> []
   lower-arguments: ArgsParen(as) -> as
   lower-arguments: a -> a

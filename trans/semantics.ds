@@ -60,12 +60,12 @@ rules
   O encO |- ObjectDecl(NoInherit(), [], cs)  :: E, H, OH -->
                 WrappedO(Object(Object(encO, NoObject(), E), NoObject(), E')) :: E', H', OH'
     where
-      printS("directly evaluating object") => _;
+      print(StringV("directly evaluating object")) => _;
       print(getOHeap(OH)) => _;
       O Object(encO, NoObject(), E) |- cs :: E, H, OH  --> _ :: E', H', OH';
-      printS("done directly evaluating object") => _;
+      print(StringV("done directly evaluating object")) => _;
       print(getOHeap(OH')) => _;
-      printS("==========") => _.
+      print(StringV("==end directly evaluating object==")) => _.
   
   cs : List(CodeSequence) :: E --> v' :: Env eFinal
   where
@@ -76,6 +76,7 @@ rules
           Done() => v';
           E => eFinal
         [code | [] ] =>  //needed for final value
+          print(StringV("single entry")) => _;
           code :: E --> v' :: Env eFinal
         [code | cs'] =>
           print(StringV("one of many cs execs")) => _;
@@ -157,43 +158,62 @@ rules
     where
       NumV(nativeIBinOp("+", i1, i2)) => v.
 
-  MCallCanonical(NoPrefix(),receiver,ID(name),NoArgType(),NoArgs()) :: E, OH --> v :: E
+  MCallCanonicalL(_,receiver,name, _, args) :: E --> v :: E
     where
-      printS("method call with receiver") => _;
-      printS("startenv") => _;
+      print(StringV("method call with receiver")) => _;
+      print(StringV(name)) => _;
+      print(StringV("startenv")) => _;
+      
       print(Binding(E)) => _;
-      printS("startheap") => _;
-      print(getOHeap(OH)) => _;
+      print(StringV("startheap")) => _;
+//      print(getOHeap(OH)) => _;
+      
       
       receiver --> WrappedO(Object(_, _, receiverEnv)); // MCallImpl([Part(ID("a"),NoArgType(),NoArgs())])
       
-      printS("receiverEnv") => _;
+      print(StringV("receiverEnv")) => _;
       print(Binding(receiverEnv)) => _;
-      print(getOHeap(OH)) => _;
+//      print(getOHeap(OH)) => _;
       
       readName(name) :: Env receiverEnv --> i; // read address from receiver environment
       
-      readO(i) :: OH --> Method(names, e, cs); // read method from heap
+      print(StringV("read name from env")) => _;
       
-      cs :: Env {e, receiverEnv}, OH --> v :: E''; // merge env from method with object env and execute
+      readO(i) --> Method(names, e, cs); // read method from heap
+      
+      print(StringV("read method from heap")) => _;
+      
+      args -ea-> vs; // evaluate arguments
+      
+      saveConstants(e, names: List(String), vs: List(V)) --> eArgs;
+      
+      {eArgs, E} => eArgsAndScope; // add to current scope (not needed?)
+      
+      cs :: Env {eArgsAndScope, receiverEnv} --> v :: E''; // merge env from method with object env and execute
+      
+      print(StringV("evaluated method")) => _;
       
       print(v) => _;
       
-      printI(i) => _;
+      print(NumV(i)) => _;
       
-//      Done() => v;
-      
-      printS("endenv") => _;
+      print(StringV("endenv")) => _;
       print(Binding(E'')) => _;
-      printS("==end method call with receiver==") => _. 
+      print(StringV("==end method call with receiver==")) => _. 
+
+  O encO |- Self() :: E --> WrappedO(Object(encO, NoObject(), E))
+    where
+     print(StringV("reading self")) => _.
 
   MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).
 
   MethodDeclL(_, name, _, _, pNames, _, _, cs, _) :: E --> Done() :: Env e'
     where
+      print(StringV("methoddeclL")) => _;
       fresh => i;
       writeO(i, Method(pNames, {name |--> i, E}, cs)) --> _; 
-      bindName(name, i) --> e'. 
+      bindName(name, i) --> e';
+      print(StringV("==end methoddeclL==")) => _. 
         
   // constants will just be a method returning the evaluated value
   Constant(name, _, _, e1) :: E --> Done() :: E''
@@ -202,9 +222,9 @@ rules
 
   O Object(_, _, eEnc) |- MCallWDot(Outer(),[Part(ID(name),NoArgType(),NoArgs())]) --> v
     where
-      printS("reading from outer") => _;
+      print(StringV("reading from outer")) => _;
       print(Binding(eEnc)) => _;
       eEnc[name] => i;
-      printI(i) => _;
+      print(NumV(i)) => _;
       read(i) => v;
       Done() => v. 

@@ -37,7 +37,7 @@ rules
   
   desugar-post = lower-all
   
-  desugar-pre = desugar-program <+ desugar-fail
+  desugar-pre = desugar-program <+ desugar-mCallCanonical-args <+ desugar-fail
 
   desugar-program: Program(a, b) -> Program([Expression(ObjectDecl(NoInherit(), [], a))], b)
 
@@ -70,6 +70,37 @@ rules
     [Part(ID(<concat-strings> [name1, "_", name2]),NoArgType(), ArgsParen(<map(desugar-arg)> <concat> [args, [args2]]))]
   
   
+  desugar-mCallCanonical-args: 
+    MCallCanonical(
+              prfx
+            , recv
+            , idf
+            , argType
+            , ArgsParen(args)
+            ) -> MCallCanonical(
+              prfx
+            , recv
+            , idf
+            , argType
+            , ArgsParen( <map(desugar-arg)> args)
+            )
+  
+  desugar-mCallCanonical-args: 
+    MCallCanonical(
+              prfx
+            , recv
+            , idf
+            , argType
+            , arg
+            ) -> MCallCanonical(
+              prfx
+            , recv
+            , idf
+            , argType
+            , <desugar-arg> arg
+            )
+            
+  desugar-mCallCanonical-args: a -> a
   
   // Flatten things in lists in the objectdecl list.
   desugar-flatten-objectdecl: ObjectDecl(a, b, xs) -> ObjectDecl(a, b, ys)

@@ -136,7 +136,7 @@ context-free syntax
   Exp.MCallOp                   = <<Exp> <OperatorCF> <ArgType> <CallArgs>>    {left, prefer}
   Exp.MCallOpEx                 = <<Exp> <OperatorCF> <ArgType> <Exp>>         {left}
   Exp.MCallWDot                 = <<Exp> . <Part+>>                            {left, prefer}
-  Exp.MCallImpl                 = <<Part+>>
+  Exp.MCallImpl                 = <<Part+>>                                    {left}
   Exp.MCallPrefixOp             = <<OperatorCF> <ArgType> <CallArgs>>          {left, prefer}
   Exp.MCallPrefixOpExp          = <<OperatorCF> <ArgType> <Exp>>               {left}
   

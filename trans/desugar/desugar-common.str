@@ -19,5 +19,6 @@ rules
     (MethodID(_, _, _, Params(param)), list) -> [list,  param]
   
   name-to-string: ID(a) -> a where <is-string> a
+  name-to-string: OperatorCF(a) -> a where <is-string> a
   name-to-string: a -> a
   
