@@ -12,29 +12,33 @@ imports
     trans/desugar/desugar-common
     
     trans/desugar/lower-booleans
-    
-    
-    
+
 rules
 
   lower-all = lower
-  
   lower = 
           lower-boolean-to-object <+
           lower-mdecl <+
-          lower-mcallop <+
+          lower-methodcallwdot <+
+          lower-mcallopex <+
           lower-mcallimpl <+
           lower-mcallcanonical <+
           lower-fail
   
-  lower-mcallop:
-    MCallOp(recv, name, argtype, args) ->
-      MCallCanonicalL(recv, <name-to-string> name, argtype, <lower-arguments> args)
+  lower-methodcallwdot:
+    MCallWDot(recv, [Part(idf, argType, args)]) ->
+      MCallCanonicalL(recv, <name-to-string> idf, argType, as)
+        with
+          as := <flatten-list> <lower-arguments> args
+  
+  lower-mcallopex:
+    MCallOpEx(recv, name, argtype, arg) ->
+      MCallCanonicalL(recv, <name-to-string> name, argtype, [arg])
   
   lower-mcallimpl: 
-    MCallImpl([Part(ID(name),NoArgType(),args)]) -> MCallImplL(name,NoArgType(), aList)
-      where
-        aList := <flatten-list> <lower-arguments> args
+    MCallImpl([Part(ID(name),argType,args)]) -> MCallImplL(name,argType, as)
+      with
+        as := <flatten-list> <lower-arguments> args
   
   lower-mdecl:
     MethodDecl(prfx, [MethodID(mName, argType, annotations, ps)], methodType, MethodBody(cs), wherec) ->
@@ -67,6 +71,5 @@ rules
   lower-arguments: NoArgs() -> []
   lower-arguments: ArgsParen(as) -> as
   lower-arguments: a -> a
-  
   
   lower-fail: a -> <fail>

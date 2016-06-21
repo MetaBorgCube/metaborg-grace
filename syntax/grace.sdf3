@@ -133,14 +133,12 @@ context-free syntax
   Exp                           = <(<Exp>)>                                    {bracket}
 
   Exp.MCall                     = <<Exp> . <MethodName> <ArgType>>             {left, avoid}
-  Exp.MCallOp                   = <<Exp> <OperatorCF> <ArgType> <CallArgs>>    {left, prefer}
+//  Exp.MCallOp                   = <<Exp> <OperatorCF> <ArgType> <CallArgs>>    {left}
   Exp.MCallOpEx                 = <<Exp> <OperatorCF> <ArgType> <Exp>>         {left}
-  Exp.MCallWDot                 = <<Exp> . <Part+>>                            {left, prefer}
+  Exp.MCallWDot                 = <<Exp> . <Part+>>                            {left}
   Exp.MCallImpl                 = <<Part+>>                                    {left}
-  Exp.MCallPrefixOp             = <<OperatorCF> <ArgType> <CallArgs>>          {left, prefer}
+  Exp.MCallPrefixOp             = <<OperatorCF> <ArgType> <CallArgs>>          {left}
   Exp.MCallPrefixOpExp          = <<OperatorCF> <ArgType> <Exp>>               {left}
-  
-  Exp.MCallCanonical            = <<Prefix> <Exp> . <MethodName> <ArgType> <CallArgs>>
   
   OperatorCF.OperatorCF         = <<Operator>>
     
@@ -172,9 +170,6 @@ context-free syntax
   BlockParams.BlockParams       = [ [ArgType] [{Param ","}*] -> ]
 
   
-context-free priorities
+//context-free priorities
     
-    { left: Exp.MCallWDot Exp.MCall } >
-    { left: Exp.MCallOp Exp.MCallOpEx } >
-    { left: Exp.MCallImpl } > //  Exp.MCallOnOuters  
-    { left: Exp.MCallCanonical }
+//    { left: Exp.MCallWDot Exp.MCall Exp.MCallOp Exp.MCallOpEx Exp.MCallImpl Exp.MCallCanonical }

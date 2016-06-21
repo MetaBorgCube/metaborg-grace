@@ -1,0 +1,185 @@
+module trans/desugar/inject
+
+imports
+
+    libstratego-lib
+    libstratego-gpp
+    libstratego-aterm
+    src-gen/signatures/grace-sig
+    src-gen/signatures/grace-lowered-sig
+    src-gen/signatures/General-sig
+
+rules
+  
+  inject-all = inject-booleans
+
+  inject-booleans: Program([c | cs ], b) -> Program([Declaration(
+            Constant(
+              "true"
+            , NoAnnotations()
+            , NoTypeAnn()
+            , ObjectDecl(
+                NoInherit()
+              , []
+              , [ Declaration(
+                    MethodDeclL(
+                      NoPrefix()
+                    , "ifTrue"
+                    , NoArgType()
+                    , NoAnnotations()
+                    , ["blk"]
+                    , [NoTypeAnn()]
+                    , NoMethodType()
+                    , [ Expression(
+                          MCallCanonicalL(
+                            MCallImplL("blk", NoArgType(), [])
+                          , "apply"
+                          , NoArgType()
+                          , []
+                          )
+                        )
+                      ]
+                    , NoWhere()
+                    )
+                  )
+                , Declaration(
+                    MethodDeclL(
+                      NoPrefix()
+                    , "ifFalse"
+                    , NoArgType()
+                    , NoAnnotations()
+                    , ["blk"]
+                    , [NoTypeAnn()]
+                    , NoMethodType()
+                    , []
+                    , NoWhere()
+                    )
+                  )
+                , Declaration(
+                    MethodDeclL(
+                      NoPrefix()
+                    , "||"
+                    , NoArgType()
+                    , NoAnnotations()
+                    , ["other"]
+                    , [NoTypeAnn()]
+                    , NoMethodType()
+                    , [Expression(Self())]
+                    , NoWhere()
+                    )
+                  )
+                , Declaration(
+                    MethodDeclL(
+                      NoPrefix()
+                    , "&&"
+                    , NoArgType()
+                    , NoAnnotations()
+                    , ["other"]
+                    , [NoTypeAnn()]
+                    , NoMethodType()
+                    , [Expression(MCallImplL("other", NoArgType(), []))]
+                    , NoWhere()
+                    )
+                  )
+                , Declaration(
+                    MethodDeclL(
+                      NoPrefix()
+                    , "asString"
+                    , NoArgType()
+                    , NoAnnotations()
+                    , []
+                    , []
+                    , NoMethodType()
+                    , [Expression(String("\"true\""))]
+                    , NoWhere()
+                    )
+                  )
+                ]
+              )
+            )
+          )
+        , Declaration(
+            Constant(
+              "false"
+            , NoAnnotations()
+            , NoTypeAnn()
+            , ObjectDecl(
+                NoInherit()
+              , []
+              , [ Declaration(
+                    MethodDeclL(
+                      NoPrefix()
+                    , "ifTrue"
+                    , NoArgType()
+                    , NoAnnotations()
+                    , ["blk"]
+                    , [NoTypeAnn()]
+                    , NoMethodType()
+                    , []
+                    , NoWhere()
+                    )
+                  )
+                , Declaration(
+                    MethodDeclL(
+                      NoPrefix()
+                    , "ifFalse"
+                    , NoArgType()
+                    , NoAnnotations()
+                    , ["blk"]
+                    , [NoTypeAnn()]
+                    , NoMethodType()
+                    , [ Expression(
+                          MCallCanonicalL(
+                            MCallImplL("blk", NoArgType(), [])
+                          , "apply"
+                          , NoArgType()
+                          , []
+                          )
+                        )
+                      ]
+                    , NoWhere()
+                    )
+                  )
+                , Declaration(
+                    MethodDeclL(
+                      NoPrefix()
+                    , "||"
+                    , NoArgType()
+                    , NoAnnotations()
+                    , ["other"]
+                    , [NoTypeAnn()]
+                    , NoMethodType()
+                    , [Expression(MCallImplL("other", NoArgType(), []))]
+                    , NoWhere()
+                    )
+                  )
+                , Declaration(
+                    MethodDeclL(
+                      NoPrefix()
+                    , "&&"
+                    , NoArgType()
+                    , NoAnnotations()
+                    , ["other"]
+                    , [NoTypeAnn()]
+                    , NoMethodType()
+                    , [Expression(Self())]
+                    , NoWhere()
+                    )
+                  )
+                , Declaration(
+                    MethodDeclL(
+                      NoPrefix()
+                    , "asString"
+                    , NoArgType()
+                    , NoAnnotations()
+                    , []
+                    , []
+                    , NoMethodType()
+                    , [Expression(String("\"false\""))]
+                    , NoWhere()
+                    )
+                  )
+                ]
+              )
+            )
+          ), c | cs], b)

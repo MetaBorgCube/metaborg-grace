@@ -14,7 +14,6 @@ signature
     Program -init-> V
     
     Exp --> V
-    Boolean --> V
     CodeSequence --> V
     Declaration --> V
     Assignment --> V
@@ -33,7 +32,6 @@ signature
     
   native operators
     nativeIBinOp: String * Int * Int -> Int
-    nativeIfThenElse: Bool * V * V -> V
     nativePrint: V -> V
     
 rules
@@ -45,17 +43,12 @@ rules
 
   Number(s) --> NumV(parseNumber(s)).
   ArgNumber(s) --> NumV(parseNumber(s)).
-  ArgBoolean(True()) --> BoolV(true).
-  ArgBoolean(False()) --> BoolV(false).
   ArgString(s) --> StringV(s).
   String(s) --> StringV(s).
-  True() --> BoolV(true).
-  False() --> BoolV(false).
-  Boolean(s) --> s.
 
   Program(cs, _) -init-> cs'
     where
-      O NoObject() |- cs :: Env {}, Heap {}, OHeap {} --> cs' :: Env _, Heap _, OHeap _.
+      O NoObject() |- cs :: Env {"_root" |--> fresh}, Heap {}, OHeap {} --> cs' :: Env _, Heap _, OHeap _.
   
   O encO |- ObjectDecl(NoInherit(), [], cs)  :: E, H, OH -->
                 WrappedO(Object(Object(encO, NoObject(), E), NoObject(), E')) :: E', H', OH'
@@ -132,13 +125,18 @@ rules
       arg --> v;
       more -ea-> vs : List(V).
   
-  MCallImplL(name, _, args) :: E --> v :: E
+  O encO |- MCallImplL(name, _, args) :: E --> v :: E
     where
       name != "base_print";
       name != "base_add";
       print(StringV("new method call on lowered")) => _;
+      print(StringV(name)) => _;
+      encO => Object(_, _, envI);
+      print(Binding(envI)) => _;
       print(NumV(readName(name))) => _;
-      readO(readName(name)) --> obj;
+      print(Binding(E)) => _;
+      readName(name) :: E --> i;
+      readO(i) --> obj;
       print(Stored(obj)) => _;
       obj => Method(ns, e, cs);
       print(Binding(e)) => _;
@@ -158,12 +156,11 @@ rules
     where
       NumV(nativeIBinOp("+", i1, i2)) => v.
 
-  MCallCanonicalL(_,receiver,name, _, args) :: E --> v :: E
+  MCallCanonicalL(receiver,name, _, args) :: E --> v :: E
     where
       print(StringV("method call with receiver")) => _;
       print(StringV(name)) => _;
       print(StringV("startenv")) => _;
-      
       print(Binding(E)) => _;
       print(StringV("startheap")) => _;
 //      print(getOHeap(OH)) => _;
@@ -183,7 +180,7 @@ rules
       
       print(StringV("read method from heap")) => _;
       
-      args -ea-> vs; // evaluate arguments
+      args :: E -ea-> vs; // evaluate arguments
       
       saveConstants(e, names: List(String), vs: List(V)) --> eArgs;
       
@@ -204,8 +201,6 @@ rules
   O encO |- Self() :: E --> WrappedO(Object(encO, NoObject(), E))
     where
      print(StringV("reading self")) => _.
-
-  MCallOp(NumV(i1),OperatorCF(s),NoArgType(),NumV(i2)) --> NumV(nativeIBinOp(s, i1, i2)).
 
   MethodDeclL(_, name, _, _, pNames, _, _, cs, _) :: E --> Done() :: Env e'
     where

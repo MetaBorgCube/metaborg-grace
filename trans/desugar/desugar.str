@@ -6,6 +6,7 @@ imports
     libstratego-gpp
     libstratego-aterm
     src-gen/signatures/grace-sig
+    src-gen/signatures/grace-lowered-sig
     src-gen/signatures/General-sig
     
     trans/desugar/desugar-common
@@ -20,6 +21,7 @@ rules
             
             desugar-flatten-methodID <+
             desugar-flatten-methodPart <+
+            desugar-mcallcanonical-args <+ 
             
             desugar-blockExp <+
             desugar-block <+
@@ -31,13 +33,12 @@ rules
             desugar-flatten-objectdecl <+
             desugar-flatten-declaration <+
             desugar-fail
-            
-            
+
   desugar-all-post = innermost(desugar-post)
   
   desugar-post = lower-all
   
-  desugar-pre = desugar-program <+ desugar-mCallCanonical-args <+ desugar-fail
+  desugar-pre = desugar-program <+ desugar-fail
 
   desugar-program: Program(a, b) -> Program([Expression(ObjectDecl(NoInherit(), [], a))], b)
 
@@ -68,9 +69,8 @@ rules
   
   desugar-flatten-methodPart: [Part(ID(name1),NoArgType(), ArgsParen(args)),Part(ID(name2),NoArgType(),args2)] ->
     [Part(ID(<concat-strings> [name1, "_", name2]),NoArgType(), ArgsParen(<map(desugar-arg)> <concat> [args, [args2]]))]
-  
-  
-  desugar-mCallCanonical-args: 
+      
+  desugar-mcallcanonical-args: 
     MCallCanonical(
               prfx
             , recv
@@ -85,7 +85,7 @@ rules
             , ArgsParen( <map(desugar-arg)> args)
             )
   
-  desugar-mCallCanonical-args: 
+  desugar-mcallcanonical-args: 
     MCallCanonical(
               prfx
             , recv
@@ -99,8 +99,6 @@ rules
             , argType
             , <desugar-arg> arg
             )
-            
-  desugar-mCallCanonical-args: a -> a
   
   // Flatten things in lists in the objectdecl list.
   desugar-flatten-objectdecl: ObjectDecl(a, b, xs) -> ObjectDecl(a, b, ys)
