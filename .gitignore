@@ -33,13 +33,15 @@ local.properties
 .recommenders
 
 # Eclipse Core
-.project
+grace/.project
+grace.interpreter/.project
 
 # External tool builders
 .externalToolBuilders/
 
 # Locally stored "Eclipse launch configurations"
-*.launch
+grace/*.launch
+grace.interpreter/*.launch
 
 # PyDev specific (Python IDE for Eclipse)
 *.pydevproject
@@ -48,7 +50,8 @@ local.properties
 .cproject
 
 # JDT-specific (Eclipse Java Development Tools)
-.classpath
+grace/.classpath
+grace.interpreter/.classpath
 
 # Java annotation processor (APT)
 .factorypath
