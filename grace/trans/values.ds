@@ -2,9 +2,9 @@ module trans/values
 
 imports
 
-  src-gen/ds-signatures/Grace-sig
-  trans/store
-  trans/environment
+  src-gen/ds-signatures/grace-sig
+//  trans/store
+//  trans/environment
 
 signature
 
@@ -13,11 +13,7 @@ signature
     StringV: String -> V
     BoolV: Bool -> V
     Done: V
-    
-    
-    Object: O * O * Env -> O // the enclosing object, inherited object, and its bound names
-    Trait: Env -> O // basically just a list of mappings of function names to memory locations
-    Method: List(String) * Env * List(CodeSequence) -> O // env of declaration and code
+
     NoObject: O
     Wrapped: V -> CodeSequence
     WrappedO: O -> V

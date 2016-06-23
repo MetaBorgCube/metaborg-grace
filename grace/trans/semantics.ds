@@ -1,8 +1,8 @@
 module trans/semantics
 
 imports
-  src-gen/ds-signatures/Grace-sig
-  src-gen/ds-signatures/Grace-lowered-sig
+  src-gen/ds-signatures/grace-sig
+  src-gen/ds-signatures/grace-lowered-sig
   
   trans/values
   trans/store

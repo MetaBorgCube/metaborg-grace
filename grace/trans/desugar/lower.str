@@ -30,7 +30,7 @@ rules
       MCallCanonicalL(recv, <name-to-string> idf, argType, as)
         with
           as := <flatten-list> <lower-arguments> args
-  
+
   lower-mcallopex:
     MCallOpEx(recv, name, argtype, arg) ->
       MCallCanonicalL(recv, <name-to-string> name, argtype, [arg])
@@ -69,7 +69,8 @@ rules
   lower-arguments: ArgString(a) -> [String(a)]
   lower-arguments: ArgBoolean(a) -> [Boolean(a)]
   lower-arguments: NoArgs() -> []
-  lower-arguments: ArgsParen(as) -> as
+  lower-arguments: ArgsParen(as) -> <lower-arguments> as
+  lower-arguments: [ArgsParen(a) | b] -> [a | <lower-arguments> b]
   lower-arguments: a -> a
   
   lower-fail: a -> <fail>
