@@ -1,0 +1,3358 @@
+Module(
+  "trans/semantics_varschemes_typeannos_noaliases_factorized_explimpl_factorized_explicated_copyprop_constantprop_unfactorized_unfactorized_interp"
+, [ Imports([])
+  , Signatures(
+      [ Sorts(
+          [ SortDecl("saveConstMethod__Arrow")
+          , SortDecl("saveConstants__Arrow")
+          , SortDecl("Program")
+          , SortDecl("CodeSequence")
+          , SortDecl("Assignment")
+          , SortDecl("VarInit")
+          , SortDecl("TypeAnn")
+          , SortDecl("Type")
+          , SortDecl("TypeDeclTarget")
+          , SortDecl("TypeRule")
+          , SortDecl("TypeRuleRightHand")
+          , SortDecl("Where")
+          , SortDecl("TypeConf")
+          , SortDecl("TypeExp")
+          , SortDecl("Declaration")
+          , SortDecl("MethodNames")
+          , SortDecl("Prefix")
+          , SortDecl("MethodName")
+          , SortDecl("ArgType")
+          , SortDecl("Annotations")
+          , SortDecl("Annotation")
+          , SortDecl("Params")
+          , SortDecl("Param")
+          , SortDecl("PrefixParam")
+          , SortDecl("MethodType")
+          , SortDecl("MethodBody")
+          , SortDecl("Inherit")
+          , SortDecl("Alias")
+          , SortDecl("Exclude")
+          , SortDecl("Use")
+          , SortDecl("Boolean")
+          , SortDecl("OperatorCF")
+          , SortDecl("Part")
+          , SortDecl("CallArgs")
+          , SortDecl("Lineup")
+          , SortDecl("Block")
+          , SortDecl("Exp")
+          , SortDecl("BlockParams")
+          , SortDecl("Declaration")
+          , SortDecl("Exp")
+          , SortDecl("printS__Arrow")
+          , SortDecl("printI__Arrow")
+          , SortDecl("printV__Arrow")
+          , SortDecl("V")
+          , SortDecl("O")
+          , SortDecl("read__Arrow")
+          , SortDecl("readO__Arrow")
+          , SortDecl("allocate__Arrow")
+          , SortDecl("allocateO__Arrow")
+          , SortDecl("write__Arrow")
+          , SortDecl("writeO__Arrow")
+          , SortDecl("bindName__Arrow")
+          , SortDecl("readName__Arrow")
+          ]
+        )
+      , Constructors(
+          [ ConsDecl(
+              "saveConstMethod"
+            , [MapSort(SimpleSort("String"), SimpleSort("Int")), SimpleSort("String"), SimpleSort("V")]
+            , SimpleSort("saveConstMethod__Arrow")
+            , Annos([MetafunAnno()])
+            )
+          , ConsDecl(
+              "saveConstants"
+            , [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+              , ListSort(SimpleSort("String"))
+              , ListSort(SimpleSort("V"))
+              ]
+            , SimpleSort("saveConstants__Arrow")
+            , Annos([MetafunAnno()])
+            )
+          , ConsDecl(
+              "Program"
+            , [ListSort(SimpleSort("CodeSequence")), SimpleSort("String")]
+            , SimpleSort("Program")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Dialect"
+            , [SimpleSort("String")]
+            , SimpleSort("CodeSequence")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Import"
+            , [SimpleSort("String"), SimpleSort("String")]
+            , SimpleSort("CodeSequence")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Assignment"
+            , [SimpleSort("Assignment")]
+            , SimpleSort("CodeSequence")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Declaration"
+            , [SimpleSort("Declaration")]
+            , SimpleSort("CodeSequence")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Expression"
+            , [SimpleSort("Exp")]
+            , SimpleSort("CodeSequence")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Assignment"
+            , [SimpleSort("String"), SimpleSort("Exp")]
+            , SimpleSort("Assignment")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Constant"
+            , [SimpleSort("String"), SimpleSort("Annotations"), SimpleSort("TypeAnn"), SimpleSort("Exp")]
+            , SimpleSort("Declaration")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Variable"
+            , [SimpleSort("String"), SimpleSort("Annotations"), SimpleSort("TypeAnn"), SimpleSort("VarInit")]
+            , SimpleSort("Declaration")
+            , Annos([])
+            )
+          , ConsDecl(
+              "ActualType"
+            , [SimpleSort("MethodName"), SimpleSort("Annotations"), SimpleSort("Params"), SimpleSort("MethodType")]
+            , SimpleSort("Declaration")
+            , Annos([])
+            )
+          , ConsDecl(
+              "VarInit"
+            , [SimpleSort("Exp")]
+            , SimpleSort("VarInit")
+            , Annos([])
+            )
+          , ConsDecl("NoVarInit", [], SimpleSort("VarInit"), Annos([]))
+          , ConsDecl(
+              "TypeAnn"
+            , [SimpleSort("Type"), SimpleSort("ArgType")]
+            , SimpleSort("TypeAnn")
+            , Annos([])
+            )
+          , ConsDecl("NoTypeAnn", [], SimpleSort("TypeAnn"), Annos([]))
+          , ConsDecl(
+              "Type"
+            , [SimpleSort("String")]
+            , SimpleSort("Type")
+            , Annos([])
+            )
+          , ConsDecl(
+              "ClassDecl"
+            , [ListSort(SimpleSort("MethodNames")), SimpleSort("MethodBody")]
+            , SimpleSort("Declaration")
+            , Annos([])
+            )
+          , ConsDecl(
+              "TraitDecl"
+            , [ListSort(SimpleSort("MethodNames")), SimpleSort("MethodBody")]
+            , SimpleSort("Declaration")
+            , Annos([])
+            )
+          , ConsDecl(
+              "TypeDeclDirect"
+            , [SimpleSort("String"), SimpleSort("ArgType"), SimpleSort("Annotations"), SimpleSort("TypeDeclTarget")]
+            , SimpleSort("Declaration")
+            , Annos([])
+            )
+          , ConsDecl(
+              "TypeDeclDirectW"
+            , [ SimpleSort("String")
+              , SimpleSort("ArgType")
+              , SimpleSort("Annotations")
+              , SimpleSort("TypeDeclTarget")
+              , SimpleSort("Where")
+              ]
+            , SimpleSort("Declaration")
+            , Annos([])
+            )
+          , ConsDecl(
+              "DirectType"
+            , [ListSort(SimpleSort("TypeRule"))]
+            , SimpleSort("TypeDeclTarget")
+            , Annos([])
+            )
+          , ConsDecl(
+              "TypeExp"
+            , [SimpleSort("TypeExp")]
+            , SimpleSort("TypeDeclTarget")
+            , Annos([])
+            )
+          , ConsDecl(
+              "TypeExpKW"
+            , [ListSort(SimpleSort("TypeRule")), SimpleSort("Where")]
+            , SimpleSort("TypeExp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "TypeRule"
+            , [SimpleSort("Prefix"), ListSort(SimpleSort("MethodNames")), SimpleSort("TypeRuleRightHand")]
+            , SimpleSort("TypeRule")
+            , Annos([])
+            )
+          , ConsDecl(
+              "TypeRuleRightHand"
+            , [SimpleSort("TypeExp"), SimpleSort("ArgType")]
+            , SimpleSort("TypeRuleRightHand")
+            , Annos([])
+            )
+          , ConsDecl("NoTypeRuleRightHand", [], SimpleSort("TypeRuleRightHand"), Annos([]))
+          , ConsDecl(
+              "Where"
+            , [ListSort(SimpleSort("TypeConf"))]
+            , SimpleSort("Where")
+            , Annos([])
+            )
+          , ConsDecl("NoWhere", [], SimpleSort("Where"), Annos([]))
+          , ConsDecl(
+              "TypeConf"
+            , [SimpleSort("TypeExp"), SimpleSort("TypeExp")]
+            , SimpleSort("TypeConf")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Union"
+            , [SimpleSort("String"), SimpleSort("String")]
+            , SimpleSort("TypeExp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Subtract"
+            , [SimpleSort("String"), SimpleSort("String")]
+            , SimpleSort("TypeExp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Intersect"
+            , [SimpleSort("String"), SimpleSort("String")]
+            , SimpleSort("TypeExp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Variant"
+            , [SimpleSort("String"), SimpleSort("String")]
+            , SimpleSort("TypeExp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "TypeID"
+            , [SimpleSort("String")]
+            , SimpleSort("TypeExp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "MethodDecl"
+            , [ SimpleSort("Prefix")
+              , ListSort(SimpleSort("MethodNames"))
+              , SimpleSort("MethodType")
+              , SimpleSort("MethodBody")
+              , SimpleSort("Where")
+              ]
+            , SimpleSort("Declaration")
+            , Annos([])
+            )
+          , ConsDecl(
+              "MethodID"
+            , [SimpleSort("MethodName"), SimpleSort("ArgType"), SimpleSort("Annotations"), SimpleSort("Params")]
+            , SimpleSort("MethodNames")
+            , Annos([])
+            )
+          , ConsDecl(
+              "MethodOp"
+            , [SimpleSort("OperatorCF"), SimpleSort("ArgType"), SimpleSort("Annotations"), SimpleSort("Params")]
+            , SimpleSort("MethodNames")
+            , Annos([])
+            )
+          , ConsDecl("Prefix", [], SimpleSort("Prefix"), Annos([]))
+          , ConsDecl("NoPrefix", [], SimpleSort("Prefix"), Annos([]))
+          , ConsDecl(
+              "ID"
+            , [SimpleSort("String")]
+            , SimpleSort("MethodName")
+            , Annos([])
+            )
+          , ConsDecl(
+              "ArgType"
+            , [ListSort(SimpleSort("String"))]
+            , SimpleSort("ArgType")
+            , Annos([])
+            )
+          , ConsDecl("NoArgType", [], SimpleSort("ArgType"), Annos([]))
+          , ConsDecl(
+              "Annotations"
+            , [ListSort(SimpleSort("Annotation"))]
+            , SimpleSort("Annotations")
+            , Annos([])
+            )
+          , ConsDecl("NoAnnotations", [], SimpleSort("Annotations"), Annos([]))
+          , ConsDecl("Public", [], SimpleSort("Annotation"), Annos([]))
+          , ConsDecl("Readable", [], SimpleSort("Annotation"), Annos([]))
+          , ConsDecl("Writeable", [], SimpleSort("Annotation"), Annos([]))
+          , ConsDecl("Confidential", [], SimpleSort("Annotation"), Annos([]))
+          , ConsDecl("Manifest", [], SimpleSort("Annotation"), Annos([]))
+          , ConsDecl("Overrides", [], SimpleSort("Annotation"), Annos([]))
+          , ConsDecl(
+              "Params"
+            , [ListSort(SimpleSort("Param"))]
+            , SimpleSort("Params")
+            , Annos([])
+            )
+          , ConsDecl("NoParams", [], SimpleSort("Params"), Annos([]))
+          , ConsDecl(
+              "Param"
+            , [SimpleSort("String"), SimpleSort("TypeAnn")]
+            , SimpleSort("Param")
+            , Annos([])
+            )
+          , ConsDecl(
+              "SingleParam"
+            , [SimpleSort("Param")]
+            , SimpleSort("PrefixParam")
+            , Annos([])
+            )
+          , ConsDecl(
+              "SingleParamParen"
+            , [SimpleSort("Param")]
+            , SimpleSort("PrefixParam")
+            , Annos([])
+            )
+          , ConsDecl(
+              "MethodType"
+            , [SimpleSort("String")]
+            , SimpleSort("MethodType")
+            , Annos([])
+            )
+          , ConsDecl("NoMethodType", [], SimpleSort("MethodType"), Annos([]))
+          , ConsDecl(
+              "MethodBody"
+            , [ListSort(SimpleSort("CodeSequence"))]
+            , SimpleSort("MethodBody")
+            , Annos([])
+            )
+          , ConsDecl(
+              "ObjectDecl"
+            , [SimpleSort("Inherit"), ListSort(SimpleSort("Use")), ListSort(SimpleSort("CodeSequence"))]
+            , SimpleSort("Exp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Inherit"
+            , [SimpleSort("Exp"), SimpleSort("Alias"), SimpleSort("Exclude")]
+            , SimpleSort("Inherit")
+            , Annos([])
+            )
+          , ConsDecl("NoInherit", [], SimpleSort("Inherit"), Annos([]))
+          , ConsDecl(
+              "Alias"
+            , [SimpleSort("String"), SimpleSort("String")]
+            , SimpleSort("Alias")
+            , Annos([])
+            )
+          , ConsDecl("NoAlias", [], SimpleSort("Alias"), Annos([]))
+          , ConsDecl(
+              "Exclude"
+            , [ListSort(SimpleSort("String"))]
+            , SimpleSort("Exclude")
+            , Annos([])
+            )
+          , ConsDecl("NoExclude", [], SimpleSort("Exclude"), Annos([]))
+          , ConsDecl(
+              "Use"
+            , [SimpleSort("Exp"), SimpleSort("Alias"), SimpleSort("Exclude")]
+            , SimpleSort("Use")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Number"
+            , [SimpleSort("String")]
+            , SimpleSort("Exp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "String"
+            , [SimpleSort("String")]
+            , SimpleSort("Exp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Boolean"
+            , [SimpleSort("Boolean")]
+            , SimpleSort("Exp")
+            , Annos([])
+            )
+          , ConsDecl("True", [], SimpleSort("Boolean"), Annos([]))
+          , ConsDecl("False", [], SimpleSort("Boolean"), Annos([]))
+          , ConsDecl("Self", [], SimpleSort("Exp"), Annos([]))
+          , ConsDecl("Outer", [], SimpleSort("Exp"), Annos([]))
+          , ConsDecl("PlaceHolder", [], SimpleSort("Exp"), Annos([]))
+          , ConsDecl(
+              "MCall"
+            , [SimpleSort("Exp"), SimpleSort("MethodName"), SimpleSort("ArgType")]
+            , SimpleSort("Exp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "MCallOpEx"
+            , [SimpleSort("Exp"), SimpleSort("OperatorCF"), SimpleSort("ArgType"), SimpleSort("Exp")]
+            , SimpleSort("Exp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "MCallWDot"
+            , [SimpleSort("Exp"), ListSort(SimpleSort("Part"))]
+            , SimpleSort("Exp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "MCallImpl"
+            , [ListSort(SimpleSort("Part"))]
+            , SimpleSort("Exp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "MCallPrefixOp"
+            , [SimpleSort("OperatorCF"), SimpleSort("ArgType"), SimpleSort("CallArgs")]
+            , SimpleSort("Exp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "MCallPrefixOpExp"
+            , [SimpleSort("OperatorCF"), SimpleSort("ArgType"), SimpleSort("Exp")]
+            , SimpleSort("Exp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "OperatorCF"
+            , [SimpleSort("String")]
+            , SimpleSort("OperatorCF")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Part"
+            , [SimpleSort("MethodName"), SimpleSort("ArgType"), SimpleSort("CallArgs")]
+            , SimpleSort("Part")
+            , Annos([])
+            )
+          , ConsDecl(
+              "ArgsParen"
+            , [ListSort(SimpleSort("Exp"))]
+            , SimpleSort("CallArgs")
+            , Annos([])
+            )
+          , ConsDecl("NoArgs", [], SimpleSort("CallArgs"), Annos([]))
+          , ConsDecl(
+              "ArgBlock"
+            , [SimpleSort("Block")]
+            , SimpleSort("CallArgs")
+            , Annos([])
+            )
+          , ConsDecl(
+              "ArgNumber"
+            , [SimpleSort("String")]
+            , SimpleSort("CallArgs")
+            , Annos([])
+            )
+          , ConsDecl(
+              "ArgString"
+            , [SimpleSort("String")]
+            , SimpleSort("CallArgs")
+            , Annos([])
+            )
+          , ConsDecl(
+              "ArgLineup"
+            , [SimpleSort("Lineup")]
+            , SimpleSort("CallArgs")
+            , Annos([])
+            )
+          , ConsDecl(
+              "ArgBoolean"
+            , [SimpleSort("Boolean")]
+            , SimpleSort("CallArgs")
+            , Annos([])
+            )
+          , ConsDecl(
+              "LineupExp"
+            , [SimpleSort("Lineup")]
+            , SimpleSort("Exp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Lineup"
+            , [ListSort(SimpleSort("Exp"))]
+            , SimpleSort("Lineup")
+            , Annos([])
+            )
+          , ConsDecl("Ellipsis", [], SimpleSort("Exp"), Annos([]))
+          , ConsDecl(
+              "BlockExp"
+            , [SimpleSort("Block")]
+            , SimpleSort("Exp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Block"
+            , [ListSort(SimpleSort("CodeSequence"))]
+            , SimpleSort("Block")
+            , Annos([])
+            )
+          , ConsDecl(
+              "BlockWParams"
+            , [SimpleSort("BlockParams"), ListSort(SimpleSort("CodeSequence"))]
+            , SimpleSort("Block")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Return"
+            , [SimpleSort("Exp")]
+            , SimpleSort("Exp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "BlockParams"
+            , [SimpleSort("ArgType"), ListSort(SimpleSort("Param"))]
+            , SimpleSort("BlockParams")
+            , Annos([])
+            )
+          , ConsDecl(
+              "MCallImplL"
+            , [SimpleSort("String"), SimpleSort("ArgType"), ListSort(SimpleSort("Exp"))]
+            , SimpleSort("Exp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "MethodDeclL"
+            , [ SimpleSort("Prefix")
+              , SimpleSort("String")
+              , SimpleSort("ArgType")
+              , SimpleSort("Annotations")
+              , ListSort(SimpleSort("String"))
+              , ListSort(SimpleSort("TypeAnn"))
+              , SimpleSort("MethodType")
+              , ListSort(SimpleSort("CodeSequence"))
+              , SimpleSort("Where")
+              ]
+            , SimpleSort("Declaration")
+            , Annos([])
+            )
+          , ConsDecl(
+              "MCallCanonical"
+            , [ SimpleSort("Prefix")
+              , SimpleSort("Exp")
+              , SimpleSort("MethodName")
+              , SimpleSort("ArgType")
+              , SimpleSort("CallArgs")
+              ]
+            , SimpleSort("Exp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "MCallCanonicalL"
+            , [SimpleSort("Exp"), SimpleSort("String"), SimpleSort("ArgType"), ListSort(SimpleSort("Exp"))]
+            , SimpleSort("Exp")
+            , Annos([])
+            )
+          , ConsDecl(
+              "NumV"
+            , [SimpleSort("Int")]
+            , SimpleSort("V")
+            , Annos([])
+            )
+          , ConsDecl(
+              "StringV"
+            , [SimpleSort("String")]
+            , SimpleSort("V")
+            , Annos([])
+            )
+          , ConsDecl(
+              "BoolV"
+            , [SimpleSort("Bool")]
+            , SimpleSort("V")
+            , Annos([])
+            )
+          , ConsDecl("Done", [], SimpleSort("V"), Annos([]))
+          , ConsDecl(
+              "Object"
+            , [SimpleSort("O"), SimpleSort("O"), MapSort(SimpleSort("String"), SimpleSort("Int"))]
+            , SimpleSort("O")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Trait"
+            , [MapSort(SimpleSort("String"), SimpleSort("Int"))]
+            , SimpleSort("O")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Method"
+            , [ ListSort(SimpleSort("String"))
+              , MapSort(SimpleSort("String"), SimpleSort("Int"))
+              , ListSort(SimpleSort("CodeSequence"))
+              ]
+            , SimpleSort("O")
+            , Annos([])
+            )
+          , ConsDecl("NoObject", [], SimpleSort("O"), Annos([]))
+          , ConsDecl(
+              "Wrapped"
+            , [SimpleSort("V")]
+            , SimpleSort("CodeSequence")
+            , Annos([])
+            )
+          , ConsDecl(
+              "WrappedO"
+            , [SimpleSort("O")]
+            , SimpleSort("V")
+            , Annos([])
+            )
+          , ConsDecl(
+              "WrappedArgs"
+            , [SimpleSort("CallArgs")]
+            , SimpleSort("V")
+            , Annos([])
+            )
+          , ConsDecl(
+              "printS"
+            , [SimpleSort("String")]
+            , SimpleSort("printS__Arrow")
+            , Annos([MetafunAnno()])
+            )
+          , ConsDecl(
+              "printI"
+            , [SimpleSort("Int")]
+            , SimpleSort("printI__Arrow")
+            , Annos([MetafunAnno()])
+            )
+          , ConsDecl(
+              "printV"
+            , [SimpleSort("V")]
+            , SimpleSort("printV__Arrow")
+            , Annos([MetafunAnno()])
+            )
+          , ConsDecl(
+              "read"
+            , [SimpleSort("Int")]
+            , SimpleSort("read__Arrow")
+            , Annos([MetafunAnno()])
+            )
+          , ConsDecl(
+              "readO"
+            , [SimpleSort("Int")]
+            , SimpleSort("readO__Arrow")
+            , Annos([MetafunAnno()])
+            )
+          , ConsDecl(
+              "allocate"
+            , [SimpleSort("V")]
+            , SimpleSort("allocate__Arrow")
+            , Annos([MetafunAnno()])
+            )
+          , ConsDecl(
+              "allocateO"
+            , [SimpleSort("O")]
+            , SimpleSort("allocateO__Arrow")
+            , Annos([MetafunAnno()])
+            )
+          , ConsDecl(
+              "write"
+            , [SimpleSort("Int"), SimpleSort("V")]
+            , SimpleSort("write__Arrow")
+            , Annos([MetafunAnno()])
+            )
+          , ConsDecl(
+              "writeO"
+            , [SimpleSort("Int"), SimpleSort("O")]
+            , SimpleSort("writeO__Arrow")
+            , Annos([MetafunAnno()])
+            )
+          , ConsDecl(
+              "getHeap"
+            , [MapSort(SimpleSort("Int"), SimpleSort("V"))]
+            , SimpleSort("V")
+            , Annos([])
+            )
+          , ConsDecl(
+              "getOHeap"
+            , [MapSort(SimpleSort("Int"), SimpleSort("O"))]
+            , SimpleSort("V")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Stored"
+            , [SimpleSort("O")]
+            , SimpleSort("V")
+            , Annos([])
+            )
+          , ConsDecl(
+              "bindName"
+            , [SimpleSort("String"), SimpleSort("Int")]
+            , SimpleSort("bindName__Arrow")
+            , Annos([MetafunAnno()])
+            )
+          , ConsDecl(
+              "readName"
+            , [SimpleSort("String")]
+            , SimpleSort("readName__Arrow")
+            , Annos([MetafunAnno()])
+            )
+          , ConsDecl(
+              "Binding"
+            , [MapSort(SimpleSort("String"), SimpleSort("Int"))]
+            , SimpleSort("V")
+            , Annos([])
+            )
+          ]
+        )
+      , NativeConstructors([])
+      , NativeOperators(
+          [ NativeOpDecl(
+              "nativeIBinOp"
+            , [SimpleSort("String"), SimpleSort("Int"), SimpleSort("Int")]
+            , SimpleSort("Int")
+            )
+          , NativeOpDecl("nativePrint", [SimpleSort("V")], SimpleSort("V"))
+          , NativeOpDecl("parseNumber", [SimpleSort("String")], SimpleSort("Int"))
+          , NativeOpDecl("print", [SimpleSort("V")], SimpleSort("V"))
+          ]
+        )
+      , ArrowDeclarations(
+          [ ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("saveConstMethod__Arrow")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , MapSort(SimpleSort("String"), SimpleSort("Int"))
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("saveConstants__Arrow")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , MapSort(SimpleSort("String"), SimpleSort("Int"))
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("Program")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "init"
+            , SimpleSort("V")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("Exp")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , SimpleSort("V")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("CodeSequence")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , SimpleSort("V")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("Declaration")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , SimpleSort("V")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("Assignment")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , SimpleSort("V")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("CallArgs")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , SimpleSort("V")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , ListSort(SimpleSort("CodeSequence"))
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , SimpleSort("V")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("Params")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , ListSort(SimpleSort("String"))
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([])
+            , SimpleSort("Exp")
+            , ArrowRWs([])
+            , "o"
+            , SimpleSort("O")
+            , ArrowRWs([])
+            )
+          , ArrowDecl(
+              ArrowROs([])
+            , SimpleSort("Declaration")
+            , ArrowRWs([])
+            , "o"
+            , SimpleSort("O")
+            , ArrowRWs([])
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , ListSort(SimpleSort("Exp"))
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "ea"
+            , ListSort(SimpleSort("V"))
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("printS__Arrow")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , SimpleSort("V")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("printI__Arrow")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , SimpleSort("V")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("printV__Arrow")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , SimpleSort("V")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("read__Arrow")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , SimpleSort("V")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("readO__Arrow")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , SimpleSort("O")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("allocate__Arrow")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , SimpleSort("Int")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("allocateO__Arrow")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , SimpleSort("Int")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("write__Arrow")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , SimpleSort("V")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("writeO__Arrow")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , SimpleSort("O")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("bindName__Arrow")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , MapSort(SimpleSort("String"), SimpleSort("Int"))
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          , ArrowDecl(
+              ArrowROs([SimpleSort("O")])
+            , SimpleSort("readName__Arrow")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            , "default"
+            , SimpleSort("Int")
+            , ArrowRWs(
+                [ MapSort(SimpleSort("String"), SimpleSort("Int"))
+                , MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapSort(SimpleSort("Int"), SimpleSort("O"))
+                ]
+              )
+            )
+          ]
+        )
+      , NativeDataTypes([])
+      , VariableSchemes(
+          [ VariableScheme("v", SimpleSort("V"))
+          , VariableScheme("o", SimpleSort("O"))
+          , VariableScheme("H", MapSort(SimpleSort("Int"), SimpleSort("V")))
+          , VariableScheme("OH", MapSort(SimpleSort("Int"), SimpleSort("O")))
+          , VariableScheme("E", MapSort(SimpleSort("String"), SimpleSort("Int")))
+          ]
+        )
+      ]
+    )
+  , Rules(
+      [ Rule(
+          [ Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("attempting to write to objectstore")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("objectstore: ")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("getOHeap", [VarRef("_lifted_l_int_o_10")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("NumV", [VarRef("addr24")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("Stored", [VarRef("_lifted_951")])])
+              , Wld()
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con("writeO", [VarRef("addr24"), VarRef("_lifted_951")])
+            , [ LabelComp(SimpleSort("O"), Wld())
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_10"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_10"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_10"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("writeO__Arrow"))
+          , Target(
+              VarRef("_lifted_951")
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_10"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_10"))
+              , LabelComp(
+                  MapSort(SimpleSort("Int"), SimpleSort("O"))
+                , MapExtend(
+                    Map([Bind(VarRef("addr24"), VarRef("_lifted_951"))])
+                  , VarRef("_lifted_l_int_o_10")
+                  )
+                )
+              ]
+            )
+          )
+        )
+      , Rule(
+          []
+        , "---------"
+        , Relation(
+            Source(
+              Con("write", [VarRef("addr25"), VarRef("_lifted_1051")])
+            , [ LabelComp(SimpleSort("O"), Wld())
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_11"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_11"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_11"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("write__Arrow"))
+          , Target(
+              VarRef("_lifted_1051")
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_11"))
+              , LabelComp(
+                  MapSort(SimpleSort("Int"), SimpleSort("V"))
+                , MapExtend(
+                    Map([Bind(VarRef("addr25"), VarRef("_lifted_1051"))])
+                  , VarRef("_lifted_l_int_v_11")
+                  )
+                )
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_11"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          []
+        , "---------"
+        , Relation(
+            Source(
+              Con("Wrapped", [VarRef("_lifted_1081")])
+            , [ LabelComp(SimpleSort("O"), Wld())
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_12"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_12"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_12"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("CodeSequence"))
+          , Target(
+              VarRef("_lifted_1081")
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_12"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_12"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_12"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          []
+        , "---------"
+        , Relation(
+            Source(
+              Con("String", [VarRef("s134")])
+            , [ LabelComp(SimpleSort("O"), Wld())
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_13"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_13"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_13"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+          , Target(
+              Con("StringV", [VarRef("s134")])
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_13"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_13"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_13"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("reading self")])])
+              , Wld()
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con("Self", [])
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_10"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_14"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_14"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_14"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+          , Target(
+              Con(
+                "WrappedO"
+              , [ Con(
+                    "Object"
+                  , [VarRef("_lifted_o_10"), Con("NoObject", []), VarRef("_lifted_l_string_int_14")]
+                  )
+                ]
+              )
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_14"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_14"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_14"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("saving const method")])])
+              , Wld()
+              )
+            )
+          , Formula(Match(Fresh(), VarRef("i154")))
+          , Formula(
+              Relation(
+                Source(
+                  Con(
+                    "writeO"
+                  , [ VarRef("i154")
+                    , Con(
+                        "Method"
+                      , [ Cast(List([]), ListSort(SimpleSort("String")))
+                        , VarRef("startEnv54")
+                        , ListTail(
+                            [Con("Wrapped", [VarRef("_lifted_1151")])]
+                          , Cast(List([]), ListSort(SimpleSort("CodeSequence")))
+                          )
+                        ]
+                      )
+                    ]
+                  )
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_11"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_15"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_15"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_15"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("writeO__Arrow"))
+              , Target(
+                  Wld()
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_20"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_20"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_20"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  Con("bindName", [VarRef("name124"), VarRef("i154")])
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_11"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_20"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_20"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_20"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("bindName__Arrow"))
+              , Target(
+                  VarRef("e'64")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_30"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_30"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_30"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("==end saving const method==")])])
+              , Wld()
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con(
+                "saveConstMethod"
+              , [VarRef("startEnv54"), VarRef("name124"), VarRef("_lifted_1151")]
+              )
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_11"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_15"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_15"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_15"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("saveConstMethod__Arrow"))
+          , Target(
+              VarRef("e'64")
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_30"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_30"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_30"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("saving constants")])])
+              , Wld()
+              )
+            )
+          , CaseMatch(
+              VarRef("names44")
+            , [ CasePattern(
+                  List([])
+                , [ Formula(
+                      Match(
+                        NativeOp("print", [Con("StringV", [String("empty const list")])])
+                      , Wld()
+                      )
+                    )
+                  , Formula(Match(VarRef("startEnv44"), VarRef("eFinal54")))
+                  , Formula(Match(VarRef("_lifted_l_string_int_16"), VarRef("_lifted_l_string_int_31")))
+                  , Formula(Match(VarRef("_lifted_l_int_v_16"), VarRef("_lifted_l_int_v_31")))
+                  , Formula(Match(VarRef("_lifted_l_int_o_16"), VarRef("_lifted_l_int_o_31")))
+                  ]
+                )
+              , CasePattern(
+                  ListTail([VarRef("n24")], VarRef("ns44"))
+                , [ Formula(
+                      Match(
+                        NativeOp("print", [Con("StringV", [String("nonempty const list")])])
+                      , Wld()
+                      )
+                    )
+                  , Formula(
+                      Match(
+                        VarRef("_lifted_1271")
+                      , ListTail(
+                          [Cast(VarRef("v304"), SimpleSort("V"))]
+                        , VarRef("vs84")
+                        )
+                      )
+                    )
+                  , Formula(
+                      Match(
+                        NativeOp("print", [Con("Binding", [VarRef("startEnv44")])])
+                      , Wld()
+                      )
+                    )
+                  , Formula(Match(NativeOp("print", [VarRef("v304")]), Wld()))
+                  , Formula(
+                      Match(
+                        NativeOp("print", [Con("StringV", [VarRef("n24")])])
+                      , Wld()
+                      )
+                    )
+                  , Formula(
+                      Relation(
+                        Source(
+                          Con(
+                            "saveConstMethod"
+                          , [VarRef("startEnv44"), VarRef("n24"), VarRef("v304")]
+                          )
+                        , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_12"))
+                          , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_16"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_16"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_16"))
+                          ]
+                        )
+                      , NamedDynamicEmitted([], "default", SimpleSort("saveConstMethod__Arrow"))
+                      , Target(
+                          VarRef("e184")
+                        , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_21"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_21"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_21"))
+                          ]
+                        )
+                      )
+                    )
+                  , Formula(
+                      Relation(
+                        Source(
+                          Con(
+                            "saveConstants"
+                          , [VarRef("startEnv44"), VarRef("ns44"), VarRef("vs84")]
+                          )
+                        , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_12"))
+                          , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_21"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_21"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_21"))
+                          ]
+                        )
+                      , NamedDynamicEmitted([], "default", SimpleSort("saveConstants__Arrow"))
+                      , Target(
+                          VarRef("em24")
+                        , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_31"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_31"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_31"))
+                          ]
+                        )
+                      )
+                    )
+                  , Formula(
+                      Match(MapExtend(VarRef("em24"), VarRef("e184")), VarRef("eFinal54"))
+                    )
+                  ]
+                )
+              ]
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con(
+                "saveConstants"
+              , [VarRef("startEnv44"), VarRef("names44"), VarRef("_lifted_1271")]
+              )
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_12"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_16"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_16"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_16"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("saveConstants__Arrow"))
+          , Target(
+              VarRef("eFinal54")
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_31"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_31"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_31"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("reading from heap")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("getOHeap", [VarRef("_lifted_l_int_o_17")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("NumV", [VarRef("addr26")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp(
+                  "print"
+                , [Con("Stored", [MapSelect(VarRef("_lifted_l_int_o_17"), VarRef("addr26"))])]
+                )
+              , Wld()
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con("readO", [VarRef("addr26")])
+            , [ LabelComp(SimpleSort("O"), Wld())
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_17"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_17"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_17"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("readO__Arrow"))
+          , Target(
+              MapSelect(VarRef("_lifted_l_int_o_17"), VarRef("addr26"))
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_17"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_17"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_17"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("read")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("Binding", [VarRef("_lifted_l_string_int_18")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [VarRef("x15")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp(
+                  "print"
+                , [Con("NumV", [MapSelect(VarRef("_lifted_l_string_int_18"), VarRef("x15"))])]
+                )
+              , Wld()
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con("readName", [VarRef("x15")])
+            , [ LabelComp(SimpleSort("O"), Wld())
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_18"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_18"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_18"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("readName__Arrow"))
+          , Target(
+              MapSelect(VarRef("_lifted_l_string_int_18"), VarRef("x15"))
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_18"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_18"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_18"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          []
+        , "---------"
+        , Relation(
+            Source(
+              Con("read", [VarRef("addr27")])
+            , [ LabelComp(SimpleSort("O"), Wld())
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_19"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_19"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_19"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("read__Arrow"))
+          , Target(
+              MapSelect(VarRef("_lifted_l_int_v_19"), VarRef("addr27"))
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_19"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_19"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_19"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Relation(
+                Source(
+                  ListSource(VarRef("cs124"), ListType("CodeSequence"))
+                , [ LabelComp(SimpleSort("O"), Con("NoObject", []))
+                  , LabelComp(
+                      MapSort(SimpleSort("String"), SimpleSort("Int"))
+                    , Map([Bind(String("_root"), Fresh())])
+                    )
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), Map([]))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), Map([]))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", ListSort(SimpleSort("CodeSequence")))
+              , Target(
+                  VarRef("cs'44")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), Wld())
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), Wld())
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), Wld())
+                  ]
+                )
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(Con("Program", [VarRef("cs124"), Wld()]), [])
+          , NamedDynamicEmitted([], "init", SimpleSort("Program"))
+          , Target(VarRef("cs'44"), [])
+          )
+        )
+      , Rule(
+          [Formula(Match(NativeOp("print", [VarRef("_lifted_1512")]), Wld()))]
+        , "---"
+        , Relation(
+            Source(
+              Con("printV", [VarRef("_lifted_1512")])
+            , [ LabelComp(SimpleSort("O"), Wld())
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_110"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_110"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_110"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("printV__Arrow"))
+          , Target(
+              VarRef("_lifted_1512")
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_110"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_110"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_110"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          []
+        , "---"
+        , Relation(
+            Source(
+              Con("printS", [VarRef("s18")])
+            , [ LabelComp(SimpleSort("O"), Wld())
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_111"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_111"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_111"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("printS__Arrow"))
+          , Target(
+              NativeOp("print", [Con("StringV", [VarRef("s18")])])
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_111"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_111"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_111"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Match(
+                NativeOp("print", [Con("NumV", [VarRef("i36")])])
+              , Wld()
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con("printI", [VarRef("i36")])
+            , [ LabelComp(SimpleSort("O"), Wld())
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_112"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_112"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_112"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("printI__Arrow"))
+          , Target(
+              Con("Done", [])
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_112"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_112"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_112"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("directly evaluating object")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("getOHeap", [VarRef("_lifted_l_int_o_113")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  ListSource(VarRef("cs134"), ListType("CodeSequence"))
+                , [ LabelComp(
+                      SimpleSort("O")
+                    , Con(
+                        "Object"
+                      , [VarRef("_lifted_o_13"), Con("NoObject", []), VarRef("_lifted_l_string_int_113")]
+                      )
+                    )
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_113"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_113"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_113"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", ListSort(SimpleSort("CodeSequence")))
+              , Target(
+                  Wld()
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_22"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_22"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_22"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("done directly evaluating object")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("getOHeap", [VarRef("_lifted_l_int_o_22")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("==end directly evaluating object==")])])
+              , Wld()
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con(
+                "ObjectDecl"
+              , [Con("NoInherit", []), List([]), VarRef("cs134")]
+              )
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_13"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_113"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_113"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_113"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+          , Target(
+              Con(
+                "WrappedO"
+              , [ Con(
+                    "Object"
+                  , [ Con(
+                        "Object"
+                      , [VarRef("_lifted_o_13"), Con("NoObject", []), VarRef("_lifted_l_string_int_113")]
+                      )
+                    , Con("NoObject", [])
+                    , VarRef("_lifted_l_string_int_22")
+                    ]
+                  )
+                ]
+              )
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_22"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_22"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_22"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          []
+        , "---------"
+        , Relation(
+            Source(
+              Con("Number", [VarRef("s104")])
+            , [ LabelComp(SimpleSort("O"), Wld())
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_114"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_114"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_114"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+          , Target(
+              Con("NumV", [NativeOp("parseNumber", [VarRef("s104")])])
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_114"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_114"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_114"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("methoddeclL")])])
+              , Wld()
+              )
+            )
+          , Formula(Match(Fresh(), VarRef("i194")))
+          , Formula(
+              Relation(
+                Source(
+                  Con(
+                    "writeO"
+                  , [ VarRef("i194")
+                    , Con(
+                        "Method"
+                      , [ VarRef("pNames24")
+                        , MapExtend(
+                            Map([Bind(VarRef("name154"), VarRef("i194"))])
+                          , VarRef("_lifted_l_string_int_115")
+                          )
+                        , VarRef("cs174")
+                        ]
+                      )
+                    ]
+                  )
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_14"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_115"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_115"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_115"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("writeO__Arrow"))
+              , Target(
+                  Wld()
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_23"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_23"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_23"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  Con("bindName", [VarRef("name154"), VarRef("i194")])
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_14"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_23"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_23"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_23"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("bindName__Arrow"))
+              , Target(
+                  VarRef("e'84")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), Wld())
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_32"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_32"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("==end methoddeclL==")])])
+              , Wld()
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con(
+                "MethodDeclL"
+              , [ Wld()
+                , VarRef("name154")
+                , Wld()
+                , Wld()
+                , VarRef("pNames24")
+                , Wld()
+                , Wld()
+                , VarRef("cs174")
+                , Wld()
+                ]
+              )
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_14"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_115"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_115"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_115"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("Declaration"))
+          , Target(
+              Con("Done", [])
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("e'84"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_32"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_32"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Match(
+                VarRef("_lifted_o_15")
+              , Con("Object", [Wld(), Wld(), VarRef("eEnc24")])
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("reading from outer")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("Binding", [VarRef("eEnc24")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(MapSelect(VarRef("eEnc24"), VarRef("name174")), VarRef("i234"))
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("NumV", [VarRef("i234")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  Con("read", [VarRef("i234")])
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_15"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_116"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_116"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_116"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("read__Arrow"))
+              , Target(
+                  VarRef("_lifted_3080")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_24"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_24"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_24"))
+                  ]
+                )
+              )
+            )
+          , Formula(Match(Con("Done", []), Wld()))
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con(
+                "MCallWDot"
+              , [ Con("Outer", [])
+                , ListTail(
+                    [ Con(
+                        "Part"
+                      , [ Con("ID", [VarRef("name174")])
+                        , Con("NoArgType", [])
+                        , Con("NoArgs", [])
+                        ]
+                      )
+                    ]
+                  , List([])
+                  )
+                ]
+              )
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_15"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_116"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_116"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_116"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+          , Target(
+              VarRef("_lifted_3080")
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_24"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_24"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_24"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(Fails(Formula(TermEq(VarRef("name134"), String("base_print")))))
+          , Formula(Fails(Formula(TermEq(VarRef("name134"), String("base_add")))))
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("new method call on lowered")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [VarRef("name134")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                VarRef("_lifted_o_16")
+              , Con("Object", [Wld(), Wld(), VarRef("envI24")])
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("Binding", [VarRef("envI24")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  Con("readName", [VarRef("name134")])
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_16"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_117"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_117"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_117"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("readName__Arrow"))
+              , Target(
+                  VarRef("_lifted_3120")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), Wld())
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_25"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_25"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("NumV", [VarRef("_lifted_3120")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("Binding", [VarRef("_lifted_l_string_int_117")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  Con("readName", [VarRef("name134")])
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_16"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_117"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_25"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_25"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("readName__Arrow"))
+              , Target(
+                  VarRef("i164")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_32"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_33"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_33"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  Con("readO", [VarRef("i164")])
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_16"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_32"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_33"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_33"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("readO__Arrow"))
+              , Target(
+                  VarRef("obj24")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_40"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_40"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_40"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("Stored", [VarRef("obj24")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                VarRef("obj24")
+              , Con(
+                  "Method"
+                , [VarRef("ns54"), VarRef("e194"), VarRef("cs154")]
+                )
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("Binding", [VarRef("e194")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("now evaluating args")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  ListSource(VarRef("args44"), ListType("Exp"))
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_16"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_40"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_40"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_40"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "ea", ListSort(SimpleSort("Exp")))
+              , Target(
+                  VarRef("vs104")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_50"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_50"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_50"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  Con(
+                    "saveConstants"
+                  , [ VarRef("e194")
+                    , Cast(VarRef("ns54"), ListSort(SimpleSort("String")))
+                    , Cast(VarRef("vs104"), ListSort(SimpleSort("V")))
+                    ]
+                  )
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_16"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_50"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_50"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_50"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("saveConstants__Arrow"))
+              , Target(
+                  VarRef("e'74")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), Wld())
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_60"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_60"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  ListSource(VarRef("cs154"), ListType("CodeSequence"))
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_16"))
+                  , LabelComp(
+                      MapSort(SimpleSort("String"), SimpleSort("Int"))
+                    , MapExtend(VarRef("_lifted_l_string_int_117"), VarRef("e'74"))
+                    )
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_60"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_60"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", ListSort(SimpleSort("CodeSequence")))
+              , Target(
+                  VarRef("_lifted_2181")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), Wld())
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_70"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_70"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("==done new method call on lowered==")])])
+              , Wld()
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con("MCallImplL", [VarRef("name134"), Wld(), VarRef("args44")])
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_16"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_117"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_117"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_117"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+          , Target(
+              VarRef("_lifted_2181")
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_117"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_70"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_70"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Relation(
+                Source(
+                  VarRef("_lifted_2291")
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_17"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_118"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_118"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_118"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+              , Target(
+                  VarRef("_lifted_3130")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), Wld())
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_26"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_26"))
+                  ]
+                )
+              )
+            )
+          , Formula(Match(NativeOp("nativePrint", [VarRef("_lifted_3130")]), Wld()))
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con(
+                "MCallImplL"
+              , [String("base_print"), Wld(), ListTail([VarRef("_lifted_2291")], List([]))]
+              )
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_17"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_118"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_118"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_118"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+          , Target(
+              Con("Done", [])
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_118"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_26"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_26"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Relation(
+                Source(
+                  VarRef("_lifted_2331")
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_18"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_119"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_119"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_119"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+              , Target(
+                  Con("NumV", [VarRef("i174")])
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_25"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_27"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_27"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  VarRef("_lifted_2371")
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_18"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_25"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_27"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_27"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+              , Target(
+                  Con("NumV", [VarRef("i224")])
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), Wld())
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_34"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_34"))
+                  ]
+                )
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con(
+                "MCallImplL"
+              , [ String("base_add")
+                , Wld()
+                , ListTail(
+                    [VarRef("_lifted_2331")]
+                  , ListTail([VarRef("_lifted_2371")], List([]))
+                  )
+                ]
+              )
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_18"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_119"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_119"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_119"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+          , Target(
+              Con(
+                "NumV"
+              , [NativeOp(
+                   "nativeIBinOp"
+                 , [String("+"), VarRef("i174"), VarRef("i224")]
+                 )]
+              )
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_119"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_34"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_34"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("method call with receiver")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [VarRef("name144")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("startenv")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("Binding", [VarRef("_lifted_l_string_int_120")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("startheap")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  VarRef("receiver24")
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_19"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_120"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_120"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_120"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+              , Target(
+                  Con(
+                    "WrappedO"
+                  , [Con("Object", [Wld(), Wld(), VarRef("receiverEnv24")])]
+                  )
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), Wld())
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_28"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_28"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("receiverEnv")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("Binding", [VarRef("receiverEnv24")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  Con("readName", [VarRef("name144")])
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_19"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("receiverEnv24"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_28"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_28"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("readName__Arrow"))
+              , Target(
+                  VarRef("i184")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_33"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_35"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_35"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("read name from env")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  Con("readO", [VarRef("i184")])
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_19"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_33"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_35"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_35"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("readO__Arrow"))
+              , Target(
+                  Con(
+                    "Method"
+                  , [VarRef("names54"), VarRef("e204"), VarRef("cs164")]
+                  )
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), Wld())
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_41"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_41"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("read method from heap")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  ListSource(VarRef("args54"), ListType("Exp"))
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_19"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_120"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_41"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_41"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "ea", ListSort(SimpleSort("Exp")))
+              , Target(
+                  VarRef("vs114")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_51"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_51"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_51"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  Con(
+                    "saveConstants"
+                  , [ VarRef("e204")
+                    , Cast(VarRef("names54"), ListSort(SimpleSort("String")))
+                    , Cast(VarRef("vs114"), ListSort(SimpleSort("V")))
+                    ]
+                  )
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_19"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_51"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_51"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_51"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("saveConstants__Arrow"))
+              , Target(
+                  VarRef("eArgs24")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), Wld())
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_61"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_61"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  ListSource(VarRef("cs164"), ListType("CodeSequence"))
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_19"))
+                  , LabelComp(
+                      MapSort(SimpleSort("String"), SimpleSort("Int"))
+                    , MapExtend(MapExtend(VarRef("eArgs24"), VarRef("_lifted_l_string_int_120")), VarRef("receiverEnv24"))
+                    )
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_61"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_61"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", ListSort(SimpleSort("CodeSequence")))
+              , Target(
+                  VarRef("_lifted_2561")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_70"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_71"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_71"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("evaluated method")])])
+              , Wld()
+              )
+            )
+          , Formula(Match(NativeOp("print", [VarRef("_lifted_2561")]), Wld()))
+          , Formula(
+              Match(
+                NativeOp("print", [Con("NumV", [VarRef("i184")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("endenv")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("Binding", [VarRef("_lifted_l_string_int_70")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("==end method call with receiver==")])])
+              , Wld()
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con(
+                "MCallCanonicalL"
+              , [VarRef("receiver24"), VarRef("name144"), Wld(), VarRef("args54")]
+              )
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_19"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_120"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_120"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_120"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+          , Target(
+              VarRef("_lifted_2561")
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_120"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_71"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_71"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Relation(
+                Source(
+                  VarRef("e154")
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_110"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_121"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_121"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_121"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+              , Target(
+                  VarRef("_lifted_3170")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_26"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_29"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_29"))
+                  ]
+                )
+              )
+            )
+          ]
+        , "---------"
+        , Relation(
+            Source(
+              Con("Expression", [VarRef("e154")])
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_110"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_121"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_121"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_121"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("CodeSequence"))
+          , Target(
+              VarRef("_lifted_3170")
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_26"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_29"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_29"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Relation(
+                Source(
+                  VarRef("e164")
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_111"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_122"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_122"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_122"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("Declaration"))
+              , Target(
+                  VarRef("_lifted_3190")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_27"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_210"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_210"))
+                  ]
+                )
+              )
+            )
+          ]
+        , "---------"
+        , Relation(
+            Source(
+              Con("Declaration", [VarRef("e164")])
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_111"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_122"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_122"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_122"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("CodeSequence"))
+          , Target(
+              VarRef("_lifted_3190")
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_27"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_210"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_210"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Relation(
+                Source(
+                  VarRef("e1104")
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_112"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_123"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_123"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_123"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+              , Target(
+                  VarRef("_lifted_3220")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_28"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_211"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_211"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  Con(
+                    "saveConstMethod"
+                  , [VarRef("_lifted_l_string_int_123"), VarRef("name164"), VarRef("_lifted_3220")]
+                  )
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_112"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_28"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_211"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_211"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("saveConstMethod__Arrow"))
+              , Target(
+                  VarRef("_lifted_2761")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), Wld())
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_36"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_36"))
+                  ]
+                )
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con(
+                "Constant"
+              , [VarRef("name164"), Wld(), Wld(), VarRef("e1104")]
+              )
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_112"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_123"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_123"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_123"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("Declaration"))
+          , Target(
+              Con("Done", [])
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_2761"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_36"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_36"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          []
+        , "---------"
+        , Relation(
+            Source(
+              Con("bindName", [VarRef("x16"), VarRef("i37")])
+            , [ LabelComp(SimpleSort("O"), Wld())
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_124"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_124"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_124"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("bindName__Arrow"))
+          , Target(
+              MapExtend(
+                Map([Bind(VarRef("x16"), VarRef("i37"))])
+              , VarRef("_lifted_l_string_int_124")
+              )
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_124"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_124"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_124"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          []
+        , "---------"
+        , Relation(
+            Source(
+              Con("bindName", [VarRef("x17"), VarRef("i38")])
+            , [ LabelComp(SimpleSort("O"), Wld())
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_125"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_125"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_125"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("bindName__Arrow"))
+          , Target(
+              MapExtend(
+                Map([Bind(VarRef("x17"), VarRef("i38"))])
+              , VarRef("_lifted_l_string_int_125")
+              )
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_125"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_125"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_125"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Relation(
+                Source(
+                  VarRef("e174")
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_113"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_126"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_126"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_126"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("Assignment"))
+              , Target(
+                  VarRef("_lifted_3240")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_29"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_212"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_212"))
+                  ]
+                )
+              )
+            )
+          ]
+        , "---------"
+        , Relation(
+            Source(
+              Con("Assignment", [VarRef("e174")])
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_113"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_126"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_126"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_126"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("CodeSequence"))
+          , Target(
+              VarRef("_lifted_3240")
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_29"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_212"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_212"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          []
+        , "---------"
+        , Relation(
+            Source(
+              Con("ArgString", [VarRef("s124")])
+            , [ LabelComp(SimpleSort("O"), Wld())
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_127"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_127"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_127"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("CallArgs"))
+          , Target(
+              Con("StringV", [VarRef("s124")])
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_127"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_127"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_127"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          []
+        , "---------"
+        , Relation(
+            Source(
+              Con("ArgNumber", [VarRef("s114")])
+            , [ LabelComp(SimpleSort("O"), Wld())
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_128"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_128"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_128"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("CallArgs"))
+          , Target(
+              Con("NumV", [NativeOp("parseNumber", [VarRef("s114")])])
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_128"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_128"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_128"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(Match(Fresh(), VarRef("addr28")))
+          , Formula(
+              Relation(
+                Source(
+                  Con("writeO", [VarRef("addr28"), VarRef("_lifted_2851")])
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_114"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_129"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_129"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_129"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("writeO__Arrow"))
+              , Target(
+                  Wld()
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_210"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_213"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_213"))
+                  ]
+                )
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con("allocateO", [VarRef("_lifted_2851")])
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_114"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_129"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_129"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_129"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("allocateO__Arrow"))
+          , Target(
+              VarRef("addr28")
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_210"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_213"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_213"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(Match(Fresh(), VarRef("addr29")))
+          , Formula(
+              Relation(
+                Source(
+                  Con("write", [VarRef("addr29"), VarRef("_lifted_2871")])
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_115"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_130"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_130"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_130"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("write__Arrow"))
+              , Target(
+                  Wld()
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_211"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_214"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_214"))
+                  ]
+                )
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Con("allocate", [VarRef("_lifted_2871")])
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_115"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_130"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_130"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_130"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", SimpleSort("allocate__Arrow"))
+          , Target(
+              VarRef("addr29")
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_211"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_214"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_214"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("executing codeseq")])])
+              , Wld()
+              )
+            )
+          , CaseMatch(
+              ArgRead(0){Var("cs144")}
+            , [ CasePattern(
+                  List([])
+                , [ Formula(
+                      Match(
+                        NativeOp("print", [Con("StringV", [String("emptylist")])])
+                      , Wld()
+                      )
+                    )
+                  , Formula(
+                      Match(
+                        Con("Done", [])
+                      , Cast(VarRef("v'24"), SimpleSort("V"))
+                      )
+                    )
+                  , Formula(Match(VarRef("_lifted_l_string_int_131"), VarRef("eFinal44")))
+                  , Formula(Match(VarRef("_lifted_l_string_int_131"), VarRef("_lifted_l_string_int_34")))
+                  , Formula(Match(VarRef("_lifted_l_int_v_131"), VarRef("_lifted_l_int_v_37")))
+                  , Formula(Match(VarRef("_lifted_l_int_o_131"), VarRef("_lifted_l_int_o_37")))
+                  ]
+                )
+              , CasePattern(
+                  ListTail([VarRef("code44")], List([]))
+                , [ Formula(
+                      Match(
+                        NativeOp("print", [Con("StringV", [String("single entry")])])
+                      , Wld()
+                      )
+                    )
+                  , Formula(
+                      Relation(
+                        Source(
+                          VarRef("code44")
+                        , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_116"))
+                          , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_131"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_131"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_131"))
+                          ]
+                        )
+                      , NamedDynamicEmitted([], "default", SimpleSort("CodeSequence"))
+                      , Target(
+                          Cast(VarRef("v'24"), SimpleSort("V"))
+                        , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_212"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_215"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_215"))
+                          ]
+                        )
+                      )
+                    )
+                  , Formula(Match(VarRef("_lifted_l_string_int_212"), VarRef("eFinal44")))
+                  , Formula(Match(VarRef("_lifted_l_string_int_212"), VarRef("_lifted_l_string_int_35")))
+                  , Formula(Match(VarRef("_lifted_l_int_v_215"), VarRef("_lifted_l_int_v_37")))
+                  , Formula(Match(VarRef("_lifted_l_int_o_215"), VarRef("_lifted_l_int_o_37")))
+                  ]
+                )
+              , CasePattern(
+                  ListTail([VarRef("code54")], VarRef("cs'54"))
+                , [ Formula(
+                      Match(
+                        NativeOp("print", [Con("StringV", [String("one of many cs execs")])])
+                      , Wld()
+                      )
+                    )
+                  , Formula(
+                      Match(
+                        NativeOp("print", [Con("Binding", [VarRef("_lifted_l_string_int_131")])])
+                      , Wld()
+                      )
+                    )
+                  , Formula(
+                      Relation(
+                        Source(
+                          VarRef("code54")
+                        , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_116"))
+                          , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_131"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_131"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_131"))
+                          ]
+                        )
+                      , NamedDynamicEmitted([], "default", SimpleSort("CodeSequence"))
+                      , Target(
+                          Cast(VarRef("v284"), SimpleSort("V"))
+                        , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_213"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_216"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_216"))
+                          ]
+                        )
+                      )
+                    )
+                  , Formula(Match(VarRef("_lifted_l_string_int_213"), VarRef("E'54")))
+                  , Formula(Match(NativeOp("print", [VarRef("v284")]), Wld()))
+                  , Formula(
+                      Match(
+                        NativeOp("print", [Con("StringV", [String("first executed")])])
+                      , Wld()
+                      )
+                    )
+                  , Formula(
+                      Relation(
+                        Source(
+                          ListSource(VarRef("cs'54"), ListType("CodeSequence"))
+                        , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_116"))
+                          , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("E'54"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_216"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_216"))
+                          ]
+                        )
+                      , NamedDynamicEmitted([], "default", ListSort(SimpleSort("CodeSequence")))
+                      , Target(
+                          Cast(VarRef("v'24"), SimpleSort("V"))
+                        , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_36"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_37"))
+                          , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_37"))
+                          ]
+                        )
+                      )
+                    )
+                  , Formula(Match(VarRef("_lifted_l_string_int_36"), VarRef("eFinal44")))
+                  ]
+                )
+              , CaseOtherwise(
+                  [ Formula(
+                      Match(
+                        NativeOp("print", [Con("StringV", [String("invalid cs")])])
+                      , Wld()
+                      )
+                    )
+                  , Formula(
+                      Match(Con("Done", []), Cast(Wld(), SimpleSort("V")))
+                    )
+                  , Formula(Match(VarRef("_lifted_l_string_int_131"), VarRef("eFinal44")))
+                  , Formula(Match(VarRef("_lifted_l_string_int_131"), VarRef("_lifted_l_string_int_37")))
+                  , Formula(Match(VarRef("_lifted_l_int_v_131"), VarRef("_lifted_l_int_v_37")))
+                  , Formula(Match(VarRef("_lifted_l_int_o_131"), VarRef("_lifted_l_int_o_37")))
+                  ]
+                )
+              ]
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Cast(ArgBind(0), ListSort(SimpleSort("CodeSequence")))
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_116"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_131"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_131"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_131"))
+              ]
+            )
+          , NamedDynamicEmitted([], "default", ListSort(SimpleSort("CodeSequence")))
+          , Target(
+              VarRef("v'24")
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("eFinal44"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_37"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_37"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("ea 0")])])
+              , Wld()
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Cast(List([]), ListSort(SimpleSort("Exp")))
+            , [ LabelComp(SimpleSort("O"), Wld())
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_132"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_132"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_132"))
+              ]
+            )
+          , NamedDynamicEmitted([], "ea", ListSort(SimpleSort("Exp")))
+          , Target(
+              Cast(List([]), ListSort(SimpleSort("V")))
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_132"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_132"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_132"))
+              ]
+            )
+          )
+        )
+      , Rule(
+          [ Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("ea 1")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  VarRef("arg44")
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_117"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_133"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_133"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_133"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+              , Target(
+                  VarRef("_lifted_2991")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_214"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_217"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_217"))
+                  ]
+                )
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Cast(
+                ListTail([VarRef("arg44")], List([]))
+              , ListSort(SimpleSort("Exp"))
+              )
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_117"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_133"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_133"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_133"))
+              ]
+            )
+          , NamedDynamicEmitted([], "ea", ListSort(SimpleSort("Exp")))
+          , Target(
+              ListTail([VarRef("_lifted_2991")], List([]))
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_214"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_217"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_217"))
+              ]
+            )
+          )
+        )
+      , RecRule(
+          [ Formula(
+              Match(
+                NativeOp("print", [Con("StringV", [String("ea 1 and more")])])
+              , Wld()
+              )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  VarRef("arg54")
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_118"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_134"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_134"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_134"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
+              , Target(
+                  VarRef("_lifted_3041")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_215"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_218"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_218"))
+                  ]
+                )
+              )
+            )
+          , Formula(
+              RecRelation(
+                Source(
+                  ListSource(VarRef("more24"), ListType("Exp"))
+                , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_118"))
+                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_215"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_218"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_218"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "ea", ListSort(SimpleSort("Exp")))
+              , Target(
+                  VarRef("_lifted_3051")
+                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_38"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_38"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_38"))
+                  ]
+                )
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Source(
+              Cast(
+                ListTail([VarRef("arg54")], VarRef("more24"))
+              , ListSort(SimpleSort("Exp"))
+              )
+            , [ LabelComp(SimpleSort("O"), VarRef("_lifted_o_118"))
+              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_134"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_134"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_134"))
+              ]
+            )
+          , NamedDynamicEmitted([], "ea", ListSort(SimpleSort("Exp")))
+          , Target(
+              ListTail([VarRef("_lifted_3041")], VarRef("_lifted_3051"))
+            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), VarRef("_lifted_l_string_int_38"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("V")), VarRef("_lifted_l_int_v_38"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("_lifted_l_int_o_38"))
+              ]
+            )
+          )
+        )
+      ]
+    )
+  ]
+)
