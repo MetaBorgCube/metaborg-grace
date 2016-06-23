@@ -13,9 +13,11 @@
 *.desugared-pp.grace
 *.analyzed-pp.grace
 *.core.ds
+
 grace/src-gen/*
 grace/target/*
 
+grace.interpreter/src/main/java/org/metaborg/grace/interpreter/generated/*
 
 # Gitignore java and eclipse
 .metadata
