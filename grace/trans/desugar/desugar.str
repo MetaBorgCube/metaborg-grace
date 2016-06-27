@@ -57,12 +57,12 @@ rules
     , NoAnnotations()
     , Params(params2)
     )
-  ] -> [MethodID(
+  | mids ] -> [MethodID(
       ID(<concat-strings> [name1, "_", name2])
     , NoArgType()
     , NoAnnotations()
     , Params(<concat> [params1,params2])
-    )]
+    ) | mids ]
     
   desugar-flatten-methodPart: [Part(ID(name1),NoArgType(),args1),Part(ID(name2),NoArgType(),args2)] ->
     [Part(ID(<concat-strings> [name1, "_", name2]),NoArgType(), ArgsParen(<map(desugar-arg)> [args1, args2]))]

@@ -5,37 +5,14 @@ imports
 
 signature
   sort aliases
-    Env = Map(String, Int)
+    Members = Map(String, Int)
 
   variables
-    E : Env
+    M : Members
 
   constructors
-    bindName: String * Int --> Env
-    readName: String --> Int
-    Binding: Env -> V
-    
-    Object: O * O * Env -> O // the enclosing object, inherited object, and its bound names
-    Trait: Env -> O // basically just a list of mappings of function names to memory locations
-    Method: List(String) * Env * List(CodeSequence) -> O // env of declaration and code
+//    Object: O * O * Env -> O // the enclosing object, inherited object, and its bound names
+//    Trait: Env -> O // basically just a list of mappings of function names to memory locations
+//    Method: List(String) * Env * List(CodeSequence) -> O // env of declaration and code
     
 rules
-
-  bindName(x, i) :: E --> {x |--> i, E}.
-//    where print(StringV("bind to r/w")) => _.
-  
-  Env E |- bindName(x, i) --> {x |--> i, E}.
-//    where print(StringV("vind to r/o")) => _.
-
-  readName(x) :: E --> E[x]
-    where 
-      print(StringV("read")) => _;
-      print(Binding(E)) => _;
-      print(StringV(x)) => _;
-      print(NumV(E[x])) => _.
-//      print(Binding(eRW)) => _';
-//      {eRO, eRW} => e.
-//      print(Binding(e)) => _'.
-//  
-//  Env E |- readName(x) --> E[x]
-//    where print(StringV("read from r/w")) => _.

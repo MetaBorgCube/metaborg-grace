@@ -3,10 +3,11 @@ module trans/values
 imports
 
   src-gen/ds-signatures/grace-sig
-//  trans/store
-//  trans/environment
 
 signature
+
+  sort aliases
+    Ref = Int
 
   constructors
     NumV: Int -> V
@@ -14,14 +15,23 @@ signature
     BoolV: Bool -> V
     Done: V
 
+    //      enclosing object ref
+    //            super ref
+    //                  members (methods)
+    Object: Int * Int * Map(String, Int) -> O
+    
+    //      parameters
+    //                     code
+    //                                          self (decl)
+    Method: List(String) * List(CodeSequence) * Int -> O
+
+    Call: O * List(V) --> V
     NoObject: O
+    
     Wrapped: V -> CodeSequence
     WrappedO: O -> V
+    ObjectRef: Int -> V
     WrappedArgs: CallArgs -> V
-    
-    printS: String --> V
-    printI: Int --> V
-    printV: V --> V
     
   sorts
     V // value
@@ -34,15 +44,3 @@ signature
   native operators
     parseNumber: String -> Int
     print: V -> V
-    
-  rules 
-  
-    printS(s) --> v
-      where
-        print(StringV(s)) => v.
-    printI(i) --> Done()
-      where
-        print(NumV(i)) => v.
-    printV(v) --> v
-      where
-        print(v) => v.

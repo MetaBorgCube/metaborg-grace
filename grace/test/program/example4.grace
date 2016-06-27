@@ -1,30 +1,52 @@
-method print(s) { 
-  base_print(s.asString);
+method print(o) { 
+  base_print(o.asString);
 };
+
+def trueo = object {
+  method ifTrue { self; };
+  method ifFalse { falseo; };
+  method ifTrue(b1) IfFalse(b2) { b1.apply; };
+  method || (other) { base_print("true.||() is called"); self; };
+  method && (other) { base_print("true.&&() is called"); other; };
+  method asString { "true"; };
+};
+
+def falseo = object {
+  method ifTrue { trueo; };
+  method ifFalse { self; };
+  method ifTrue(b1) IfFalse(b2) { b2.apply; };
+  method || (other) { base_print("false.||() is called"); other; };
+  method && (other) { base_print("false.&&() is called"); self; };
+  method asString { "false"; };
+};
+
 
 method if(cond) then(blk1) else(blk2) {
     cond.ifTrue(blk1) ifFalse(blk2);
 };
 
-//method rec(c) {
-//  
+//def b = "a field on the root object";
+//
+//def a = object {
+//  def b = "the field b in object a";
+//  method asString { b; };
 //};
+//
+//print(a);
 
-def b = "a field on the root object";
+print(trueo);
+print(falseo);
 
-def a = object {
-  def b = "the field b in object a";
-  method asString { b; };
-};
+base_print("\n");
 
-print(a);
+print(falseo || falseo);
+print(falseo || trueo);
+print(trueo || falseo);
+print(trueo || trueo);
 
-////def t = true;
-////def f = false;
-////print(true);
-////print(false);
-////
-////print(false || false);
-////print(false || true);
-////print(true || false);
-////print(true || true);
+base_print("\n");
+
+print(falseo && falseo);
+print(falseo && trueo);
+print(trueo && falseo);
+print(trueo && trueo);

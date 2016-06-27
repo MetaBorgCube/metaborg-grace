@@ -5,50 +5,44 @@ imports
 
 signature
   sort aliases
-    Heap = Map(Int, V)
     OHeap = Map(Int, O)
+//    MHeap = Map(Int, O)
 
   variables
-    H : Heap
     OH : OHeap
+//    MH : MHeap
 
   constructors
-    read: Int --> V
-    readO: Int --> O
-    allocate: V --> Int
-    allocateO: O --> Int
-    write: Int * V --> V
-    writeO: Int * O --> O
-    getHeap: Heap -> V
+    
     getOHeap: OHeap -> V
+//    getMHeap: MHeap -> V
     
     Stored: O -> V
+    
+    readObject: Int --> O
+    allocateObject: O --> Int
+    writeObject: Int * O --> O
+    
+    readMethod: Int --> O
+    allocateMethod: O --> Int
+    writeMethod: Int * O --> O
 
 rules
-
-  read(addr) :: H --> H[addr].
-  readO(addr) :: OH --> OH[addr]
-    where
-      print(StringV("reading from heap")) => _;
-      print(getOHeap(OH)) => _;
-      print(NumV(addr)) => _;
-      print(Stored(OH[addr])) => _.
-
-  allocate(v) --> addr
-  where
-    fresh => addr;
-    write(addr, v) --> _.
   
-  allocateO(o) --> addr
+  readObject(addr) :: OH --> OH[addr].
+  
+  allocateObject(o) --> addr
   where
     fresh => addr;
-    writeO(addr, o) --> _.
+    writeObject(addr, o) --> _.
 
-  write(addr, v) :: H --> v :: Heap {addr |--> v, H}.
-  writeO(addr, o) :: OH --> o :: OHeap {addr |--> o, OH}
-    where 
-      print(StringV("attempting to write to objectstore")) => _;
-      print(StringV("objectstore: ")) => _;
-      print(getOHeap(OH)) => _;
-      print(NumV(addr)) => _;
-      print(Stored(o)) => _.
+  writeObject(addr, o) :: OH --> o :: OHeap {addr |--> o, OH}.
+  
+  readMethod(addr) :: OH --> OH[addr].
+  
+  allocateMethod(o) --> addr
+  where
+    fresh => addr;
+    writeMethod(addr, o) --> _.
+
+  writeMethod(addr, o) :: OH --> o :: OHeap {addr |--> o, OH}.
