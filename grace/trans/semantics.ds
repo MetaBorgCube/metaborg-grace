@@ -21,10 +21,8 @@ signature
     CallArgs --> V
     List(CodeSequence) --> V
     Params --> List(String)
-    
-    Exp -o-> O
-    Declaration -o-> O
 
+    Inherit -i-> Ref
   
     List(Exp) -ea-> List(V)
     
@@ -117,18 +115,19 @@ rules
       ids |- readObject(ids) --> Object(enc, sup, tbl);
       ids |- writeObject(ids, Object(enc, sup, {name |--> iMethod, tbl})) --> _.
   
-  ics, ids |- ObjectDecl(_, [], cs) --> ObjectRef(i')
+  Inherit(e, _, _) -i-> i
     where
-//      Ref ids |- eInherit --> Ref oInh;
-      ics -s-> iics;
-      ids -s-> iids;
-      print(NumV(iics)) => _;
-      print(NumV(iids)) => _;
-      iics == iids;
-      
-      fresh => superi;
-      writeObject(superi, NoObject()) --> _;
-      allocateObject(Object(ids, superi, {})) --> i';
+      print(StringV("inherit")) => _;
+      e --> ObjectRef(i).
+
+  NoInherit() -i-> i
+    where
+      print(StringV("noInherit")) => _;
+      allocateObject(NoObject()) --> i.
+  
+  ics, ids |- ObjectDecl(inherit, [], cs) --> ObjectRef(i')
+    where
+      allocateObject(Object(ids, inherit, {})) --> i';
       CS ICS(i'), DS IDS(i') |- cs --> _.
       
   ics |- Call(Method(names, code, ds), values) --> v
