@@ -1,0 +1,118 @@
+module trans/lookup
+
+imports
+  src-gen/ds-signatures/grace-sig
+  src-gen/ds-signatures/grace-lowered-sig
+  
+  trans/values
+  trans/store
+  trans/environment
+
+signature
+
+  constructors
+    lookupAll: String --> M
+    lookupOuter: Int * String --> M
+    lookupInherit: Int * String --> M
+    lookupInheritAndOuter: String --> M
+
+rules
+
+  ics, ids |- lookupAll(name) --> m
+    where
+      // local
+      // inherit
+      // enclosing
+      print(StringV("lookup")) => _;
+      print(StringV(name)) => _;
+      ics -s-> iics;
+      ids -s-> iids;
+      print(NumV(iics)) => _;
+      print(NumV(iids)) => _;
+      iics == iids;
+      print(StringV("equal cs and ds")) => _;
+      readObject(ics) --> Object(_, _, tbl);
+      print(getMembers(tbl)) => _;
+      case tbl[name?] of { // local
+        true =>
+          print(StringV("found locally")) => _;
+          readMethod(tbl[name]) --> Method(names, b, idc');
+
+          Method(names, b, idc') => m
+        otherwise =>
+          print(StringV("not found locally")) => _;
+          
+          lookupInherit(iids, name) --> inheritM;
+      
+          case inheritM of {
+            NoMethod() => // do an 'all' lookup on outer.ds
+              print(StringV("not found in inheritence")) => _;
+              lookupOuter(iids, name) --> m // if not found here then doesnt exist
+            otherwise => // do an inherit lookup on callsite
+              print(StringV("found in inheritance")) => _;
+              inheritM => m
+          }
+      }.
+    
+    lookupOuter(i, name) --> m // always on ds
+      where
+        readObject(i) --> Object(outerAddr,_,tbl);
+        case tbl[name?] of { // local
+          true =>
+            print(StringV("found on outer")) => _;
+            readMethod(tbl[name]) --> m
+          otherwise =>
+            lookupOuter(outerAddr, name) --> m
+        }.
+    
+    lookupInherit(i, name) --> m
+      where
+        NoMethod() => m;
+        print(StringV("not implemented")) => _. 
+    
+    ics, ids |- lookupAll(name) :: OH, MH --> m // inequal call and declare site
+      where
+      // inherit
+      // enclosing
+      print(StringV("lookup")) => _;
+      print(StringV(name)) => _;
+      ics -s-> iics;
+      ids -s-> iids;
+      print(getOHeap(OH)) => _;
+      print(getMHeap(MH)) => _;
+      print(NumV(iics)) => _;
+      print(NumV(iids)) => _;
+      iics != iids;
+      print(StringV("not equal cs and ds")) => _;      
+      
+      readObject(ids) --> Object(_, _, tbl);
+      case tbl[name?] of { // local
+        true =>
+          print(StringV("found locally")) => _;
+          readMethod(tbl[name]) --> Method(names, b, idc');
+          Method(names, b, idc') => m
+        otherwise => // TODO
+          print(StringV("not found locally")) => _;
+          lookupInherit(iids, name) --> inheritM;
+      
+          case inheritM of {
+            NoMethod() => // do an 'all' lookup on outer.ds
+              print(StringV("not found in inheritence")) => _;
+              readObject(iics) --> Object(out, _, _);
+              print(StringV("reading from outer obj")) => _;
+              readObject(out) --> Object(outo, _, _);
+              ics, DS IDS(outo) |- lookupAll(name) --> m
+            otherwise => // do an inherit lookup on callsite
+              print(StringV("found in inheritance")) => _;
+              
+              lookupInherit(iics, name) --> inheritMCS;
+              
+              case inheritMCS of {
+                NoMethod() => 
+                  inheritM => m
+                otherwise => 
+                  inheritMCS => m
+              }
+              
+          }
+      }.

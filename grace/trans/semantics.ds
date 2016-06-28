@@ -7,6 +7,7 @@ imports
   trans/values
   trans/store
   trans/environment
+  trans/lookup
 
 signature
 
@@ -22,14 +23,15 @@ signature
     Params --> List(String)
     
     Exp -o-> O
-    Declaration -o-> O   
+    Declaration -o-> O
+
   
     List(Exp) -ea-> List(V)
     
   constructors
     
-    lookupAll: String --> O
-  
+    Call: M * List(V) --> V
+    
     saveConst: String * V * Members --> Members
     saveConstants: List(String) * List(V) * Members --> Members
     
@@ -39,14 +41,13 @@ signature
     
 rules
 
-  Ref i |- Expression(e) :: OH --> e :: OH
-    where
-      print(NumV(i)) => _;
-      print(getOHeap(OH)) => _.
-  
+  Expression(e) --> e.
   Declaration(e) --> e.
-  Wrapped(v) --> v.
   Assignment(e) --> e.
+  Wrapped(v) --> v.
+  
+  ICS(i) -s-> i.
+  IDS(i) -s-> i.
 
   Number(s) --> NumV(parseNumber(s)).
   ArgNumber(s) --> NumV(parseNumber(s)).
@@ -55,8 +56,8 @@ rules
 
   Program(cs, _) -init-> cs'
     where
-      Ref fresh |- allocateObject(NoObject()) :: OHeap {} --> i;
-      Ref i |- cs :: OHeap {} --> cs' :: OHeap _.
+      CS ICS(fresh), DS IDS(fresh) |- allocateObject(NoObject()) :: OHeap {}, MHeap {} --> i;
+      CS ICS(i), DS IDS(i) |- cs :: OHeap {}, MHeap {} --> cs' :: OHeap _, MHeap _.
   
   cs : List(CodeSequence) --> v'
     where
@@ -82,68 +83,66 @@ rules
       arg --> v;
       more -ea-> vs : List(V).
 
-  Ref ics |- MCallCanonicalL(receiver, name, _, args) --> v
+  ics |- MCallCanonicalL(receiver, name, _, args) --> v
     where
-       Ref ics |- receiver --> ObjectRef(i');
-       Ref i' |- lookupAll(name) --> m;
-       Ref i' |- Call(m, args) --> v;
+       ics |- receiver --> ObjectRef(i');
+       ics, DS IDS(i') |- lookupAll(name) --> m;
+       DS IDS(i') |- Call(m, args) --> v;
        Done() => v.
   
-  Ref ics |- MCallImplL(name, _, []) --> v
+  MCallImplL("base_print", _, [v]) --> v
     where
-      Ref ics |- lookupAll(name) --> m;
-      Ref ics |- Call(m, []) --> v.
+      nativePrint(v) => _.
   
-  Ref ics |- MCallImplL(name, _, args) --> v
+  ics |- MCallImplL(name, _, vs@[]) --> v
     where
-      Ref ics |- lookupAll(name) --> m@Method(_, _, _);
-      Ref ics |- args -ea-> argVs;
-      Ref ics |- Call(m, argVs) --> v.
+      ics |- lookupAll(name) --> m;
+      ics |- Call(m, vs) --> v.
   
-  Ref ids |- Constant(name, _, _, e1) --> Done()
+  ics |- MCallImplL(name, _, vs) --> v
     where
-      Ref ids |- e1 --> v;
-      readObject(ids) --> Object(enc, sup, tbl);
-      allocateMethod(Method([], [Wrapped(v)], ids)) --> iMethod;
+      ics |- lookupAll(name) --> m;
+      ics |- Call(m, vs) --> v.
+  
+  ics, ids |- Constant(name, _, _, e1) --> Done()
+    where
+      ids |- e1 --> v;
+      ids |- readObject(ids) --> Object(enc, sup, tbl);
+      ids |- allocateMethod(Method([], [Wrapped(v)], ids)) --> iMethod;
       writeObject(ids, Object(enc, sup, {name |--> iMethod, tbl} )) --> _.
   
-  Ref ids |- MethodDeclL(_, name, _, _, pNames, _, _, code, _) --> Done()
+  ics, ids |- MethodDeclL(_, name, _, _, pNames, _, _, code, _) --> Done()
     where
-      Ref ids |- allocateMethod(Method(pNames, code, ids)) --> iMethod;
-      Ref ids |- readObject(ids) --> Object(enc, sup, tbl);
-      Ref ids |- writeObject(ids, Object(enc, sup, {name |--> iMethod, tbl})) --> _.
+      ids |- allocateMethod(Method(pNames, code, ids)) --> iMethod;
+      ids |- readObject(ids) --> Object(enc, sup, tbl);
+      ids |- writeObject(ids, Object(enc, sup, {name |--> iMethod, tbl})) --> _.
   
-  Ref ids |- ObjectDecl(_, [], cs) --> ObjectRef(i')
+  ics, ids |- ObjectDecl(_, [], cs) --> ObjectRef(i')
     where
 //      Ref ids |- eInherit --> Ref oInh;
-      allocateObject(Object(ids, fresh, {})) --> i';
-      Ref i' |- cs --> _.
+      ics -s-> iics;
+      ids -s-> iids;
+      print(NumV(iics)) => _;
+      print(NumV(iids)) => _;
+      iics == iids;
       
-  Ref ics |- Call(Method(names, code, ds), values) --> v
+      fresh => superi;
+      writeObject(superi, NoObject()) --> _;
+      allocateObject(Object(ids, superi, {})) --> i';
+      CS ICS(i'), DS IDS(i') |- cs --> _.
+      
+  ics |- Call(Method(names, code, ds), values) --> v
     where
       readObject(ics) --> Object(enc, sup, tbl);
+      print(getMembers(tbl)) => _;
       saveConstants(names, values, tbl) --> tbl';
       writeObject(ics, Object(enc, sup, tbl')) --> _;
-      Ref ics, Ref ds |- code --> v.
-      
-  Ref ics |- lookupAll(name) --> m
-    where
-      // local
-      // inherit
-      // enclosing
-      print(StringV("lookup")) => _;
-      print(StringV(name)) => _;
-      readObject(ics) --> Object(_, _, tbl);
-      case tbl[name?] of {
-        true =>
-          readMethod(tbl[name]) --> m
-        otherwise => // TODO
-          Method(["test"], [], ics) => m
-      }.
+      print(getMembers(tbl')) => _;
+      ics, DS IDS(ds) |- code --> v;
+      writeObject(ics, Object(enc, sup, tbl)) --> _. // restore
   
   saveConstants(names : List(String), values: List(V), tbl : Members) --> tbl'''
     where
-      print(StringV("saving constants")) => _;
       case names of {
         [] =>
           tbl => tbl'''
@@ -154,9 +153,9 @@ rules
           {tbl'', tbl'} => tbl'''
       }.
       
-  Ref ids |- saveConst(name, v, tbl) --> tbl'
-    where 
+  ics, ids |- saveConst(name, v, tbl) :: MH --> tbl' :: MH'
+    where
       fresh => iMethod;
-      writeMethod(ids, Method([], [Wrapped(v)], ids)) --> _;
+      writeMethod(iMethod, Method([], [Wrapped(v)], ids)) :: MH --> _ :: MH';
       {name |--> iMethod, tbl} => tbl'.
       

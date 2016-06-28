@@ -15,9 +15,7 @@ public abstract class parseNumber_1 extends TermBuild {
 
       @Specialization
       public int doInt(String s) {
-    	  int parseRes = Integer.parseInt(s);
-    	  System.out.println("Parsed string: '" + s +"' to: '" + parseRes + "'");
-          return parseRes;
+          return Integer.parseInt(s);
       }
 
       public static TermBuild create(SourceSection source, TermBuild stringbuild) {

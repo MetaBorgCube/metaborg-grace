@@ -23,23 +23,38 @@ signature
     //      parameters
     //                     code
     //                                          self (decl)
-    Method: List(String) * List(CodeSequence) * Int -> O
+    Method: List(String) * List(CodeSequence) * Int -> M
 
-    Call: O * List(V) --> V
     NoObject: O
+    NoMethod: M
     
     Wrapped: V -> CodeSequence
     WrappedO: O -> V
     ObjectRef: Int -> V
     WrappedArgs: CallArgs -> V
     
+    ICS: Int -> CS
+    IDS: Int -> DS
+    
+  arrows
+  
+    CS -s-> Int
+    DS -s-> Int
+    
   sorts
     V // value
     O // object
+    M // method
+    CS // callsite
+    DS // declaresite
 
   variables
     v : V
+    vs : List(V)
     o : O
+    m : M
+    ics: CS
+    ids: DS
 
   native operators
     parseNumber: String -> Int
