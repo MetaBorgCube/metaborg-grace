@@ -67,8 +67,28 @@ rules
     
     lookupInherit(i, name) --> m
       where
-        NoMethod() => m;
-        print(StringV("not implemented")) => _. 
+        print(StringV("looking in inherited")) => _;
+        readObject(i) --> obj;
+        case obj of {
+          NoObject() =>
+            print(StringV("obj has no super")) => _;
+            print(WrappedO(obj)) => _;
+            NoMethod() => m
+          otherwise =>
+            print(StringV("object has a super")) => _;
+            print(WrappedO(obj)) => _;
+            obj => Object(_, inhAddr,tbl);
+
+            print(getMembers(tbl)) => _;
+            case tbl[name?] of { // local
+              true =>
+                print(StringV("found on inherit")) => _;
+                readMethod(tbl[name]) --> m
+              otherwise =>
+                lookupInherit(inhAddr, name) --> m
+            }
+
+        }.
     
     ics, ids |- lookupAll(name) :: OH, MH --> m // inequal call and declare site
       where

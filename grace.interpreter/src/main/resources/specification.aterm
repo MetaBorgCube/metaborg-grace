@@ -1394,7 +1394,7 @@ Module(
             Source(
               Con(
                 "saveConst"
-              , [VarRef("name42"), VarRef("v1"), VarRef("tbl34")]
+              , [VarRef("name42"), VarRef("v1"), VarRef("tbl35")]
               )
             , [ LabelComp(SimpleSort("DS"), VarRef("ids1"))
               , LabelComp(SimpleSort("CS"), VarRef("ics1"))
@@ -1406,7 +1406,7 @@ Module(
           , Target(
               MapExtend(
                 Map([Bind(VarRef("name42"), VarRef("iMethod17"))])
-              , VarRef("tbl34")
+              , VarRef("tbl35")
               )
             , [ LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH2"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH2"))
@@ -1631,12 +1631,6 @@ Module(
         )
       , Rule(
           [ Formula(
-              Match(
-                NativeOp("print", [Con("StringV", [String("noInherit")])])
-              , Wld()
-              )
-            )
-          , Formula(
               Relation(
                 Source(
                   Con("allocateObject", [Con("NoObject", [])])
@@ -1731,7 +1725,7 @@ Module(
               , Target(
                   Con(
                     "Object"
-                  , [VarRef("enc16"), VarRef("sup16"), VarRef("tbl31")]
+                  , [VarRef("enc16"), VarRef("sup16"), VarRef("tbl32")]
                   )
                 , [ LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH3"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH3"))
@@ -1758,7 +1752,7 @@ Module(
                         , VarRef("sup16")
                         , MapExtend(
                             Map([Bind(VarRef("name41"), VarRef("iMethod16"))])
-                          , VarRef("tbl31")
+                          , VarRef("tbl32")
                           )
                         ]
                       )
@@ -2228,26 +2222,155 @@ Module(
       , Rule(
           [ Formula(
               Match(
-                NativeOp("print", [Con("StringV", [String("not implemented")])])
+                NativeOp("print", [Con("StringV", [String("looking in inherited")])])
               , Wld()
               )
+            )
+          , Formula(
+              Relation(
+                Source(
+                  Con("readObject", [VarRef("i")])
+                , [ LabelComp(SimpleSort("DS"), VarRef("ids1"))
+                  , LabelComp(SimpleSort("CS"), VarRef("ics1"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH1"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH1"))
+                  ]
+                )
+              , NamedDynamicEmitted([], "default", SimpleSort("readObject__Arrow"))
+              , Target(
+                  VarRef("obj")
+                , [ LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH2"))
+                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH2"))
+                  ]
+                )
+              )
+            )
+          , CaseMatch(
+              VarRef("obj")
+            , [ CasePattern(
+                  Con("NoObject", [])
+                , [ Formula(
+                      Match(
+                        NativeOp("print", [Con("StringV", [String("obj has no super")])])
+                      , Wld()
+                      )
+                    )
+                  , Formula(
+                      Match(
+                        NativeOp("print", [Con("WrappedO", [VarRef("obj")])])
+                      , Wld()
+                      )
+                    )
+                  , Formula(
+                      Match(
+                        Con("NoMethod", [])
+                      , Cast(VarRef("m"), SimpleSort("M"))
+                      )
+                    )
+                  , Formula(Match(VarRef("OH2"), VarRef("OH3")))
+                  , Formula(Match(VarRef("MH2"), VarRef("MH3")))
+                  ]
+                )
+              , CaseOtherwise(
+                  [ Formula(
+                      Match(
+                        NativeOp("print", [Con("StringV", [String("object has a super")])])
+                      , Wld()
+                      )
+                    )
+                  , Formula(
+                      Match(
+                        NativeOp("print", [Con("WrappedO", [VarRef("obj")])])
+                      , Wld()
+                      )
+                    )
+                  , Formula(
+                      Match(
+                        VarRef("obj")
+                      , Con("Object", [Wld(), VarRef("inhAddr"), VarRef("tbl")])
+                      )
+                    )
+                  , Formula(
+                      Match(
+                        NativeOp("print", [Con("getMembers", [VarRef("tbl")])])
+                      , Wld()
+                      )
+                    )
+                  , CaseMatch(
+                      MapHas(VarRef("tbl"), VarRef("name"))
+                    , [ CasePattern(
+                          True()
+                        , [ Formula(
+                              Match(
+                                NativeOp("print", [Con("StringV", [String("found on inherit")])])
+                              , Wld()
+                              )
+                            )
+                          , Formula(
+                              Relation(
+                                Source(
+                                  Con("readMethod", [MapSelect(VarRef("tbl"), VarRef("name"))])
+                                , [ LabelComp(SimpleSort("DS"), VarRef("ids1"))
+                                  , LabelComp(SimpleSort("CS"), VarRef("ics1"))
+                                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH2"))
+                                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH2"))
+                                  ]
+                                )
+                              , NamedDynamicEmitted([], "default", SimpleSort("readMethod__Arrow"))
+                              , Target(
+                                  Cast(VarRef("m"), SimpleSort("M"))
+                                , [ LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH3"))
+                                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH3"))
+                                  ]
+                                )
+                              )
+                            )
+                          ]
+                        )
+                      , CaseOtherwise(
+                          [ Formula(
+                              RecRelation(
+                                Source(
+                                  Con("lookupInherit", [VarRef("inhAddr"), VarRef("name")])
+                                , [ LabelComp(SimpleSort("DS"), VarRef("ids1"))
+                                  , LabelComp(SimpleSort("CS"), VarRef("ics1"))
+                                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH2"))
+                                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH2"))
+                                  ]
+                                )
+                              , NamedDynamicEmitted([], "default", SimpleSort("lookupInherit__Arrow"))
+                              , Target(
+                                  Cast(VarRef("m"), SimpleSort("M"))
+                                , [ LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH3"))
+                                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH3"))
+                                  ]
+                                )
+                              )
+                            )
+                          ]
+                        )
+                      ]
+                    )
+                  ]
+                )
+              ]
             )
           ]
         , "---"
         , Relation(
             Source(
-              Con("lookupInherit", [Wld(), Wld()])
-            , [ LabelComp(SimpleSort("DS"), Wld())
-              , LabelComp(SimpleSort("CS"), Wld())
+              Con("lookupInherit", [VarRef("i"), VarRef("name")])
+            , [ LabelComp(SimpleSort("DS"), VarRef("ids1"))
+              , LabelComp(SimpleSort("CS"), VarRef("ics1"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH1"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH1"))
               ]
             )
           , NamedDynamicEmitted([], "default", SimpleSort("lookupInherit__Arrow"))
           , Target(
-              Con("NoMethod", [])
-            , [ LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH1"))
-              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH1"))
+              VarRef("m")
+            , [ LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH3"))
+              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH3"))
               ]
             )
           )
@@ -2767,12 +2890,6 @@ Module(
         )
       , Rule(
           [ Formula(
-              Match(
-                NativeOp("print", [Con("StringV", [String("inherit")])])
-              , Wld()
-              )
-            )
-          , Formula(
               Relation(
                 Source(
                   VarRef("e27")
@@ -2960,7 +3077,7 @@ Module(
               , Target(
                   Con(
                     "Object"
-                  , [VarRef("enc15"), VarRef("sup15"), VarRef("tbl30")]
+                  , [VarRef("enc15"), VarRef("sup15"), VarRef("tbl31")]
                   )
                 , [ LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH3"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH3"))
@@ -3023,7 +3140,7 @@ Module(
                         , VarRef("sup15")
                         , MapExtend(
                             Map([Bind(VarRef("name40"), VarRef("iMethod15"))])
-                          , VarRef("tbl30")
+                          , VarRef("tbl31")
                           )
                         ]
                       )
@@ -3091,7 +3208,7 @@ Module(
               , Target(
                   Con(
                     "Object"
-                  , [VarRef("enc17"), VarRef("sup17"), VarRef("tbl32")]
+                  , [VarRef("enc17"), VarRef("sup17"), VarRef("tbl33")]
                   )
                 , [ LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH2"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH2"))
@@ -3101,7 +3218,7 @@ Module(
             )
           , Formula(
               Match(
-                NativeOp("print", [Con("getMembers", [VarRef("tbl32")])])
+                NativeOp("print", [Con("getMembers", [VarRef("tbl33")])])
               , Wld()
               )
             )
@@ -3110,7 +3227,7 @@ Module(
                 Source(
                   Con(
                     "saveConstants"
-                  , [VarRef("names13"), VarRef("values9"), VarRef("tbl32")]
+                  , [VarRef("names13"), VarRef("values9"), VarRef("tbl33")]
                   )
                 , [ LabelComp(SimpleSort("DS"), VarRef("ids1"))
                   , LabelComp(SimpleSort("CS"), VarRef("ics1"))
@@ -3201,7 +3318,7 @@ Module(
                   , [ VarRef("int3")
                     , Con(
                         "Object"
-                      , [VarRef("enc17"), VarRef("sup17"), VarRef("tbl32")]
+                      , [VarRef("enc17"), VarRef("sup17"), VarRef("tbl33")]
                       )
                     ]
                   )

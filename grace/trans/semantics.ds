@@ -117,12 +117,10 @@ rules
   
   Inherit(e, _, _) -i-> i
     where
-      print(StringV("inherit")) => _;
       e --> ObjectRef(i).
 
   NoInherit() -i-> i
     where
-      print(StringV("noInherit")) => _;
       allocateObject(NoObject()) --> i.
   
   ics, ids |- ObjectDecl(inherit, [], cs) --> ObjectRef(i')

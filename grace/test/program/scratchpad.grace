@@ -3,10 +3,13 @@ method print(a) {
 };
 
 class super {
-  method a { 5; };
+  method a { base_print(5); };
 };
 
+method a { base_print(4); };
+
 object {
-  inherit super;
-  5;
+//  inherit super;
+//  method a { base_print(6); };
+  a;
 };
