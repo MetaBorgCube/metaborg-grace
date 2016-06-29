@@ -23,7 +23,7 @@ signature
     Params --> List(String)
 
     Inherit -i-> Ref
-  
+    
     List(Exp) -ea-> List(V)
     
   constructors
@@ -38,11 +38,6 @@ signature
     nativePrint: V -> V
     
 rules
-
-  Expression(e) --> e.
-  Declaration(e) --> e.
-  Assignment(e) --> e.
-  Wrapped(v) --> v.
   
   ICS(i) -s-> i.
   IDS(i) -s-> i.
@@ -51,7 +46,7 @@ rules
   ArgNumber(s) --> NumV(parseNumber(s)).
   ArgString(s) --> StringV(s).
   String(s) --> StringV(s).
-
+  
   Program(cs, _) -init-> cs'
     where
       CS ICS(fresh), DS IDS(fresh) |- allocateObject(NoObject()) :: OHeap {}, MHeap {} --> i;
@@ -67,26 +62,13 @@ rules
         [code | cs'] =>
           code --> _;
           cs' --> v'
-
       }.
-
-  [] : List(Exp) -ea-> [].
-  
-  [arg] : List(Exp) -ea-> [v]
-    where
-      arg --> v.
-  
-  [arg | more] : List(Exp) -ea-> [v | vs]
-    where
-      arg --> v;
-      more -ea-> vs : List(V).
 
   ics |- MCallCanonicalL(receiver, name, _, args) --> v
     where
        ics |- receiver --> ObjectRef(i');
        ics, DS IDS(i') |- lookupAll(name) --> m;
-       DS IDS(i') |- Call(m, args) --> v;
-       Done() => v.
+       DS IDS(i') |- Call(m, args) --> v.
   
   MCallImplL("base_print", _, [v]) --> v
     where
@@ -131,10 +113,8 @@ rules
   ics |- Call(Method(names, code, ds), values) --> v
     where
       readObject(ics) --> Object(enc, sup, tbl);
-      print(getMembers(tbl)) => _;
       saveConstants(names, values, tbl) --> tbl';
       writeObject(ics, Object(enc, sup, tbl')) --> _;
-      print(getMembers(tbl')) => _;
       ics, DS IDS(ds) |- code --> v;
       writeObject(ics, Object(enc, sup, tbl)) --> _. // restore
   
@@ -156,3 +136,13 @@ rules
       writeMethod(iMethod, Method([], [Wrapped(v)], ids)) :: MH --> _ :: MH';
       {name |--> iMethod, tbl} => tbl'.
       
+  [] : List(Exp) -ea-> [].
+  
+  [arg] : List(Exp) -ea-> [v]
+    where
+      arg --> v.
+  
+  [arg | more] : List(Exp) -ea-> [v | vs]
+    where
+      arg --> v;
+      more -ea-> vs : List(V).

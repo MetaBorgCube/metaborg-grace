@@ -1,7 +1,3 @@
-method print(a) {
-  base_print(a);
-};
-
 class super {
   method a { base_print(5); };
 };
