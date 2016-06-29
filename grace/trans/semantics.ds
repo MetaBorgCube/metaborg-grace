@@ -13,7 +13,7 @@ signature
 
   arrows
     Program -init-> V
-    
+
     Exp --> V
     CodeSequence --> V
     Declaration --> V
@@ -38,6 +38,11 @@ signature
     nativePrint: V -> V
     
 rules
+  
+  Expression(e) --> e.
+  Declaration(e) --> e.
+  Assignment(e) --> e.
+  Wrapped(v) --> v.
   
   ICS(i) -s-> i.
   IDS(i) -s-> i.
