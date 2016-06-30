@@ -19,13 +19,13 @@ signature
     
     Stored: O -> V
     
-    readObject: Int --> O
-    allocateObject: O --> Int
-    writeObject: Int * O --> O
+    readObject: Ref --> O
+    allocateObject: O --> Ref
+    writeObject: Ref * O --> O
     
-    readMethod: Int --> M
-    allocateMethod: M --> Int
-    writeMethod: Int * M --> M
+    readMethod: Ref --> M
+    allocateMethod: M --> Ref
+    writeMethod: Ref * M --> M
 
 rules
   

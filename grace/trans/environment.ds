@@ -7,13 +7,15 @@ signature
   sort aliases
     Members = Map(String, Int)
 
-  variables
-    M : Members
+  sorts
+    Table
 
   constructors
     getMembers: Members -> V
-//    Object: O * O * Env -> O // the enclosing object, inherited object, and its bound names
-//    Trait: Env -> O // basically just a list of mappings of function names to memory locations
-//    Method: List(String) * Env * List(CodeSequence) -> O // env of declaration and code
     
+    member-table: Ref --> Table
+    
+    NoTable: Table
+    MemTable: Members -> Table 
+ 
 rules

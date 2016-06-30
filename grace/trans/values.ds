@@ -18,28 +18,30 @@ signature
     //      enclosing object ref
     //            super ref
     //                  members (methods)
-    Object: Int * Int * Map(String, Int) -> O
+    Object: Ref * Ref * Map(String, Int) -> O
     
     //      parameters
     //                     code
     //                                          self (decl)
-    Method: List(String) * List(CodeSequence) * Int -> M
+    Method: List(String) * List(CodeSequence) * Ref -> M
 
     NoObject: O
     NoMethod: M
+    NoMethodAndStop: M
     
     Wrapped: V -> CodeSequence
     WrappedO: O -> V
+    WrappedM: M -> V
     ObjectRef: Int -> V
     WrappedArgs: CallArgs -> V
     
-    ICS: Int -> CS
-    IDS: Int -> DS
+    ICS: Ref -> CS
+    IDS: Ref -> DS
     
   arrows
   
-    CS -s-> Int
-    DS -s-> Int
+    CS -s-> Ref
+    DS -s-> Ref
     
   sorts
     V // value
@@ -53,8 +55,9 @@ signature
     vs : List(V)
     o : O
     m : M
-    ics: CS
-    ids: DS
+    csv: CS
+    dsv: DS
+    r : Ref
 
   native operators
     parseNumber: String -> Int

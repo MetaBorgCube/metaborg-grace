@@ -3,7 +3,7 @@ module trans/lookup
 imports
   src-gen/ds-signatures/grace-sig
   src-gen/ds-signatures/grace-lowered-sig
-  
+
   trans/values
   trans/store
   trans/environment
@@ -11,62 +11,96 @@ imports
 signature
 
   constructors
-    lookupAll: String --> M
-    lookupOuter: Int * String --> M
-    lookupInheritAndOuter: String --> M
+    lookup: String --> M
+    lookup-super: String --> M
+    lookup-outer: String --> M
+    lookup-local: String --> M
     
-    lookupInheritObj: O * String --> M
-    outerIfNoMethod: M * Int * String --> M
+    get-super: Ref --> Ref
+    get-outer: Ref --> Ref
 
 rules
-
-  ics, ids |- lookupAll(name) --> m
+  
+  CS ICS(rcs), DS IDS(rds) |- lookup(name) --> m'
     where
-      ics -s-> iics;
-      ids -s-> iids;
-      iics == iids;
-      readObject(ics) --> obj@Object(_, _, tbl);
-      case tbl[name?] of { // local
-        true =>
-          readMethod(tbl[name]) --> Method(names, b, idc');
-          Method(names, b, idc') => m
-        otherwise =>
-          lookupInheritObj(obj, name) --> m
+      rcs == rds;
+      lookup-super(name) --> m;
+      case m of {
+        Method(_,_,_) =>
+          m => m'
+        NoMethod() =>
+          lookup-outer(name) --> m'
+      }.
+  
+  CS ICS(rcs), DS IDS(rds) |- lookup(name) --> m
+    where
+      rcs != rds;
+      lookup-super(name) --> Method(_,_,_);
+      DS IDS(rcs) |- lookup-super(name) --> m.
+  
+  CS ICS(rcs), DS IDS(rds) |- lookup(name) --> lookup-outer(name)
+    where
+      rcs != rds;
+      lookup-super(name) --> NoMethod().
+      
+  lookup-outer(name) --> m
+    where
+      get-outer(0) --> r;
+      CS ICS(r), DS IDS(r) |- lookup(name) --> m. // this is changed to include both cs and ds as r
+  
+//  lookup-super(name) --> m
+//  where
+//    print(StringV("trying local")) => _;
+//    lookup-local(name) --> m@Method(_, _, _);
+//    print(StringV("local found")) => _;
+//    print(WrappedM(m)) => _.
+  
+//  lookup-super(name) --> m
+//  where
+//    print(StringV("trying local to be NoMethod")) => _;
+//    lookup-local(name) --> NoMethod();
+//    get-super(fresh) --> r;
+//    DS IDS(r) |- lookup-super(name) --> m;
+//    print(StringV("found in super")) => _;
+//    print(WrappedM(m)) => _.
+  
+  lookup-super(name) --> m
+  where
+    lookup-local(name) --> m;
+    case m of {
+      Method(_, _, _) =>
+        m => m'
+      NoMethod() =>
+        get-super(0) --> r;
+        DS IDS(r) |- lookup-super(name) --> m
+      NoMethodAndStop() =>
+        NoMethod() => m
+    }.
+  
+  DS IDS(r) |- lookup-local(name) --> m
+    where
+      member-table(r) --> mem;
+      case mem of {
+        NoTable() =>
+          NoMethodAndStop() => m
+        MemTable(tbl) =>
+          case tbl[name?] of {
+            true =>
+              tbl[name] => mr;
+              readMethod(mr) --> m
+            otherwise =>
+              NoMethod() => m
+          }
       }.
       
-  ics, ids |- lookupAll(name) --> m
+  DS IDS(r) |- get-super(_) --> sup : Ref where readObject(r) --> Object(_, sup, _).
+  DS IDS(r) |- get-outer(_) --> out : Ref where readObject(r) --> Object(out, _, _).
+  
+  member-table(r) --> MemTable(tbl) : Table
     where
-      ics -s-> iics;
-      ids -s-> iids;
-      iics == iids;
-      readObject(ics) --> Object(_, _, tbl);
-      case tbl[name?] of { // local
-        true =>
-          readMethod(tbl[name]) --> Method(names, b, idc');
-          Method(names, b, idc') => m
-        otherwise =>
-          lookupOuter(iids, name) --> m
-      }.
-    
-    lookupOuter(i, name) --> m // always on ds
-      where
-        readObject(i) --> Object(outerAddr,_,tbl);
-        case tbl[name?] of { // local
-          true =>
-            readMethod(tbl[name]) --> m
-          otherwise =>
-            lookupOuter(outerAddr, name) --> m
-        }.
-        
-    lookupInheritObj(NoObject(), _) --> NoMethod().
+      readObject(r) --> Object(_,_,tbl).
 
-    lookupInheritObj(Object(_, inhAddr, tbl), name) --> m
-      where
-        case tbl[name?] of {
-          true =>
-            readMethod(tbl[name]) --> m
-          otherwise =>
-            readObject(inhAddr) --> obj';
-            lookupInheritObj(obj', name) --> m
-        }.
- 
+  member-table(r) --> NoTable() : Table
+    where
+      readObject(r) --> NoObject().  
+  

@@ -22,7 +22,7 @@ signature
     List(CodeSequence) --> V
     Params --> List(String)
 
-    Inherit -i-> Ref
+    Inherit --> Ref
     
     List(Exp) -ea-> List(V)
     
@@ -54,74 +54,73 @@ rules
   
   Program(cs, _) -init-> cs'
     where
-      CS ICS(fresh), DS IDS(fresh) |- allocateObject(NoObject()) :: OHeap {}, MHeap {} --> i;
-      CS ICS(i), DS IDS(i) |- cs :: OHeap {}, MHeap {} --> cs' :: OHeap _, MHeap _.
+      CS ICS(fresh), DS IDS(fresh) |- allocateObject(NoObject()) :: OHeap {}, MHeap {} --> r;
+      CS ICS(r), DS IDS(r) |- cs :: OHeap {}, MHeap {} --> cs' :: OHeap _, MHeap _.
   
   cs : List(CodeSequence) --> v'
     where
       case cs of {
         [] =>
           Done() => v'
-        [code | [] ] =>  //needed for final value
+        [code | [] ] =>
           code --> v'
         [code | cs'] =>
           code --> _;
           cs' --> v'
       }.
 
-  ics |- MCallCanonicalL(receiver, name, _, args) --> v
+  csv |- MCallCanonicalL(receiver, name, _, args) --> v
     where
-       ics |- receiver --> ObjectRef(i');
-       ics, DS IDS(i') |- lookupAll(name) --> m;
+       csv |- receiver --> ObjectRef(i');
+       csv, DS IDS(i') |- lookup(name) --> m;
        DS IDS(i') |- Call(m, args) --> v.
   
   MCallImplL("base_print", _, [v]) --> v
     where
       nativePrint(v) => _.
   
-  ics |- MCallImplL(name, _, vs@[]) --> v
+  MCallImplL(name, _, vs) --> Call(lookup(name), vs)
     where
-      ics |- lookupAll(name) --> m;
-      ics |- Call(m, vs) --> v.
+      print(StringV("calling impl")) => _.
   
-  ics |- MCallImplL(name, _, vs) --> v
+  dsv |- Constant(name, _, _, v) --> Done()
     where
-      ics |- lookupAll(name) --> m;
-      ics |- Call(m, vs) --> v.
+      readObject(dsv) --> Object(enc, sup, tbl);
+      allocateMethod(Method([], [Wrapped(v)], dsv)) --> iMethod;
+      writeObject(dsv, Object(enc, sup, {name |--> iMethod, tbl} )) --> _.
+  // create addmember rule to abstract this
   
-  ics, ids |- Constant(name, _, _, e1) --> Done()
+  dsv |- MethodDeclL(_, name, _, _, pNames, _, _, code, _) --> Done()
     where
-      ids |- e1 --> v;
-      ids |- readObject(ids) --> Object(enc, sup, tbl);
-      ids |- allocateMethod(Method([], [Wrapped(v)], ids)) --> iMethod;
-      writeObject(ids, Object(enc, sup, {name |--> iMethod, tbl} )) --> _.
+      allocateMethod(Method(pNames, code, dsv)) --> iMethod;
+      readObject(dsv) --> Object(enc, sup, tbl);
+      writeObject(dsv, Object(enc, sup, {name |--> iMethod, tbl})) --> _.
   
-  ics, ids |- MethodDeclL(_, name, _, _, pNames, _, _, code, _) --> Done()
+  dsv |- ObjectDecl(inherit, [], cs) --> ObjectRef(i')
     where
-      ids |- allocateMethod(Method(pNames, code, ids)) --> iMethod;
-      ids |- readObject(ids) --> Object(enc, sup, tbl);
-      ids |- writeObject(ids, Object(enc, sup, {name |--> iMethod, tbl})) --> _.
+      allocateObject(Object(dsv, inherit, {})) --> i'; // allocate should create object
+      CS ICS(i'), DS IDS(i') |- cs --> _. // addr -> objecref
   
-  Inherit(e, _, _) -i-> i
-    where
-      e --> ObjectRef(i).
-
-  NoInherit() -i-> i
-    where
-      allocateObject(NoObject()) --> i.
+//  Call(Method(names, code, ds), values) --> v
+//  where
+//    DS IDS(ds) |- with-binds(binds(names, values), code) --> v.
+//  
+//  ics |- with-binds(binds, code) --> v
+//  where
+//    readObject(ics) --> Object(enc, sup, tbl);
+//    write(Object(enc, sup, tbl + binds)) --> _;
+//    code --> v;
+//    write(Object(enc, sup, tbl + tbl')) --> _.
+//    
+    // add inner object as env for method
   
-  ics, ids |- ObjectDecl(inherit, [], cs) --> ObjectRef(i')
+  csv |- Call(Method(names, code, ds), values) --> v
     where
-      allocateObject(Object(ids, inherit, {})) --> i';
-      CS ICS(i'), DS IDS(i') |- cs --> _.
-      
-  ics |- Call(Method(names, code, ds), values) --> v
-    where
-      readObject(ics) --> Object(enc, sup, tbl);
+      readObject(csv) --> Object(enc, sup, tbl);
       saveConstants(names, values, tbl) --> tbl';
-      writeObject(ics, Object(enc, sup, tbl')) --> _;
-      ics, DS IDS(ds) |- code --> v;
-      writeObject(ics, Object(enc, sup, tbl)) --> _. // restore
+      writeObject(csv, Object(enc, sup, tbl')) --> _;
+      DS IDS(ds) |- code --> v;
+      writeObject(csv, Object(enc, sup, tbl)) --> _. // restore
   
   saveConstants(names : List(String), values: List(V), tbl : Members) --> tbl'''
     where
@@ -135,10 +134,10 @@ rules
           {tbl'', tbl'} => tbl'''
       }.
       
-  ics, ids |- saveConst(name, v, tbl) :: MH --> tbl' :: MH'
+  dsv |- saveConst(name, v, tbl) :: MH --> tbl' :: MH'
     where
       fresh => iMethod;
-      writeMethod(iMethod, Method([], [Wrapped(v)], ids)) :: MH --> _ :: MH';
+      writeMethod(iMethod, Method([], [Wrapped(v)], dsv)) :: MH --> _ :: MH';
       {name |--> iMethod, tbl} => tbl'.
       
   [] : List(Exp) -ea-> [].
@@ -151,3 +150,11 @@ rules
     where
       arg --> v;
       more -ea-> vs : List(V).
+
+  Inherit(e, _, _) --> r // change to default arrow
+    where
+      e --> ObjectRef(r).
+
+  NoInherit() --> r
+    where
+      allocateObject(NoObject()) --> r.

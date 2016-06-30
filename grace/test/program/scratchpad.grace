@@ -1,17 +1,14 @@
 class super {
-  method a { base_print(4); };
+  method a { 4; };
+  
 };
 
-method out { base_print(5); };
+def a = 3;
 
-method b { out; };
+base_print(c);
 
 object {
   inherit super;
-  method c { base_print(6); };
-  method d(a, b) { base_print(a); base_print(b); };
-  a;
-  b;
-  c;
-  d(7,8);
+  method a { 5; };
+  base_print(c);
 };
