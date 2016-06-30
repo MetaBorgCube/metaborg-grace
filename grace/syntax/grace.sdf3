@@ -40,7 +40,11 @@ context-free syntax
   TypeAnn.NoTypeAnn             = <>
   Type.Type                     = <<ID>>
   
-  Declaration.ClassDecl         = <class <MethodNames+> <MethodBody>>
+  Declaration.ClassDecl         = <class <MethodNames+> {
+    <Inherit>
+    <Use*>
+    <CodeSequence*>
+}>
   Declaration.TraitDecl         = <trait <MethodNames+> <MethodBody>>
   Declaration.TypeDeclDirect    = <type <ID> <ArgType> <Annotations> = <TypeDeclTarget>>
   Declaration.TypeDeclDirectW   = <type <ID> <ArgType> <Annotations> = <TypeDeclTarget> <Where>> {prefer}

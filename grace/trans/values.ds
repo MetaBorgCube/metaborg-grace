@@ -32,11 +32,14 @@ signature
     Wrapped: V -> CodeSequence
     WrappedO: O -> V
     WrappedM: M -> V
+    WrappedLCS: List(List(CodeSequence)) -> V
     ObjectRef: Int -> V
     WrappedArgs: CallArgs -> V
     
-    ICS: Ref -> CS
-    IDS: Ref -> DS
+    CS: Ref -> CS
+    DS: Ref -> DS
+    
+    Unit: Unit
     
   arrows
   
@@ -49,6 +52,7 @@ signature
     M // method
     CS // callsite
     DS // declaresite
+    Unit
 
   variables
     v : V

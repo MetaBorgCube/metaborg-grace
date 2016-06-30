@@ -1,14 +1,22 @@
-class super {
-  method a { 4; };
-  
+class superduper {
+  method w { "disturb?"; };
 };
 
-def a = 3;
+class supersuper {
+  inherit superduper;
+  method w { "disturb!"; };
+  method a(w) { w; };
+};
 
-base_print(c);
+class super {
+  inherit supersuper;
+  method a(w) { w; };
+  method w { "disturb!"; };
+};
 
 object {
   inherit super;
-  method a { 5; };
-  base_print(c);
+  method a(w) { w; };
+  method w { "disturb!"; };
+  base_print(a(1));
 };

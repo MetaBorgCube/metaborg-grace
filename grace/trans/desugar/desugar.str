@@ -162,10 +162,9 @@ rules
         )]
       )
 
-
   desugar-class-declaration:
-    ClassDecl(mIDs,MethodBody(code)) ->
-    MethodDecl(NoPrefix(),mIDs,NoMethodType(),MethodBody([Expression(ObjectDecl(NoInherit(),[],code))]),NoWhere())
+    ClassDecl(mIDs, inh, use, code) ->
+    MethodDecl(NoPrefix(),mIDs,NoMethodType(),MethodBody([Expression(ObjectDecl(inh,use,code))]),NoWhere())
   part-to-nameList:
     (Part(name, _, _), list) -> [list, <name-to-string> name]
   
@@ -190,7 +189,6 @@ rules
 
   part-to-argList:
     (Part(_, _, args), list) -> [list, args]
-  
 
   unpack-or-emptylist: NoArgType() -> []
   unpack-or-emptylist: a -> a

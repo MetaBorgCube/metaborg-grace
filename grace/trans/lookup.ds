@@ -21,7 +21,7 @@ signature
 
 rules
   
-  CS ICS(rcs), DS IDS(rds) |- lookup(name) --> m'
+  CS CS(rcs), DS DS(rds) |- lookup(name) --> m'
     where
       rcs == rds;
       lookup-super(name) --> m;
@@ -32,13 +32,13 @@ rules
           lookup-outer(name) --> m'
       }.
   
-  CS ICS(rcs), DS IDS(rds) |- lookup(name) --> m
+  CS CS(rcs), DS DS(rds) |- lookup(name) --> m
     where
       rcs != rds;
       lookup-super(name) --> Method(_,_,_);
-      DS IDS(rcs) |- lookup-super(name) --> m.
+      DS DS(rcs) |- lookup-super(name) --> m.
   
-  CS ICS(rcs), DS IDS(rds) |- lookup(name) --> lookup-outer(name)
+  CS CS(rcs), DS DS(rds) |- lookup(name) --> lookup-outer(name)
     where
       rcs != rds;
       lookup-super(name) --> NoMethod().
@@ -46,7 +46,7 @@ rules
   lookup-outer(name) --> m
     where
       get-outer(0) --> r;
-      CS ICS(r), DS IDS(r) |- lookup(name) --> m. // this is changed to include both cs and ds as r
+      CS CS(r), DS DS(r) |- lookup(name) --> m. // this is changed to include both cs and ds as r
   
 //  lookup-super(name) --> m
 //  where
@@ -60,7 +60,7 @@ rules
 //    print(StringV("trying local to be NoMethod")) => _;
 //    lookup-local(name) --> NoMethod();
 //    get-super(fresh) --> r;
-//    DS IDS(r) |- lookup-super(name) --> m;
+//    DS DS(r) |- lookup-super(name) --> m;
 //    print(StringV("found in super")) => _;
 //    print(WrappedM(m)) => _.
   
@@ -72,12 +72,12 @@ rules
         m => m'
       NoMethod() =>
         get-super(0) --> r;
-        DS IDS(r) |- lookup-super(name) --> m
+        DS DS(r) |- lookup-super(name) --> m
       NoMethodAndStop() =>
         NoMethod() => m
     }.
   
-  DS IDS(r) |- lookup-local(name) --> m
+  DS DS(r) |- lookup-local(name) --> m
     where
       member-table(r) --> mem;
       case mem of {
@@ -93,8 +93,8 @@ rules
           }
       }.
       
-  DS IDS(r) |- get-super(_) --> sup : Ref where readObject(r) --> Object(_, sup, _).
-  DS IDS(r) |- get-outer(_) --> out : Ref where readObject(r) --> Object(out, _, _).
+  DS DS(r) |- get-super(_) --> sup : Ref where readObject(r) --> Object(_, sup, _).
+  DS DS(r) |- get-outer(_) --> out : Ref where readObject(r) --> Object(out, _, _).
   
   member-table(r) --> MemTable(tbl) : Table
     where
