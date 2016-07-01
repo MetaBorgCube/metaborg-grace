@@ -38,31 +38,16 @@ rules
       lookup-super(name) --> Method(_,_,_);
       DS DS(rcs) |- lookup-super(name) --> m.
   
-  CS CS(rcs), DS DS(rds) |- lookup(name) --> lookup-outer(name)
+  CS CS(rcs), DS DS(rds) |- lookup(name) --> m
     where
       rcs != rds;
-      lookup-super(name) --> NoMethod().
+      lookup-super(name) --> NoMethod();
+      lookup-outer(name) --> m.
       
   lookup-outer(name) --> m
     where
       get-outer(0) --> r;
-      CS CS(r), DS DS(r) |- lookup(name) --> m. // this is changed to include both cs and ds as r
-  
-//  lookup-super(name) --> m
-//  where
-//    print(StringV("trying local")) => _;
-//    lookup-local(name) --> m@Method(_, _, _);
-//    print(StringV("local found")) => _;
-//    print(WrappedM(m)) => _.
-  
-//  lookup-super(name) --> m
-//  where
-//    print(StringV("trying local to be NoMethod")) => _;
-//    lookup-local(name) --> NoMethod();
-//    get-super(fresh) --> r;
-//    DS DS(r) |- lookup-super(name) --> m;
-//    print(StringV("found in super")) => _;
-//    print(WrappedM(m)) => _.
+      CS CS(r), DS DS(r) |- lookup(name) --> m.
   
   lookup-super(name) --> m
   where
@@ -71,36 +56,40 @@ rules
       Method(_, _, _) =>
         m => m'
       NoMethod() =>
-        get-super(0) --> r;
-        DS DS(r) |- lookup-super(name) --> m
+        get-super(0) --> sr;
+        DS DS(sr) |- lookup-super(name) --> m
       NoMethodAndStop() =>
         NoMethod() => m
     }.
   
+  DS DS(r) |- lookup-local(_) --> NoMethodAndStop()
+    where
+      readObject(r) --> NoObject().
+ 
   DS DS(r) |- lookup-local(name) --> m
     where
-      member-table(r) --> mem;
-      case mem of {
-        NoTable() =>
-          NoMethodAndStop() => m
-        MemTable(tbl) =>
-          case tbl[name?] of {
-            true =>
-              tbl[name] => mr;
-              readMethod(mr) --> m
-            otherwise =>
-              NoMethod() => m
-          }
+      readObject(r) --> Object(_,_,_);
+      member-table(r) --> tbl;
+      case tbl[name?] of {
+        true =>
+          tbl[name] => mr;
+          readMethod(mr) --> m
+        otherwise =>
+          NoMethod() => m
       }.
       
-  DS DS(r) |- get-super(_) --> sup : Ref where readObject(r) --> Object(_, sup, _).
-  DS DS(r) |- get-outer(_) --> out : Ref where readObject(r) --> Object(out, _, _).
+  DS DS(r) |- get-super(_) --> sup
+    where readObject(r) --> Object(_, sup, _).
+
+  DS DS(r) |- get-super(_) --> r
+    where readObject(r) --> NoObject().
+    
+  DS DS(r) |- get-outer(_) --> out
+    where readObject(r) --> Object(out, _, _).
+
+  DS DS(r) |- get-outer(_) --> r
+    where readObject(r) --> NoObject().
   
-  member-table(r) --> MemTable(tbl) : Table
+  member-table(r) --> tbl
     where
       readObject(r) --> Object(_,_,tbl).
-
-  member-table(r) --> NoTable() : Table
-    where
-      readObject(r) --> NoObject().  
-  

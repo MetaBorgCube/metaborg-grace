@@ -13,9 +13,7 @@ signature
   constructors
     getMembers: Members -> V
     
-    member-table: Ref --> Table
-    
-    NoTable: Table
-    MemTable: Members -> Table 
+    member-table: Ref --> Members
+
  
 rules

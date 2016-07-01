@@ -1,9 +1,4 @@
-class superduper {
-  method w { "disturb?"; };
-};
-
 class supersuper {
-  inherit superduper;
   method w { "disturb!"; };
   method a(w) { w; };
 };
@@ -19,4 +14,5 @@ object {
   method a(w) { w; };
   method w { "disturb!"; };
   base_print(a(1));
+  base_print(w);
 };

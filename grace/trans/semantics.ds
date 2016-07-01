@@ -71,11 +71,11 @@ rules
   [code | cs@[_|_] ] : List(CodeSequence) --> cs
     where code --> _.
   
-  csv |- MCallCanonicalL(receiver, name, _, args) --> v
+  MCallCanonicalL(receiver, name, _, args) --> v
     where
-       csv |- receiver --> ObjectRef(i');
-       csv, DS DS(i') |- lookup(name) --> m;
-       DS DS(i') |- Call(m, args) --> v.
+       receiver --> ObjectRef(r);
+       DS DS(r) |- lookup(name) --> m;
+       DS DS(r) |- Call(m, args) --> v.
   
   MCallImplL("base_print", _, [v]) --> nativePrint(v).
   
@@ -91,8 +91,8 @@ rules
       
   dsv |- ObjectDecl(inherit, [], cs) --> ObjectRef(or)
     where
-      allocateObject(Object(dsv, inherit, {})) --> or; // allocate should create object
-      CS CS(or), DS DS(or) |- cs --> _. // addr -> objecref
+      allocateObject(Object(dsv, inherit, {})) --> or;
+      CS CS(or), DS DS(or) |- cs --> _.
 
   Call(Method([], code, ds), []) --> v
     where
@@ -138,7 +138,7 @@ rules
       arg --> v;
       more -ea-> vs : List(V).
 
-  Inherit(e, _, _) --> r // change to default arrow
+  Inherit(e, _, _) --> r
     where
       e --> ObjectRef(r).
 
