@@ -4,10 +4,9 @@ imports
   src-gen/ds-signatures/grace-sig
   src-gen/ds-signatures/grace-lowered-sig
   
-  semantics/trans/values
-  semantics/trans/store
-  semantics/trans/environment
-  semantics/trans/lookup
+  trans/semantics/values
+  trans/semantics/store
+  trans/semantics/lookup
 
 signature
   
@@ -15,16 +14,15 @@ signature
     Program -init-> V
     Program --> V
 
+    List(CodeSequence) --> V
+
     Exp --> V
     CodeSequence --> V
     Declaration --> V
     Assignment --> V
-    CallArgs --> V
-    List(CodeSequence) --> V
-//    Params --> List(String)
-
-    Inherit --> Ref
     
+    
+    Inherit --> Ref
     List(Exp) -ea-> List(V)
     
   constructors
@@ -39,7 +37,7 @@ signature
     
     wrap-values: List(V) --> List(List(CodeSequence))
     
-    no-super: Int --> Ref
+    no-super: --> Ref
     
   native operators
     nativeIBinOp: String * Int * Int -> Int
@@ -56,60 +54,58 @@ rules
   DS(i) -s-> i.
 
   Number(s) --> NumV(parseNumber(s)).
-  ArgNumber(s) --> NumV(parseNumber(s)).
-  ArgString(s) --> StringV(s).
   String(s) --> StringV(s).
   
   p@Program(_, _) -init-> v
     where
       CS CS(fresh), DS DS(fresh) |- p :: OHeap {}, MHeap {} --> v.
       
-  Program(cs, _) --> v
+  Program(code, _) --> v
     where
       allocateObject(NoObject())--> r;
-      CS CS(r), DS DS(r) |- cs --> v.
+      CS CS(r), DS DS(r) |- code --> v.
   
   [] : List(CodeSequence) --> Done().
   
   [code | [] ] : List(CodeSequence) --> code.
 
-  [code | cs@[_|_] ] : List(CodeSequence) --> cs
+  [code | codes@[_|_] ] : List(CodeSequence) --> codes
     where code --> _.
   
-  MCallCanonicalL(receiver, name, _, args) --> v
+  MCallRecvL(receiver, name, args) --> v
     where
        receiver --> ObjectRef(r);
        DS DS(r) |- lookup(name) --> m;
        DS DS(r) |- Call(m, args) --> v.
   
-  MCallImplL("base_print", _, [v]) --> nativePrint(v).
+  MCallL("base_print", [v]) --> nativePrint(v).
   
-  MCallImplL(name, _, vs) --> Call(lookup(name), vs).
+  MCallL(name, vs) --> Call(lookup(name), vs).
   
-  Constant(name, _, _, v) --> Done()
+  ConstantL(name, _, v) --> Done()
     where
       add-member(name, [], [Wrapped(v)]) --> _.
   
-  MethodDeclL(_, name, _, _, params, _, _, code, _) --> Done()
+  MethodL(name, _, params, code) --> Done()
     where
       add-member(name, params, code) --> _.
       
-  dsv |- ObjectDecl(inherit, [], cs) --> ObjectRef(or)
+  ds |- ObjectDecl(inherit, [], code) --> ObjectRef(or)
     where
-      allocateObject(Object(dsv, inherit, {})) --> or;
-      CS CS(or), DS DS(or) |- cs --> _.
+      allocateObject(Object(ds, inherit, {})) --> or;
+      CS CS(or), DS DS(or) |- code --> _.
 
-  Call(Method([], code, ds), []) --> v
+  Call(Method([], code, scope), []) --> v
     where
-      CS CS(ds), DS DS(ds) |- code --> v.
+      CS CS(scope), DS DS(scope) |- code --> v.
   
-  Call(Method([n | _ ], code, ds), [a | _ ]) --> v
+  Call(Method([n | _ ], code, scope), [a | _ ]) --> v
     where
-      allocateObject(Object(ds, no-super(0), {})) --> call-scope;
+      allocateObject(Object(scope, no-super(), {})) --> call-scope;
       DS DS(call-scope) |- add-member(n, [], [Wrapped(a)]) --> _;
       CS CS(call-scope), DS DS(call-scope) |- code --> v.
   
-  no-super(_) --> allocateObject(NoObject()).
+  no-super() --> allocateObject(NoObject()).
   
   wrap-values([]) --> [] : List(List(CodeSequence)).
   
@@ -120,16 +116,16 @@ rules
   
   add-members([], []) --> Unit().
   
-  add-members([n | ns], [c | cs]) --> Unit()
+  add-members([n | ns], [code | codes]) --> Unit()
     where
-      add-member(n, [], c) --> _;
-      add-members(ns, cs) --> _.
+      add-member(n, [], code) --> _;
+      add-members(ns, codes) --> _.
   
-  dsv |- add-member(name, params, code) --> Unit()
+  ds |- add-member(name, params, code) --> Unit()
     where
-      allocateMethod(Method(params, code, dsv)) --> iMethod;
-      readObject(dsv) --> Object(enc, sup, tbl);
-      writeObject(dsv, Object(enc, sup, {name |--> iMethod, tbl} )) --> _.
+      allocateMethod(Method(params, code, ds)) --> iMethod;
+      readObject(ds) --> Object(enc, sup, tbl);
+      writeObject(ds, Object(enc, sup, {name |--> iMethod, tbl} )) --> _.
       
   [] : List(Exp) -ea-> [].
   

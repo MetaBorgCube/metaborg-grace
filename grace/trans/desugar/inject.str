@@ -10,7 +10,7 @@ imports
     src-gen/signatures/General-sig
 
 rules
-  
+
   inject-all = inject-booleans
 
   inject-booleans: Program([c | cs ], b) -> Program([Declaration(
@@ -21,13 +21,13 @@ rules
                 NoInherit()
               , []
               , [ Declaration(
-                    MethodDeclL(
+                    MethodL(
                       "ifTrue"
                     , NoAnnotations()
                     , ["blk"]
                     , [ Expression(
-                          MCallCanonicalL(
-                            MCallImplL("blk", [])
+                          MCallRecvL(
+                            MCallL("blk", [])
                           , "apply"
                           , []
                           )
@@ -36,7 +36,7 @@ rules
                     )
                   )
                 , Declaration(
-                    MethodDeclL(
+                    MethodL(
                       "ifFalse"
                     , NoAnnotations()
                     , ["blk"]
@@ -44,7 +44,7 @@ rules
                     )
                   )
                 , Declaration(
-                    MethodDeclL(
+                    MethodL(
                       "||"
                     , NoAnnotations()
                     , ["other"]
@@ -52,15 +52,15 @@ rules
                     )
                   )
                 , Declaration(
-                    MethodDeclL(
+                    MethodL(
                       "&&"
                     , NoAnnotations()
                     , ["other"]
-                    , [Expression(MCallImplL("other", []))]
+                    , [Expression(MCallL("other", []))]
                     )
                   )
                 , Declaration(
-                    MethodDeclL(
+                    MethodL(
                       "asString"
                     , NoAnnotations()
                     , []
@@ -79,7 +79,7 @@ rules
                 NoInherit()
               , []
               , [ Declaration(
-                    MethodDeclL(
+                    MethodL(
                       "ifTrue"
                     , NoAnnotations()
                     , ["blk"]
@@ -87,13 +87,13 @@ rules
                     )
                   )
                 , Declaration(
-                    MethodDeclL(
+                    MethodL(
                       "ifFalse"
                     , NoAnnotations()
                     , ["blk"]
                     , [ Expression(
-                          MCallCanonicalL(
-                            MCallImplL("blk", [])
+                          MCallRecvL(
+                            MCallL("blk", [])
                           , "apply"
                           , []
                           )
@@ -102,15 +102,15 @@ rules
                     )
                   )
                 , Declaration(
-                    MethodDeclL(
+                    MethodL(
                       "||"
                     , NoAnnotations()
                     , ["other"]
-                    , [Expression(MCallImplL("other", []))]
+                    , [Expression(MCallL("other", []))]
                     )
                   )
                 , Declaration(
-                    MethodDeclL(
+                    MethodL(
                       "&&"
                     , NoAnnotations()
                     , ["other"]
@@ -118,7 +118,7 @@ rules
                     )
                   )
                 , Declaration(
-                    MethodDeclL(
+                    MethodL(
                       "asString"
                     , NoAnnotations()
                     , []

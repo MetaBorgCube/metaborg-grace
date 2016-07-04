@@ -1,15 +1,15 @@
-module semantics/trans/values
+module trans/semantics/values
 
 imports
 
   src-gen/ds-signatures/grace-sig
-  // move environment into this file
 
 signature
 
   sort aliases
     Ref = Int
-
+    Members = Map(String, Int)
+    
   constructors
     NumV: Int -> V
     StringV: String -> V
@@ -44,6 +44,9 @@ signature
     
     Unit: Unit
     
+    getMembers: Members -> V
+    member-table: Ref --> Members
+    
   arrows
   
     CS -s-> Ref
@@ -56,14 +59,15 @@ signature
     CS // callsite
     DS // declaresite
     Unit
+    Table
 
   variables
     v : V
     vs : List(V)
     o : O
     m : M
-    csv: CS
-    dsv: DS
+    cs: CS
+    ds: DS
     r : Ref
 
   native operators

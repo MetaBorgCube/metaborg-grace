@@ -8,12 +8,11 @@ imports
     src-gen/signatures/grace-sig
     src-gen/signatures/grace-lowered-sig
     src-gen/signatures/General-sig
-    
+
     trans/desugar/desugar-common
 
 rules
 
-  lower-boolean-to-object: Boolean(True()) -> MCallImplL("true", [])
+  lower-boolean-to-object: Boolean(True()) -> MCallL("true", [])
         
-  lower-boolean-to-object: Boolean(False()) -> MCallImplL("false", [])
-          
+  lower-boolean-to-object: Boolean(False()) -> MCallL("false", [])

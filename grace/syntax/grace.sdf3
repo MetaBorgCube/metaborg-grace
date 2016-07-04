@@ -4,6 +4,7 @@ imports
 
   General
   KeywordRejections
+  grace-lowered
 
 context-free start-symbols
   
@@ -49,7 +50,7 @@ context-free syntax
   MethodName.MethodID          = <<Identifier> <Params>>
   MethodName.MethodOp          = <<OperatorCF> <Params>>
   
-  Prefix.Prefix                 = "prefix"
+  Prefix.Prefix                 = "prefix "
   Prefix.NoPrefix               = <>
   
   Identifier.ID                 = <<ID>>

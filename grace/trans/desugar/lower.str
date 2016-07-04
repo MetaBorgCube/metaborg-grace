@@ -15,55 +15,93 @@ imports
 
 rules
 
-  lower-all = lower
-  lower = 
+  lower-all: ast -> <lower-post-all> <lower> ast
+  lower =
           lower-boolean-to-object <+
           lower-mdecl <+
           lower-methodcallwdot <+
           lower-mcallopex <+
           lower-mcallimpl <+
-          lower-mcallcanonical <+
+          lower-mcallwdot <+
+          lower-objectdecl <+
+          lower-constant <+
+          lower-variable <+
+          lower-assignment <+
+          lower-trait <+
+          lower-fail
+  
+  lower-post-all: ast -> <topdown(try(lower-post-2))> <topdown(try(lower-post-1))> ast
+  
+  lower-post-1 =
+          flatten-codesequence-declaration <+
+          lower-fail
+  
+  lower-post-2 =
+          flatten-codesequence <+
           lower-fail
   
   lower-methodcallwdot:
     MCallWDot(recv, [Part(idf, args)]) ->
-      MCallCanonicalL(recv, <name-to-string> idf, as)
+      MCallRecvL(recv, <name-to-string> idf, as)
         with
           as := <flatten-list> <lower-arguments> args
 
   lower-mcallopex:
     MCallOpEx(recv, name, arg) ->
-      MCallCanonicalL(recv, <name-to-string> name, [arg])
+      MCallRecvL(recv, <name-to-string> name, [arg])
   
   lower-mcallimpl: 
-    MCallImpl([Part(ID(name),args)]) -> MCallImplL(name, as)
+    MCallImpl([Part(ID(name),args)]) -> MCallL(name, as)
       with
         as := <flatten-list> <lower-arguments> args
   
   lower-mdecl:
-    MethodDecl(prfx, [MethodID(mName, ps)], annotations, MethodBody(cs)) ->
-      MethodDeclL(name,annotations, paramNames, cs)
+    MethodDecl(_, [MethodID(mName, ps)], annotations, MethodBody(cs)) ->
+      MethodL(name,annotations, paramNames, cs)
       with
-        (paramNames, paramTypes) := <lower-params> ps;
+        paramNames := <lower-params> ps;
         name := <name-to-string> mName 
 
   lower-mdecl:
     MethodDecl(prfx, [MethodOp(mName, ps)], annotations, MethodBody(cs)) ->
-      MethodDeclL(name,annotations, paramNames, cs)
+      MethodL(name,annotations, params, cs)
       with
-        paramNames:= <lower-params> ps;
-        name := <name-to-string> mName 
+        name := <name-to-string> mName; 
+        params := <lower-params> ps
   
-  lower-mcallcanonical: 
-    MCallCanonical(_, recv, ID(name), args) ->
-      MCallCanonicalL(recv, name, <lower-arguments> args)
+  lower-mcallwdot: 
+    MCallWDot(recv, [Part(ID(name), args)]) ->
+      MCallRecvL(recv, name, <lower-arguments> args)
+      
+  lower-objectdecl: ObjectDecl(a, b, c) -> ObjectL(a,b,c)
+
+  lower-constant: Constant(a, b, c) -> ConstantL(a, b, c)
+    
+  lower-variable: Variable(a, b, NoVarInit()) -> VariableL(a,b)
+  lower-variable: Variable(a, b, VarInit(exp)) -> [VariableL(a,b), AssignmentL(a,exp)]
+  
+  lower-assignment: Assignment(a,b) -> AssignmentL(a, b)
+
+  lower-trait: TraitDecl([MethodID(tName, ps)], MethodBody(code)) -> 
+    TraitL(name, params, code)
+    where
+      name := <name-to-string> tName;
+      params := <lower-params> ps
+  
+  flatten-codesequence-declaration: Declaration([a,b]) -> [Declaration(a),Assignment(b)]
+  
+  flatten-codesequence: ObjectL(a,b,code) -> ObjectL(a,b, flattened)
+    where
+      flattened := <flatten-list> code
+  
+  flatten-codesequence: MethodL(a,b,c,code) -> MethodL(a,b,c, flattened)
+    where
+      flattened := <flatten-list> code
   
   lower-params: NoParams() -> []
   lower-params: Params(ps) -> <lower-params> ps
   lower-params: [Param(n)] -> [n]
-  lower-params: [Param(n) | bs] -> [n | ns ]
-    where
-      (ns, tas) := <lower-params> bs
+  lower-params: [Param(n) | bs] -> [n | <lower-params> bs ]
   
   lower-arguments: ArgNumber(a) -> [Number(a)]
   lower-arguments: ArgString(a) -> [String(a)]

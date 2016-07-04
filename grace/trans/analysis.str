@@ -54,7 +54,7 @@ rules // Debugging
   debug-show-desugared-pp:
     (_, _, ast, path, _) -> (filename, result)
     with
-      filename := <guarantee-extension(|"desugared-lowered-pp.grace")> path;
+      filename := <guarantee-extension(|"desugared-lowered-pp.grace-lowered")> path;
       to-pp    := <desugar-all-post> <desugar-all> <desugar-pre> ast;
       result   := <pp-debug> to-pp
 

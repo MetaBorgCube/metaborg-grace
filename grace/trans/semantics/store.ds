@@ -1,7 +1,7 @@
-module semantics/trans/store
+module trans/semantics/store
 
 imports
-  semantics/trans/values
+  trans/semantics/values
 
 signature
   sort aliases

@@ -1,12 +1,11 @@
-module semantics/trans/lookup
+module trans/semantics/lookup
 
 imports
   src-gen/ds-signatures/grace-sig
   src-gen/ds-signatures/grace-lowered-sig
 
-  semantics/trans/values
-  semantics/trans/store
-  semantics/trans/environment
+  trans/semantics/values
+  trans/semantics/store
 
 signature
 
@@ -62,15 +61,15 @@ rules
         NoMethod() => m
     }.
   
-  dsv |- lookup-local(_) --> NoMethodAndStop()
+  ds |- lookup-local(_) --> NoMethodAndStop()
     where
-      readObject(dsv) --> NoObject().
+      readObject(ds) --> NoObject().
  
   // replace DS(r) with dsv --> rename dsv to ds
-  DS DS(r) |- lookup-local(name) --> m
+  ds |- lookup-local(name) --> m
     where
-      readObject(r) --> Object(_,_,_);
-      member-table(r) --> tbl;
+      readObject(ds) --> Object(_,_,_);
+      member-table(ds) --> tbl;
       case tbl[name?] of {
         true =>
           tbl[name] => mr;
@@ -79,17 +78,17 @@ rules
           NoMethod() => m
       }.
       
-  DS DS(r) |- get-super() --> sup
-    where readObject(r) --> Object(_, sup, _).
+  ds |- get-super() --> sup
+    where readObject(ds) --> Object(_, sup, _).
 
-  DS DS(r) |- get-super() --> r
-    where readObject(r) --> NoObject().
+  ds |- get-super() --> ds
+    where readObject(ds) --> NoObject().
     
-  DS DS(r) |- get-outer() --> out
-    where readObject(r) --> Object(out, _, _).
+  ds |- get-outer() --> out
+    where readObject(ds) --> Object(out, _, _).
 
-  DS DS(r) |- get-outer() --> r
-    where readObject(r) --> NoObject().
+  ds |- get-outer() --> ds
+    where readObject(ds) --> NoObject().
   
   member-table(r) --> tbl
     where
