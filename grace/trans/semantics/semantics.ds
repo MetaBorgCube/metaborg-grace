@@ -1,13 +1,13 @@
-module trans/semantics
+module semantics/trans/semantics
 
 imports
   src-gen/ds-signatures/grace-sig
   src-gen/ds-signatures/grace-lowered-sig
   
-  trans/values
-  trans/store
-  trans/environment
-  trans/lookup
+  semantics/trans/values
+  semantics/trans/store
+  semantics/trans/environment
+  semantics/trans/lookup
 
 signature
   

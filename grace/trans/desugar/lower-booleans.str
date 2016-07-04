@@ -13,7 +13,7 @@ imports
 
 rules
 
-  lower-boolean-to-object: Boolean(True()) -> MCallImplL("true", NoArgType(), [])
+  lower-boolean-to-object: Boolean(True()) -> MCallImplL("true", [])
         
-  lower-boolean-to-object: Boolean(False()) -> MCallImplL("false", NoArgType(), [])
+  lower-boolean-to-object: Boolean(False()) -> MCallImplL("false", [])
           

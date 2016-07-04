@@ -23,63 +23,38 @@ context-free syntax
   Assignment.Assignment         = <<ID> := <Exp>>
   
   // def must be initialized
-  Declaration.Constant          = <def <ID> <Annotations> <TypeAnn> = <Exp>> 
+  Declaration.Constant          = <def <ID><Annotations> = <Exp>> 
   // var has optional init
-  Declaration.Variable          = <var <ID> <Annotations> <TypeAnn> <VarInit>> 
-  Declaration.ActualType        = <<Identifier> <Annotations> <Params> <MethodType>> 
+  Declaration.Variable          = <var <ID><Annotations><VarInit>> 
+  Declaration.ActualType        = <<Identifier> <Annotations> <Params>> 
   
-  VarInit.VarInit               = <:= <Exp>>
+  VarInit.VarInit               = < := <Exp>>
   VarInit.NoVarInit             = <>
-  TypeAnn.TypeAnn               = <: <Type><ArgType>>
-  TypeAnn.NoTypeAnn             = <>
-  Type.Type                     = <<ID>>
   
   Declaration.ClassDecl         = <
-                                    class <MethodName+> {
-                                      <Inherit>
-                                      <Use*>
-                                      <CodeSequence*>
+                                    class <MethodName+>{
+                                      <Inherit><Use*><{CodeSequence "\n"}*>
                                     }
                                   >
   Declaration.TraitDecl         = <trait <MethodName+> <MethodBody>>
-  Declaration.TypeDeclDirect    = <type <ID> <ArgType> <Annotations> = <TypeDeclTarget>>
-  Declaration.TypeDeclDirectW   = <type <ID> <ArgType> <Annotations> = <TypeDeclTarget> <Where>> {prefer}
   
-  Use.Use                       = <use <Exp> <Alias> <Exclude>;>
-  
-  TypeDeclTarget.DirectType     = < { <TypeRule*> } >
-  TypeDeclTarget.TypeExp        = <<TypeExp>>
-  
-//  Exp.Type                      = TypeExp
-  TypeExp.TypeExpKW             = <type { <TypeRule*> } <Where>>
-  TypeRule.TypeRule             = [ [Prefix] [MethodName+] [TypeRuleRightHand] ;]
-  TypeRuleRightHand.TypeRuleRightHand = [-> [TypeExp][ArgType]]
-  TypeRuleRightHand.NoTypeRuleRightHand = []
-  
-  Where.Where                   = <where <{TypeConf ","}+>>
-  Where.NoWhere                 = <>
-  TypeConf.TypeConf             = [[TypeExp] <: [TypeExp]]
-  TypeExp.Union                 = <<ID> + <ID>>
-  TypeExp.Subtract              = <<ID> - <ID>>
-  TypeExp.Intersect             = <<ID> & <ID>>
-  TypeExp.Variant               = <<ID> | <ID>>
-  TypeExp.TypeID                = <<ID>>
+  Use.Use                       = <
+									use <Exp><Alias><Exclude>;
 
+								  >
+  
   // renmae methodtype to returntype? check docs
-  Declaration.MethodDecl        = <method <Prefix> <MethodName+> <MethodType> <MethodBody> <Where>> 
+  Declaration.MethodDecl        = <method <Prefix><MethodName+><Annotations> <MethodBody>>
   // rename argtype to typearg
-  MethodName.MethodID          = <<Identifier> <ArgType> <Annotations> <Params>>
-  MethodName.MethodOp          = <<OperatorCF> <ArgType> <Annotations> <Params>>
+  MethodName.MethodID          = <<Identifier> <Params>>
+  MethodName.MethodOp          = <<OperatorCF> <Params>>
   
   Prefix.Prefix                 = "prefix"
   Prefix.NoPrefix               = <>
   
   Identifier.ID                 = <<ID>>
   
-  ArgType.ArgType               = < [[ <{ID ","}*> ]] >
-  ArgType.NoArgType             = <>
-  
-  Annotations.Annotations       = <is <{Annotation ","}+>>
+  Annotations.Annotations       = < is <{Annotation ", "}+>>
   Annotations.NoAnnotations     = <>
   
   Annotation.Public             = "public"
@@ -91,36 +66,35 @@ context-free syntax
   
   Params.Params                 = <(<{Param ", "}*>)>
   Params.NoParams               = <>
-  Param.Param                   = <<ID><TypeAnn>>
+  Param.Param                   = <<ID>>
   PrefixParam.SingleParam       = <<Param>>
   PrefixParam.SingleParamParen  = <(<Param>)>
+
+  MethodBody.MethodBody         = <
+									{
+									  <{CodeSequence "\n"}*>
+									}
+								  >
   
-  MethodType.MethodType         = [-> [ID]]
-  MethodType.NoMethodType       = []
-    
-  MethodBody.MethodBody         = <{
-    <CodeSequence*>
-}>
+  Exp.ObjectDecl                = <
+									object {
+									  <Inherit><Use*><{CodeSequence "\n"}*>
+									}
+								  >
   
-  Exp.ObjectDecl                = <object {
-    <Inherit>
-    <Use*>
-    <CodeSequence*>
-}>
-  
-  Inherit.Inherit               = <inherit <Exp> <Alias> <Exclude>;>
+  Inherit.Inherit               = <
+                                    inherit <Exp><Alias><Exclude>;
+                                    
+  								  >
   Inherit.NoInherit             = <>
   
-  Alias.Alias                   = <alias <ID> as <ID>>
+  Alias.Alias                   = < alias <ID> as <ID>>
   Alias.NoAlias                 = <>
   
-  Exclude.Exclude               = <exclude <{ID ", "}*>>
+  Exclude.Exclude               = < exclude <{ID ", "}*>>
   Exclude.NoExclude             = <>
   
-  
-  
   // simple expressions
-//  Exp.Var                       = ID // foobar; Var("foobar") | self; Self() | self.outer.foobar; Chain([Self(), Outer(), Var("foobar")])
   Exp.Number                    = <<NUM>>
   Exp.String                    = <<STRING>>
   Exp.Boolean                   = <<Boolean>>
@@ -134,44 +108,41 @@ context-free syntax
   Exp.Outer                      = "outer"
   Exp.PlaceHolder                = "_"
   
-  Exp                           = <(<Exp>)>                                    {bracket}
+  Exp                           = <(<Exp>)>										{bracket}
 
 //  Exp.MCall                     = <<Exp> . <Identifier> <ArgType>>             {left, avoid}
 //  Exp.MCallOp                   = <<Exp> <OperatorCF> <ArgType> <CallArgs>>    {left}
-  Exp.MCallOpEx                 = <<Exp> <OperatorCF> <ArgType> <Exp>>         {left}
-  Exp.MCallWDot                 = <<Exp> . <Part+>>                            {left}
-  Exp.MCallImpl                 = <<Part+>>                                    {left}
-  Exp.MCallPrefixOp             = <<OperatorCF> <ArgType> <CallArgs>>          {left}
-  Exp.MCallPrefixOpExp          = <<OperatorCF> <ArgType> <Exp>>               {left}
+  Exp.MCallOpEx                 = <<Exp> <OperatorCF> <Exp>>					{left}
+  Exp.MCallWDot                 = <<Exp>.<Part+>>								{left}
+  Exp.MCallImpl                 = <<Part+>>										{left}
+  Exp.MCallPrefixOp             = <<OperatorCF> <CallArgs>>						{left}
+  Exp.MCallPrefixOpExp          = <<OperatorCF> <Exp>>							{left}
   
   OperatorCF.OperatorCF         = <<Operator>>
     
-  Part.Part                     = <<Identifier> <ArgType> <CallArgs>>
+  Part.Part                     = <<Identifier><CallArgs>>
   
   // arguments between parenthesis
-  CallArgs.ArgsParen            = <(<{Exp ","}+>)> {left}
+  CallArgs.ArgsParen            = < (<{Exp ", "}+>)> {left}
   CallArgs.NoArgs               = <>
-//  ArgsParen.ArgsParen           = [ ( [{Exp ","}*] ) ]                          {prefer}
-  
+
   // arguments that are valid without parenthesis
-  CallArgs.ArgBlock             = <<Block>>
-  CallArgs.ArgNumber            = <<NUM>>
-  CallArgs.ArgString            = <<STRING>>
-  CallArgs.ArgLineup            = <<Lineup>>
-  CallArgs.ArgBoolean           = <<Boolean>>
+  CallArgs.ArgBlock             = < <Block>>
+  CallArgs.ArgNumber            = < <NUM>>
+  CallArgs.ArgString            = < <STRING>>
+  CallArgs.ArgLineup            = < <Lineup>>
+  CallArgs.ArgBoolean           = < <Boolean>>
   
   Exp.LineupExp                 = <<Lineup>>
-  Lineup.Lineup                 = <[ <{Exp ","}*> ]>
+  Lineup.Lineup                 = <[ <{Exp ", "}*> ]>
   Exp.Ellipsis                  = "..." // needs to yield _runtime_ error
   Exp.BlockExp                  = <<Block>>
-  Block.Block                   = <{ <CodeSequence*> }>
-  Block.BlockWParams            = <{ <BlockParams>
-    <CodeSequence*>
-}>          {prefer}
+  Block.Block                   = <{ <{CodeSequence "\n"}*> }>
+  Block.BlockWParams            = <{ <BlockParams> <{CodeSequence "\n"}*> }>          {prefer}
   
   Exp.Return                    = <return <Exp>>
   
-  BlockParams.BlockParams       = [ [ArgType] [{Param ","}*] -> ]
+  BlockParams.BlockParams       = [[{Param ", "}*] ->]
 
   
 //context-free priorities

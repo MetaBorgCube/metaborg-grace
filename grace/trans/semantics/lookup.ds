@@ -1,12 +1,12 @@
-module trans/lookup
+module semantics/trans/lookup
 
 imports
   src-gen/ds-signatures/grace-sig
   src-gen/ds-signatures/grace-lowered-sig
 
-  trans/values
-  trans/store
-  trans/environment
+  semantics/trans/values
+  semantics/trans/store
+  semantics/trans/environment
 
 signature
 

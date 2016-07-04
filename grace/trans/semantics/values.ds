@@ -1,4 +1,4 @@
-module trans/values
+module semantics/trans/values
 
 imports
 

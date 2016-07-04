@@ -8,8 +8,8 @@ imports
 
 context-free syntax
 
-  Exp.MCallImplL = <<STRING> <ArgType> <Exp*>>
+  Exp.MCallImplL = <<STRING> <Exp*>>
   Declaration.MethodDeclL =
-    <<Prefix> <STRING> <ArgType> <Annotations> <STRING*> <TypeAnn*> <MethodType> <CodeSequence*> <Where>>
-  Exp.MCallCanonical = <<Prefix> <Exp> . <MethodName> <ArgType> <CallArgs>>
-  Exp.MCallCanonicalL = <<Exp> <STRING> <ArgType> <Exp*>>
+    <<STRING> <Annotations> <STRING*> <CodeSequence*>>
+  Exp.MCallCanonical = <<Prefix> <Exp> . <MethodName> <CallArgs>>
+  Exp.MCallCanonicalL = <<Exp> <STRING> <Exp*>>

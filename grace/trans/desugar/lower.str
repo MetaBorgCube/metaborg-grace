@@ -26,42 +26,42 @@ rules
           lower-fail
   
   lower-methodcallwdot:
-    MCallWDot(recv, [Part(idf, argType, args)]) ->
-      MCallCanonicalL(recv, <name-to-string> idf, argType, as)
+    MCallWDot(recv, [Part(idf, args)]) ->
+      MCallCanonicalL(recv, <name-to-string> idf, as)
         with
           as := <flatten-list> <lower-arguments> args
 
   lower-mcallopex:
-    MCallOpEx(recv, name, argtype, arg) ->
-      MCallCanonicalL(recv, <name-to-string> name, argtype, [arg])
+    MCallOpEx(recv, name, arg) ->
+      MCallCanonicalL(recv, <name-to-string> name, [arg])
   
   lower-mcallimpl: 
-    MCallImpl([Part(ID(name),argType,args)]) -> MCallImplL(name,argType, as)
+    MCallImpl([Part(ID(name),args)]) -> MCallImplL(name, as)
       with
         as := <flatten-list> <lower-arguments> args
   
   lower-mdecl:
-    MethodDecl(prfx, [MethodID(mName, argType, annotations, ps)], methodType, MethodBody(cs), wherec) ->
-      MethodDeclL(prfx,name,argType,annotations, paramNames, paramTypes, methodType, cs, wherec)
+    MethodDecl(prfx, [MethodID(mName, ps)], annotations, MethodBody(cs)) ->
+      MethodDeclL(name,annotations, paramNames, cs)
       with
         (paramNames, paramTypes) := <lower-params> ps;
         name := <name-to-string> mName 
 
   lower-mdecl:
-    MethodDecl(prfx, [MethodOp(mName, argType, annotations, ps)], methodType, MethodBody(cs), wherec) ->
-      MethodDeclL(prfx,name,argType,annotations, paramNames, paramTypes, methodType, cs, wherec)
+    MethodDecl(prfx, [MethodOp(mName, ps)], annotations, MethodBody(cs)) ->
+      MethodDeclL(name,annotations, paramNames, cs)
       with
-        (paramNames, paramTypes) := <lower-params> ps;
+        paramNames:= <lower-params> ps;
         name := <name-to-string> mName 
   
   lower-mcallcanonical: 
-    MCallCanonical(_, recv, ID(name), argType, args) ->
-      MCallCanonicalL(recv, name, argType, <lower-arguments> args)
+    MCallCanonical(_, recv, ID(name), args) ->
+      MCallCanonicalL(recv, name, <lower-arguments> args)
   
-  lower-params: NoParams() -> ([], [])
+  lower-params: NoParams() -> []
   lower-params: Params(ps) -> <lower-params> ps
-  lower-params: [Param(n, typeAnn)] -> ([n], [typeAnn])
-  lower-params: [Param(n, typeAnn) | bs] -> ([n | ns ], [typeAnn | tas])
+  lower-params: [Param(n)] -> [n]
+  lower-params: [Param(n) | bs] -> [n | ns ]
     where
       (ns, tas) := <lower-params> bs
   

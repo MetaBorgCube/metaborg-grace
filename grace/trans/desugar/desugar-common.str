@@ -11,12 +11,11 @@ imports
     
 rules
 
-
   methodId-to-nameList:
-    (MethodID(name, _, _, _), list) -> [list, <name-to-string> name]
+    (MethodID(name, _), list) -> [list, <name-to-string> name]
 
   methodId-to-paramList:
-    (MethodID(_, _, _, Params(param)), list) -> [list,  param]
+    (MethodID(_, Params(param)), list) -> [list,  param]
   
   name-to-string: ID(a) -> a where <is-string> a
   name-to-string: OperatorCF(a) -> a where <is-string> a
