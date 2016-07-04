@@ -14,39 +14,35 @@ context-free start-symbols
 context-free syntax
 
   Program.Program               = <<{CodeSequence "\n"}*> <EOF>>
-  
+
+context-free syntax
+
   CodeSequence.Dialect          = <dialect <STRING>>
   CodeSequence.Import           = <import <STRING> as <ID>>
   CodeSequence.Assignment       = <<Assignment>;>
   CodeSequence.Declaration 		= <<Declaration>;> {avoid}
   CodeSequence.Expression       = <<Exp>;>
 
+context-free syntax
+
   Assignment.Assignment         = <<ID> := <Exp>>
-  
-  // def must be initialized
-  Declaration.Constant          = <def <ID><Annotations> = <Exp>> 
-  // var has optional init
-  Declaration.Variable          = <var <ID><Annotations><VarInit>> 
-  Declaration.ActualType        = <<Identifier> <Annotations> <Params>> 
-  
   VarInit.VarInit               = < := <Exp>>
   VarInit.NoVarInit             = <>
-  
+  Declaration.Constant          = <def <ID><Annotations> = <Exp>> 
+  Declaration.Variable          = <var <ID><Annotations><VarInit>> 
+  Declaration.MethodDecl        = <method <Prefix><MethodName+><Annotations> <MethodBody>>
+  Declaration.ActualType        = <<Identifier> <Annotations> <Params>> 
   Declaration.ClassDecl         = <
                                     class <MethodName+>{
                                       <Inherit><Use*><{CodeSequence "\n"}*>
                                     }
                                   >
   Declaration.TraitDecl         = <trait <MethodName+> <MethodBody>>
-  
   Use.Use                       = <
 									use <Exp><Alias><Exclude>;
 
 								  >
   
-  // renmae methodtype to returntype? check docs
-  Declaration.MethodDecl        = <method <Prefix><MethodName+><Annotations> <MethodBody>>
-  // rename argtype to typearg
   MethodName.MethodID          = <<Identifier> <Params>>
   MethodName.MethodOp          = <<OperatorCF> <Params>>
   
@@ -77,11 +73,51 @@ context-free syntax
 									}
 								  >
   
+context-free syntax
+  
   Exp.ObjectDecl                = <
 									object {
 									  <Inherit><Use*><{CodeSequence "\n"}*>
 									}
 								  >
+  
+  Exp.Number                    = <<NUM>>
+  Exp.String                    = <<STRING>>
+  Exp.Boolean                   = <<Boolean>>
+  Exp.Self                      = "self"
+  Exp.Outer                     = "outer"
+  Exp.PlaceHolder               = "_"
+  
+  Exp                           = <(<Exp>)>										{bracket}
+
+  Exp.MCallOpEx                 = <<Exp> <OperatorCF> <Exp>>					{left}
+  Exp.MCallWDot                 = <<Exp>.<Part+>>								{left}
+  Exp.MCallImpl                 = <<Part+>>										{left}
+  Exp.MCallPrefixOp             = <<OperatorCF> <CallArgs>>						{left}
+  Exp.MCallPrefixOpExp          = <<OperatorCF> <Exp>>							{left}
+  
+  Exp.LineupExp                 = <<Lineup>>
+  Exp.Ellipsis                  = "..."
+  Exp.BlockExp                  = <<Block>>
+  
+  Exp.Return                    = <return <Exp>>
+
+context-free syntax
+  
+  // arguments between parenthesis
+  CallArgs.ArgsParen            = < (<{Exp ", "}+>)> {left}
+  CallArgs.NoArgs               = <>
+
+  // arguments that are valid without parenthesis (literals)
+  CallArgs.ArgBlock             = < <Block>>
+  CallArgs.ArgNumber            = < <NUM>>
+  CallArgs.ArgString            = < <STRING>>
+  CallArgs.ArgLineup            = < <Lineup>>
+  CallArgs.ArgBoolean           = < <Boolean>>
+    
+  OperatorCF.OperatorCF         = <<Operator>>
+    
+  Part.Part                     = <<Identifier><CallArgs>>
   
   Inherit.Inherit               = <
                                     inherit <Exp><Alias><Exclude>;
@@ -95,57 +131,9 @@ context-free syntax
   Exclude.Exclude               = < exclude <{ID ", "}*>>
   Exclude.NoExclude             = <>
   
-  // simple expressions
-  Exp.Number                    = <<NUM>>
-  Exp.String                    = <<STRING>>
-  Exp.Boolean                   = <<Boolean>>
   Boolean.True                  = "true"
   Boolean.False                 = "false"
-  
-  // simple "built-in" identifiers
-  Exp.Self                       = "self"
-//  ID.Outer                      = <<Outer>>
-  
-  Exp.Outer                      = "outer"
-  Exp.PlaceHolder                = "_"
-  
-  Exp                           = <(<Exp>)>										{bracket}
-
-//  Exp.MCall                     = <<Exp> . <Identifier> <ArgType>>             {left, avoid}
-//  Exp.MCallOp                   = <<Exp> <OperatorCF> <ArgType> <CallArgs>>    {left}
-  Exp.MCallOpEx                 = <<Exp> <OperatorCF> <Exp>>					{left}
-  Exp.MCallWDot                 = <<Exp>.<Part+>>								{left}
-  Exp.MCallImpl                 = <<Part+>>										{left}
-  Exp.MCallPrefixOp             = <<OperatorCF> <CallArgs>>						{left}
-  Exp.MCallPrefixOpExp          = <<OperatorCF> <Exp>>							{left}
-  
-  OperatorCF.OperatorCF         = <<Operator>>
-    
-  Part.Part                     = <<Identifier><CallArgs>>
-  
-  // arguments between parenthesis
-  CallArgs.ArgsParen            = < (<{Exp ", "}+>)> {left}
-  CallArgs.NoArgs               = <>
-
-  // arguments that are valid without parenthesis
-  CallArgs.ArgBlock             = < <Block>>
-  CallArgs.ArgNumber            = < <NUM>>
-  CallArgs.ArgString            = < <STRING>>
-  CallArgs.ArgLineup            = < <Lineup>>
-  CallArgs.ArgBoolean           = < <Boolean>>
-  
-  Exp.LineupExp                 = <<Lineup>>
-  Lineup.Lineup                 = <[ <{Exp ", "}*> ]>
-  Exp.Ellipsis                  = "..." // needs to yield _runtime_ error
-  Exp.BlockExp                  = <<Block>>
   Block.Block                   = <{ <{CodeSequence "\n"}*> }>
   Block.BlockWParams            = <{ <BlockParams> <{CodeSequence "\n"}*> }>          {prefer}
-  
-  Exp.Return                    = <return <Exp>>
-  
   BlockParams.BlockParams       = [[{Param ", "}*] ->]
-
-  
-//context-free priorities
-    
-//    { left: Exp.MCallWDot Exp.MCall Exp.MCallOp Exp.MCallOpEx Exp.MCallImpl Exp.MCallCanonical }
+  Lineup.Lineup                 = <[ <{Exp ", "}*> ]>

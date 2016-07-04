@@ -65,7 +65,6 @@ rules
     where
       readObject(ds) --> NoObject().
  
-  // replace DS(r) with dsv --> rename dsv to ds
   ds |- lookup-local(name) --> m
     where
       readObject(ds) --> Object(_,_,_);
