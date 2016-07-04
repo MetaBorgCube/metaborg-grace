@@ -46,13 +46,13 @@ method add (a, b) -> Number { a + b; };
 method prefix - -> Number { 0 - a; };
 method prefix - is confidential -> Number { 0 - a; };
 method prefix - { 0 - a; };
-method prefix - is confidential (a: Number) -> Number { 0 - a; };
+method prefix - is confidential, public (a: Number) -> Number { 0 - a; };
 method prefix - is confidential (a) { 0 - a; };
 method prefix -- (a) -> Number { a - 1; };
 method prefix -- (a) { a - 1; };
 
 
-method if(cond) then(blk) {
+method if(cond) then (blk) {
     cond.ifTrue(blk);
 };
 

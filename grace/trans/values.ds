@@ -3,6 +3,7 @@ module trans/values
 imports
 
   src-gen/ds-signatures/grace-sig
+  // move environment into this file
 
 signature
 
@@ -29,12 +30,14 @@ signature
     NoMethod: M
     NoMethodAndStop: M
     
+    // rename to Code
     Wrapped: V -> CodeSequence
+    
     WrappedO: O -> V
     WrappedM: M -> V
     WrappedLCS: List(List(CodeSequence)) -> V
+    
     ObjectRef: Int -> V
-    WrappedArgs: CallArgs -> V
     
     CS: Ref -> CS
     DS: Ref -> DS

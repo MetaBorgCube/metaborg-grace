@@ -12,19 +12,13 @@ context-free start-symbols
 
 context-free syntax
 
-  Program.Program               = <<CodeSequence*> <EOF>>
+  Program.Program               = <<{CodeSequence "\n"}*> <EOF>>
   
   CodeSequence.Dialect          = <dialect <STRING>>
   CodeSequence.Import           = <import <STRING> as <ID>>
-  CodeSequence.Assignment       = <<Assignment> ;
-
->
-  CodeSequence.Declaration 		= <<Declaration> ;
-
-> {avoid}
-  CodeSequence.Expression       = <<Exp> ;
-
->
+  CodeSequence.Assignment       = <<Assignment>;>
+  CodeSequence.Declaration 		= <<Declaration>;> {avoid}
+  CodeSequence.Expression       = <<Exp>;>
 
   Assignment.Assignment         = <<ID> := <Exp>>
   
@@ -32,7 +26,7 @@ context-free syntax
   Declaration.Constant          = <def <ID> <Annotations> <TypeAnn> = <Exp>> 
   // var has optional init
   Declaration.Variable          = <var <ID> <Annotations> <TypeAnn> <VarInit>> 
-  Declaration.ActualType        = <<MethodName> <Annotations> <Params> <MethodType>> 
+  Declaration.ActualType        = <<Identifier> <Annotations> <Params> <MethodType>> 
   
   VarInit.VarInit               = <:= <Exp>>
   VarInit.NoVarInit             = <>
@@ -40,21 +34,25 @@ context-free syntax
   TypeAnn.NoTypeAnn             = <>
   Type.Type                     = <<ID>>
   
-  Declaration.ClassDecl         = <class <MethodNames+> {
-    <Inherit>
-    <Use*>
-    <CodeSequence*>
-}>
-  Declaration.TraitDecl         = <trait <MethodNames+> <MethodBody>>
+  Declaration.ClassDecl         = <
+                                    class <MethodName+> {
+                                      <Inherit>
+                                      <Use*>
+                                      <CodeSequence*>
+                                    }
+                                  >
+  Declaration.TraitDecl         = <trait <MethodName+> <MethodBody>>
   Declaration.TypeDeclDirect    = <type <ID> <ArgType> <Annotations> = <TypeDeclTarget>>
   Declaration.TypeDeclDirectW   = <type <ID> <ArgType> <Annotations> = <TypeDeclTarget> <Where>> {prefer}
+  
+  Use.Use                       = <use <Exp> <Alias> <Exclude>;>
   
   TypeDeclTarget.DirectType     = < { <TypeRule*> } >
   TypeDeclTarget.TypeExp        = <<TypeExp>>
   
 //  Exp.Type                      = TypeExp
   TypeExp.TypeExpKW             = <type { <TypeRule*> } <Where>>
-  TypeRule.TypeRule             = [ [Prefix] [MethodNames+] [TypeRuleRightHand] ;]
+  TypeRule.TypeRule             = [ [Prefix] [MethodName+] [TypeRuleRightHand] ;]
   TypeRuleRightHand.TypeRuleRightHand = [-> [TypeExp][ArgType]]
   TypeRuleRightHand.NoTypeRuleRightHand = []
   
@@ -67,14 +65,16 @@ context-free syntax
   TypeExp.Variant               = <<ID> | <ID>>
   TypeExp.TypeID                = <<ID>>
 
-  Declaration.MethodDecl        = <method <Prefix> <MethodNames+> <MethodType> <MethodBody> <Where>> 
-  MethodNames.MethodID          = <<MethodName> <ArgType> <Annotations> <Params>>
-  MethodNames.MethodOp          = <<OperatorCF> <ArgType> <Annotations> <Params>>
+  // renmae methodtype to returntype? check docs
+  Declaration.MethodDecl        = <method <Prefix> <MethodName+> <MethodType> <MethodBody> <Where>> 
+  // rename argtype to typearg
+  MethodName.MethodID          = <<Identifier> <ArgType> <Annotations> <Params>>
+  MethodName.MethodOp          = <<OperatorCF> <ArgType> <Annotations> <Params>>
   
   Prefix.Prefix                 = "prefix"
   Prefix.NoPrefix               = <>
   
-  MethodName.ID                 = <<ID>>
+  Identifier.ID                 = <<ID>>
   
   ArgType.ArgType               = < [[ <{ID ","}*> ]] >
   ArgType.NoArgType             = <>
@@ -117,7 +117,7 @@ context-free syntax
   Exclude.Exclude               = <exclude <{ID ", "}*>>
   Exclude.NoExclude             = <>
   
-  Use.Use                       = <use <Exp> <Alias> <Exclude>;>
+  
   
   // simple expressions
 //  Exp.Var                       = ID // foobar; Var("foobar") | self; Self() | self.outer.foobar; Chain([Self(), Outer(), Var("foobar")])
@@ -136,7 +136,7 @@ context-free syntax
   
   Exp                           = <(<Exp>)>                                    {bracket}
 
-  Exp.MCall                     = <<Exp> . <MethodName> <ArgType>>             {left, avoid}
+//  Exp.MCall                     = <<Exp> . <Identifier> <ArgType>>             {left, avoid}
 //  Exp.MCallOp                   = <<Exp> <OperatorCF> <ArgType> <CallArgs>>    {left}
   Exp.MCallOpEx                 = <<Exp> <OperatorCF> <ArgType> <Exp>>         {left}
   Exp.MCallWDot                 = <<Exp> . <Part+>>                            {left}
@@ -146,7 +146,7 @@ context-free syntax
   
   OperatorCF.OperatorCF         = <<Operator>>
     
-  Part.Part                     = <<MethodName> <ArgType> <CallArgs>>
+  Part.Part                     = <<Identifier> <ArgType> <CallArgs>>
   
   // arguments between parenthesis
   CallArgs.ArgsParen            = <(<{Exp ","}+>)> {left}

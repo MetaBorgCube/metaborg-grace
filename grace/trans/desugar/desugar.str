@@ -69,7 +69,8 @@ rules
   
   desugar-flatten-methodPart: [Part(ID(name1),NoArgType(), ArgsParen(args)),Part(ID(name2),NoArgType(),args2)] ->
     [Part(ID(<concat-strings> [name1, "_", name2]),NoArgType(), ArgsParen(<map(desugar-arg)> <concat> [args, [args2]]))]
-      
+  
+  // make these str. shorter
   desugar-mcallcanonical-args: 
     MCallCanonical(
               prfx

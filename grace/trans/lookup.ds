@@ -16,8 +16,8 @@ signature
     lookup-outer: String --> M
     lookup-local: String --> M
     
-    get-super: Ref --> Ref
-    get-outer: Ref --> Ref
+    get-super: --> Ref
+    get-outer: --> Ref
 
 rules
   
@@ -46,7 +46,7 @@ rules
       
   lookup-outer(name) --> m
     where
-      get-outer(0) --> r;
+      get-outer() --> r;
       CS CS(r), DS DS(r) |- lookup(name) --> m.
   
   lookup-super(name) --> m
@@ -56,16 +56,17 @@ rules
       Method(_, _, _) =>
         m => m'
       NoMethod() =>
-        get-super(0) --> sr;
+        get-super() --> sr;
         DS DS(sr) |- lookup-super(name) --> m
       NoMethodAndStop() =>
         NoMethod() => m
     }.
   
-  DS DS(r) |- lookup-local(_) --> NoMethodAndStop()
+  dsv |- lookup-local(_) --> NoMethodAndStop()
     where
-      readObject(r) --> NoObject().
+      readObject(dsv) --> NoObject().
  
+  // replace DS(r) with dsv --> rename dsv to ds
   DS DS(r) |- lookup-local(name) --> m
     where
       readObject(r) --> Object(_,_,_);
@@ -78,16 +79,16 @@ rules
           NoMethod() => m
       }.
       
-  DS DS(r) |- get-super(_) --> sup
+  DS DS(r) |- get-super() --> sup
     where readObject(r) --> Object(_, sup, _).
 
-  DS DS(r) |- get-super(_) --> r
+  DS DS(r) |- get-super() --> r
     where readObject(r) --> NoObject().
     
-  DS DS(r) |- get-outer(_) --> out
+  DS DS(r) |- get-outer() --> out
     where readObject(r) --> Object(out, _, _).
 
-  DS DS(r) |- get-outer(_) --> r
+  DS DS(r) |- get-outer() --> r
     where readObject(r) --> NoObject().
   
   member-table(r) --> tbl

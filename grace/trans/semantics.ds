@@ -13,6 +13,7 @@ signature
   
   arrows
     Program -init-> V
+    Program --> V
 
     Exp --> V
     CodeSequence --> V
@@ -59,10 +60,14 @@ rules
   ArgString(s) --> StringV(s).
   String(s) --> StringV(s).
   
-  Program(cs, _) -init-> cs'
+  p@Program(_, _) -init-> v
     where
-      CS CS(fresh), DS DS(fresh) |- allocateObject(NoObject()) :: OHeap {}, MHeap {} --> r;
-      CS CS(r), DS DS(r) |- cs :: OHeap {}, MHeap {} --> cs' :: OHeap _, MHeap _.
+      CS CS(fresh), DS DS(fresh) |- p :: OHeap {}, MHeap {} --> v.
+      
+  Program(cs, _) --> v
+    where
+      allocateObject(NoObject())--> r;
+      CS CS(r), DS DS(r) |- cs --> v.
   
   [] : List(CodeSequence) --> Done().
   
@@ -96,8 +101,7 @@ rules
 
   Call(Method([], code, ds), []) --> v
     where
-      allocateObject(Object(ds, no-super(0), {})) --> call-scope;
-      CS CS(call-scope), DS DS(call-scope) |- code --> v.
+      CS CS(ds), DS DS(ds) |- code --> v.
   
   Call(Method([n | _ ], code, ds), [a | _ ]) --> v
     where
