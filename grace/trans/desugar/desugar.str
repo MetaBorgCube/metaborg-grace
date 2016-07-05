@@ -21,14 +21,12 @@ rules
             
             desugar-flatten-methodID <+
             desugar-flatten-methodPart <+
-//            desugar-mcallcanonical-args <+ 
             
             desugar-blockExp <+
             desugar-block <+
             desugar-block-to-object <+
             desugar-arg-noargs <+
             desugar-arg-argsparen <+
-//            desugar-self-in-id <+
 			desugar-argBlock <+
             
             desugar-flatten-objectdecl <+
@@ -42,9 +40,6 @@ rules
   desugar-pre = desugar-program <+ desugar-fail
 
   desugar-program: Program(a, b) -> Program([Expression(ObjectDecl(NoInherit(), [], a))], b)
-
-  // a reference to a method is just calling it as a method with no params
-//  desugar-ID: ID(a) -> MCallCanonical(NoPrefix(), Self(), a, [], [])
   
   desugar-flatten-methodID: [ MethodID(
       ID(name1)
@@ -59,40 +54,15 @@ rules
     , Params(<concat> [params1,params2])
     ) | mids ]
     
-  desugar-flatten-methodPart: [Part(ID(name1),args1),Part(ID(name2),args2)] ->
+  desugar-flatten-methodPart: [Part(ID(name1),args1), Part(ID(name2),args2)] ->
     [Part(ID(<concat-strings> [name1, "_", name2]), ArgsParen(<map(desugar-arg)> [args1, args2]))]
+    
+  desugar-flatten-methodPart: [Part(ID(name1),args1), Part(ID(name2),args2), Part(ID(name3), args3)] ->
+    [Part(ID(<concat-strings> [name1, "_", name2, "_", name3]), ArgsParen(<map(desugar-arg)> [args1, args2, args3]))]
   
   desugar-flatten-methodPart: [Part(ID(name1), ArgsParen(args)),Part(ID(name2),args2)] ->
     [Part(ID(<concat-strings> [name1, "_", name2]), ArgsParen(<map(desugar-arg)> <concat> [args, [args2]]))]
 
-//  // make these str. shorter
-//  desugar-mcallcanonical-args: 
-//    MCallCanonical(
-//              prfx
-//            , recv
-//            , idf
-//            , ArgsParen(args)
-//            ) -> MCallCanonical(
-//              prfx
-//            , recv
-//            , idf
-//            , ArgsParen( <map(desugar-arg)> args)
-//            )
-//  
-//  desugar-mcallcanonical-args: 
-//    MCallCanonical(
-//              prfx
-//            , recv
-//            , idf
-//            , arg
-//            ) -> MCallCanonical(
-//              prfx
-//            , recv
-//            , idf
-//            , <desugar-arg> arg
-//            )
-  
-  // Flatten things in lists in the objectdecl list.
   desugar-flatten-objectdecl: ObjectDecl(a, b, xs) -> ObjectDecl(a, b, ys)
     where
       ys := <flatten-list> xs;
@@ -101,11 +71,10 @@ rules
   desugar-flatten-declaration: Declaration([a, b]) ->
       [Declaration(a), Declaration(b)]
 
-//  desugar-arg: ArgNumber(a) -> Number(a)
-//  desugar-arg: ArgString(a) -> String(a)  
-//  desugar-arg:  ArgBlock(a) ->  Block(a)
-  desugar-arg:            a -> a
-//  desugar-arg-lineup: ArgLineup(a) -> a
+  desugar-arg:  ArgNumber(a) -> Number(a)
+  desugar-arg: ArgBoolean(a) -> Boolean(a)
+  desugar-arg:  ArgsParen(a) -> a
+  desugar-arg:             a -> a
 
   desugar-arg-noargs: ArgsParen([NoArgs(), b]) -> ArgsParen([b])
   desugar-arg-noargs: ArgsParen([b, NoArgs()]) -> ArgsParen([b])
@@ -114,8 +83,6 @@ rules
     ArgsParen( <flatten-list> <map(strip-argsparen)> as)
   
   strip-argsparen: ArgsParen(a) -> a
-  
-//  desugar-self-in-id: ID(Self()) -> Self()
   
   desugar-argBlock: ArgBlock(o) -> ArgsParen([o])
   desugar-blockExp: BlockExp(e) -> e
@@ -163,16 +130,8 @@ rules
   
   part-to-nameList:
     (Part(name, _), list) -> [list, <name-to-string> name]
-  
-//  arg-or-noargs:
-//    [] -> NoArgs()
-//  arg-or-noargs:
-//    [x|[]] -> x
-//  arg-or-noargs:
-//    [x|xs] -> ArgsParen([x|xs])
 
   part-to-argList:
     (Part(_, args), list) -> [list, args]
 
-  // if no strategy may be applied, fail
   desugar-fail: a -> <fail>

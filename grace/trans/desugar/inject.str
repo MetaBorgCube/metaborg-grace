@@ -13,58 +13,26 @@ rules
 
   inject-all = inject-booleans
 
-  inject-booleans: Program([c | cs ], b) -> Program([Declaration(
-            Constant(
-              "true"
+  inject-booleans: Program([c | cs ], b) -> Program([
+          Declaration(
+            MethodDecl(
+              NoPrefix()
+            , [MethodID(ID("print"), Params([Param("obj")]))]
             , NoAnnotations()
-            , ObjectDecl(
-                NoInherit()
-              , []
-              , [ Declaration(
-                    MethodL(
-                      "ifTrue"
-                    , NoAnnotations()
-                    , ["blk"]
-                    , [ Expression(
-                          MCallRecvL(
-                            MCallL("blk", [])
-                          , "apply"
-                          , []
+            , MethodBody(
+                [ Expression(
+                    MCallImpl(
+                      [ Part(
+                          ID("base_print")
+                        , ArgsParen(
+                            [ MCallWDot(
+                                MCallImpl([Part(ID("obj"), NoArgs())])
+                              , [Part(ID("asString"), NoArgs())]
+                              )
+                            ]
                           )
                         )
                       ]
-                    )
-                  )
-                , Declaration(
-                    MethodL(
-                      "ifFalse"
-                    , NoAnnotations()
-                    , ["blk"]
-                    , []
-                    )
-                  )
-                , Declaration(
-                    MethodL(
-                      "||"
-                    , NoAnnotations()
-                    , ["other"]
-                    , [Expression(Self())]
-                    )
-                  )
-                , Declaration(
-                    MethodL(
-                      "&&"
-                    , NoAnnotations()
-                    , ["other"]
-                    , [Expression(MCallL("other", []))]
-                    )
-                  )
-                , Declaration(
-                    MethodL(
-                      "asString"
-                    , NoAnnotations()
-                    , []
-                    , [Expression(String("\"true\""))]
                     )
                   )
                 ]
@@ -72,10 +40,39 @@ rules
             )
           )
         , Declaration(
-            Constant(
-              "false"
+            MethodDecl(
+              NoPrefix()
+            , [MethodID(ID("base_number"), NoParams())]
             , NoAnnotations()
-            , ObjectDecl(
+            , MethodBody(
+                [ Expression(
+                    ObjectDecl(
+                      NoInherit()
+                    , []
+                    , [ Declaration(Constant("value", NoAnnotations(), Number("0")))
+                      , Declaration(
+                          MethodDecl(
+                            NoPrefix()
+                          , [MethodID(ID("asString"), NoParams())]
+                          , NoAnnotations()
+                          , MethodBody(
+                              [Expression(MCallImpl([Part(ID("value"), NoArgs())]))]
+                            )
+                          )
+                        )
+                      ]
+                    )
+                  )
+                ]
+              )
+            )
+          ),
+          
+          Declaration(
+            ConstantL(
+              "true"
+            , NoAnnotations()
+            , ObjectL(
                 NoInherit()
               , []
               , [ Declaration(
@@ -83,22 +80,58 @@ rules
                       "ifTrue"
                     , NoAnnotations()
                     , ["blk"]
-                    , []
+                    , [Expression(MCallRecvL(MCallL("blk", []), "apply", []))]
                     )
                   )
+                , Declaration(MethodL("ifFalse", NoAnnotations(), ["blk"], []))
+                , Declaration(
+                    MethodL(
+                      "ifTrue_ifFalse"
+                    , NoAnnotations()
+                    , ["blk1", "blk2"]
+                    , [Expression(MCallRecvL(MCallL("blk1", []), "apply", []))]
+                    )
+                  )
+                , Declaration(
+                    MethodL("||", NoAnnotations(), ["other"], [Expression(Self())])
+                  )
+                , Declaration(
+                    MethodL(
+                      "&&"
+                    , NoAnnotations()
+                    , ["other"]
+                    , [Expression(MCallL("other", []))]
+                    )
+                  )
+                , Declaration(
+                    MethodL("asString", NoAnnotations(), [], [Expression(String("\"true\""))])
+                  )
+                ]
+              )
+            )
+          )
+        , Declaration(
+            ConstantL(
+              "false"
+            , NoAnnotations()
+            , ObjectL(
+                NoInherit()
+              , []
+              , [ Declaration(MethodL("ifTrue", NoAnnotations(), ["blk"], []))
                 , Declaration(
                     MethodL(
                       "ifFalse"
                     , NoAnnotations()
                     , ["blk"]
-                    , [ Expression(
-                          MCallRecvL(
-                            MCallL("blk", [])
-                          , "apply"
-                          , []
-                          )
-                        )
-                      ]
+                    , [Expression(MCallRecvL(MCallL("blk", []), "apply", []))]
+                    )
+                  )
+                , Declaration(
+                    MethodL(
+                      "ifTrue_ifFalse"
+                    , NoAnnotations()
+                    , ["blk1", "blk2"]
+                    , [Expression(MCallRecvL(MCallL("blk2", []), "apply", []))]
                     )
                   )
                 , Declaration(
@@ -110,20 +143,10 @@ rules
                     )
                   )
                 , Declaration(
-                    MethodL(
-                      "&&"
-                    , NoAnnotations()
-                    , ["other"]
-                    , [Expression(Self())]
-                    )
+                    MethodL("&&", NoAnnotations(), ["other"], [Expression(Self())])
                   )
                 , Declaration(
-                    MethodL(
-                      "asString"
-                    , NoAnnotations()
-                    , []
-                    , [Expression(String("\"false\""))]
-                    )
+                    MethodL("asString", NoAnnotations(), [], [Expression(String("\"false\""))])
                   )
                 ]
               )

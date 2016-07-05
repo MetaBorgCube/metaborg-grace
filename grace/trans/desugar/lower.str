@@ -11,13 +11,13 @@ imports
     
     trans/desugar/desugar-common
     
-    trans/desugar/lower-booleans
+    trans/desugar/lower-literals
 
 rules
 
   lower-all: ast -> <lower-post-all> <lower> ast
   lower =
-          lower-boolean-to-object <+
+          
           lower-mdecl <+
           lower-methodcallwdot <+
           lower-mcallopex <+
@@ -33,6 +33,7 @@ rules
   lower-post-all: ast -> <topdown(try(lower-post-2))> <topdown(try(lower-post-1))> ast
   
   lower-post-1 =
+          lower-boolean-to-object <+
           flatten-codesequence-declaration <+
           lower-fail
   

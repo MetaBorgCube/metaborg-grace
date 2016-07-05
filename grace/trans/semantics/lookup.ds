@@ -34,8 +34,14 @@ rules
   CS CS(rcs), DS DS(rds) |- lookup(name) --> m
     where
       rcs != rds;
-      lookup-super(name) --> Method(_,_,_);
-      DS DS(rcs) |- lookup-super(name) --> m.
+      lookup-super(name) --> mSuper@Method(_,_,_);
+      DS DS(rcs) |- lookup-super(name) --> mCS;
+      case mCS of {
+        NoMethod() =>
+          mSuper => m
+        Method(_,_,_) =>
+          mCS => m
+      }.
   
   CS CS(rcs), DS DS(rds) |- lookup(name) --> m
     where

@@ -8,20 +8,20 @@ imports
 
 context-free syntax
 
-  Exp.MCallL = <_CALL_IMPLICIT <STRING> (<{Exp ", "}*>)>
-  Exp.MCallRecvL = <_CALL_RECEIVER [<Exp>].<STRING> (<{Exp ", "}*>)>
+  Exp.MCallL = <call <STRING> (<{Exp ", "}*>)>
+  Exp.MCallRecvL = <call_receiver [<Exp>].<STRING> (<{Exp ", "}*>)>
   Exp.ObjectL             = <
-							_OBJECT {
+							object {
 							  <Inherit><Use*><{CodeSequence "\n"}*>
 							}
 							>
   Declaration.MethodL     = <
-								_METHOD <STRING><Annotations> (<{STRING ", "}*>) {
+								method <STRING><Annotations> (<{STRING ", "}*>) {
 								  <{CodeSequence "\n"}*>
 								}
 							>
-  Declaration.ConstantL = <_CONSTANT <STRING><Annotations> = <Exp>>
-  Declaration.VariableL = <_VARIABLE <STRING><Annotations>>
-  Declaration.TraitL = <_TRAIT <STRING> (<{STRING ", "}*>) <{CodeSequence "\n"}*>>
+  Declaration.ConstantL = <constant <STRING><Annotations> = <Exp>>
+  Declaration.VariableL = <variable <STRING><Annotations>>
+  Declaration.TraitL = <trait <STRING> (<{STRING ", "}*>) <{CodeSequence "\n"}*>>
   
-  Assignment.AssignmentL = <_ASSIGNMENT <STRING> := <Exp>>
+  Assignment.AssignmentL = <assignment <STRING> := <Exp>>

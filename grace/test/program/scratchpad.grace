@@ -1,15 +1,9 @@
-method print (obj) {
-  base_print(obj.asString);
-};
-
-class super {
-  method a (blk) { blk.apply; };
+method if(cond) then(blk1) else(blk2) {
+  cond.ifTrue(blk1) ifFalse(blk2);
 };
 
 object {
-  inherit super;
-  
-  print(true);
-  
-  base_print(a({1;}));
+  base_print( if false then { "condition is true"; } else { "condition is false"; });
 };
+
+base_print 5;

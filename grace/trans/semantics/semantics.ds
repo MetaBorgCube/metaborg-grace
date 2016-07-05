@@ -21,7 +21,6 @@ signature
     Declaration --> V
     Assignment --> V
     
-    
     Inherit --> Ref
     List(Exp) -ea-> List(V)
     
@@ -95,15 +94,32 @@ rules
       allocateObject(Object(ds, inherit, {})) --> or;
       CS CS(or), DS DS(or) |- code --> _.
 
+  ds |- Self() --> ObjectRef(ds).
+
   Call(Method([], code, scope), []) --> v
     where
-      CS CS(scope), DS DS(scope) |- code --> v.
-  
-  Call(Method([n | _ ], code, scope), [a | _ ]) --> v
+      DS DS(scope) |- code --> v.
+
+  Call(Method([n], code, scope), [a]) --> v
     where
       allocateObject(Object(scope, no-super(), {})) --> call-scope;
       DS DS(call-scope) |- add-member(n, [], [Wrapped(a)]) --> _;
-      CS CS(call-scope), DS DS(call-scope) |- code --> v.
+      DS DS(call-scope) |- code --> v.
+      
+  Call(Method([n1, n2], code, scope), [a, b]) --> v
+    where
+      allocateObject(Object(scope, no-super(), {})) --> call-scope;
+      DS DS(call-scope) |- add-member(n1, [], [Wrapped(a)]) --> _;
+      DS DS(call-scope) |- add-member(n2, [], [Wrapped(b)]) --> _;
+      DS DS(call-scope) |- code --> v.
+      
+  Call(Method([n1, n2, n3], code, scope), [a, b, c]) --> v
+    where
+      allocateObject(Object(scope, no-super(), {})) --> call-scope;
+      DS DS(call-scope) |- add-member(n1, [], [Wrapped(a)]) --> _;
+      DS DS(call-scope) |- add-member(n2, [], [Wrapped(b)]) --> _;
+      DS DS(call-scope) |- add-member(n3, [], [Wrapped(c)]) --> _;
+      DS DS(call-scope) |- code --> v.
   
   no-super() --> allocateObject(NoObject()).
   
