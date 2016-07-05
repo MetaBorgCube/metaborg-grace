@@ -1,10 +1,15 @@
+method print (obj) {
+  base_print(obj.asString);
+};
+
 class super {
-  method a (w) { w; };
-  method w { "super"; };
+  method a (blk) { blk.apply; };
 };
 
 object {
   inherit super;
-  def lambda = { a -> a + 1; };
-  a 1;
+  
+  print(true);
+  
+  base_print(a({1;}));
 };

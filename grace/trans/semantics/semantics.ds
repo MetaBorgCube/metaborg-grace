@@ -75,8 +75,8 @@ rules
   MCallRecvL(receiver, name, args) --> v
     where
        receiver --> ObjectRef(r);
-       DS DS(r) |- lookup(name) --> m;
-       DS DS(r) |- Call(m, args) --> v.
+       CS CS(r), DS DS(r) |- lookup(name) --> m;
+       CS CS(r), DS DS(r) |- Call(m, args) --> v.
   
   MCallL("base_print", [v]) --> nativePrint(v).
   
@@ -90,7 +90,7 @@ rules
     where
       add-member(name, params, code) --> _.
       
-  ds |- ObjectDecl(inherit, [], code) --> ObjectRef(or)
+  ds |- ObjectL(inherit, [], code) --> ObjectRef(or)
     where
       allocateObject(Object(ds, inherit, {})) --> or;
       CS CS(or), DS DS(or) |- code --> _.

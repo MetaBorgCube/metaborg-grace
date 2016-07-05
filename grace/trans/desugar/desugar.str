@@ -29,6 +29,7 @@ rules
             desugar-arg-noargs <+
             desugar-arg-argsparen <+
 //            desugar-self-in-id <+
+			desugar-argBlock <+
             
             desugar-flatten-objectdecl <+
             desugar-flatten-declaration <+
@@ -116,6 +117,7 @@ rules
   
 //  desugar-self-in-id: ID(Self()) -> Self()
   
+  desugar-argBlock: ArgBlock(o) -> ArgsParen([o])
   desugar-blockExp: BlockExp(e) -> e
   
   desugar-block:
