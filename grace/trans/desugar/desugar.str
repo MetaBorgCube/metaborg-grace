@@ -94,7 +94,7 @@ rules
     Block(a) -> BlockWParams(BlockParams(NoParams()), a) 
 
   desugar-block-to-object:
-    BlockWParams(BlockParams( NoParams()), code)-> 
+    BlockWParams(BlockParams(NoParams()), code)-> 
       ObjectDecl(
         NoInherit(),
         [],
