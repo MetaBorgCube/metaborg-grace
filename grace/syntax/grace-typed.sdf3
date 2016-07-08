@@ -2,8 +2,8 @@ module grace-typed
 
 imports
 
-  General
-  KeywordRejections
+  general
+  keywordRejections
 
 context-free start-symbols
   

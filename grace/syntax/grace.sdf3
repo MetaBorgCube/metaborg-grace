@@ -2,8 +2,8 @@ module grace
 
 imports
 
-  General
-  KeywordRejections
+  general
+  keywordRejections
   grace-lowered
 
 context-free start-symbols
@@ -31,7 +31,6 @@ context-free syntax
   Declaration.Constant          = <def <ID><Annotations> = <Exp>> 
   Declaration.Variable          = <var <ID><Annotations><VarInit>> 
   Declaration.MethodDecl        = <method <Prefix><MethodName+><Annotations> <MethodBody>>
-//  Declaration.ActualType        = <<Identifier> <Annotations> <Params>> 
   Declaration.ClassDecl         = <
                                     class <MethodName+>{
                                       <Inherit><Use*><{CodeSequence "\n"}*>

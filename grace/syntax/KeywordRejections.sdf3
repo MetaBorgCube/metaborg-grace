@@ -1,8 +1,8 @@
-module KeywordRejections
+module keywordRejections
 
 imports
 
-  General
+  general
 
 lexical syntax
 
