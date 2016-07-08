@@ -11,31 +11,33 @@ signature
 
   constructors
     lookup: String --> M
-    lookup-super: String --> M
-    lookup-outer: String --> M
-    lookup-local: String --> M
+    lookupSuper: String --> M
+    lookupOuter: String --> M
+    lookupLocal: String --> M
     
-    get-super: --> Ref
-    get-outer: --> Ref
+    getSuper: --> Ref
+    getOuter: --> Ref
+    
+    memberTable: Ref --> Members
 
 rules
   
   CS CS(rcs), DS DS(rds) |- lookup(name) --> m'
     where
       rcs == rds;
-      lookup-super(name) --> m;
+      lookupSuper(name) --> m;
       case m of {
         Method(_,_,_) =>
           m => m'
         NoMethod() =>
-          lookup-outer(name) --> m'
+          lookupOuter(name) --> m'
       }.
   
   CS CS(rcs), DS DS(rds) |- lookup(name) --> m
     where
       rcs != rds;
-      lookup-super(name) --> mSuper@Method(_,_,_);
-      DS DS(rcs) |- lookup-super(name) --> mCS;
+      lookupSuper(name) --> mSuper@Method(_,_,_);
+      DS DS(rcs) |- lookupSuper(name) --> mCS;
       case mCS of {
         NoMethod() =>
           mSuper => m
@@ -46,39 +48,39 @@ rules
   CS CS(rcs), DS DS(rds) |- lookup(name) --> m
     where
       rcs != rds;
-      lookup-super(name) --> NoMethod();
-      lookup-outer(name) --> m.
+      lookupSuper(name) --> NoMethod();
+      lookupOuter(name) --> m.
   
-  lookup-outer(_) --> NoMethod()
+  lookupOuter(_) --> NoMethod()
     where
-      get-outer() --> r;
+      getOuter() --> r;
       readObject(r) --> NoObject(). 
   
-  lookup-outer(name) --> m
+  lookupOuter(name) --> m
     where
-      get-outer() --> r;
+      getOuter() --> r;
       CS CS(r), DS DS(r) |- lookup(name) --> m.
   
-  lookup-super(name) --> m
+  lookupSuper(name) --> m
   where
-    lookup-local(name) --> m;
+    lookupLocal(name) --> m;
     case m of {
       Method(_, _, _) =>
       NoMethod() =>
-        get-super() --> sr;
-        DS DS(sr) |- lookup-super(name) --> m
+        getSuper() --> sr;
+        DS DS(sr) |- lookupSuper(name) --> m
       NoMethodAndStop() =>
         NoMethod() => m
     }.
   
-  ds |- lookup-local(_) --> NoMethodAndStop()
+  ds |- lookupLocal(_) --> NoMethodAndStop()
     where
       readObject(ds) --> NoObject().
  
-  ds |- lookup-local(name) --> m
+  ds |- lookupLocal(name) --> m
     where
       readObject(ds) --> Object(_,_,_);
-      member-table(ds) --> tbl;
+      memberTable(ds) --> tbl;
       case tbl[name?] of {
         true =>
           tbl[name] => mr;
@@ -87,18 +89,18 @@ rules
           NoMethod() => m
       }.
       
-  ds |- get-super() --> sup
+  ds |- getSuper() --> sup
     where readObject(ds) --> Object(_, sup, _).
 
-  ds |- get-super() --> ds
+  ds |- getSuper() --> ds
     where readObject(ds) --> NoObject().
     
-  ds |- get-outer() --> out
+  ds |- getOuter() --> out
     where readObject(ds) --> Object(out, _, _).
 
-  ds |- get-outer() --> ds
+  ds |- getOuter() --> ds
     where readObject(ds) --> NoObject().
   
-  member-table(r) --> tbl
+  memberTable(r) --> tbl
     where
       readObject(r) --> Object(_,_,tbl).

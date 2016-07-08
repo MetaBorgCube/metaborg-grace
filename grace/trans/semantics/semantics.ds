@@ -26,17 +26,17 @@ signature
     
   constructors
     
-    Call: M * List(V) --> V
+    call: M * List(V) --> V
     
     saveConst: String * V * Members --> Members
     saveConstants: List(String) * List(V) * Members --> Members
 
-    add-member: String * List(String) * List(Statement) --> Unit
-    add-members: List(String) * List(List(Statement)) --> Unit
+    addMember: String * List(String) * List(Statement) --> Unit
+    addMembers: List(String) * List(List(Statement)) --> Unit
     
-    wrap-values: List(V) --> List(List(Statement))
+    wrapValues: List(V) --> List(List(Statement))
     
-    no-super: --> Ref
+    noSuper: --> Ref
     
   native operators
     nativeIBinOp: String * Int * Int -> Int
@@ -91,22 +91,22 @@ rules
     where
        receiver --> ObjectRef(r);
        CS CS(r), DS DS(r) |- lookup(name) --> m;
-       CS CS(r), DS DS(r) |- Call(m, args) --> v.
+       CS CS(r), DS DS(r) |- call(m, args) --> v.
   
   MCallL("base_print", [v]) --> nativePrint(v).
 
   MCallL(name, vs) --> v
     where
       lookup(name) --> m;
-      Call(m, vs) --> v.
+      call(m, vs) --> v.
   
   ConstantL(name, _, v) --> Done()
     where
-      add-member(name, [], [Code(v)]) --> _.
+      addMember(name, [], [Code(v)]) --> _.
   
   MethodL(name, _, params, code) --> Done()
     where
-      add-member(name, params, code) --> _.
+      addMember(name, params, code) --> _.
       
   ds |- ObjectL(inherit, [], code) --> ObjectRef(or)
     where
@@ -115,48 +115,48 @@ rules
 
   ds |- Self() --> ObjectRef(ds).
 
-  Call(Method([], code, scope), []) --> v
+  call(Method([], code, scope), []) --> v
     where
       DS DS(scope) |- code --> v.
 
-  Call(Method([n], code, scope), [a]) --> v
+  call(Method(names@[_ | _], code, scope), args@[_ | _]) --> v
     where
-      allocateObject(Object(scope, no-super(), {})) --> call-scope;
-      DS DS(call-scope) |- add-member(n, [], [Code(a)]) --> _;
+      allocateObject(Object(scope, noSuper(), {})) --> call-scope;
+      DS DS(call-scope) |- addMembers(names,wrapValues(args)) --> _;
       DS DS(call-scope) |- code --> v.
       
-  Call(Method([n1, n2], code, scope), [a, b]) --> v
-    where
-      allocateObject(Object(scope, no-super(), {})) --> call-scope;
-      DS DS(call-scope) |- add-member(n1, [], [Code(a)]) --> _;
-      DS DS(call-scope) |- add-member(n2, [], [Code(b)]) --> _;
-      DS DS(call-scope) |- code --> v.
-      
-  Call(Method([n1, n2, n3], code, scope), [a, b, c]) --> v
-    where
-      allocateObject(Object(scope, no-super(), {})) --> call-scope;
-      DS DS(call-scope) |- add-member(n1, [], [Code(a)]) --> _;
-      DS DS(call-scope) |- add-member(n2, [], [Code(b)]) --> _;
-      DS DS(call-scope) |- add-member(n3, [], [Code(c)]) --> _;
-      DS DS(call-scope) |- code --> v.
-  
-  no-super() --> allocateObject(NoObject()).
-  
-  wrap-values([]) --> [] : List(List(Statement)).
-  
-//  wrap-values([v|vs]) --> [ wv | wvs ] : List(List(Statement))
+//  call(Method([n1, n2], code, scope), [a, b]) --> v
 //    where
-//      [Wrapped(v)] : List(Statement) => wv;
-//      wrap-values(vs) --> wvs.
+//      allocateObject(Object(scope, no-super(), {})) --> call-scope;
+//      DS DS(call-scope) |- addMember(n1, [], [Code(a)]) --> _;
+//      DS DS(call-scope) |- addMember(n2, [], [Code(b)]) --> _;
+//      DS DS(call-scope) |- code --> v.
+//      
+//  call(Method([n1, n2, n3], code, scope), [a, b, c]) --> v
+//    where
+//      allocateObject(Object(scope, no-super(), {})) --> call-scope;
+//      DS DS(call-scope) |- addMember(n1, [], [Code(a)]) --> _;
+//      DS DS(call-scope) |- addMember(n2, [], [Code(b)]) --> _;
+//      DS DS(call-scope) |- addMember(n3, [], [Code(c)]) --> _;
+//      DS DS(call-scope) |- code --> v.
   
-  add-members([], []) --> Unit().
+  noSuper() --> allocateObject(NoObject()).
   
-  add-members([n | ns], [code | codes]) --> Unit()
+  wrapValues([]) --> [] : List(List(Statement)).
+  
+  wrapValues([v|vs]) --> [ wv | wvs ] : List(List(Statement))
     where
-      add-member(n, [], code) --> _;
-      add-members(ns, codes) --> _.
+      [Code(v)] : List(Statement) => wv;
+      wrapValues(vs) --> wvs.
   
-  ds |- add-member(name, params, code) --> Unit()
+  addMembers([], []) --> Unit().
+  
+  addMembers([n | ns], [code | codes]) --> Unit()
+    where
+      addMember(n, [], code) --> _;
+      addMembers(ns, codes) --> _.
+  
+  ds |- addMember(name, params, code) --> Unit()
     where
       allocateMethod(Method(params, code, ds)) --> mRef;
       readObject(ds) --> Object(enc, sup, tbl);
@@ -164,14 +164,14 @@ rules
       
   [] : List(Exp) -ea-> [].
   
-  [arg] : List(Exp) -ea-> [v]
+  [a] : List(Exp) -ea-> [v] : List(V)
     where
-      arg --> v.
+      a --> v.
   
-  [arg | more] : List(Exp) -ea-> [v | vs]
+  [a | as] : List(Exp) -ea-> [v | vs]
     where
-      arg --> v;
-      more -ea-> vs : List(V).
+      a --> v;
+      as -ea-> vs : List(V).
 
   Inherit(e, _, _) --> r
     where

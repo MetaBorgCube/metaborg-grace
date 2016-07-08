@@ -45,7 +45,6 @@ signature
     Unit: Unit
     
     getMembers: Members -> V
-    member-table: Ref --> Members
     
   arrows
   
