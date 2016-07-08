@@ -27,8 +27,7 @@ rules
       rcs == rds;
       lookupSuper(name) --> m;
       case m of {
-        Method(_,_,_) =>
-          m => m'
+        m'@Method(_,_,_) =>
         NoMethod() =>
           lookupOuter(name) --> m'
       }.
@@ -39,10 +38,9 @@ rules
       lookupSuper(name) --> mSuper@Method(_,_,_);
       DS DS(rcs) |- lookupSuper(name) --> mCS;
       case mCS of {
+        m@Method(_,_,_) =>
         NoMethod() =>
           mSuper => m
-        Method(_,_,_) =>
-          mCS => m
       }.
   
   CS CS(rcs), DS DS(rds) |- lookup(name) --> m
@@ -61,16 +59,16 @@ rules
       getOuter() --> r;
       CS CS(r), DS DS(r) |- lookup(name) --> m.
   
-  lookupSuper(name) --> m
+  lookupSuper(name) --> m'
   where
     lookupLocal(name) --> m;
     case m of {
-      Method(_, _, _) =>
+      m'@Method(_, _, _) =>
       NoMethod() =>
         getSuper() --> sr;
-        DS DS(sr) |- lookupSuper(name) --> m
+        DS DS(sr) |- lookupSuper(name) --> m'
       NoMethodAndStop() =>
-        NoMethod() => m
+        NoMethod() => m'
     }.
   
   ds |- lookupLocal(_) --> NoMethodAndStop()
