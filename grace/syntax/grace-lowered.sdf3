@@ -25,3 +25,5 @@ context-free syntax
   Declaration.TraitL      = <trait <STRING> (<{STRING ", "}*>) <{CodeSequence "\n"}*>>
   
   Assignment.AssignmentL  = <<STRING> := <Exp>>
+  
+  Exp.NumL				  = <_base_number(<NUM>)> {avoid}

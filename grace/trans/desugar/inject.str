@@ -11,63 +11,207 @@ imports
 
 rules
 
-  inject-all = inject-booleans
-
-  inject-booleans: Program([c | cs ], b) -> Program([
+  inject-all: Program([c | cs ], b) -> Program([Expression(ObjectL(NoInherit(),[],[
           Declaration(
-            MethodDecl(
-              NoPrefix()
-            , [MethodID(ID("print"), Params([Param("obj")]))]
+            MethodL(
+              "print"
             , NoAnnotations()
-            , MethodBody(
-                [ Expression(
-                    MCallImpl(
-                      [ Part(
-                          ID("base_print")
-                        , ArgsParen(
-                            [ MCallWDot(
-                                MCallImpl([Part(ID("obj"), NoArgs())])
-                              , [Part(ID("asString"), NoArgs())]
-                              )
-                            ]
-                          )
-                        )
-                      ]
-                    )
+            , ["obj"]
+            , [ Expression(
+                  MCallL(
+                    "base_print"
+                  , [MCallRecvL(MCallL("obj", []), "asString", [])]
                   )
-                ]
-              )
+                )
+              ]
             )
           )
-        , Declaration(
-            MethodDecl(
-              NoPrefix()
-            , [MethodID(ID("base_number"), NoParams())]
-            , NoAnnotations()
-            , MethodBody(
-                [ Expression(
-                    ObjectDecl(
-                      NoInherit()
-                    , []
-                    , [ Declaration(Constant("value", NoAnnotations(), Number("0")))
-                      , Declaration(
-                          MethodDecl(
-                            NoPrefix()
-                          , [MethodID(ID("asString"), NoParams())]
-                          , NoAnnotations()
-                          , MethodBody(
-                              [Expression(MCallImpl([Part(ID("value"), NoArgs())]))]
+        ,
+          Declaration(
+                  MethodL(
+                    "base_number"
+                  , NoAnnotations()
+                  , []
+                  , [ Expression(
+                        ObjectL(
+                          NoInherit()
+                        , []
+                        , [ Declaration(
+                              ConstantL(
+                                "value"
+                              , NoAnnotations()
+                              , NumL("0")
+                              )
                             )
-                          )
+                          , Declaration(
+                              MethodL(
+                                "asString"
+                              , NoAnnotations()
+                              , []
+                              , [Expression(MCallL("value", []))]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "+"
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_plus"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "-"
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_minus"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "*"
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_mult"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "/"
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_div"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "-"
+                              , NoAnnotations()
+                              , []
+                              , [ Expression(
+                                    MCallL(
+                                      "base_negative"
+                                    , [MCallRecvL(MCallL("value", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                ">"
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_gt"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                ">="
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_gte"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "<"
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_lt"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "<="
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_lte"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "=="
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_eq"
+                                    , [MCallRecvL(Self(), "value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "!="
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_neq"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          ]
                         )
-                      ]
-                    )
+                      )
+                    ]
                   )
-                ]
-              )
-            )
-          ),
-          
+                )
+                ,          
           Declaration(
             ConstantL(
               "true"
@@ -151,4 +295,4 @@ rules
                 ]
               )
             )
-          ), c | cs], b)
+          ), c | cs]))], b)

@@ -16,8 +16,7 @@ rules
 
   desugar-all = innermost(desugar)
   
-  desugar = 
-            desugar-class-declaration <+
+  desugar = desugar-class-declaration <+
             
             desugar-flatten-methodID <+
             desugar-flatten-methodPart <+
@@ -33,11 +32,8 @@ rules
             desugar-flatten-declaration <+
             desugar-fail
 
-  desugar-all-post = innermost(desugar-post)
-  
-  desugar-post = lower-all
-  
   desugar-pre = desugar-program <+ desugar-fail
+  desugar-all-post: ast -> <lower-post-all> <lower-all> ast
 
   desugar-program: Program(a, b) -> Program([Expression(ObjectDecl(NoInherit(), [], a))], b)
   
@@ -55,13 +51,13 @@ rules
     ) | mids ]
     
   desugar-flatten-methodPart: [Part(ID(name1),args1), Part(ID(name2),args2)] ->
-    [Part(ID(<concat-strings> [name1, "_", name2]), ArgsParen(<map(desugar-arg)> [args1, args2]))]
+    [Part(ID(<concat-strings> [name1, "_", name2]), ArgsParen(<flatten-list> <map(desugar-arg)> [args1, args2]))]
     
   desugar-flatten-methodPart: [Part(ID(name1),args1), Part(ID(name2),args2), Part(ID(name3), args3)] ->
-    [Part(ID(<concat-strings> [name1, "_", name2, "_", name3]), ArgsParen(<map(desugar-arg)> [args1, args2, args3]))]
+    [Part(ID(<concat-strings> [name1, "_", name2, "_", name3]), ArgsParen(<flatten-list> <map(desugar-arg)> [args1, args2, args3]))]
   
   desugar-flatten-methodPart: [Part(ID(name1), ArgsParen(args)),Part(ID(name2),args2)] ->
-    [Part(ID(<concat-strings> [name1, "_", name2]), ArgsParen(<map(desugar-arg)> <concat> [args, [args2]]))]
+    [Part(ID(<concat-strings> [name1, "_", name2]), ArgsParen(<flatten-list> <map(desugar-arg)> <concat> [args, [args2]]))]
 
   desugar-flatten-objectdecl: ObjectDecl(a, b, xs) -> ObjectDecl(a, b, ys)
     where
@@ -110,19 +106,15 @@ rules
       )
       
   desugar-block-to-object:
-    BlockWParams(BlockParams(params), code)-> 
-      ObjectDecl(
-        NoInherit(),
-        [],
-        [Declaration(
-          MethodDecl(
-            NoPrefix()
-          , [MethodID(ID("apply"), Params(params))]
-          , NoAnnotations()
-          , MethodBody(code)
-          )
-        )]
-      )
+    BlockWParams(BlockParams(params), code) -> 
+      ObjectDecl(NoInherit(), [], [Declaration(
+        MethodDecl(
+          NoPrefix()
+        , [MethodID(ID("apply"), Params(params))]
+        , NoAnnotations()
+        , MethodBody(code)
+        )
+      )])
 
   desugar-class-declaration:
     ClassDecl(mIDs, inh, use, code) ->

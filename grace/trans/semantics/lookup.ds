@@ -48,7 +48,12 @@ rules
       rcs != rds;
       lookup-super(name) --> NoMethod();
       lookup-outer(name) --> m.
-      
+  
+  lookup-outer(_) --> NoMethod()
+    where
+      get-outer() --> r;
+      readObject(r) --> NoObject(). 
+  
   lookup-outer(name) --> m
     where
       get-outer() --> r;
@@ -59,7 +64,6 @@ rules
     lookup-local(name) --> m;
     case m of {
       Method(_, _, _) =>
-        m => m'
       NoMethod() =>
         get-super() --> sr;
         DS DS(sr) |- lookup-super(name) --> m

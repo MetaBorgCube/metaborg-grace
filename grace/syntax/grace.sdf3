@@ -43,8 +43,8 @@ context-free syntax
 
 								  >
   
-  MethodName.MethodID          = <<Identifier> <Params>>
-  MethodName.MethodOp          = <<OperatorCF> <Params>>
+  MethodName.MethodID           = <<Identifier> <Params>>
+  MethodName.MethodOp           = <<OperatorCF> <Params>>
   
   Prefix.Prefix                 = "prefix "
   Prefix.NoPrefix               = <>
@@ -104,11 +104,11 @@ context-free syntax
 
 context-free syntax
   
-  // arguments between parenthesis
+  Part.Part                     = <<Identifier><CallArgs>>
+  
   CallArgs.ArgsParen            = < (<{Exp ", "}+>)> {left}
   CallArgs.NoArgs               = <>
 
-  // arguments that are valid without parenthesis (literals)
   CallArgs.ArgBlock             = < <Block>>
   CallArgs.ArgNumber            = < <NUM>>
   CallArgs.ArgString            = < <STRING>>
@@ -116,24 +116,20 @@ context-free syntax
   CallArgs.ArgBoolean           = < <Boolean>>
     
   OperatorCF.OperatorCF         = <<Operator>>
-    
-  Part.Part                     = <<Identifier><CallArgs>>
   
   Inherit.Inherit               = <
                                     inherit <Exp><Alias><Exclude>;
                                     
   								  >
   Inherit.NoInherit             = <>
-  
   Alias.Alias                   = < alias <ID> as <ID>>
   Alias.NoAlias                 = <>
-  
   Exclude.Exclude               = < exclude <{ID ", "}*>>
   Exclude.NoExclude             = <>
   
   Boolean.True                  = "true"
   Boolean.False                 = "false"
+  Lineup.Lineup                 = <[ <{Exp ", "}*> ]>
   Block.Block                   = <{ <{CodeSequence "\n"}*> }>
   Block.BlockWParams            = <{ <BlockParams> <{CodeSequence "\n"}*> }>          {prefer}
   BlockParams.BlockParams       = [[{Param ", "}*] ->]
-  Lineup.Lineup                 = <[ <{Exp ", "}*> ]>

@@ -30,7 +30,7 @@ signature
     
     saveConst: String * V * Members --> Members
     saveConstants: List(String) * List(V) * Members --> Members
-    
+
     add-member: String * List(String) * List(CodeSequence) --> Unit
     add-members: List(String) * List(List(CodeSequence)) --> Unit
     
@@ -41,18 +41,22 @@ signature
   native operators
     nativeIBinOp: String * Int * Int -> Int
     nativePrint: V -> V
+    nativeEq: V * V -> Bool
+    nativeMinus: V * V -> Int
+    nativePlus: V * V -> Int
+    nativeLte: V * V -> Bool
     
 rules
   
   Expression(e) --> e.
   Declaration(e) --> e.
   Assignment(e) --> e.
-  Wrapped(v) --> v.
+  Code(v) --> v.
   
   CS(i) -s-> i.
   DS(i) -s-> i.
 
-  Number(s) --> NumV(parseNumber(s)).
+  NumL(s) --> NumV(parseNumber(s)).
   String(s) --> StringV(s).
   
   p@Program(_, _) -init-> v
@@ -71,6 +75,18 @@ rules
   [code | codes@[_|_] ] : List(CodeSequence) --> codes
     where code --> _.
   
+  MCallRecvL(e1, "==", [e2]) --> v
+    where
+       e1 --> v1@NumV(_);
+       e2 --> v2@NumV(_);
+       case nativeEq(v1,v2) of {
+         true => MCallL("true", []) --> v
+         otherwise => MCallL("false", []) --> v
+       }.
+   
+  MCallRecvL(v1@NumV(_), "-", [v2@NumV(_)]) --> NumV(nativeMinus(v1,v2)).
+  MCallRecvL(v1@NumV(_), "+", [v2@NumV(_)]) --> NumV(nativePlus(v1,v2)).
+        
   MCallRecvL(receiver, name, args) --> v
     where
        receiver --> ObjectRef(r);
@@ -78,12 +94,15 @@ rules
        CS CS(r), DS DS(r) |- Call(m, args) --> v.
   
   MCallL("base_print", [v]) --> nativePrint(v).
-  
-  MCallL(name, vs) --> Call(lookup(name), vs).
+
+  MCallL(name, vs) --> v
+    where
+      lookup(name) --> m;
+      Call(m, vs) --> v.
   
   ConstantL(name, _, v) --> Done()
     where
-      add-member(name, [], [Wrapped(v)]) --> _.
+      add-member(name, [], [Code(v)]) --> _.
   
   MethodL(name, _, params, code) --> Done()
     where
@@ -103,32 +122,32 @@ rules
   Call(Method([n], code, scope), [a]) --> v
     where
       allocateObject(Object(scope, no-super(), {})) --> call-scope;
-      DS DS(call-scope) |- add-member(n, [], [Wrapped(a)]) --> _;
+      DS DS(call-scope) |- add-member(n, [], [Code(a)]) --> _;
       DS DS(call-scope) |- code --> v.
       
   Call(Method([n1, n2], code, scope), [a, b]) --> v
     where
       allocateObject(Object(scope, no-super(), {})) --> call-scope;
-      DS DS(call-scope) |- add-member(n1, [], [Wrapped(a)]) --> _;
-      DS DS(call-scope) |- add-member(n2, [], [Wrapped(b)]) --> _;
+      DS DS(call-scope) |- add-member(n1, [], [Code(a)]) --> _;
+      DS DS(call-scope) |- add-member(n2, [], [Code(b)]) --> _;
       DS DS(call-scope) |- code --> v.
       
   Call(Method([n1, n2, n3], code, scope), [a, b, c]) --> v
     where
       allocateObject(Object(scope, no-super(), {})) --> call-scope;
-      DS DS(call-scope) |- add-member(n1, [], [Wrapped(a)]) --> _;
-      DS DS(call-scope) |- add-member(n2, [], [Wrapped(b)]) --> _;
-      DS DS(call-scope) |- add-member(n3, [], [Wrapped(c)]) --> _;
+      DS DS(call-scope) |- add-member(n1, [], [Code(a)]) --> _;
+      DS DS(call-scope) |- add-member(n2, [], [Code(b)]) --> _;
+      DS DS(call-scope) |- add-member(n3, [], [Code(c)]) --> _;
       DS DS(call-scope) |- code --> v.
   
   no-super() --> allocateObject(NoObject()).
   
   wrap-values([]) --> [] : List(List(CodeSequence)).
   
-  wrap-values([v|vs]) --> [ wv | wvs ] : List(List(CodeSequence))
-    where
-      [Wrapped(v)] --> wv;
-      wrap-values(vs) --> wvs.
+//  wrap-values([v|vs]) --> [ wv | wvs ] : List(List(CodeSequence))
+//    where
+//      [Wrapped(v)] : List(CodeSequence) => wv;
+//      wrap-values(vs) --> wvs.
   
   add-members([], []) --> Unit().
   
@@ -139,9 +158,9 @@ rules
   
   ds |- add-member(name, params, code) --> Unit()
     where
-      allocateMethod(Method(params, code, ds)) --> iMethod;
+      allocateMethod(Method(params, code, ds)) --> mRef;
       readObject(ds) --> Object(enc, sup, tbl);
-      writeObject(ds, Object(enc, sup, {name |--> iMethod, tbl} )) --> _.
+      writeObject(ds, Object(enc, sup, {name |--> mRef, tbl} )) --> _.
       
   [] : List(Exp) -ea-> [].
   

@@ -10,15 +10,13 @@ imports
     src-gen/signatures/General-sig
     
     trans/desugar/desugar-common
-    
     trans/desugar/lower-literals
 
 rules
 
-  lower-all: ast -> <lower-post-all> <lower> ast
-  lower =
-          
-          lower-mdecl <+
+  lower-all = innermost(lower)
+  
+  lower = lower-mdecl <+
           lower-methodcallwdot <+
           lower-mcallopex <+
           lower-mcallimpl <+
@@ -34,6 +32,7 @@ rules
   
   lower-post-1 =
           lower-boolean-to-object <+
+          lower-number-to-object <+
           flatten-codesequence-declaration <+
           lower-fail
   

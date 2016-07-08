@@ -19,7 +19,7 @@ signature
     //      enclosing object ref
     //            super ref
     //                  members (methods)
-    Object: Ref * Ref * Map(String, Int) -> O
+    Object: Ref * Ref * Members -> O
     
     //      parameters
     //                     code
@@ -31,7 +31,7 @@ signature
     NoMethodAndStop: M
     
     // rename to Code
-    Wrapped: V -> CodeSequence
+    Code: V -> CodeSequence
     
     WrappedO: O -> V
     WrappedM: M -> V
