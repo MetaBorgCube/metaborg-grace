@@ -13,15 +13,15 @@ context-free start-symbols
 
 context-free syntax
 
-  Program.Program               = <<{CodeSequence "\n"}*> <EOF>>
+  Program.Program               = <<{Statement "\n"}*> <EOF>>
 
 context-free syntax
 
-  CodeSequence.Dialect          = <dialect <STRING>>
-  CodeSequence.Import           = <import <STRING> as <ID>>
-  CodeSequence.Assignment       = <<Assignment>;>
-  CodeSequence.Declaration 		= <<Declaration>;> {avoid}
-  CodeSequence.Expression       = <<Exp>;>
+  Statement.Dialect             = <dialect <STRING>>
+  Statement.Import              = <import <STRING> as <ID>>
+  Statement.Assignment          = <<Assignment>;>
+  Statement.Declaration 		= <<Declaration>;> {avoid}
+  Statement.Expression          = <<Exp>;>
 
 context-free syntax
 
@@ -33,7 +33,7 @@ context-free syntax
   Declaration.MethodDecl        = <method <Prefix><MethodName+><Annotations> <MethodBody>>
   Declaration.ClassDecl         = <
                                     class <MethodName+>{
-                                      <Inherit><Use*><{CodeSequence "\n"}*>
+                                      <Inherit><Use*><{Statement "\n"}*>
                                     }
                                   >
   Declaration.TraitDecl         = <trait <MethodName+> <MethodBody>>
@@ -68,7 +68,7 @@ context-free syntax
 
   MethodBody.MethodBody         = <
 									{
-									  <{CodeSequence "\n"}*>
+									  <{Statement "\n"}*>
 									}
 								  >
   
@@ -76,7 +76,7 @@ context-free syntax
   
   Exp.ObjectDecl                = <
 									object {
-									  <Inherit><Use*><{CodeSequence "\n"}*>
+									  <Inherit><Use*><{Statement "\n"}*>
 									}
 								  >
   
@@ -129,6 +129,6 @@ context-free syntax
   Boolean.True                  = "true"
   Boolean.False                 = "false"
   Lineup.Lineup                 = <[ <{Exp ", "}*> ]>
-  Block.Block                   = <{ <{CodeSequence "\n"}*> }>
-  Block.BlockWParams            = <{ <BlockParams> <{CodeSequence "\n"}*> }>    {prefer}
+  Block.Block                   = <{ <{Statement "\n"}*> }>
+  Block.BlockWParams            = <{ <BlockParams> <{Statement "\n"}*> }>    {prefer}
   BlockParams.BlockParams       = [[{Param ", "}*] ->]

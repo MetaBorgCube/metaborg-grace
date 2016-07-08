@@ -12,13 +12,13 @@ context-free start-symbols
 
 context-free syntax
 
-  Program.Program               = <<{CodeSequence "\n"}*> <EOF>>
+  Program.Program               = <<{Statement "\n"}*> <EOF>>
   
-  CodeSequence.Dialect          = <dialect <STRING>>
-  CodeSequence.Import           = <import <STRING> as <ID>>
-  CodeSequence.Assignment       = <<Assignment>;>
-  CodeSequence.Declaration 		= <<Declaration>;> {avoid}
-  CodeSequence.Expression       = <<Exp>;>
+  Statement.Dialect          = <dialect <STRING>>
+  Statement.Import           = <import <STRING> as <ID>>
+  Statement.Assignment       = <<Assignment>;>
+  Statement.Declaration 		= <<Declaration>;> {avoid}
+  Statement.Expression       = <<Exp>;>
 
   Assignment.Assignment         = <<ID> := <Exp>>
   
@@ -38,7 +38,7 @@ context-free syntax
                                     class <MethodName+> {
                                       <Inherit>
                                       <Use*>
-                                      <CodeSequence*>
+                                      <Statement*>
                                     }
                                   >
   Declaration.TraitDecl         = <trait <MethodName+> <MethodBody>>
@@ -99,13 +99,13 @@ context-free syntax
   MethodType.NoMethodType       = []
     
   MethodBody.MethodBody         = <{
-    <CodeSequence*>
+    <Statement*>
 }>
   
   Exp.ObjectDecl                = <object {
     <Inherit>
     <Use*>
-    <CodeSequence*>
+    <Statement*>
 }>
   
   Inherit.Inherit               = <inherit <Exp> <Alias> <Exclude>;>
@@ -164,9 +164,9 @@ context-free syntax
   Lineup.Lineup                 = <[ <{Exp ","}*> ]>
   Exp.Ellipsis                  = "..." // needs to yield _runtime_ error
   Exp.BlockExp                  = <<Block>>
-  Block.Block                   = <{ <CodeSequence*> }>
+  Block.Block                   = <{ <Statement*> }>
   Block.BlockWParams            = <{ <BlockParams>
-    <CodeSequence*>
+    <Statement*>
 }>          {prefer}
   
   Exp.Return                    = <return <Exp>>

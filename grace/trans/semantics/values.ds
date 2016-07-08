@@ -24,18 +24,18 @@ signature
     //      parameters
     //                     code
     //                                          self (decl)
-    Method: List(String) * List(CodeSequence) * Ref -> M
+    Method: List(String) * List(Statement) * Ref -> M
 
     NoObject: O
     NoMethod: M
     NoMethodAndStop: M
     
     // rename to Code
-    Code: V -> CodeSequence
+    Code: V -> Statement
     
     WrappedO: O -> V
     WrappedM: M -> V
-    WrappedLCS: List(List(CodeSequence)) -> V
+    WrappedLCS: List(List(Statement)) -> V
     
     ObjectRef: Int -> V
     

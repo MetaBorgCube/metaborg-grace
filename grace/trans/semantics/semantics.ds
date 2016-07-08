@@ -14,10 +14,10 @@ signature
     Program -init-> V
     Program --> V
 
-    List(CodeSequence) --> V
+    List(Statement) --> V
 
     Exp --> V
-    CodeSequence --> V
+    Statement --> V
     Declaration --> V
     Assignment --> V
     
@@ -31,10 +31,10 @@ signature
     saveConst: String * V * Members --> Members
     saveConstants: List(String) * List(V) * Members --> Members
 
-    add-member: String * List(String) * List(CodeSequence) --> Unit
-    add-members: List(String) * List(List(CodeSequence)) --> Unit
+    add-member: String * List(String) * List(Statement) --> Unit
+    add-members: List(String) * List(List(Statement)) --> Unit
     
-    wrap-values: List(V) --> List(List(CodeSequence))
+    wrap-values: List(V) --> List(List(Statement))
     
     no-super: --> Ref
     
@@ -68,11 +68,11 @@ rules
       allocateObject(NoObject())--> r;
       CS CS(r), DS DS(r) |- code --> v.
   
-  [] : List(CodeSequence) --> Done().
+  [] : List(Statement) --> Done().
   
-  [code | [] ] : List(CodeSequence) --> code.
+  [code | [] ] : List(Statement) --> code.
 
-  [code | codes@[_|_] ] : List(CodeSequence) --> codes
+  [code | codes@[_|_] ] : List(Statement) --> codes
     where code --> _.
   
   MCallRecvL(e1, "==", [e2]) --> v
@@ -142,11 +142,11 @@ rules
   
   no-super() --> allocateObject(NoObject()).
   
-  wrap-values([]) --> [] : List(List(CodeSequence)).
+  wrap-values([]) --> [] : List(List(Statement)).
   
-//  wrap-values([v|vs]) --> [ wv | wvs ] : List(List(CodeSequence))
+//  wrap-values([v|vs]) --> [ wv | wvs ] : List(List(Statement))
 //    where
-//      [Wrapped(v)] : List(CodeSequence) => wv;
+//      [Wrapped(v)] : List(Statement) => wv;
 //      wrap-values(vs) --> wvs.
   
   add-members([], []) --> Unit().

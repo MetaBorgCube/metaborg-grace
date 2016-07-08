@@ -12,17 +12,17 @@ context-free syntax
   Exp.MCallRecvL		  = <<Exp>.<STRING>(<{Exp ", "}*>)>
   Exp.ObjectL             = <
 							_object {
-							  <Inherit><Use*><{CodeSequence "\n"}*>
+							  <Inherit><Use*><{Statement "\n"}*>
 							}
 							>
   Declaration.MethodL     = <
 							_method <STRING><Annotations> (<{STRING ", "}*>) {
-							  <{CodeSequence "\n"}*>
+							  <{Statement "\n"}*>
 							}
 							>
   Declaration.ConstantL   = <<STRING><Annotations> = <Exp>>
   Declaration.VariableL   = <<STRING><Annotations>>
-  Declaration.TraitL      = <_trait <STRING> (<{STRING ", "}*>) <{CodeSequence "\n"}*>>
+  Declaration.TraitL      = <_trait <STRING> (<{STRING ", "}*>) <{Statement "\n"}*>>
   
   Assignment.AssignmentL  = <<STRING> := <Exp>>
   

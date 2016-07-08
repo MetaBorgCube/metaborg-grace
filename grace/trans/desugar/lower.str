@@ -33,11 +33,11 @@ rules
   lower-post-1 =
           lower-boolean-to-object <+
           lower-number-to-object <+
-          flatten-codesequence-declaration <+
+          flatten-statements-declaration <+
           lower-fail
   
   lower-post-2 =
-          flatten-codesequence <+
+          flatten-statements <+
           lower-fail
   
   lower-methodcallwdot:
@@ -88,13 +88,13 @@ rules
       name := <name-to-string> tName;
       params := <lower-params> ps
   
-  flatten-codesequence-declaration: Declaration([a,b]) -> [Declaration(a),Assignment(b)]
+  flatten-statements-declaration: Declaration([a,b]) -> [Declaration(a),Assignment(b)]
   
-  flatten-codesequence: ObjectL(a,b,code) -> ObjectL(a,b, flattened)
+  flatten-statements: ObjectL(a,b,code) -> ObjectL(a,b, flattened)
     where
       flattened := <flatten-list> code
   
-  flatten-codesequence: MethodL(a,b,c,code) -> MethodL(a,b,c, flattened)
+  flatten-statements: MethodL(a,b,c,code) -> MethodL(a,b,c, flattened)
     where
       flattened := <flatten-list> code
   
