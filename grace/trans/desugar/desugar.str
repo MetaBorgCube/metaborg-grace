@@ -13,6 +13,8 @@ imports
     trans/desugar/lower
 
 rules
+  
+  desugar-pre = desugar-program <+ desugar-fail
 
   desugar-all = innermost(desugar)
   
@@ -31,33 +33,31 @@ rules
             desugar-flatten-objectdecl <+
             desugar-flatten-declaration <+
             desugar-fail
-
-  desugar-pre = desugar-program <+ desugar-fail
+  
   desugar-all-post: ast -> <lower-post-all> <lower-all> ast
 
   desugar-program: Program(a, b) -> Program([Expression(ObjectDecl(NoInherit(), [], a))], b)
   
-  desugar-flatten-methodID: [ MethodID(
-      ID(name1)
-    , Params(params1)
-    )
-  , MethodID(
-      ID(name2)
-    , Params(params2)
-    )
-  | mids ] -> [MethodID(
-      ID(<concat-strings> [name1, "_", name2])
-    , Params(<concat> [params1,params2])
-    ) | mids ]
-    
-  desugar-flatten-methodPart: [Part(ID(name1),args1), Part(ID(name2),args2)] ->
-    [Part(ID(<concat-strings> [name1, "_", name2]), ArgsParen(<flatten-list> <map(desugar-arg)> [args1, args2]))]
-    
-  desugar-flatten-methodPart: [Part(ID(name1),args1), Part(ID(name2),args2), Part(ID(name3), args3)] ->
-    [Part(ID(<concat-strings> [name1, "_", name2, "_", name3]), ArgsParen(<flatten-list> <map(desugar-arg)> [args1, args2, args3]))]
+  desugar-class-declaration:
+    ClassDecl(mIDs, inh, use, code) ->
+      MethodDecl(
+        NoPrefix(), mIDs, NoAnnotations(),
+        MethodBody([
+          Expression(ObjectDecl(inh,use,code))
+        ])
+      )
   
-  desugar-flatten-methodPart: [Part(ID(name1), ArgsParen(args)),Part(ID(name2),args2)] ->
-    [Part(ID(<concat-strings> [name1, "_", name2]), ArgsParen(<flatten-list> <map(desugar-arg)> <concat> [args, [args2]]))]
+  desugar-flatten-methodID: [ MethodID(ID(n1), Params(p1)), MethodID(ID(n2), Params(p2)) | mids ] ->
+      [MethodID(ID(name), Params(ps)) | mids ]
+    with
+      name := <concat-strings> [n1, "_", n2];
+      ps   := <concat> [p1,p2]
+    
+  desugar-flatten-methodPart: [Part(ID(n1), args1), Part(ID(n2), args2) | ps ] ->
+      [Part(ID(name), ArgsParen(args)) | ps]
+    with
+      name := <concat-strings> [n1, "_", n2];
+      args := <flatten-list> <map(desugar-arg)> [args1, args2]
 
   desugar-flatten-objectdecl: ObjectDecl(a, b, xs) -> ObjectDecl(a, b, ys)
     where
@@ -72,9 +72,15 @@ rules
   desugar-arg:  ArgsParen(a) -> a
   desugar-arg:             a -> a
 
-  desugar-arg-noargs: ArgsParen([NoArgs(), b]) -> ArgsParen([b])
-  desugar-arg-noargs: ArgsParen([b, NoArgs()]) -> ArgsParen([b])
-  desugar-arg-argsparen: ArgsParen([NoArgs()]) -> NoArgs()
+  desugar-arg-noargs: ArgsParen(as) -> ArgsParen(as')
+    where
+      as' := <flatten-list> <filter-no-args> as;
+      <not(eq)> (as, as')
+
+  filter-no-args: [NoArgs() | as] -> [<filter-no-args> as]  
+  filter-no-args: [a | as] -> [a | <filter-no-args> as]
+  filter-no-args: [] -> []
+  
   desugar-arg-argsparen: ArgsParen(as@[_ | _]) ->
     ArgsParen( <flatten-list> <map(strip-argsparen)> as)
   
@@ -115,15 +121,5 @@ rules
         , MethodBody(code)
         )
       )])
-
-  desugar-class-declaration:
-    ClassDecl(mIDs, inh, use, code) ->
-      MethodDecl(NoPrefix(),mIDs,NoAnnotations(),MethodBody([Expression(ObjectDecl(inh,use,code))]))
-  
-  part-to-nameList:
-    (Part(name, _), list) -> [list, <name-to-string> name]
-
-  part-to-argList:
-    (Part(_, args), list) -> [list, args]
 
   desugar-fail: a -> <fail>
