@@ -7,7 +7,7 @@ imports
     libstratego-aterm
     src-gen/signatures/grace-sig
     src-gen/signatures/grace-lowered-sig
-    src-gen/signatures/General-sig
+    src-gen/signatures/general-sig
     
     trans/desugar/desugar-common
     trans/desugar/lower-literals

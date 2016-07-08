@@ -7,7 +7,7 @@ imports
     libstratego-aterm
     src-gen/signatures/grace-sig
     src-gen/signatures/grace-lowered-sig
-    src-gen/signatures/General-sig
+    src-gen/signatures/general-sig
     
     trans/desugar/desugar-common
     trans/desugar/lower
@@ -32,7 +32,7 @@ rules
             
             desugar-flatten-objectdecl <+
             desugar-flatten-declaration <+
-            desugar-fail
+            fail
   
   desugar-all-post: ast -> <lower-post-all> <lower-all> ast
 

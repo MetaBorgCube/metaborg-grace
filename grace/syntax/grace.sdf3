@@ -118,7 +118,7 @@ context-free syntax
   
   Inherit.Inherit               = <
                                     inherit <Exp><Alias><Exclude>;
-                                    
+									
   								  >
   Inherit.NoInherit             = <>
   Alias.Alias                   = < alias <ID> as <ID>>
@@ -130,5 +130,5 @@ context-free syntax
   Boolean.False                 = "false"
   Lineup.Lineup                 = <[ <{Exp ", "}*> ]>
   Block.Block                   = <{ <{CodeSequence "\n"}*> }>
-  Block.BlockWParams            = <{ <BlockParams> <{CodeSequence "\n"}*> }>          {prefer}
+  Block.BlockWParams            = <{ <BlockParams> <{CodeSequence "\n"}*> }>    {prefer}
   BlockParams.BlockParams       = [[{Param ", "}*] ->]
