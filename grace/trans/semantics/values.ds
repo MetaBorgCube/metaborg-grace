@@ -3,6 +3,8 @@ module trans/semantics/values
 imports
 
   src-gen/ds-signatures/grace-sig
+  
+  trans/semantics/context
 
 signature
 
@@ -30,7 +32,6 @@ signature
     NoMethod: M
     NoMethodAndStop: M
     
-    // rename to Code
     Code: V -> Statement
     
     WrappedO: O -> V
@@ -57,6 +58,7 @@ signature
     M // method
     CS // callsite
     DS // declaresite
+    C // context
     Unit
     Table
 

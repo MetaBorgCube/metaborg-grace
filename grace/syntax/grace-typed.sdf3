@@ -15,7 +15,7 @@ context-free syntax
   Program.Program               = <<{Statement "\n"}*> <EOF>>
   
   Statement.Dialect          = <dialect <STRING>>
-  Statement.Import           = <import <STRING> as <ID>>
+  Statement.Import           = <import <STRING> = <ID>>
   Statement.Assignment       = <<Assignment>;>
   Statement.Declaration 		= <<Declaration>;> {avoid}
   Statement.Expression       = <<Exp>;>

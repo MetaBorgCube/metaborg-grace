@@ -61,12 +61,12 @@ rules
   
   p@Program(_, _) -init-> v
     where
-      CS CS(fresh), DS DS(fresh) |- p :: OHeap {}, MHeap {} --> v.
+      CS CS(fresh), DS DS(fresh), C ObjectC() |- p :: OHeap {}, MHeap {}, Locals {} --> v.
       
   Program(code, _) --> v
     where
-      allocateObject(NoObject())--> r;
-      CS CS(r), DS DS(r) |- code --> v.
+      allocateObject(NoObject()) --> r;
+      CS CS(r), DS DS(r), C ObjectC() |- code --> v.
   
   [] : List(Statement) --> Done().
   
@@ -106,7 +106,12 @@ rules
   
   MethodL(name, _, params, code) --> Done()
     where
-      addMember(name, params, code) --> _.
+      C MethodC() |- addMember(name, params, code) --> _.
+
+  ds |- ObjectL(inherit, [], code) --> ObjectRef(or)
+    where
+      allocateObject(Object(ds, inherit, {})) --> or;
+      CS CS(or), DS DS(or), C ObjectC() |- code --> _.
 
   Inherit(e, _, _) --> r
     where
@@ -114,12 +119,7 @@ rules
 
   NoInherit() --> r
     where
-      allocateObject(NoObject()) --> r.
-  
-  ds |- ObjectL(inherit, [], code) --> ObjectRef(or)
-    where
-      allocateObject(Object(ds, inherit, {})) --> or;
-      CS CS(or), DS DS(or) |- code --> _.
+      allocateObject(NoObject()) --> r.  
 
   ds |- Self() --> ObjectRef(ds).
 
