@@ -1,6 +1,8 @@
 module syntax-types
 
-language Grace
+language grace
+
+start symbol Program
 
 test type boolean [[type Boolean = {
     not -> Boolean;
@@ -177,28 +179,28 @@ test type object [[type Object = {
     :: (other:Object) -> Binding;
 };]] parse succeeds
 
-test parametric type [[type MyParametricType[[A, B]] =
-    type {
-        at_put (_:A, _:B) -> Boolean;
-        cleanup(_:B);
-    } where A <: Hashable, B <: DisposableReference; ]] parse succeeds
-
-test simple parametric type [[type MyType[[A]] =
-    type {
-        f(_:A);
-    } where A <: Ha;]] parse succeeds
-    
-test simple parametric type 2 [[type Block0[[R]] = type {
-    apply -> R;
-};]] parse succeeds
-
-test parametric type double [[type Block1[[T,R]] = type {
-    apply(a:T) -> R;
-};]] parse succeeds
-
-test parametric type triple [[type Block2[[S,T,R]] = type {
-    apply(a:S, b:T) -> R;
-};]] parse succeeds
+//test parametric type [[type MyParametricType[[A, B]] =
+//    type {
+//        at_put (_:A, _:B) -> Boolean;
+//        cleanup(_:B);
+//    } where A <: Hashable, B <: DisposableReference; ]] parse succeeds
+//
+//test simple parametric type [[type MyType[[A]] =
+//    type {
+//        f(_:A);
+//    } where A <: Ha;]] parse succeeds
+//    
+//test simple parametric type 2 [[type Block0[[R]] = type {
+//    apply -> R;
+//};]] parse succeeds
+//
+//test parametric type double [[type Block1[[T,R]] = type {
+//    apply(a:T) -> R;
+//};]] parse succeeds
+//
+//test parametric type triple [[type Block2[[S,T,R]] = type {
+//    apply(a:S, b:T) -> R;
+//};]] parse succeeds
 
 test type simple string [[type String = type {
     asString -> String;

@@ -1,47 +1,48 @@
 module syntax-expressions
 
-language Grace
+language grace
 
+start symbol Program
 
-test empty expressio                                    [[]]                        parse succeeds
-test self												[[self]] 					parse succeeds
-test self parenthesis									[[(self)]] 					parse succeeds
-test arbitrary											[[arbitrary]]				parse succeeds
-test arbitrary parentheses								[[(arbitrary)]]				parse succeeds
-test arbitrary double parentheses						[[((arbirary))]]			parse succeeds
+test empty expression                                   [[]]                        parse succeeds
+test self												[[self;]] 					parse succeeds
+test self parenthesis									[[(self);]] 				parse succeeds
+test arbitrary											[[arbitrary;]]				parse succeeds
+test arbitrary parentheses								[[(arbitrary);]]			parse succeeds
+test arbitrary double parentheses						[[((arbirary));]]			parse succeeds
 
-test print hello world 									[[print "Hello World"]]		parse succeeds
-test print hello world parenthesis 						[[print("Hello World")]]	parse succeeds
-test print number										[[print(5)]]				parse succeeds
-test print float number									[[print(5.5)]]				parse succeeds
-test print addition										[[print(5+5)]]				parse succeeds
+test print hello world 									[[print "Hello World";]]	parse succeeds
+test print hello world parenthesis 						[[print("Hello World");]]	parse succeeds
+test print number										[[print(5);]]				parse succeeds
+test print float number									[[print(5.5);]]				parse succeeds
+test print addition										[[print(5+5);]]				parse succeeds
 
-test add no layout										[[5+5]]						parse succeeds
-test add layout spaces									[[ 5 + 5 ]]					parse succeeds
-test add layout tabs									[[ 5 	+ 		5 ]]		parse fails
-test add identifier and number							[[5 + foo]]					parse succeeds
-test add identifier and float							[[5.5 + foo]]				parse succeeds
-test add floats											[[5.5 + 5.5]]				parse succeeds
-test add identifiers									[[foo + foo ]]				parse succeeds
-test add parentheses									[[(foo + foo)]]				parse succeeds
+test add no layout										[[5+5;]]					parse succeeds
+test add layout spaces									[[ 5 + 5 ;]]				parse succeeds
+test add layout tabs									[[ 5 	+ 		5 ;]]		parse fails
+test add identifier and number							[[5 + foo;]]				parse succeeds
+test add identifier and float							[[5.5 + foo;]]				parse succeeds
+test add floats											[[5.5 + 5.5;]]				parse succeeds
+test add identifiers									[[foo + foo ;]]				parse succeeds
+test add parentheses									[[(foo + foo);]]			parse succeeds
 
-test add and multiply									[[foo * foo + foo]]			parse succeeds
-test add and multiply inner parentheses					[[(foo + foo) * foo]]		parse succeeds
-test add and multiply outer parentheses					[[(foo + foo * foo)]]		parse succeeds
+test add and multiply									[[foo * foo + foo;]]		parse succeeds
+test add and multiply inner parentheses					[[(foo + foo) * foo;]]		parse succeeds
+test add and multiply outer parentheses					[[(foo + foo * foo);]]		parse succeeds
 
-test dot operator										[[foo.foo]]					parse succeeds
-test multiple dot operator								[[foo.foo.foo]]				parse succeeds
-test dot operator and call								[[foo.foo(5)]]				parse succeeds
+test dot operator										[[foo.foo;]]				parse succeeds
+test multiple dot operator								[[foo.foo.foo;]]			parse succeeds
+test dot operator and call								[[foo.foo(5);]]				parse succeeds
 
-test addition [[5 + 5;]] parse succeeds
-test multiplication [[5 * 5;]] parse succeeds
-test subtraction [[5 - 5;]] parse succeeds
-test parens [[(5 + 5);]] parse succeeds
-test parens and more [[(5 + 5) + 5;]] parse succeeds
+test addition                                           [[5 + 5;]]                  parse succeeds
+test multiplication                                     [[5 * 5;]]                  parse succeeds
+test subtraction                                        [[5 - 5;]]                  parse succeeds
+test parens                                             [[(5 + 5);]]                parse succeeds
+test parens and more                                    [[(5 + 5) + 5;]]            parse succeeds
 
-test addition three [[5 + 5 + 5;]] parse succeeds
-test multiplication three [[5 * 5 * 5;]] parse succeeds
-test subtraction three [[5 - 5 - 5;]] parse succeeds
+test addition three                                     [[5 + 5 + 5;]]              parse succeeds
+test multiplication three                               [[5 * 5 * 5;]]              parse succeeds
+test subtraction three                                  [[5 - 5 - 5;]]              parse succeeds
 test division three [[5 / 5 / 5;]] parse succeeds
 
 test plus mult [[5 + 5 * 5;]] parse succeeds

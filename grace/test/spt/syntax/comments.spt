@@ -1,11 +1,13 @@
 module syntax-comments
 
-language Grace
+language grace
 
-test single comment [[
-	//comment
+start symbol Program
+
+test just a single comment [[
+    //comment
 ]] parse succeeds
 
-test print with comment [[
-	print "Hello World" //comment
+test a print with comment [[
+    print "Hello World"; //comment
 ]] parse succeeds

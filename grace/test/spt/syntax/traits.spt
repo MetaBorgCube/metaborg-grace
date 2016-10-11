@@ -1,6 +1,8 @@
 module syntax-traits
 
-language Grace
+language grace
+
+start symbol Program
 
 test trait [[trait emptiness {
     method isEmpty { size == 0; };

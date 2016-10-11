@@ -1,23 +1,26 @@
 module syntax-program
 
-language Grace
+language grace
+
+start symbol Program
+
 test empty program [[
 
 ]] parse succeeds
 
 test hello world [[
-	print "Hello world";
+    print "Hello world";
 ]] parse succeeds
 
 test hello world twice newline seperated [[
-	print "Hello world";
+    print "Hello world";
     print "Hello world";
 ]] parse succeeds
 
 test hello world space seperated [[
-	print "Hello world"; print "Hello world";
+    print "Hello world"; print "Hello world";
 ]] parse succeeds
 
 test hello world tab seperated [[
-	print "Hello world"	print "Hello world"
+    print "Hello world"	print "Hello world"
 ]] parse fails

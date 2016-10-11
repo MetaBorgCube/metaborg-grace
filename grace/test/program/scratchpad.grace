@@ -19,4 +19,3 @@ object {
   base_print(a 1);
   base_print(w);
 };
-

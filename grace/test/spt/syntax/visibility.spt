@@ -1,6 +1,8 @@
 module syntax-visibility
 
-language Grace
+language grace
+
+start symbol Program
 
 test object with visibilities [[object {
     def a = 1; // Confidential access to a
