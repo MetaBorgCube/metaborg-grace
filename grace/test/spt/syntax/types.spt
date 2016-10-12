@@ -202,12 +202,15 @@ test type object [[type Object = {
 //    apply(a:S, b:T) -> R;
 //};]] parse succeeds
 
-test type simple string [[type String = type {
+test type simple string [[
+type String = type {
     asString -> String;
     ++(o : String) -> String;
-};]]
+};
+]]
 
-test type simple number [[type Number = type {
+test type simple number [[
+type Number = type {
     asString -> String;
     +(o : Number) -> Number;
     *(o : Number) -> Number;
@@ -215,9 +218,11 @@ test type simple number [[type Number = type {
     /(o : Number) -> Number;
     ^(o : Number) -> Number;
     %(o : Number) -> Number;
-};]] parse succeeds
+};
+]] parse succeeds
 
-test type boolean [[type Boolean = type {
+test type boolean [[
+type Boolean = type {
     ifTrue(b) -> Done;
     ifFalse(b) -> Done;
     ifTrue(b1) ifFalse(b2);
@@ -225,4 +230,5 @@ test type boolean [[type Boolean = type {
     ||(o : Boolean) -> Boolean;
     andAlso(b);
     orElse(b);
-};]] parse succeeds
+};
+]] parse succeeds
