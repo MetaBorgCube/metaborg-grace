@@ -1,4 +1,4 @@
-module General
+module general
 
 lexical syntax
 
@@ -9,7 +9,7 @@ lexical syntax
   NUM.RadixNum   = [0-9]+ [xX] [a-zA-Z0-9]+ // some radix number
   NUM.SciNum     = [0-9]* "."? [0-9]+ [eE] "-"? [0-9]+ // scientific notation
   Operator       = [\!\?\@\#\%\^\&\|\~\=\+\-\*\/\\\>\<\:\.\$]+
-  STRING         = "\"" StringChar* "\"" 
+  STRING         = "\"" StringChar* "\""
   StringChar     = ~[\"\n] 
   StringChar     = "\\\"" 
   StringChar     = BackSlashChar 

@@ -7,179 +7,292 @@ imports
     libstratego-aterm
     src-gen/signatures/grace-sig
     src-gen/signatures/grace-lowered-sig
-    src-gen/signatures/General-sig
+    src-gen/signatures/general-sig
 
 rules
-  
-  inject-all = inject-booleans
 
-  inject-booleans: Program([c | cs ], b) -> Program([Declaration(
-            Constant(
+  inject-all: Program([c | cs ], b) -> Program([Expression(ObjectL(NoInherit(),[],[
+          Declaration(
+            MethodL(
+              "print"
+            , NoAnnotations()
+            , ["obj"]
+            , [ Expression(
+                  MCallL(
+                    "base_print"
+                  , [MCallRecvL(MCallL("obj", []), "asString", [])]
+                  )
+                )
+              ]
+            )
+          )
+        ,
+          Declaration(
+                  MethodL(
+                    "base_number"
+                  , NoAnnotations()
+                  , []
+                  , [ Expression(
+                        ObjectL(
+                          NoInherit()
+                        , []
+                        , [ Declaration(
+                              ConstantL(
+                                "value"
+                              , NoAnnotations()
+                              , NumL("0")
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "asString"
+                              , NoAnnotations()
+                              , []
+                              , [Expression(MCallL("value", []))]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "+"
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_plus"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "-"
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_minus"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "*"
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_mult"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "/"
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_div"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "-"
+                              , NoAnnotations()
+                              , []
+                              , [ Expression(
+                                    MCallL(
+                                      "base_negative"
+                                    , [MCallRecvL(MCallL("value", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                ">"
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_gt"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                ">="
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_gte"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "<"
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_lt"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "<="
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_lte"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "=="
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_eq"
+                                    , [MCallRecvL(Self(), "value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          , Declaration(
+                              MethodL(
+                                "!="
+                              , NoAnnotations()
+                              , ["other"]
+                              , [ Expression(
+                                    MCallL(
+                                      "base_neq"
+                                    , [MCallL("value", []), MCallRecvL(MCallL("other", []), "value", [])]
+                                    )
+                                  )
+                                ]
+                              )
+                            )
+                          ]
+                        )
+                      )
+                    ]
+                  )
+                )
+                ,          
+          Declaration(
+            ConstantL(
               "true"
             , NoAnnotations()
-            , NoTypeAnn()
-            , ObjectDecl(
+            , ObjectL(
                 NoInherit()
               , []
               , [ Declaration(
-                    MethodDeclL(
-                      NoPrefix()
-                    , "ifTrue"
-                    , NoArgType()
+                    MethodL(
+                      "ifTrue"
                     , NoAnnotations()
                     , ["blk"]
-                    , [NoTypeAnn()]
-                    , NoMethodType()
-                    , [ Expression(
-                          MCallCanonicalL(
-                            MCallImplL("blk", NoArgType(), [])
-                          , "apply"
-                          , NoArgType()
-                          , []
-                          )
-                        )
-                      ]
-                    , NoWhere()
+                    , [Expression(MCallRecvL(MCallL("blk", []), "apply", []))]
                     )
                   )
+                , Declaration(MethodL("ifFalse", NoAnnotations(), ["blk"], []))
                 , Declaration(
-                    MethodDeclL(
-                      NoPrefix()
-                    , "ifFalse"
-                    , NoArgType()
+                    MethodL(
+                      "ifTrue_ifFalse"
                     , NoAnnotations()
-                    , ["blk"]
-                    , [NoTypeAnn()]
-                    , NoMethodType()
-                    , []
-                    , NoWhere()
+                    , ["blk1", "blk2"]
+                    , [Expression(MCallRecvL(MCallL("blk1", []), "apply", []))]
                     )
                   )
                 , Declaration(
-                    MethodDeclL(
-                      NoPrefix()
-                    , "||"
-                    , NoArgType()
+                    MethodL("||", NoAnnotations(), ["other"], [Expression(Self())])
+                  )
+                , Declaration(
+                    MethodL(
+                      "&&"
                     , NoAnnotations()
                     , ["other"]
-                    , [NoTypeAnn()]
-                    , NoMethodType()
-                    , [Expression(Self())]
-                    , NoWhere()
+                    , [Expression(MCallL("other", []))]
                     )
                   )
                 , Declaration(
-                    MethodDeclL(
-                      NoPrefix()
-                    , "&&"
-                    , NoArgType()
-                    , NoAnnotations()
-                    , ["other"]
-                    , [NoTypeAnn()]
-                    , NoMethodType()
-                    , [Expression(MCallImplL("other", NoArgType(), []))]
-                    , NoWhere()
-                    )
-                  )
-                , Declaration(
-                    MethodDeclL(
-                      NoPrefix()
-                    , "asString"
-                    , NoArgType()
-                    , NoAnnotations()
-                    , []
-                    , []
-                    , NoMethodType()
-                    , [Expression(String("\"true\""))]
-                    , NoWhere()
-                    )
+                    MethodL("asString", NoAnnotations(), [], [Expression(String("\"true\""))])
                   )
                 ]
               )
             )
           )
         , Declaration(
-            Constant(
+            ConstantL(
               "false"
             , NoAnnotations()
-            , NoTypeAnn()
-            , ObjectDecl(
+            , ObjectL(
                 NoInherit()
               , []
-              , [ Declaration(
-                    MethodDeclL(
-                      NoPrefix()
-                    , "ifTrue"
-                    , NoArgType()
+              , [ Declaration(MethodL("ifTrue", NoAnnotations(), ["blk"], []))
+                , Declaration(
+                    MethodL(
+                      "ifFalse"
                     , NoAnnotations()
                     , ["blk"]
-                    , [NoTypeAnn()]
-                    , NoMethodType()
-                    , []
-                    , NoWhere()
+                    , [Expression(MCallRecvL(MCallL("blk", []), "apply", []))]
                     )
                   )
                 , Declaration(
-                    MethodDeclL(
-                      NoPrefix()
-                    , "ifFalse"
-                    , NoArgType()
+                    MethodL(
+                      "ifTrue_ifFalse"
                     , NoAnnotations()
-                    , ["blk"]
-                    , [NoTypeAnn()]
-                    , NoMethodType()
-                    , [ Expression(
-                          MCallCanonicalL(
-                            MCallImplL("blk", NoArgType(), [])
-                          , "apply"
-                          , NoArgType()
-                          , []
-                          )
-                        )
-                      ]
-                    , NoWhere()
+                    , ["blk1", "blk2"]
+                    , [Expression(MCallRecvL(MCallL("blk2", []), "apply", []))]
                     )
                   )
                 , Declaration(
-                    MethodDeclL(
-                      NoPrefix()
-                    , "||"
-                    , NoArgType()
+                    MethodL(
+                      "||"
                     , NoAnnotations()
                     , ["other"]
-                    , [NoTypeAnn()]
-                    , NoMethodType()
-                    , [Expression(MCallImplL("other", NoArgType(), []))]
-                    , NoWhere()
+                    , [Expression(MCallL("other", []))]
                     )
                   )
                 , Declaration(
-                    MethodDeclL(
-                      NoPrefix()
-                    , "&&"
-                    , NoArgType()
-                    , NoAnnotations()
-                    , ["other"]
-                    , [NoTypeAnn()]
-                    , NoMethodType()
-                    , [Expression(Self())]
-                    , NoWhere()
-                    )
+                    MethodL("&&", NoAnnotations(), ["other"], [Expression(Self())])
                   )
                 , Declaration(
-                    MethodDeclL(
-                      NoPrefix()
-                    , "asString"
-                    , NoArgType()
-                    , NoAnnotations()
-                    , []
-                    , []
-                    , NoMethodType()
-                    , [Expression(String("\"false\""))]
-                    , NoWhere()
-                    )
+                    MethodL("asString", NoAnnotations(), [], [Expression(String("\"false\""))])
                   )
                 ]
               )
             )
-          ), c | cs], b)
+          ), c | cs]))], b)

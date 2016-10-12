@@ -1,21 +1,12 @@
-class supersuper {
-  method a(w) { w; };
-  method w { "supersuper"; };
+method if(cond) then(blk1) else(blk2) {
+  cond.ifTrue(blk1) ifFalse(blk2);
 };
-
-class super {
-  inherit supersuper;
-  method a(w) { w; };
-//  method w { "super"; };
-};
-
-method a(i) { i; };
-method w { "from outer"; };
 
 object {
-  inherit super;
-  method a(w) { w; };
-//  method w { "local"; };
-  base_print(a 1);
-  base_print(w);
+  def a = if true then { "condition is true"; } else { "condition is false"; };
+  base_print(a);
+};
+
+method a {
+  def b = true;
 };

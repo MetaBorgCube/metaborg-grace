@@ -7,67 +7,106 @@ imports
     libstratego-aterm
     src-gen/signatures/grace-sig
     src-gen/signatures/grace-lowered-sig
-    src-gen/signatures/General-sig
+    src-gen/signatures/general-sig
     
     trans/desugar/desugar-common
-    
-    trans/desugar/lower-booleans
+    trans/desugar/lower-literals
 
 rules
 
-  lower-all = lower
-  lower = 
-          lower-boolean-to-object <+
-          lower-mdecl <+
+  lower-all = innermost(lower)
+  
+  lower = lower-mdecl <+
           lower-methodcallwdot <+
           lower-mcallopex <+
           lower-mcallimpl <+
-          lower-mcallcanonical <+
+          lower-mcallwdot <+
+          lower-objectdecl <+
+          lower-constant <+
+          lower-variable <+
+          lower-assignment <+
+          lower-trait <+
+          lower-fail
+  
+  lower-post-all: ast -> <topdown(try(lower-post-2))> <topdown(try(lower-post-1))> ast
+  
+  lower-post-1 =
+          lower-boolean-to-object <+
+          lower-number-to-object <+
+          flatten-statements-declaration <+
+          lower-fail
+  
+  lower-post-2 =
+          flatten-statements <+
           lower-fail
   
   lower-methodcallwdot:
-    MCallWDot(recv, [Part(idf, argType, args)]) ->
-      MCallCanonicalL(recv, <name-to-string> idf, argType, as)
+    MCallWDot(recv, [Part(idf, args)]) ->
+      MCallRecvL(recv, <name-to-string> idf, as)
         with
           as := <flatten-list> <lower-arguments> args
 
   lower-mcallopex:
-    MCallOpEx(recv, name, argtype, arg) ->
-      MCallCanonicalL(recv, <name-to-string> name, argtype, [arg])
+    MCallOpEx(recv, name, arg) ->
+      MCallRecvL(recv, <name-to-string> name, [arg])
   
   lower-mcallimpl: 
-    MCallImpl([Part(ID(name),argType,args)]) -> MCallImplL(name,argType, as)
+    MCallImpl([Part(ID(name),args)]) -> MCallL(name, as)
       with
         as := <flatten-list> <lower-arguments> args
   
   lower-mdecl:
-    MethodDecl(prfx, [MethodID(mName, argType, annotations, ps)], methodType, MethodBody(cs), wherec) ->
-      MethodDeclL(prfx,name,argType,annotations, paramNames, paramTypes, methodType, cs, wherec)
+    MethodDecl(_, [MethodID(mName, ps)], annotations, MethodBody(cs)) ->
+      MethodL(name,annotations, paramNames, cs)
       with
-        (paramNames, paramTypes) := <lower-params> ps;
+        paramNames := <lower-params> ps;
         name := <name-to-string> mName 
 
   lower-mdecl:
-    MethodDecl(prfx, [MethodOp(mName, argType, annotations, ps)], methodType, MethodBody(cs), wherec) ->
-      MethodDeclL(prfx,name,argType,annotations, paramNames, paramTypes, methodType, cs, wherec)
+    MethodDecl(prfx, [MethodOp(mName, ps)], annotations, MethodBody(cs)) ->
+      MethodL(name,annotations, params, cs)
       with
-        (paramNames, paramTypes) := <lower-params> ps;
-        name := <name-to-string> mName 
+        name := <name-to-string> mName; 
+        params := <lower-params> ps
   
-  lower-mcallcanonical: 
-    MCallCanonical(_, recv, ID(name), argType, args) ->
-      MCallCanonicalL(recv, name, argType, <lower-arguments> args)
+  lower-mcallwdot: 
+    MCallWDot(recv, [Part(ID(name), args)]) ->
+      MCallRecvL(recv, name, <lower-arguments> args)
+      
+  lower-objectdecl: ObjectDecl(a, b, c) -> ObjectL(a,b,c)
+
+  lower-constant: Constant(a, b, c) -> ConstantL(a, b, c)
+    
+  lower-variable: Variable(a, b, NoVarInit()) -> VariableL(a,b)
+  lower-variable: Variable(a, b, VarInit(exp)) -> [VariableL(a,b), AssignmentL(a,exp)]
   
-  lower-params: NoParams() -> ([], [])
-  lower-params: Params(ps) -> <lower-params> ps
-  lower-params: [Param(n, typeAnn)] -> ([n], [typeAnn])
-  lower-params: [Param(n, typeAnn) | bs] -> ([n | ns ], [typeAnn | tas])
+  lower-assignment: Assignment(a,b) -> AssignmentL(a, b)
+
+  lower-trait: TraitDecl([MethodID(tName, ps)], MethodBody(code)) -> 
+    TraitL(name, params, code)
     where
-      (ns, tas) := <lower-params> bs
+      name := <name-to-string> tName;
+      params := <lower-params> ps
+  
+  flatten-statements-declaration: Declaration([a,b]) -> [Declaration(a),Assignment(b)]
+  
+  flatten-statements: ObjectL(a,b,code) -> ObjectL(a,b, flattened)
+    where
+      flattened := <flatten-list> code
+  
+  flatten-statements: MethodL(a,b,c,code) -> MethodL(a,b,c, flattened)
+    where
+      flattened := <flatten-list> code
+  
+  lower-params: NoParams() -> []
+  lower-params: Params(ps) -> <lower-params> ps
+  lower-params: [Param(n)] -> [n]
+  lower-params: [Param(n) | bs] -> [n | <lower-params> bs ]
   
   lower-arguments: ArgNumber(a) -> [Number(a)]
   lower-arguments: ArgString(a) -> [String(a)]
   lower-arguments: ArgBoolean(a) -> [Boolean(a)]
+  lower-arguments: ArgLineup(a) -> [LineupExp(a)]
   lower-arguments: NoArgs() -> []
   lower-arguments: ArgsParen(as) -> <lower-arguments> as
   lower-arguments: [ArgsParen(a) | b] -> [a | <lower-arguments> b]

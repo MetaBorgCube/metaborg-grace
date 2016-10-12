@@ -2,14 +2,28 @@ module grace-lowered
 
 imports
 
-  General
-  KeywordRejections
+  general
+  keywordRejections
   grace
 
 context-free syntax
 
-  Exp.MCallImplL = <<STRING> <ArgType> <Exp*>>
-  Declaration.MethodDeclL =
-    <<Prefix> <STRING> <ArgType> <Annotations> <STRING*> <TypeAnn*> <MethodType> <CodeSequence*> <Where>>
-  Exp.MCallCanonical = <<Prefix> <Exp> . <MethodName> <ArgType> <CallArgs>>
-  Exp.MCallCanonicalL = <<Exp> <STRING> <ArgType> <Exp*>>
+  Exp.MCallL			  = <<STRING>(<{Exp ", "}*>)>
+  Exp.MCallRecvL		  = <<Exp>.<STRING>(<{Exp ", "}*>)>
+  Exp.ObjectL             = <
+							_object {
+							  <Inherit><Use*><{Statement "\n"}*>
+							}
+							>
+  Declaration.MethodL     = <
+							_method <STRING><Annotations> (<{STRING ", "}*>) {
+							  <{Statement "\n"}*>
+							}
+							>
+  Declaration.ConstantL   = <<STRING><Annotations> = <Exp>>
+  Declaration.VariableL   = <<STRING><Annotations>>
+  Declaration.TraitL      = <_trait <STRING> (<{STRING ", "}*>) <{Statement "\n"}*>>
+  
+  Assignment.AssignmentL  = <<STRING> := <Exp>>
+  
+  Exp.NumL				  = <_number(<NUM>)> {avoid}

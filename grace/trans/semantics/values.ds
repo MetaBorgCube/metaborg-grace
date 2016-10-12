@@ -1,15 +1,17 @@
-module trans/values
+module trans/semantics/values
 
 imports
 
   src-gen/ds-signatures/grace-sig
-  // move environment into this file
+  
+  trans/semantics/context
 
 signature
 
   sort aliases
     Ref = Int
-
+    Members = Map(String, Int)
+    
   constructors
     NumV: Int -> V
     StringV: String -> V
@@ -19,23 +21,22 @@ signature
     //      enclosing object ref
     //            super ref
     //                  members (methods)
-    Object: Ref * Ref * Map(String, Int) -> O
+    Object: Ref * Ref * Members -> O
     
     //      parameters
     //                     code
     //                                          self (decl)
-    Method: List(String) * List(CodeSequence) * Ref -> M
+    Method: List(String) * List(Statement) * Ref -> M
 
     NoObject: O
     NoMethod: M
     NoMethodAndStop: M
     
-    // rename to Code
-    Wrapped: V -> CodeSequence
+    Code: V -> Statement
     
     WrappedO: O -> V
     WrappedM: M -> V
-    WrappedLCS: List(List(CodeSequence)) -> V
+    WrappedLCS: List(List(Statement)) -> V
     
     ObjectRef: Int -> V
     
@@ -43,6 +44,8 @@ signature
     DS: Ref -> DS
     
     Unit: Unit
+    
+    getMembers: Members -> V
     
   arrows
   
@@ -55,15 +58,17 @@ signature
     M // method
     CS // callsite
     DS // declaresite
+    C // context
     Unit
+    Table
 
   variables
     v : V
     vs : List(V)
     o : O
     m : M
-    csv: CS
-    dsv: DS
+    cs: CS
+    ds: DS
     r : Ref
 
   native operators

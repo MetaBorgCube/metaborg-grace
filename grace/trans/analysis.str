@@ -43,21 +43,30 @@ rules // Debugging
       filename := <guarantee-extension(|"analyzed-pp.grace")> path;
       result   := <pp-debug> ast
   
-  desugar-complete: ast -> <desugar-all-post> <desugar-all> <desugar-pre> <inject-all> ast 
-  desugar-test    : ast -> ast
-    where
-      <debug(!"testing strategy, ast: ")> ast 
+  desugar-complete: ast -> <inject-all> <desugar-all-post> <desugar-all> <desugar-pre> ast
   
   debug-show-desugared:
     (_, _, ast, path, _) -> (filename, result)
     with
-      filename := <guarantee-extension(|"desugared.aterm")> path;
-      result   := <desugar-complete> ast
+      filename := <guarantee-extension(|"desugared-lowered.aterm")> path;
+      result   := <desugar-all-post> <desugar-all> <desugar-pre> ast
 
   debug-show-desugared-pp:
     (_, _, ast, path, _) -> (filename, result)
     with
-      filename := <guarantee-extension(|"desugared-pp.grace")> path;
+      filename := <guarantee-extension(|"desugared-lowered-pp.grace-l")> path;
       to-pp    := <desugar-all-post> <desugar-all> <desugar-pre> ast;
-      <debug(!"to-pp")> to-pp;
+      result   := <pp-debug> to-pp
+
+  debug-show-desugared-nolower:
+    (_, _, ast, path, _) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"desugared.aterm")> path;
+      result   := <desugar-all> <desugar-pre> ast
+
+  debug-show-desugared-nolower-pp:
+    (_, _, ast, path, _) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"desugared-pp.grace")> path;
+      to-pp    := <desugar-all> <desugar-pre> ast;
       result   := <pp-debug> to-pp

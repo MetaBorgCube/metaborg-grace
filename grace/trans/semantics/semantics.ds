@@ -1,0 +1,167 @@
+module semantics/trans/semantics
+
+imports
+  src-gen/ds-signatures/grace-sig
+  src-gen/ds-signatures/grace-lowered-sig
+  
+  trans/semantics/values
+  trans/semantics/store
+  trans/semantics/lookup
+
+signature
+  
+  arrows
+    Program -init-> V
+    Program --> V
+
+    List(Statement) --> V
+
+    Exp --> V
+    Statement --> V
+    Declaration --> V
+    Assignment --> V
+    
+    Inherit --> Ref
+    List(Exp) -ea-> List(V)
+    
+  constructors
+    
+    call: M * List(V) --> V
+    
+    saveConst: String * V * Members --> Members
+    saveConstants: List(String) * List(V) * Members --> Members
+
+    addMember: String * List(String) * List(Statement) --> Unit
+    addMembers: List(String) * List(List(Statement)) --> Unit
+    
+    wrapValues: List(V) --> List(List(Statement))
+    
+    noSuper: --> Ref
+    
+  native operators
+    nativeIBinOp: String * Int * Int -> Int
+    nativePrint: V -> V
+    nativeEq: V * V -> Bool
+    nativeMinus: V * V -> Int
+    nativePlus: V * V -> Int
+    nativeLte: V * V -> Bool
+    
+rules
+  
+  Expression(e) --> e.
+  Declaration(e) --> e.
+  Assignment(e) --> e.
+  Code(v) --> v.
+  
+  CS(i) -s-> i.
+  DS(i) -s-> i.
+
+  NumL(s) --> NumV(parseNumber(s)).
+  String(s) --> StringV(s).
+  
+  p@Program(_, _) -init-> v
+    where
+      CS CS(fresh), DS DS(fresh), C ObjectC() |- p :: OHeap {}, MHeap {}, Locals {} --> v.
+      
+  Program(code, _) --> v
+    where
+      allocateObject(NoObject()) --> r;
+      CS CS(r), DS DS(r), C ObjectC() |- code --> v.
+  
+  [] : List(Statement) --> Done().
+  
+  [code | [] ] : List(Statement) --> code.
+
+  [code | codes@[_|_] ] : List(Statement) --> codes
+    where code --> _.
+  
+  MCallRecvL(e1, "==", [e2]) --> v
+    where
+       e1 --> v1@NumV(_);
+       e2 --> v2@NumV(_);
+       case nativeEq(v1,v2) of {
+         true => MCallL("true", []) --> v
+         otherwise => MCallL("false", []) --> v
+       }.
+   
+  MCallRecvL(v1@NumV(_), "-", [v2@NumV(_)]) --> NumV(nativeMinus(v1,v2)).
+  MCallRecvL(v1@NumV(_), "+", [v2@NumV(_)]) --> NumV(nativePlus(v1,v2)).
+        
+  MCallRecvL(receiver, name, args) --> v
+    where
+       receiver --> ObjectRef(r);
+       CS CS(r), DS DS(r) |- lookup(name) --> m;
+       CS CS(r), DS DS(r) |- call(m, args) --> v.
+  
+  MCallL("base_print", [v]) --> nativePrint(v).
+
+  MCallL(name, vs) --> v
+    where
+      lookup(name) --> m;
+      call(m, vs) --> v.
+  
+  ConstantL(name, _, v) --> Done()
+    where
+      addMember(name, [], [Code(v)]) --> _.
+  
+  MethodL(name, _, params, code) --> Done()
+    where
+      C MethodC() |- addMember(name, params, code) --> _.
+
+  ds |- ObjectL(inherit, [], code) --> ObjectRef(or)
+    where
+      allocateObject(Object(ds, inherit, {})) --> or;
+      CS CS(or), DS DS(or), C ObjectC() |- code --> _.
+
+  Inherit(e, _, _) --> r
+    where
+      e --> ObjectRef(r).
+
+  NoInherit() --> r
+    where
+      allocateObject(NoObject()) --> r.  
+
+  ds |- Self() --> ObjectRef(ds).
+
+  call(Method([], code, scope), []) --> v
+    where
+      DS DS(scope) |- code --> v.
+
+  call(Method(names@[_ | _], code, scope), args@[_ | _]) --> v
+    where
+      allocateObject(Object(scope, noSuper(), {})) --> call-scope;
+      DS DS(call-scope) |- addMembers(names,wrapValues(args)) --> _;
+      DS DS(call-scope) |- code --> v.
+
+  noSuper() --> allocateObject(NoObject()).
+  
+  wrapValues([]) --> [] : List(List(Statement)).
+  
+  wrapValues([v|vs]) --> [ wv | wvs ] : List(List(Statement))
+    where
+      [Code(v)] : List(Statement) => wv;
+      wrapValues(vs) --> wvs.
+  
+  addMembers([], []) --> Unit().
+  
+  addMembers([n | ns], [code | codes]) --> Unit()
+    where
+      addMember(n, [], code) --> _;
+      addMembers(ns, codes) --> _.
+  
+  ds |- addMember(name, params, code) --> Unit()
+    where
+      allocateMethod(Method(params, code, ds)) --> mRef;
+      readObject(ds) --> Object(enc, sup, tbl);
+      writeObject(ds, Object(enc, sup, {name |--> mRef, tbl} )) --> _.
+      
+  [] : List(Exp) -ea-> [].
+  
+  [a] : List(Exp) -ea-> [v] : List(V)
+    where
+      a --> v.
+  
+  [a | as] : List(Exp) -ea-> [v | vs]
+    where
+      a --> v;
+      as -ea-> vs : List(V).
