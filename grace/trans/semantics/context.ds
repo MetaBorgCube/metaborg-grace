@@ -1,0 +1,13 @@
+module trans/semantics/context
+
+signature
+
+  sorts
+    C
+
+  constructors
+    ObjectC: C
+    MethodC: C
+    BlockC: C
+    
+  

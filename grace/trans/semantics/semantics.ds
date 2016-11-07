@@ -61,12 +61,12 @@ rules
   
   p@Program(_, _) -init-> v
     where
-      CS CS(fresh), DS DS(fresh) |- p :: OHeap {}, MHeap {} --> v.
+      CS CS(fresh), DS DS(fresh), C ObjectC() |- p :: OHeap {}, MHeap {}, Locals {} --> v.
       
   Program(code, _) --> v
     where
-      allocateObject(NoObject())--> r;
-      CS CS(r), DS DS(r) |- code --> v.
+      allocateObject(NoObject()) --> r;
+      CS CS(r), DS DS(r), C ObjectC() |- code --> v.
   
   [] : List(Statement) --> Done().
   
@@ -77,15 +77,30 @@ rules
   
   MCallRecvL(e1, "==", [e2]) --> v
     where
+      nativePrint(StringV("native ==")) => _;
        e1 --> v1@NumV(_);
        e2 --> v2@NumV(_);
        case nativeEq(v1,v2) of {
          true => MCallL("true", []) --> v
          otherwise => MCallL("false", []) --> v
        }.
+
+  MCallRecvL(e1, "<=", [e2]) --> v
+    where
+       nativePrint(StringV("native <=")) => _;
+       e1 --> v1@NumV(_);
+       e2 --> v2@NumV(_);
+       case nativeLte(v1,v2) of {
+         true => MCallL("true", []) --> v
+         otherwise => MCallL("false", []) --> v
+       };
+       nativePrint(StringV("result of MCallRecvL")) => _;
+       nativePrint(v) => _.
    
   MCallRecvL(v1@NumV(_), "-", [v2@NumV(_)]) --> NumV(nativeMinus(v1,v2)).
-  MCallRecvL(v1@NumV(_), "+", [v2@NumV(_)]) --> NumV(nativePlus(v1,v2)).
+  MCallRecvL(v1@NumV(_), "+", [v2@NumV(_)]) --> NumV(nativePlus(v1,v2))
+    where
+      nativePrint(StringV("plus")) => _.
         
   MCallRecvL(receiver, name, args) --> v
     where
@@ -106,20 +121,20 @@ rules
   
   MethodL(name, _, params, code) --> Done()
     where
-      addMember(name, params, code) --> _.
+      C MethodC() |- addMember(name, params, code) --> _.
+
+  ds |- ObjectL(inherit, [], code) --> ObjectRef(or)
+    where
+      allocateObject(Object(ds, inherit, {})) --> or;
+      CS CS(or), DS DS(or), C ObjectC() |- code --> _.
 
   Inherit(e, _, _) --> r
     where
       e --> ObjectRef(r).
-
+      
   NoInherit() --> r
     where
-      allocateObject(NoObject()) --> r.
-  
-  ds |- ObjectL(inherit, [], code) --> ObjectRef(or)
-    where
-      allocateObject(Object(ds, inherit, {})) --> or;
-      CS CS(or), DS DS(or) |- code --> _.
+      allocateObject(NoObject()) --> r.  
 
   ds |- Self() --> ObjectRef(ds).
 
@@ -142,6 +157,10 @@ rules
       [Code(v)] : List(Statement) => wv;
       wrapValues(vs) --> wvs.
   
+  /*
+   * Add members
+   */
+  
   addMembers([], []) --> Unit().
   
   addMembers([n | ns], [code | codes]) --> Unit()
@@ -155,6 +174,10 @@ rules
       readObject(ds) --> Object(enc, sup, tbl);
       writeObject(ds, Object(enc, sup, {name |--> mRef, tbl} )) --> _.
       
+  /*
+   * Evaluate arguments
+   */
+  
   [] : List(Exp) -ea-> [].
   
   [a] : List(Exp) -ea-> [v] : List(V)

@@ -1,139 +1,159 @@
 module syntax-expressions
 
-language Grace
+language grace
 
+start symbol Program
 
-test empty expressio                                    [[]]                        parse succeeds
-test self												[[self]] 					parse succeeds
-test self parenthesis									[[(self)]] 					parse succeeds
-test arbitrary											[[arbitrary]]				parse succeeds
-test arbitrary parentheses								[[(arbitrary)]]				parse succeeds
-test arbitrary double parentheses						[[((arbirary))]]			parse succeeds
+test empty expression                                   [[]]                        parse succeeds
+test self												[[self;]] 					parse succeeds
+test self parenthesis									[[(self);]] 				parse succeeds
+test arbitrary											[[arbitrary;]]				parse succeeds
+test arbitrary parentheses								[[(arbitrary);]]			parse succeeds
+test arbitrary double parentheses						[[((arbirary));]]			parse succeeds
 
-test print hello world 									[[print "Hello World"]]		parse succeeds
-test print hello world parenthesis 						[[print("Hello World")]]	parse succeeds
-test print number										[[print(5)]]				parse succeeds
-test print float number									[[print(5.5)]]				parse succeeds
-test print addition										[[print(5+5)]]				parse succeeds
+test print hello world 									[[print "Hello World";]]	parse succeeds
+test print hello world parenthesis 						[[print("Hello World");]]	parse succeeds
+test print number										[[print(5);]]				parse succeeds
+test print float number									[[print(5.5);]]				parse succeeds
+test print addition										[[print(5+5);]]				parse succeeds
 
-test add no layout										[[5+5]]						parse succeeds
-test add layout spaces									[[ 5 + 5 ]]					parse succeeds
-test add layout tabs									[[ 5 	+ 		5 ]]		parse fails
-test add identifier and number							[[5 + foo]]					parse succeeds
-test add identifier and float							[[5.5 + foo]]				parse succeeds
-test add floats											[[5.5 + 5.5]]				parse succeeds
-test add identifiers									[[foo + foo ]]				parse succeeds
-test add parentheses									[[(foo + foo)]]				parse succeeds
+test add no layout										[[5+5;]]					parse succeeds
+test add layout spaces									[[ 5 + 5 ;]]				parse succeeds
+test add layout tabs									[[ 5 	+ 		5 ;]]		parse fails
+test add identifier and number							[[5 + foo;]]				parse succeeds
+test add identifier and float							[[5.5 + foo;]]				parse succeeds
+test add floats											[[5.5 + 5.5;]]				parse succeeds
+test add identifiers									[[foo + foo ;]]				parse succeeds
+test add parentheses									[[(foo + foo);]]			parse succeeds
 
-test add and multiply									[[foo * foo + foo]]			parse succeeds
-test add and multiply inner parentheses					[[(foo + foo) * foo]]		parse succeeds
-test add and multiply outer parentheses					[[(foo + foo * foo)]]		parse succeeds
+test add and multiply									[[foo * foo + foo;]]		parse succeeds
+test add and multiply inner parentheses					[[(foo + foo) * foo;]]		parse succeeds
+test add and multiply outer parentheses					[[(foo + foo * foo);]]		parse succeeds
 
-test dot operator										[[foo.foo]]					parse succeeds
-test multiple dot operator								[[foo.foo.foo]]				parse succeeds
-test dot operator and call								[[foo.foo(5)]]				parse succeeds
+test dot operator										[[foo.foo;]]				parse succeeds
+test multiple dot operator								[[foo.foo.foo;]]			parse succeeds
+test dot operator and call								[[foo.foo(5);]]				parse succeeds
 
-test addition [[5 + 5;]] parse succeeds
-test multiplication [[5 * 5;]] parse succeeds
-test subtraction [[5 - 5;]] parse succeeds
-test parens [[(5 + 5);]] parse succeeds
-test parens and more [[(5 + 5) + 5;]] parse succeeds
+test addition                                           [[5 + 5;]]                  parse succeeds
+test multiplication                                     [[5 * 5;]]                  parse succeeds
+test subtraction                                        [[5 - 5;]]                  parse succeeds
+test parens                                             [[(5 + 5);]]                parse succeeds
+test parens and more                                    [[(5 + 5) + 5;]]            parse succeeds
 
-test addition three [[5 + 5 + 5;]] parse succeeds
-test multiplication three [[5 * 5 * 5;]] parse succeeds
-test subtraction three [[5 - 5 - 5;]] parse succeeds
-test division three [[5 / 5 / 5;]] parse succeeds
+test addition three                                     [[5 + 5 + 5;]]              parse succeeds
+test multiplication three                               [[5 * 5 * 5;]]              parse succeeds
+test subtraction three                                  [[5 - 5 - 5;]]              parse succeeds
+test division three                                     [[5 / 5 / 5;]]              parse succeeds
 
-test plus mult [[5 + 5 * 5;]] parse succeeds
-test mult plus [[5 * 5 + 5;]] parse succeeds
-test plus subt [[5 + 5 - 5;]] parse succeeds
-test subt plus [[5 - 5 + 5;]] parse succeeds
-test plus divi [[5 + 5 / 5;]] parse succeeds
-test divi plus [[5 / 5 + 5;]] parse succeeds
+test plus mult                                          [[5 + 5 * 5;]]              parse succeeds
+test mult plus                                          [[5 * 5 + 5;]]              parse succeeds
+test plus subt                                          [[5 + 5 - 5;]]              parse succeeds
+test subt plus                                          [[5 - 5 + 5;]]              parse succeeds
+test plus divi                                          [[5 + 5 / 5;]]              parse succeeds
+test divi plus                                          [[5 / 5 + 5;]]              parse succeeds
 
-test mult subt [[5 * 5 - 5;]] parse succeeds
-test subt mult [[5 - 5 * 5;]] parse succeeds
-test mult divi [[5 * 5 / 5;]] parse succeeds
-test divi mult [[5 / 5 * 5;]] parse succeeds
+test mult subt                                          [[5 * 5 - 5;]]              parse succeeds
+test subt mult                                          [[5 - 5 * 5;]]              parse succeeds
+test mult divi                                          [[5 * 5 / 5;]]              parse succeeds
+test divi mult                                          [[5 / 5 * 5;]]              parse succeeds
 
-test subt divi [[5 - 5 / 5;]] parse succeeds
-test divi subt [[5 / 5 - 5;]] parse succeeds
+test subt divi                                          [[5 - 5 / 5;]]              parse succeeds
+test divi subt                                          [[5 / 5 - 5;]]              parse succeeds
 
-test mult four [[5 * 5 * 5 * 5;]] parse succeeds
-test mult five [[5 * 5 * 5 * 5 * 5;]] parse succeeds
-test plus three parens [[(5 + 5 + 5);]] parse succeeds
-test plus identifiers [[a + a;]] parse succeeds
-test plus id and lit [[a + 5;]] parse succeeds
-test plus lit and id [[5 + a;]] parse succeeds
-test greater then [[5 > 5;]] parse succeeds
-test less then [[5 < 5;]] parse succeeds
-test greater or equal [[5 >= 5;]] parse succeeds
-test less or equal [[5 <= 5;]] parse succeeds
-test boolean or [[5 || 5;]] parse succeeds
-test boolean and [[5 && 5;]] parse succeeds
+test mult four                                          [[5 * 5 * 5 * 5;]]          parse succeeds
+test mult five                                          [[5 * 5 * 5 * 5 * 5;]]      parse succeeds
+test plus three parens                                  [[(5 + 5 + 5);]]            parse succeeds
+test plus identifiers                                   [[a + a;]]                  parse succeeds
+test plus id and lit                                    [[a + 5;]]                  parse succeeds
+test plus lit and id                                    [[5 + a;]]                  parse succeeds
+test greater then                                       [[5 > 5;]]                  parse succeeds
+test less then                                          [[5 < 5;]]                  parse succeeds
+test greater or equal                                   [[5 >= 5;]]                 parse succeeds
+test less or equal                                      [[5 <= 5;]]                 parse succeeds
+test boolean or                                         [[5 || 5;]]                 parse succeeds
+test boolean and                                        [[5 && 5;]]                 parse succeeds
 
-test plus different identifiers [[a + b;]] parse succeeds
+test plus different identifiers                         [[a + b;]]                  parse succeeds
 
-test sigle identifier [[a;]] parse succeeds
+test sigle identifier                                   [[a;]]                      parse succeeds
 
-test id subt [[(id(a)) - a;]] parse succeeds
-test id mult [[(id(a)) * a;]] parse succeeds
-test id divi [[(id(a)) / a;]] parse succeeds
+test id subt                                            [[(id(a)) - a;]]            parse succeeds
+test id mult                                            [[(id(a)) * a;]]            parse succeeds
+test id divi                                            [[(id(a)) / a;]]            parse succeeds
 
-test id plus id plus id [[a + a + a;]] parse succeeds
-test id subt id plus id [[a - a + a;]] parse succeeds
-test id plus id subt id [[a + a - a;]] parse succeeds
-test id subt id subt id [[a - a - a;]] parse succeeds
-test id mult id plus id [[a * a + a;]] parse succeeds
-test id plus id mult id [[a + a * a;]] parse succeeds
-test id mult id mult id [[a * a * a;]] parse succeeds
-test id mult id divi id [[a * a / a;]] parse succeeds
-test id divi id mult id [[a / a * a;]] parse succeeds
-test id divi id divi id [[a / a / a;]] parse succeeds
-test id subt id divi id [[a - a / a;]] parse succeeds
-test id divi id subt id [[a / a - a;]] parse succeeds
-test id plus id divi id [[a + a / a;]] parse succeeds
-test id divi id plus id [[a / a + a;]] parse succeeds
-test id mult id subt id [[a * a - a;]] parse succeeds
-test id subt id mult id [[a - a * a;]] parse succeeds
+test id plus id plus id                                 [[a + a + a;]]              parse succeeds
+test id subt id plus id                                 [[a - a + a;]]              parse succeeds
+test id plus id subt id                                 [[a + a - a;]]              parse succeeds
+test id subt id subt id                                 [[a - a - a;]]              parse succeeds
+test id mult id plus id                                 [[a * a + a;]]              parse succeeds
+test id plus id mult id                                 [[a + a * a;]]              parse succeeds
+test id mult id mult id                                 [[a * a * a;]]              parse succeeds
+test id mult id divi id                                 [[a * a / a;]]              parse succeeds
+test id divi id mult id                                 [[a / a * a;]]              parse succeeds
+test id divi id divi id                                 [[a / a / a;]]              parse succeeds
+test id subt id divi id                                 [[a - a / a;]]              parse succeeds
+test id divi id subt id                                 [[a / a - a;]]              parse succeeds
+test id plus id divi id                                 [[a + a / a;]]              parse succeeds
+test id divi id plus id                                 [[a / a + a;]]              parse succeeds
+test id mult id subt id                                 [[a * a - a;]]              parse succeeds
+test id subt id mult id                                 [[a - a * a;]]              parse succeeds
 
-test id subt paren id subt id paren [[a - (a - a);]] parse succeeds
-test paren id subt id paren subt id [[(a - a) - a;]] parse succeeds
-test paren id subt paren id subt id paren paren [[(a - (a - a));]] parse succeeds
-test paren paren id subt id paren subt id paren [[((a - a) - a);]] parse succeeds
+test id subt paren id subt id paren                     [[a - (a - a);]]            parse succeeds
+test paren id subt id paren subt id                     [[(a - a) - a;]]            parse succeeds
+test paren id subt paren id subt id paren paren         [[(a - (a - a));]]          parse succeeds
+test paren paren id subt id paren subt id paren         [[((a - a) - a);]]          parse succeeds
 
-test id plus four times [[a + a + a + a;]] parse succeeds
+test id plus four times                                 [[a + a + a + a;]]          parse succeeds
 
-test id plus five times [[a + a + a + a + a;]] parse succeeds
+test id plus five times                                 [[a + a + a + a + a;]]      parse succeeds
 
-test ture or false or true [[true || false || true;]] parse succeeds
+test ture or false or true                              [[true || false || true;]]  parse succeeds
 
-test true or false or true or false or true [[true || false || true || false || true;]] parse succeeds
+test true or false or true or false or true             [[true || false || true || false || true;]] parse succeeds
 
-test int plus id dot id [[5 + a.b;]] parse succeeds
+test int plus id dot id                                 [[5 + a.b;]]                parse succeeds
 
-test int plus id dot id spaces [[5 + a . b;]] parse succeeds
+test int plus id dot id spaces                          [[5 + a . b;]]              parse succeeds
 
-test int [[5;]] parse succeeds
+test int                                                [[5;]]                      parse succeeds
 
-test string [["bla";]] parse succeeds
+test string                                             [["bla";]]                  parse succeeds
 
-test true [[true;]] parse succeeds
-test true [[false;]] parse succeeds
+test true                                               [[true;]]                   parse succeeds
+test true                                               [[false;]]                  parse succeeds
 
-test id dot id [[a . b;]] parse succeeds
+test id dot id                                          [[a . b;]]                  parse succeeds
 
-test id space int [[b 5;]] parse succeeds
-test int plus id dot id space int [[5 + a . b 6;]] parse succeeds
-test int plus paren id dot id int paren [[5 + (a . b 6);]] parse succeeds
+test id space int                                       [[b 5;]]                    parse succeeds
+test int plus id dot id space int                       [[5 + a . b 6;]]            parse succeeds
+test int plus paren id dot id int paren                 [[5 + (a . b 6);]]          parse succeeds
 
-test not true [[!true;]]
-test not false [[!false;]] parse succeeds
+test not true                                           [[!true;]]                  parse succeeds
+test not false                                          [[!false;]]                 parse succeeds
 
-test true and false [[true && false;]] parse succeeds
-test true or false [[true || false;]] parse succeeds
+test true and false                                     [[true && false;]]          parse succeeds
+test true or false                                      [[true || false;]]          parse succeeds
 
-test string with escaped tab [["string with \t tab";]] parse succeeds
+test string with escaped tab                            [["string with \t tab";]]   parse succeeds
 
-test int plus int or int [[5 + 5 || 5;]] parse succeeds
-test true or int subt int and false [[true || 5 - 3 && false;]] parse succeeds
+test int plus int or int                                [[5 + 5 || 5;]]             parse succeeds
+test true or int subt int and false                     [[true || 5 - 3 && false;]] parse succeeds
+
+// tests from https://github.com/zmthy/hopper/tree/master/test/parse-fail
+test hopper angle operators backwards                   [[name > name < name;]]     parse fails
+test hopper angle operators                             [[name < name > name;]]     parse fails
+
+test hopper assign to def                               [[def name := object {};]]  parse fails
+
+test hopper bind name                                   [[name = object {};]]       parse fails
+test hopper bind to var                                 [[var name = object {};]]   parse fails
+test hopper mismatched operators                        [[object {} & object {} | object {};]] parse fails
+test hopper no bind def                                 [[def name;]]               parse fails
+
+test hopper outer alone                                 [[outer;]]                  parse fails
+test hopper super alone                                 [[super;]]                  parse fails
+test hopper tab in string                               [[ "	"; ]]               parse fails
+test hopper tab in program                              [[ object {};	 ]]         parse fails
+
+test hopper no end of string                            [[ " ]]                     parse fails
+test hopper suffix operator                             [[ object {}!;]]            parse fails

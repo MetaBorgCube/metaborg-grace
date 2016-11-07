@@ -1,13 +1,14 @@
 ---
 id: org.metaborg:grace:0.3.0-SNAPSHOT
 name: grace
-metaborgVersion: 2.0.0-SNAPSHOT
+metaborgVersion: 2.1.0-SNAPSHOT
 dependencies:
   compile:
   - org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}
   - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
   source:
   - org.metaborg:org.metaborg.meta.lib.analysis:${metaborgVersion}
+  - org.metaborg:meta.lib.spoofax:${metaborgVersion}
 pardonedLanguages:
 - EditorService
 - Stratego-Sugar

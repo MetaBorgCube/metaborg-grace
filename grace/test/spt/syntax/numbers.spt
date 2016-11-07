@@ -1,34 +1,41 @@
 module syntax-numbers
 
-language Grace
+language grace
 
-var aaaa := .5;
+start symbol Program
 
-var a := 5;
-var a := -5;
-var a := 55;
-var a := 555;
-var a := 5555;
-var a := 5.5;
-var a := -5.5;
-var a := 555.5;
-var a := 5.5525555;
-var a := .5;
-var a := -.5;
-var a := 5.5e14;
-var a := -5.5e14;
-var a := 0xffff;
-var a := 8x1234;
-var a := 16Xaaaa;
-var a := .5e-3;
-var a := -.5e-3;
+test decimal number with leading dot                        [[var aaaa := .5;]] parse succeeds
 
-var avar := 2;
-var vara := 2;
-var var' := 3;
-var var_ := 3;
+test integer zero                                           [[var a := 0;]] parse succeeds
 
-var truea := 3;
+test integer number                                         [[var a := 5;]] parse succeeds
+test negative number                                        [[var a := -5;]] parse succeeds
+test bigger integer number                                  [[var a := 55;]] parse succeeds
+test bigger integer 2 number                                [[var a := 555;]] parse succeeds
+test bigger integer 3 number                                [[var a := 5555;]] parse succeeds
+test decimal number                                         [[var a := 5.5;]] parse succeeds
+test negative decimal number                                [[var a := -5.5;]] parse succeeds
+test bigger decimal number                                  [[var a := 555.5;]] parse succeeds
+test bigger decimal 2 number                                [[var a := 5.5525555;]] parse succeeds
+test negative decimal number with leading dot               [[var a := -.5;]] parse succeeds
+test decimal number scientific                              [[var a := 5.5e14;]] parse succeeds
+test negative decimal number scientific                     [[var a := -5.5e14;]] parse succeeds
+test hex number                                             [[var a := 0xffff;]] parse succeeds
+test octal number                                           [[var a := 8x1234;]] parse succeeds
+test hexadecimal number                                     [[var a := 16Xaaaa;]] parse succeeds
+test decimal number scientific negative exponent            [[var a := .5e-3;]] parse succeeds
+test negativ decimal number scientific negative exponent    [[var a := -.5e-3;]] parse succeeds
 
-var atrue := 3.4;
-var pi := 3.14;
+
+// from https://github.com/zmthy/hopper/tree/master/test/parse-fail
+test hopper base one                                        [[var a := 1x0;]] parse fails
+test hopper base thirty five                                [[var a := 35xz;]] parse fails
+test hopper base thirty seven                               [[var a := 37x38;]] parse fails
+test hopper exponent trailing                               [[var a := 10e+-10;]] parse fails
+test hopper leading zero                                    [[var a := 01;]] parse fails
+
+test hopper dangling decimal                                [[var a := 1.;]] parse fails
+test hopper exponent decimal point                          [[var a:= 23e4.3;]] parse fails
+test hopper exponent empty                                  [[var a:= 56e;]] parse fails
+test hopper hex decimal point                               [[var a := 0x23.1;]] parse fails
+test hopper hex empty                                       [[var a := 0x;]] parse fails

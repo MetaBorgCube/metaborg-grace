@@ -28,7 +28,7 @@ rules
       lookupSuper(name) --> m;
       case m of {
         m'@Method(_,_,_) =>
-        NoMethod() =>
+        NoMethod(_) =>
           lookupOuter(name) --> m'
       }.
   
@@ -39,17 +39,17 @@ rules
       DS DS(rcs) |- lookupSuper(name) --> mCS;
       case mCS of {
         m@Method(_,_,_) =>
-        NoMethod() =>
+        NoMethod(_) =>
           mSuper => m
       }.
   
   CS CS(rcs), DS DS(rds) |- lookup(name) --> m
     where
       rcs != rds;
-      lookupSuper(name) --> NoMethod();
+      lookupSuper(name) --> NoMethod(name);
       lookupOuter(name) --> m.
   
-  lookupOuter(_) --> NoMethod()
+  lookupOuter(name) --> NoMethod(name)
     where
       getOuter() --> r;
       readObject(r) --> NoObject(). 
@@ -64,14 +64,14 @@ rules
     lookupLocal(name) --> m;
     case m of {
       m'@Method(_, _, _) =>
-      NoMethod() =>
+      NoMethod(_) =>
         getSuper() --> sr;
         DS DS(sr) |- lookupSuper(name) --> m'
-      NoMethodAndStop() =>
-        NoMethod() => m'
+      NoMethodAndStop(n') =>
+        NoMethod(n') => m'
     }.
   
-  ds |- lookupLocal(_) --> NoMethodAndStop()
+  ds |- lookupLocal(name) --> NoMethodAndStop(name)
     where
       readObject(ds) --> NoObject().
  
@@ -84,7 +84,7 @@ rules
           tbl[name] => mr;
           readMethod(mr) --> m
         otherwise =>
-          NoMethod() => m
+          NoMethod(name) => m
       }.
       
   ds |- getSuper() --> sup

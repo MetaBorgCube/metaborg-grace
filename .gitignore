@@ -8,11 +8,11 @@
 /.settings
 
 .mvn/
-*/*.aterm
-*/*.pp.grace
-*/*.desugared-pp.grace
-*/*.analyzed-pp.grace
-*/*.core.ds
+*.aterm
+*.pp.grace
+*.desugared-pp.grace
+*.analyzed-pp.grace
+*.core.ds
 
 grace/src-gen/*
 grace/target/*

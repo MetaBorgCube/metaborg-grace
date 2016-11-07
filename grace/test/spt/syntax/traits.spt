@@ -1,8 +1,11 @@
 module syntax-traits
 
-language Grace
+language grace
 
-test trait [[trait emptiness {
+start symbol Program
+
+test trait [[
+trait emptiness {
     method isEmpty { size == 0; };
     method nonEmpty { size != 0; };
     method ifEmptyDo_nonEmptyDo (eAction, nAction) {

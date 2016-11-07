@@ -1,0 +1,41 @@
+_object {
+  _method print (text) {
+    base_print(text());
+  };
+  _object {
+    print("hoi");
+    a = _number(5).+(_number(3));
+    print(a());
+  };
+  blk = _object {
+    _method apply (i) {
+      i().+(_number(1));
+    };
+  };
+  print(blk().apply(_number(2)));
+  true();
+  false();
+  false().ifTrue(_object {
+    _method apply () {
+      print("it is false!");
+    };
+  });
+  true().ifTrue(_object {
+    _method apply () {
+      print("it is true!");
+    };
+  });
+  _method fib (n) {
+    n().<=(_number(1)).ifTrue(_object {
+      _method apply () {
+        n();
+      };
+    });
+    n().<=(_number(1)).ifFalse(_object {
+      _method apply () {
+        fib(n().-(_number(2))).+(fib(n().-(_number(1))));
+      };
+    });
+  };
+  print(fib(_number(2)));
+}; 

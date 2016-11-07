@@ -7,10 +7,12 @@ signature
   sort aliases
     OHeap = Map(Int, O)
     MHeap = Map(Int, M)
+    Locals = Map(String, V)
 
   variables
     OH : OHeap
     MH : MHeap
+    L : Locals
 
   constructors
     
@@ -26,6 +28,9 @@ signature
     readMethod: Ref --> M
     allocateMethod: M --> Ref
     writeMethod: Ref * M --> M
+    
+    writeLocal: String * V --> V
+    readLocal: String --> V
 
 rules
   
@@ -46,3 +51,7 @@ rules
     writeMethod(addr, m) --> _.
 
   writeMethod(addr, m) :: MH --> m :: MHeap {addr |--> m, MH}.
+  
+  writeLocal(name, v) :: L --> v :: Locals {name |--> v, L}.
+  
+  readLocal(name) :: L --> L[name].

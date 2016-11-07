@@ -1,6 +1,8 @@
 module syntax-identifier
 
-language Grace
+language grace
+
+start symbol Program
 
 test simple identifier					 				[[foo;]]	 					parse succeeds
 test single letter										[[f;]]	 					parse succeeds
@@ -9,10 +11,13 @@ test single letter and prime							[[f';]]	 					parse succeeds
 test single letter and underscore						[[f_;]]	 					parse succeeds
 test single letter and digit							[[f6;]]	 					parse succeeds
 test single underscore									[[_;]]	 					parse succeeds
-//test single unicode letter								[[eë]]	 					parse succeeds
-//test word with unicode									[[fooë]]					parse succeeds
+//test single unicode letter								[[eï¿½]]	 					parse succeeds
+//test word with unicode									[[fooï¿½]]					parse succeeds
 test word with primes									[[fkfkf'feff'ffe'fe;]]		parse succeeds
 test word with underscores								[[efe_Fefe__feefe_f;]]		parse succeeds
+
+test trailing apostrophe                                [[var var' := 3;]]          parse succeeds
+test trailing underscore                                [[var var_ := 3;]]          parse succeeds
 
 test single digit										[[5;]]						parse succeeds
 test single prime										[[']]						parse fails

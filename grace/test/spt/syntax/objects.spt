@@ -1,0 +1,10 @@
+module syntax-objects
+
+language grace
+
+start symbol Program
+
+test object [[object {};]] parse succeeds
+test object with content [[object { def a = 1; };]] parse succeeds
+test hopper object missing close [[object { ;]] parse fails
+test hopper object missing close with content [[object { def a = 1; ;]] parse fails

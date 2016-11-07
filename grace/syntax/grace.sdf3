@@ -20,7 +20,7 @@ context-free syntax
   Statement.Dialect             = <dialect <STRING>>
   Statement.Import              = <import <STRING> as <ID>>
   Statement.Assignment          = <<Assignment>;>
-  Statement.Declaration 		= <<Declaration>;> {avoid}
+  Statement.Declaration 		    = <<Declaration>;> {avoid}
   Statement.Expression          = <<Exp>;>
 
 context-free syntax
@@ -63,8 +63,6 @@ context-free syntax
   Params.Params                 = <(<{Param ", "}*>)>
   Params.NoParams               = <>
   Param.Param                   = <<ID>>
-  PrefixParam.SingleParam       = <<Param>>
-  PrefixParam.SingleParamParen  = <(<Param>)>
 
   MethodBody.MethodBody         = <
 									{
@@ -121,7 +119,7 @@ context-free syntax
 									
   								  >
   Inherit.NoInherit             = <>
-  Alias.Alias                   = < alias <ID> as <ID>>
+  Alias.Alias                   = < alias <ID> = <ID>>
   Alias.NoAlias                 = <>
   Exclude.Exclude               = < exclude <{ID ", "}*>>
   Exclude.NoExclude             = <>

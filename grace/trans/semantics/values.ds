@@ -3,6 +3,8 @@ module trans/semantics/values
 imports
 
   src-gen/ds-signatures/grace-sig
+  
+  trans/semantics/context
 
 signature
 
@@ -27,10 +29,9 @@ signature
     Method: List(String) * List(Statement) * Ref -> M
 
     NoObject: O
-    NoMethod: M
-    NoMethodAndStop: M
+    NoMethod: String -> M
+    NoMethodAndStop: String -> M
     
-    // rename to Code
     Code: V -> Statement
     
     WrappedO: O -> V
@@ -57,6 +58,7 @@ signature
     M // method
     CS // callsite
     DS // declaresite
+    C // context
     Unit
     Table
 

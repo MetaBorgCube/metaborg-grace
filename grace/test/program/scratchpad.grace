@@ -6,3 +6,7 @@ object {
   def a = if true then { "condition is true"; } else { "condition is false"; };
   base_print(a);
 };
+
+method a {
+  def b = true;
+};
