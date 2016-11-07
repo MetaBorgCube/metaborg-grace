@@ -1,0 +1,14 @@
+_object {
+  _method fib (n) {
+    if_then_else(n().<=(_number(1)), _object {
+      _method apply () {
+        n();
+      };
+    }, _object {
+      _method apply () {
+        fib(n().-(_number(1))).+(fib(n().-(_number(2))));
+      };
+    });
+  };
+  base_print(fib(_number(0)));
+}; 

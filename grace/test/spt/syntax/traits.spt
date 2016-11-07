@@ -4,7 +4,8 @@ language grace
 
 start symbol Program
 
-test trait [[trait emptiness {
+test trait [[
+trait emptiness {
     method isEmpty { size == 0; };
     method nonEmpty { size != 0; };
     method ifEmptyDo_nonEmptyDo (eAction, nAction) {

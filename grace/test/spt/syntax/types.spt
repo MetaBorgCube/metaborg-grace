@@ -12,7 +12,7 @@ test type boolean [[type Boolean = {
     // return true when self and other are both true
     || (other: BlockOrBoolean) -> Boolean;
     // return true when either self or other (or both) are true
-};]] parse succeeds
+};]] parse fails
 
 test type number [[type Number = {
     + (other: Number) -> Number;
@@ -56,7 +56,7 @@ test type number [[type Number = {
     // the absolute value of self
     isNan -> Boolean;
     // true if this Number is a NaN
-};]] parse succeeds
+};]] parse fails
 
 test type string [[type String = {
     * (n: Number) -> String;
@@ -167,7 +167,7 @@ test type string [[type String = {
     quoted -> String;
     // returns a quoted version of self, with internal characters like " and \ and newline escaped,
     // but without surrounding quotes.
-};]] parse succeeds
+};]] parse fails
 
 test type object [[type Object = {
     == (other: Object) -> Boolean;
@@ -177,7 +177,7 @@ test type object [[type Object = {
     asString -> String;
     asDebugString -> String;
     :: (other:Object) -> Binding;
-};]] parse succeeds
+};]] parse fails
 
 //test parametric type [[type MyParametricType[[A, B]] =
 //    type {
@@ -207,7 +207,7 @@ type String = type {
     asString -> String;
     ++(o : String) -> String;
 };
-]]
+]] parse fails
 
 test type simple number [[
 type Number = type {
@@ -219,7 +219,7 @@ type Number = type {
     ^(o : Number) -> Number;
     %(o : Number) -> Number;
 };
-]] parse succeeds
+]] parse fails
 
 test type boolean [[
 type Boolean = type {
@@ -231,4 +231,4 @@ type Boolean = type {
     andAlso(b);
     orElse(b);
 };
-]] parse succeeds
+]] parse fails

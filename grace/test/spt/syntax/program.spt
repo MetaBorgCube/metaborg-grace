@@ -24,3 +24,6 @@ test hello world space seperated [[
 test hello world tab seperated [[
     print "Hello world"	print "Hello world"
 ]] parse fails
+
+test invalid symbol [[ / ]] parse fails
+

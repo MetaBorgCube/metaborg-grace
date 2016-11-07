@@ -6,6 +6,8 @@ start symbol Program
 
 test decimal number with leading dot                        [[var aaaa := .5;]] parse succeeds
 
+test integer zero                                           [[var a := 0;]] parse succeeds
+
 test integer number                                         [[var a := 5;]] parse succeeds
 test negative number                                        [[var a := -5;]] parse succeeds
 test bigger integer number                                  [[var a := 55;]] parse succeeds
@@ -24,3 +26,16 @@ test hexadecimal number                                     [[var a := 16Xaaaa;]
 test decimal number scientific negative exponent            [[var a := .5e-3;]] parse succeeds
 test negativ decimal number scientific negative exponent    [[var a := -.5e-3;]] parse succeeds
 
+
+// from https://github.com/zmthy/hopper/tree/master/test/parse-fail
+test hopper base one                                        [[var a := 1x0;]] parse fails
+test hopper base thirty five                                [[var a := 35xz;]] parse fails
+test hopper base thirty seven                               [[var a := 37x38;]] parse fails
+test hopper exponent trailing                               [[var a := 10e+-10;]] parse fails
+test hopper leading zero                                    [[var a := 01;]] parse fails
+
+test hopper dangling decimal                                [[var a := 1.;]] parse fails
+test hopper exponent decimal point                          [[var a:= 23e4.3;]] parse fails
+test hopper exponent empty                                  [[var a:= 56e;]] parse fails
+test hopper hex decimal point                               [[var a := 0x23.1;]] parse fails
+test hopper hex empty                                       [[var a := 0x;]] parse fails
