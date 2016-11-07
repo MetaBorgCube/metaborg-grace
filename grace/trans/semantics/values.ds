@@ -29,8 +29,8 @@ signature
     Method: List(String) * List(Statement) * Ref -> M
 
     NoObject: O
-    NoMethod: M
-    NoMethodAndStop: M
+    NoMethod: String -> M
+    NoMethodAndStop: String -> M
     
     Code: V -> Statement
     
