@@ -13,14 +13,13 @@ import com.oracle.truffle.api.source.SourceSection;
 public abstract class nativePrint_1 extends TermBuild {
 
       public nativePrint_1(SourceSection source) {
-              super(source);
+          super(source);
       }
 
       @Specialization
       public Object doInt(Object s) {
     	  if (s.getClass() == StringV_1_Term.class) {
-    		  String sp = ((StringV_1_Term) s).get_1();
-    		  System.out.println(sp.substring(1, sp.length()-1) );
+    		  System.out.println( ((StringV_1_Term) s).get_1() );
     	  }
     	  else if (s.getClass() == NumV_1_Term.class)
     	      System.out.println(((NumV_1_Term) s).get_1());
@@ -32,6 +31,6 @@ public abstract class nativePrint_1 extends TermBuild {
       }
 
       public static TermBuild create(SourceSection source, TermBuild print) {
-              return nativePrint_1NodeGen.create(source, print);
+          return nativePrint_1NodeGen.create(source, print);
       }
 }
