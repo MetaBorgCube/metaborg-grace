@@ -1,10 +1,14 @@
-class printer {
-  method print(text) {
-    base_print(text);
-  };
+
+class a {
+  def t = 2;
+  method f { t; };
 };
 
-object {
-  inherit printer;
-  print "hey";
+def t = 4 ;
+
+class b {
+  inherit a;
+  base_print(f);
 };
+
+b;

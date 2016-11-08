@@ -8,6 +8,5 @@ signature
   constructors
     ObjectC: C
     MethodC: C
-    BlockC: C
-    
+    BlockC: C    
   

@@ -21,8 +21,13 @@ signature
     Declaration --> V
     Assignment --> V
     
-    Inherit --> Ref
+    Inherit -build-> Ref
+    Inherit -inito-> Ref
+    
     List(Exp) -ea-> List(V)
+    
+    Exp -build-> V
+    Exp -inito-> V
     
   constructors
     
@@ -115,24 +120,60 @@ rules
       lookup(name) --> m;
       call(m, vs) --> v.
   
+  /*
+   * Evaluate and store as value in local
+   */
+  C MethodC() |- ConstantL(name, _, v) --> Done()
+    where
+      writeLocal(name, v) --> _.
+  
+  /*
+   * Evaluate and store as a method in a field member
+   */
   ConstantL(name, _, v) --> Done()
     where
       addMember(name, [], [Code(v)]) --> _.
   
   MethodL(name, _, params, code) --> Done()
     where
-      C MethodC() |- addMember(name, params, code) --> _.
+      addMember(name, params, code) --> _.
 
+//  ds |- ObjectL(inherit, [], code) --> ObjectRef(or)
+//    where
+//      allocateObject(Object(ds, inherit, {})) --> or;
+//      CS CS(or), DS DS(or), C ObjectC() |- code --> _.
+      
+//  ds |- ObjectL(inherit, [], code) --> ObjectRef(or)
+//    where
+//      
+//      inherit --> r;
+//      allocateObject(Object(ds, r, {})) --> or;
+//      CS CS(or), DS DS(or), C ObjectC() |- code --> _.
+//  
+//  ObjectL(inh,_,_) -build-> ObjectRef()
+//    where 
+//      
+      
   ds |- ObjectL(inherit, [], code) --> ObjectRef(or)
     where
-      allocateObject(Object(ds, inherit, {})) --> or;
+      allocateObject(Object(ds, r, {})) --> or;
+      inherit -build-> r;
+      CS CS(or), DS DS(or) |- inherit -inito-> r';
       CS CS(or), DS DS(or), C ObjectC() |- code --> _.
 
-  Inherit(e, _, _) --> r
+  Inherit(e, _, _) -build-> r
     where
       e --> ObjectRef(r).
       
-  NoInherit() --> r
+  NoInherit() -build-> r
+    where
+      allocateObject(NoObject()) --> r.  
+
+  Inherit(e, _, _) -inito-> r
+    where
+      e --> ObjectRef(r).
+      
+  NoInherit() -inito-> r
     where
       allocateObject(NoObject()) --> r.  
 
@@ -140,13 +181,13 @@ rules
 
   call(Method([], code, scope), []) --> v
     where
-      DS DS(scope) |- code --> v.
+      DS DS(scope), C MethodC() |- code --> v.
 
   call(Method(names@[_ | _], code, scope), args@[_ | _]) --> v
     where
       allocateObject(Object(scope, noSuper(), {})) --> call-scope;
       DS DS(call-scope) |- addMembers(names,wrapValues(args)) --> _;
-      DS DS(call-scope) |- code --> v.
+      DS DS(call-scope), C MethodC() |- code --> v.
 
   noSuper() --> allocateObject(NoObject()).
   

@@ -22,6 +22,11 @@ signature
 
 rules
   
+  // look in local -> return,
+  //   else look both outer and super
+  //     if both, error,
+  //     else return either
+  
   CS CS(rcs), DS DS(rds) |- lookup(name) --> m'
     where
       rcs == rds;
@@ -48,12 +53,12 @@ rules
       rcs != rds;
       lookupSuper(name) --> NoMethod(name);
       lookupOuter(name) --> m.
-  
+
   lookupOuter(name) --> NoMethod(name)
     where
       getOuter() --> r;
       readObject(r) --> NoObject(). 
-  
+
   lookupOuter(name) --> m
     where
       getOuter() --> r;

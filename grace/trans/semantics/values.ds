@@ -47,6 +47,7 @@ signature
     
     getMembers: Members -> V
     
+    
   arrows
   
     CS -s-> Ref
@@ -58,7 +59,6 @@ signature
     M // method
     CS // callsite
     DS // declaresite
-    C // context
     Unit
     Table
 
