@@ -82,10 +82,13 @@ rules
   MCallRecvL(receiver, name, args) --> v
     where
        receiver --> ObjectRef(r);
-       lookup(name) --> m;
-       call(m, args) --> v.
+       S Self(r) |- lookup(name) --> m;
+       S Self(r) |- call(m, args) --> v.
   
-  MCallL("base_print", [v]) --> nativePrint(v).
+  /*
+   * Implicit method calls (calls on self or outer)
+   */
+  MCallL("print", [v]) --> nativePrint(v).
 
   MCallL(name, vs) --> v
     where
@@ -110,7 +113,7 @@ rules
   
   ConstantL(_, _, _) --> Error()
     where
-      debug("Error: unknown context for constant") => _.
+      error("Error: unknown context for constant") => _.
   
   /*
    * Methods
@@ -121,7 +124,7 @@ rules
 
   C MethodC() |- MethodL(_, _, _, _) --> Error()
     where
-      debug("Error: cannot create method inside a methodContext") => _.
+      error("Error: cannot create method inside a methodContext") => _.
 
 
   /*
@@ -168,7 +171,7 @@ rules
    */
   call(NoMethod(name), _) --> Error() // should raise exception
     where
-      debug("Message not understood: ", name) => _.
+      error("Message not understood: ", name) => _.
   
   call(Method([], code, scope), []) :: L --> v :: L // executing a call doesnt change locals
     where

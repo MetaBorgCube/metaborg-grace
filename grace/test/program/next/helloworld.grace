@@ -1,21 +1,16 @@
-
-method a (arg) {
-  def d = 42;
-  arg;
+def a = 2;
+method b { 5; };
+object {
+  print(c);
+  object {
+    def c = 6;
+    print(a);
+    print(b);
+    print(c);
+    object {
+      print(a);
+      print(b);
+      print(c);
+    };
+  };
 };
-
-method b {
-  def d = 12;
-  a(d);
-  d;
-};
-
-base_print(a(1));
-base_print(b);
-
-//method b { 2; };
-//object {
-//  object {
-//    base_print(b);
-//  };
-//};

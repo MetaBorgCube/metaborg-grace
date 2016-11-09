@@ -63,6 +63,9 @@ signature
     parseNumber: String -> Int
     print: V -> V
     
+    error: String -> String
+    error: String * String -> String
+    
     debug: String -> String
     debug: String * String -> String
     debug: String * String * String -> String
