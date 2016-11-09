@@ -18,6 +18,7 @@ signature
     BoolV: Bool -> V
     Done: V
     Error: V
+    Uninitialized: V
 
     //      enclosing object ref
     //            super ref
@@ -65,6 +66,7 @@ signature
     
     error: String -> String
     error: String * String -> String
+    error: String * String * String -> String
     
     debug: String -> String
     debug: String * String -> String

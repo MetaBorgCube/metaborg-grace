@@ -100,21 +100,48 @@ rules
   /*
    * Constants
    */
-  C MethodC() |- ConstantL(name, _, v) --> Done()
+  C MethodC() |- ConstantL(name, _, e) :: L --> Done()
     where
-      
       debug("adding local: ", name) => _;
-      writeLocal(name, v) --> _.
+      case L[name?] of {
+        true =>
+          error("Cannot rebind to constant") => _;
+          error("Cannot rebind to constant: '", name, "' ") => _
+        otherwise =>
+          e --> v; // dynsem bug: no coersion in case switch
+          writeLocal(name, v) --> _       
+      }.
+      
   
-  C ObjectC() |- ConstantL(name, _, v) --> Done()
+  C ObjectC() |- ConstantL(name, _, e) --> Done()
     where
       debug("adding member: ", name) => _;
-      addMember(name, [], [Code(v)]) --> _.
+      addMember(name, [], [Code(e)]) --> _.
   
   ConstantL(_, _, _) --> Error()
     where
       error("Error: unknown context for constant") => _.
   
+  /*
+   * Variables
+   */
+  
+  C MethodC() |- VariableL(name, _) --> Done()
+    where
+      writeLocal(name, Uninitialized()) --> _.
+      
+  C MethodC() |- AssignmentL(name, e) --> Done()
+    where
+      writeLocal(name, e) --> _.
+  
+  VariableL(_, _) --> Error()
+    where
+      error("Variables outside methods not implemented") => _.
+      
+  AssignmentL(_, _) --> Error()
+    where
+      error("Assignment outside methods not implemented") => _.
+ 
   /*
    * Methods
    */
@@ -132,7 +159,6 @@ rules
    */
   S Self(selfRef) |- ObjectL(NoInherit(), [], code) --> ObjectRef(newSelf)
     where
-      fresh => objectnumber;
       debug("new obj constructor starting...") => _;
       allocateObject(NoObject()) --> noParent;
       allocateObject(Object(selfRef, noParent, {})) --> newSelf;
@@ -141,6 +167,7 @@ rules
    
   ObjectL(inherit, [], code) --> ObjectRef(or)
     where
+      error("inheritance currently not supported") => _;
       inherit --> r;
       allocateObject(Object(whodoIinheritfrom, r, {})) --> or;
       C ObjectC() |- code --> _. // scope?
@@ -171,7 +198,7 @@ rules
    */
   call(NoMethod(name), _) --> Error() // should raise exception
     where
-      error("Message not understood: ", name) => _.
+      error("Message not understood: '", name, "'") => _.
   
   call(Method([], code, scope), []) :: L --> v :: L // executing a call doesnt change locals
     where
