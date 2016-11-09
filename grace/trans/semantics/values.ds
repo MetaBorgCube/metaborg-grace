@@ -40,26 +40,15 @@ signature
     WrappedLCS: List(List(Statement)) -> V
     
     ObjectRef: Int -> V
-    
-    CS: Ref -> CS
-    DS: Ref -> DS
-    
+
     Unit: Unit
     
     getMembers: Members -> V
-    
-    
-  arrows
-  
-    CS -s-> Ref
-    DS -s-> Ref
     
   sorts
     V // value
     O // object
     M // method
-    CS // callsite
-    DS // declaresite
     Unit
     Table
 
@@ -68,8 +57,6 @@ signature
     vs : List(V)
     o : O
     m : M
-    cs: CS
-    ds: DS
     r : Ref
 
   native operators

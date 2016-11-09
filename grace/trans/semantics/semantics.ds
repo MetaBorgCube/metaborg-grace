@@ -35,6 +35,8 @@ signature
     addMember: String * List(String) * List(Statement) --> Unit
     addMembers: List(String) * List(List(Statement)) --> Unit
     
+    createLocals: List(String) * List(List(Statement)) --> Unit
+    
     wrapValues: List(V) --> List(List(Statement))
     
     noSuper: --> Ref
@@ -54,20 +56,18 @@ rules
   Assignment(e) --> e.
   Code(v) --> v.
   
-  CS(i) -s-> i.
-  DS(i) -s-> i.
-
   NumL(s) --> NumV(parseNumber(s)).
   String(s) --> StringV(s).
   
   p@Program(_, _) -init-> v
     where
-      CS CS(fresh), DS DS(fresh), C ObjectC(), S Self(fresh), Out Outer(fresh) |- p :: OHeap {}, MHeap {}, Locals {} --> v.
+      C ObjectC(), S Self(fresh), Out Outer(fresh)
+        |- p :: OHeap {}, MHeap {}, Locals {} --> v.
       
   Program(code, _) --> v
     where
       allocateObject(NoObject()) --> r;
-      CS CS(r), DS DS(r), C ObjectC(), S Self(r), Out Outer(r) |- code --> v.
+      C ObjectC(), S Self(r), Out Outer(r) |- code --> v.
   
   [] : List(Statement) --> Done().
   
@@ -76,24 +76,23 @@ rules
   [code | codes@[_|_] ] : List(Statement) --> codes
     where code --> _.
   
-  
   /*
    * Method Calls
    */
   MCallRecvL(receiver, name, args) --> v
     where
        receiver --> ObjectRef(r);
-       CS CS(r), DS DS(r) |- lookup(name) --> m;
-       CS CS(r), DS DS(r) |- call(m, args) --> v.
+       lookup(name) --> m;
+       call(m, args) --> v.
   
   MCallL("base_print", [v]) --> nativePrint(v).
 
   MCallL(name, vs) --> v
     where
-      debug("generic implicit call") => _;
+      debug("generic implicit call of: '", name, "'") => _;
       lookup(name) --> m;
       call(m, vs) --> v;
-      debug("done generic implicit call") => _.
+      debug("done generic implicit call of: '", name, "'") => _.
   
   /*
    * Constants
@@ -137,11 +136,11 @@ rules
       S Self(newSelf), Out Outer(selfRef), C ObjectC() |- code --> _; // execute code under new self, current self becomes outer.
       debug("done constructing object") => _.  
    
-  ds |- ObjectL(inherit, [], code) --> ObjectRef(or)
+  ObjectL(inherit, [], code) --> ObjectRef(or)
     where
       inherit --> r;
-      allocateObject(Object(ds, r, {})) --> or;
-      CS CS(or), DS DS(or), C ObjectC() |- code --> _.
+      allocateObject(Object(whodoIinheritfrom, r, {})) --> or;
+      C ObjectC() |- code --> _. // scope?
 
   /*
    * Inherit expressions
@@ -171,17 +170,17 @@ rules
     where
       debug("Message not understood: ", name) => _.
   
-  call(Method([], code, scope), []) --> v
+  call(Method([], code, scope), []) :: L --> v :: L // executing a call doesnt change locals
     where
       debug("calling method with no args") => _;
-      DS DS(scope), C MethodC() |- code :: Locals {} --> v.
+      S Self(scope), C MethodC() |- code :: Locals {} --> v. // scope? // always call with empty locals
 
-  call(Method(names@[_ | _], code, scope), args@[_ | _]) --> v
+  call(Method(names@[_ | _], code, scope), args@[_ | _]) :: L --> v :: L // calling method has no net effect on locals
     where
       debug("calling method with some args") => _;
-      allocateObject(Object(scope, noSuper(), {})) --> call-scope;
-      DS DS(call-scope) |- addMembers(names,wrapValues(args)) --> _;
-      DS DS(call-scope), C MethodC() |- code :: Locals {} --> v.
+      createLocals(names, wrapValues(args)) :: Locals {} --> _ :: Locals l; // scope?
+      S Self(scope), C MethodC() |- code :: Locals l --> v;
+      debug("done calling methods with some args") => _.
 
   noSuper() --> allocateObject(NoObject()).
   
@@ -202,14 +201,21 @@ rules
       addMember(n, [], code) --> _;
       addMembers(ns, codes) --> _.
   
-  ds, S Self(self) |- addMember(name, params, code) --> Unit()
+  S Self(self) |- addMember(name, params, code) --> Unit()
     where
       debug("attempt to write member: '", name, "'") => _;
       allocateMethod(Method(params, code, self)) --> mRef;
       readObject(self) --> Object(enc, sup, tbl);
       writeObject(self, Object(enc, sup, {name |--> mRef, tbl} )) --> _;
       debug("added member: '", name, "' successfully") => _.
+  
+  createLocals([n|ns], [code|codes]) --> Unit()
+    where
+      writeLocal(n, code) --> _;
+      createLocals(ns, codes) --> _.
       
+  createLocals([], []) --> Unit().
+  
   /*
    * Evaluate arguments
    */

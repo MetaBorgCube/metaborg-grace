@@ -29,11 +29,11 @@ rules
   //     if both, error,
   //     else return either
   
-  DS DS(rds), C MethodC() |- lookup(name) :: L --> m
+  S Self(self), C MethodC() |- lookup(name) :: L --> m
     where
       case L[name?] of {
         true =>
-          Method([], [Code(L[name])], rds) => m
+          Method([], [Code(L[name])], self) => m
         otherwise => 
           true == false
       }.
@@ -50,6 +50,9 @@ rules
           lookupInOuter(name) --> m
       }.
   
+  /*
+   * Lookup in outer - recursive case (outer is a real object)
+   */
   Out Outer(outer) |- lookupInOuter(name) --> m
     where
       debug("looking in outer") => _;
@@ -57,93 +60,19 @@ rules
       case tbl[name?] of {
         true => // outer has the name
           readMethod(tbl[name]) --> m
-        otherwise =>
+        otherwise => // we have to look in the next outer
           Out Outer(outerOfOuterRef) |- lookupInOuter(name) --> m
       }.
   
+  /*
+   * Lookup in outer - base case (outer is not an object)
+   */
   Out Outer(outer) |- lookupInOuter(name) --> m
     where
       debug("looking in outer") => _;
       readObject(outer) --> NoObject();
       debug("this object has no outer") => _;
       NoMethod(name) => m.
-  
-//  CS CS(rcs), DS DS(rds) |- lookup(name) --> m'
-//    where
-//      rcs == rds;
-//      lookupSuper(name) --> m;
-//      case m of {
-//        m'@Method(_,_,_) =>
-//        NoMethod(_) =>
-//          lookupOuter(name) --> m'
-//      }.
-//  
-//  CS CS(rcs), DS DS(rds) |- lookup(name) --> m
-//    where
-//      rcs != rds;
-//      lookupSuper(name) --> mSuper@Method(_,_,_);
-//      DS DS(rcs) |- lookupSuper(name) --> mCS;
-//      case mCS of {
-//        m@Method(_,_,_) =>
-//        NoMethod(_) =>
-//          mSuper => m
-//      }.
-//  
-//  CS CS(rcs), DS DS(rds) |- lookup(name) --> m
-//    where
-//      rcs != rds;
-//      lookupSuper(name) --> NoMethod(name);
-//      lookupOuter(name) --> m.
-//
-//  lookupOuter(name) --> NoMethod(name)
-//    where
-//      getOuter() --> r;
-//      readObject(r) --> NoObject(). 
-//
-//  lookupOuter(name) --> m
-//    where
-//      getOuter() --> r;
-//      CS CS(r), DS DS(r) |- lookup(name) --> m.
-//  
-//  lookupSuper(name) --> m'
-//  where
-//    lookupLocal(name) --> m;
-//    case m of {
-//      m'@Method(_, _, _) =>
-//      NoMethod(_) =>
-//        getSuper() --> sr;
-//        DS DS(sr) |- lookupSuper(name) --> m'
-//      NoMethodAndStop(n') =>
-//        NoMethod(n') => m'
-//    }.
-//  
-//  ds |- lookupLocal(name) --> NoMethodAndStop(name)
-//    where
-//      readObject(ds) --> NoObject().
-// 
-//  ds |- lookupLocal(name) --> m
-//    where
-//      readObject(ds) --> Object(_,_,_);
-//      memberTable(ds) --> tbl;
-//      case tbl[name?] of {
-//        true =>
-//          tbl[name] => mr;
-//          readMethod(mr) --> m
-//        otherwise =>
-//          NoMethod(name) => m
-//      }.
-//      
-//  ds |- getSuper() --> sup
-//    where readObject(ds) --> Object(_, sup, _).
-//
-//  ds |- getSuper() --> ds
-//    where readObject(ds) --> NoObject().
-//    
-//  ds |- getOuter() --> out
-//    where readObject(ds) --> Object(out, _, _).
-//
-//  ds |- getOuter() --> ds
-//    where readObject(ds) --> NoObject().
   
   memberTable(r) --> tbl
     where
