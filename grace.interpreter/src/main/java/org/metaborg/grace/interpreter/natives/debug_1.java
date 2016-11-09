@@ -15,7 +15,7 @@ public abstract class debug_1 extends TermBuild {
 
       @Specialization
       public Object doInt(Object s) {
-    	  System.out.println(s);
+    	  System.err.println(s);
     	  return s;
       }
 

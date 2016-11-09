@@ -92,7 +92,6 @@ rules
     where
       debug("generic implicit call") => _;
       lookup(name) --> m;
-      print(WrappedM(m)) => _;
       call(m, vs) --> v;
       debug("done generic implicit call") => _.
   
@@ -110,27 +109,32 @@ rules
       debug("adding member: ", name) => _;
       addMember(name, [], [Code(v)]) --> _.
   
-  ConstantL(_, _, _) --> Done()
+  ConstantL(_, _, _) --> Error()
     where
       debug("Error: unknown context for constant") => _.
   
   /*
    * Methods
    */
-  MethodL(name, _, params, code) --> Done()
+  C ObjectC() |- MethodL(name, _, params, code) --> Done()
     where
       addMember(name, params, code) --> _.
+
+  C MethodC() |- MethodL(_, _, _, _) --> Error()
+    where
+      debug("Error: cannot create method inside a methodContext") => _.
+
 
   /*
    * Object Constructors
    */
-  S Self(self) |- ObjectL(NoInherit(), [], code) --> ObjectRef(newSelf)
+  S Self(selfRef) |- ObjectL(NoInherit(), [], code) --> ObjectRef(newSelf)
     where
       fresh => objectnumber;
       debug("new obj constructor starting...") => _;
       allocateObject(NoObject()) --> noParent;
-      allocateObject(Object(self, noParent, {})) --> newSelf;
-      S Self(newSelf), C ObjectC() |- code --> _; // execute code under new self
+      allocateObject(Object(selfRef, noParent, {})) --> newSelf;
+      S Self(newSelf), Out Outer(selfRef), C ObjectC() |- code --> _; // execute code under new self, current self becomes outer.
       debug("done constructing object") => _.  
    
   ds |- ObjectL(inherit, [], code) --> ObjectRef(or)

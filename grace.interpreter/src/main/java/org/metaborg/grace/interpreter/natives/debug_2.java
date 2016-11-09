@@ -20,7 +20,7 @@ public abstract class debug_2 extends TermBuild {
       @Specialization
       public Object doInt(Object s, Object s2) {
     	  String r = s.toString() + s2.toString();
-    	  System.out.println(r);
+    	  System.err.println(r);
     	  return r;
       }
 
