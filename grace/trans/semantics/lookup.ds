@@ -6,6 +6,7 @@ imports
 
   trans/semantics/values
   trans/semantics/store
+  trans/semantics/context
 
 signature
 
@@ -26,6 +27,27 @@ rules
   //   else look both outer and super
   //     if both, error,
   //     else return either
+  
+  DS DS(rds), C MethodC() |- lookup(name) :: L --> m
+    where
+      case L[name?] of {
+        true =>
+          Method([], [Code(L[name])], rds) => m
+        otherwise => 
+          true == false
+      }.
+      
+  S Self(self) |- lookup(name) --> m
+    where
+      debug("looking in self slots") => _;
+      memberTable(self) --> tbl;
+      case tbl[name?] of {
+        true => 
+          readMethod(tbl[name]) --> m
+        otherwise =>          
+          debug("no such method: '", name, "' in this object") => _;
+          NoMethod(name) => m
+      }.
   
   CS CS(rcs), DS DS(rds) |- lookup(name) --> m'
     where

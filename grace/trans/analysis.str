@@ -43,7 +43,8 @@ rules // Debugging
       filename := <guarantee-extension(|"analyzed-pp.grace")> path;
       result   := <pp-debug> ast
   
-  desugar-complete: ast -> <inject-all> <desugar-all-post> <desugar-all> <desugar-pre> ast
+//  desugar-complete: ast -> <inject-all> <desugar-all-post> <desugar-all> <desugar-pre> ast
+  desugar-complete: ast -> <desugar-all-post> <desugar-all> <desugar-pre> ast
   
   debug-show-desugared:
     (_, _, ast, path, _) -> (filename, result)

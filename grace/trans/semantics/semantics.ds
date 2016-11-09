@@ -21,13 +21,9 @@ signature
     Declaration --> V
     Assignment --> V
     
-    Inherit -build-> Ref
-    Inherit -inito-> Ref
+    Inherit --> Ref
     
     List(Exp) -ea-> List(V)
-    
-    Exp -build-> V
-    Exp -inito-> V
     
   constructors
     
@@ -66,12 +62,12 @@ rules
   
   p@Program(_, _) -init-> v
     where
-      CS CS(fresh), DS DS(fresh), C ObjectC() |- p :: OHeap {}, MHeap {}, Locals {} --> v.
+      CS CS(fresh), DS DS(fresh), C ObjectC(), S Self(fresh) |- p :: OHeap {}, MHeap {}, Locals {} --> v.
       
   Program(code, _) --> v
     where
       allocateObject(NoObject()) --> r;
-      CS CS(r), DS DS(r), C ObjectC() |- code --> v.
+      CS CS(r), DS DS(r), C ObjectC(), S Self(r) |- code --> v.
   
   [] : List(Statement) --> Done().
   
@@ -80,33 +76,10 @@ rules
   [code | codes@[_|_] ] : List(Statement) --> codes
     where code --> _.
   
-  MCallRecvL(e1, "==", [e2]) --> v
-    where
-      nativePrint(StringV("native ==")) => _;
-       e1 --> v1@NumV(_);
-       e2 --> v2@NumV(_);
-       case nativeEq(v1,v2) of {
-         true => MCallL("true", []) --> v
-         otherwise => MCallL("false", []) --> v
-       }.
-
-  MCallRecvL(e1, "<=", [e2]) --> v
-    where
-       nativePrint(StringV("native <=")) => _;
-       e1 --> v1@NumV(_);
-       e2 --> v2@NumV(_);
-       case nativeLte(v1,v2) of {
-         true => MCallL("true", []) --> v
-         otherwise => MCallL("false", []) --> v
-       };
-       nativePrint(StringV("result of MCallRecvL")) => _;
-       nativePrint(v) => _.
-   
-  MCallRecvL(v1@NumV(_), "-", [v2@NumV(_)]) --> NumV(nativeMinus(v1,v2)).
-  MCallRecvL(v1@NumV(_), "+", [v2@NumV(_)]) --> NumV(nativePlus(v1,v2))
-    where
-      nativePrint(StringV("plus")) => _.
-        
+  
+  /*
+   * Method Calls
+   */
   MCallRecvL(receiver, name, args) --> v
     where
        receiver --> ObjectRef(r);
@@ -117,77 +90,89 @@ rules
 
   MCallL(name, vs) --> v
     where
+      debug("generic implicit call") => _;
       lookup(name) --> m;
-      call(m, vs) --> v.
+      print(WrappedM(m)) => _;
+      call(m, vs) --> v;
+      debug("done generic implicit call") => _.
   
   /*
-   * Evaluate and store as value in local
+   * Constants
    */
   C MethodC() |- ConstantL(name, _, v) --> Done()
     where
+      
+      debug("adding local: ", name) => _;
       writeLocal(name, v) --> _.
   
-  /*
-   * Evaluate and store as a method in a field member
-   */
-  ConstantL(name, _, v) --> Done()
+  C ObjectC() |- ConstantL(name, _, v) --> Done()
     where
+      debug("adding member: ", name) => _;
       addMember(name, [], [Code(v)]) --> _.
   
+  ConstantL(_, _, _) --> Done()
+    where
+      debug("Error: unknown context for constant") => _.
+  
+  /*
+   * Methods
+   */
   MethodL(name, _, params, code) --> Done()
     where
       addMember(name, params, code) --> _.
 
-//  ds |- ObjectL(inherit, [], code) --> ObjectRef(or)
-//    where
-//      allocateObject(Object(ds, inherit, {})) --> or;
-//      CS CS(or), DS DS(or), C ObjectC() |- code --> _.
-      
-//  ds |- ObjectL(inherit, [], code) --> ObjectRef(or)
-//    where
-//      
-//      inherit --> r;
-//      allocateObject(Object(ds, r, {})) --> or;
-//      CS CS(or), DS DS(or), C ObjectC() |- code --> _.
-//  
-//  ObjectL(inh,_,_) -build-> ObjectRef()
-//    where 
-//      
-      
+  /*
+   * Object Constructors
+   */
+  S Self(self) |- ObjectL(NoInherit(), [], code) --> ObjectRef(newSelf)
+    where
+      fresh => objectnumber;
+      debug("new obj constructor starting...") => _;
+      allocateObject(NoObject()) --> noParent;
+      allocateObject(Object(self, noParent, {})) --> newSelf;
+      S Self(newSelf), C ObjectC() |- code --> _; // execute code under new self
+      debug("done constructing object") => _.  
+   
   ds |- ObjectL(inherit, [], code) --> ObjectRef(or)
     where
+      inherit --> r;
       allocateObject(Object(ds, r, {})) --> or;
-      inherit -build-> r;
-      CS CS(or), DS DS(or) |- inherit -inito-> r';
       CS CS(or), DS DS(or), C ObjectC() |- code --> _.
 
-  Inherit(e, _, _) -build-> r
+  /*
+   * Inherit expressions
+   */
+  Inherit(e, _, _) --> r
     where
       e --> ObjectRef(r).
       
-  NoInherit() -build-> r
+  NoInherit() --> r
     where
       allocateObject(NoObject()) --> r.  
 
-  Inherit(e, _, _) -inito-> r
-    where
-      e --> ObjectRef(r).
-      
-  NoInherit() -inito-> r
-    where
-      allocateObject(NoObject()) --> r.  
-
+  /*
+   * Self expression
+   */ 
   ds |- Self() --> ObjectRef(ds).
 
+  /*
+   * call (meta-function)
+   */
+  call(NoMethod(name), _) --> Error() // should raise exception
+    where
+      debug("Message not understood: ", name) => _.
+  
   call(Method([], code, scope), []) --> v
     where
-      DS DS(scope), C MethodC() |- code --> v.
+      debug("calling method with no args") => _;
+      DS DS(scope), C MethodC() |- code :: Locals {} --> v.
 
   call(Method(names@[_ | _], code, scope), args@[_ | _]) --> v
     where
+      debug("calling method with some args") => _;
       allocateObject(Object(scope, noSuper(), {})) --> call-scope;
       DS DS(call-scope) |- addMembers(names,wrapValues(args)) --> _;
-      DS DS(call-scope), C MethodC() |- code --> v.
+      DS DS(call-scope), C MethodC() |- code :: Locals {} --> v.
 
   noSuper() --> allocateObject(NoObject()).
   
@@ -201,7 +186,6 @@ rules
   /*
    * Add members
    */
-  
   addMembers([], []) --> Unit().
   
   addMembers([n | ns], [code | codes]) --> Unit()
@@ -209,16 +193,17 @@ rules
       addMember(n, [], code) --> _;
       addMembers(ns, codes) --> _.
   
-  ds |- addMember(name, params, code) --> Unit()
+  ds, S Self(self) |- addMember(name, params, code) --> Unit()
     where
-      allocateMethod(Method(params, code, ds)) --> mRef;
-      readObject(ds) --> Object(enc, sup, tbl);
-      writeObject(ds, Object(enc, sup, {name |--> mRef, tbl} )) --> _.
+      debug("attempt to write member: '", name, "'") => _;
+      allocateMethod(Method(params, code, self)) --> mRef;
+      readObject(self) --> Object(enc, sup, tbl);
+      writeObject(self, Object(enc, sup, {name |--> mRef, tbl} )) --> _;
+      debug("added member: '", name, "' successfully") => _.
       
   /*
    * Evaluate arguments
    */
-  
   [] : List(Exp) -ea-> [].
   
   [a] : List(Exp) -ea-> [v] : List(V)

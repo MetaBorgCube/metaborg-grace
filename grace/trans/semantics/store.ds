@@ -20,6 +20,7 @@ signature
     getMHeap: MHeap -> V
     
     Stored: O -> V
+    WrappedL: Locals -> V
     
     readObject: Ref --> O
     allocateObject: O --> Ref

@@ -3,10 +3,13 @@ module trans/semantics/context
 signature
 
   sorts
-    C
+    C // context
+    S // self
 
   constructors
     ObjectC: C
     MethodC: C
-    BlockC: C    
+    BlockC: C   
+    
+    Self: Int -> S 
   

@@ -17,6 +17,7 @@ signature
     StringV: String -> V
     BoolV: Bool -> V
     Done: V
+    Error: V
 
     //      enclosing object ref
     //            super ref
@@ -74,3 +75,7 @@ signature
   native operators
     parseNumber: String -> Int
     print: V -> V
+    
+    debug: String -> String
+    debug: String * String -> String
+    debug: String * String * String -> String
