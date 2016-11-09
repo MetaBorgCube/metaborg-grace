@@ -42,6 +42,7 @@ rules
     where
       debug("looking in self slots") => _;
       memberTable(self) --> tbl;
+      print(WrappedMembers(tbl)) => _;
       case tbl[name?] of {
         true => 
           readMethod(tbl[name]) --> m
@@ -55,8 +56,10 @@ rules
    */
   Out Outer(outer) |- lookupInOuter(name) --> m
     where
-      debug("looking in outer") => _;
       readObject(outer) --> Object(outerOfOuterRef, _, tbl);
+      debug("looking in outer (this object has an outer)") => _;
+      debug("gotten outer") => _;
+      print(WrappedMembers(tbl)) => _;
       case tbl[name?] of {
         true => // outer has the name
           readMethod(tbl[name]) --> m
@@ -69,11 +72,10 @@ rules
    */
   Out Outer(outer) |- lookupInOuter(name) --> m
     where
-      debug("looking in outer") => _;
       readObject(outer) --> NoObject();
-      debug("this object has no outer") => _;
+      debug("looking in outer (this object has no outer)") => _;
       NoMethod(name) => m.
   
   memberTable(r) --> tbl
     where
-      readObject(r) --> Object(_,_,tbl).
+      readObject(r) --> Object(_, _, tbl).

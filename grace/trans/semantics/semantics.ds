@@ -111,8 +111,7 @@ rules
           e --> v; // dynsem bug: no coersion in case switch
           writeLocal(name, v) --> _       
       }.
-      
-  
+
   C ObjectC() |- ConstantL(name, _, e) --> Done()
     where
       debug("adding member: ", name) => _;

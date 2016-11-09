@@ -554,18 +554,18 @@ Module(
             , Annos([])
             )
           , ConsDecl(
+              "WrappedMembers"
+            , [MapSort(SimpleSort("String"), SimpleSort("Int"))]
+            , SimpleSort("V")
+            , Annos([])
+            )
+          , ConsDecl(
               "ObjectRef"
             , [SimpleSort("Int")]
             , SimpleSort("V")
             , Annos([])
             )
           , ConsDecl("Unit", [], SimpleSort("Unit"), Annos([]))
-          , ConsDecl(
-              "getMembers"
-            , [MapSort(SimpleSort("String"), SimpleSort("Int"))]
-            , SimpleSort("V")
-            , Annos([])
-            )
           , ConsDecl(
               "getOHeap"
             , [MapSort(SimpleSort("Int"), SimpleSort("O"))]
@@ -2578,7 +2578,6 @@ Module(
           [ Formula(
               Match(VarRef("o1"), Con("Outer", [VarRef("outer")]))
             )
-          , Formula(Match(NativeOp("debug", [String("looking in outer")]), Wld()))
           , Formula(
               Relation(
                 Source(
@@ -2599,6 +2598,14 @@ Module(
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH2"))
                   ]
                 )
+              )
+            )
+          , Formula(Match(NativeOp("debug", [String("looking in outer (this object has an outer)")]), Wld()))
+          , Formula(Match(NativeOp("debug", [String("gotten outer")]), Wld()))
+          , Formula(
+              Match(
+                NativeOp("print", [Con("WrappedMembers", [VarRef("tbl")])])
+              , Wld()
               )
             )
           , CaseMatch(
@@ -2685,7 +2692,6 @@ Module(
           [ Formula(
               Match(VarRef("o1"), Con("Outer", [VarRef("outer")]))
             )
-          , Formula(Match(NativeOp("debug", [String("looking in outer")]), Wld()))
           , Formula(
               Relation(
                 Source(
@@ -2708,7 +2714,7 @@ Module(
                 )
               )
             )
-          , Formula(Match(NativeOp("debug", [String("this object has no outer")]), Wld()))
+          , Formula(Match(NativeOp("debug", [String("looking in outer (this object has no outer)")]), Wld()))
           ]
         , "---"
         , Relation(
@@ -2809,6 +2815,12 @@ Module(
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH2"))
                   ]
                 )
+              )
+            )
+          , Formula(
+              Match(
+                NativeOp("print", [Con("WrappedMembers", [VarRef("tbl")])])
+              , Wld()
               )
             )
           , CaseMatch(
@@ -4092,7 +4104,7 @@ Module(
           [ Formula(
               Relation(
                 Source(
-                  ArgRead(0){Var("p25")}
+                  ArgRead(0){Var("p26")}
                 , [ LabelComp(SimpleSort("C"), Con("ObjectC", []))
                   , LabelComp(SimpleSort("S"), Con("Self", [Fresh()]))
                   , LabelComp(SimpleSort("Out"), Con("Outer", [Fresh()]))

@@ -39,12 +39,11 @@ signature
     WrappedO: O -> V
     WrappedM: M -> V
     WrappedLCS: List(List(Statement)) -> V
+    WrappedMembers: Members -> V
     
     ObjectRef: Int -> V
 
     Unit: Unit
-    
-    getMembers: Members -> V
     
   sorts
     V // value
