@@ -22,3 +22,5 @@ method g {
 
 f;
 g;
+
+outer.f;

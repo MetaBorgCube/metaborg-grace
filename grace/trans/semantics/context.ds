@@ -5,11 +5,13 @@ signature
   sorts
     C // context
     S // self
+    Out // outer
 
   constructors
     ObjectC: C
     MethodC: C
     BlockC: C   
     
-    Self: Int -> S 
+    Self: Int -> S
+    Outer: Int -> Out 
   

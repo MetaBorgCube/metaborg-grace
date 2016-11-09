@@ -62,12 +62,12 @@ rules
   
   p@Program(_, _) -init-> v
     where
-      CS CS(fresh), DS DS(fresh), C ObjectC(), S Self(fresh) |- p :: OHeap {}, MHeap {}, Locals {} --> v.
+      CS CS(fresh), DS DS(fresh), C ObjectC(), S Self(fresh), Out Outer(fresh) |- p :: OHeap {}, MHeap {}, Locals {} --> v.
       
   Program(code, _) --> v
     where
       allocateObject(NoObject()) --> r;
-      CS CS(r), DS DS(r), C ObjectC(), S Self(r) |- code --> v.
+      CS CS(r), DS DS(r), C ObjectC(), S Self(r), Out Outer(r) |- code --> v.
   
   [] : List(Statement) --> Done().
   
@@ -153,7 +153,12 @@ rules
   /*
    * Self expression
    */ 
-  ds |- Self() --> ObjectRef(ds).
+  S Self(self) |- Self() --> ObjectRef(self).
+
+  /*
+   * Outer expression
+   */
+  Out Outer(outer) |- Outer() --> ObjectRef(outer).
 
   /*
    * call (meta-function)
