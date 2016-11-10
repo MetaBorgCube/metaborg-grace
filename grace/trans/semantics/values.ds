@@ -4,9 +4,21 @@ imports
 
   src-gen/ds-signatures/grace-sig
   
-  trans/semantics/context
-
 signature
+
+  //    move to components.ds after import fix
+
+  sort aliases
+    OHeap = Map(Int, O)
+    MHeap = Map(Int, M)
+    Locals = Map(String, V)
+
+  components
+    OH : OHeap
+    MH : MHeap
+    L : Locals
+    
+  // ^^ move to components.ds after import fix
 
   sort aliases
     Ref = Int
@@ -35,10 +47,10 @@ signature
     Error: V
     Uninitialized: V
 
-    //      enclosing object ref
+    //      enclosing object ref (outer)
     //            super ref
     //                  members (methods)
-    Object: Ref * Ref * Members -> O
+    Object: Ref * Members -> O
     
     //      parameters
     //                     code

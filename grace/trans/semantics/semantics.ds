@@ -7,7 +7,6 @@ imports
   trans/semantics/values
   trans/semantics/store
   trans/semantics/lookup
-  trans/semantics/components
 
 signature
   
@@ -150,16 +149,15 @@ rules
   S Self(selfRef) |- ObjectL(NoInherit(), [], code) --> ObjectRef(newSelf)
     where
       debug("new obj constructor starting...") => _;
-      allocateObject(NoObject()) --> noParent;
-      allocateObject(Object(selfRef, noParent, {})) --> newSelf;
+      allocateObject(Object(selfRef, {})) --> newSelf;
       S Self(newSelf), Out Outer(selfRef), C ObjectC() |- code --> _; // exec code under new self, self becomes outer.
       debug("done constructing object") => _.  
    
-  ObjectL(inherit, [], code) --> ObjectRef(or)
+  S Self(selfRef) |- ObjectL(inherit, [], code) --> ObjectRef(or)
     where
       error("inheritance currently not supported") => _;
       inherit --> r;
-      allocateObject(Object(whodoIinheritfrom, r, {})) --> or;
+      allocateObject(Object(selfRef, {})) --> or;
       C ObjectC() |- code --> _. // scope?
 
   /*
@@ -230,8 +228,8 @@ rules
     where
       debug("attempt to write member: '", name, "'") => _;
       allocateMethod(Method(params, code, self)) --> mRef;
-      readObject(self) --> Object(enc, sup, tbl);
-      writeObject(self, Object(enc, sup, {name |--> mRef, tbl} )) --> _;
+      readObject(self) --> Object(enc, tbl);
+      writeObject(self, Object(enc, {name |--> mRef, tbl} )) --> _;
       debug("added member: '", name, "' successfully") => _.
   
   /*

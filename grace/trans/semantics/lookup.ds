@@ -47,7 +47,7 @@ rules
    */
   Out Outer(outer) |- lookupInOuter(name) --> m
     where
-      readObject(outer) --> Object(outerOfOuterRef, _, tbl);
+      readObject(outer) --> Object(outerOfOuterRef, tbl);
       debug("looking in outer (this object has an outer)") => _;
       debug("gotten outer") => _;
       print(WrappedMembers(tbl)) => _;
@@ -69,4 +69,4 @@ rules
   
   memberTable(r) --> tbl
     where
-      readObject(r) --> Object(_, _, tbl).
+      readObject(r) --> Object(_, tbl).

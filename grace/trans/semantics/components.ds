@@ -1,8 +1,8 @@
 module trans/semantics/values
 
 imports
-  trans/semantics/values
-  trans/semantics/context
+//  trans/semantics/values
+//  trans/semantics/context
 
 signature
 

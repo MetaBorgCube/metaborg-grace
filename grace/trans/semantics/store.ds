@@ -2,7 +2,6 @@ module trans/semantics/store
 
 imports
   trans/semantics/values
-  trans/semantics/components
 
 signature
   
