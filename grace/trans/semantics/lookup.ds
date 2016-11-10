@@ -1,26 +1,17 @@
 module trans/semantics/lookup
 
 imports
-  src-gen/ds-signatures/grace-sig
-  src-gen/ds-signatures/grace-lowered-sig
-
   trans/semantics/values
   trans/semantics/store
   trans/semantics/context
 
 signature
 
-  constructors
-    lookup: String --> M
-    lookupSuper: String --> M
-    lookupOuter: String --> M
-    lookupInOuter: String --> M
-    lookupLocal: String --> M
+  arrows
+    lookup(String) --> M
+    lookupInOuter(String) --> M
     
-    getSuper: --> Ref
-    getOuter: --> Ref
-    
-    memberTable: Ref --> Members
+    memberTable(Ref) --> Members
 
 rules
   

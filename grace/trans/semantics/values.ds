@@ -11,11 +11,26 @@ signature
   sort aliases
     Ref = Int
     Members = Map(String, Int)
+
+  sorts
+    V // value
+    O // object
+    M // method
+    Unit
+    Table
+
+  variables
+    v : V
+    vs : List(V)
+    o : O
+    m : M
+    r : Ref
     
   constructors
     NumV: Int -> V
     StringV: String -> V
     BoolV: Bool -> V
+    ObjectRef: Int -> V
     Done: V
     Error: V
     Uninitialized: V
@@ -30,35 +45,21 @@ signature
     //                                          self (decl)
     Method: List(String) * List(Statement) * Ref -> M
 
+    Code: V -> Statement
+    
+    Unit: Unit
+    
     NoObject: O
     NoMethod: String -> M
     NoMethodAndStop: String -> M
-    
-    Code: V -> Statement
-    
+
+    // wrapping for debug purposes
     WrappedO: O -> V
     WrappedM: M -> V
     WrappedLCS: List(List(Statement)) -> V
     WrappedMembers: Members -> V
+    Stored: O -> V
     
-    ObjectRef: Int -> V
-
-    Unit: Unit
-    
-  sorts
-    V // value
-    O // object
-    M // method
-    Unit
-    Table
-
-  variables
-    v : V
-    vs : List(V)
-    o : O
-    m : M
-    r : Ref
-
   native operators
     parseNumber: String -> Int
     print: V -> V

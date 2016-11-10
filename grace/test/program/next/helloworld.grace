@@ -1,4 +1,4 @@
-def evenBetterScoping = 0;
+//def evenBetterScoping = 0;
 def a = object {
   def properScoping = 1;
   
@@ -16,3 +16,4 @@ def a = object {
 } ;
 
 a.f;
+

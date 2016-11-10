@@ -3,15 +3,14 @@ module trans/semantics/context
 signature
 
   sorts
-    C // context
-    S // self
-    Out // outer
+    Context
+    Self
+    Outer
 
   constructors
-    ObjectC: C
-    MethodC: C
-    BlockC: C   
-    
-    Self: Int -> S
-    Outer: Int -> Out 
-  
+    ObjectC : Context
+    MethodC : Context
+    BlockC  : Context
+
+    Self    : Int -> Self
+    Outer   : Int -> Outer
