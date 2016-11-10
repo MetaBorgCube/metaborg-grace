@@ -1,23 +1,17 @@
-def module = "module";
-def evenBetterScoping = 0;
-print(evenBetterScoping);
+print "the module object";
+print(self);
+def modulescope = 0;
 def a = object {
-  def objectA = "a";
-  def properScoping = 1;
-  
+  print "the a object: ";
+  print(self);
+    
   method f {
-    def methodF = "f";
-    print "f";
-    def test = 2;
-  
-    print(self);
-    print(evenBetterScoping);
-    print(properScoping);
-    print(test);
+    print "the method self: ";
+    print(self); // a or module?
+    print(modulescope);
   };
-  print "hey";
   
-} ;
+};
 
 a.f;
 

@@ -57,8 +57,9 @@ rules
       
   Program(code, _) --> v
     where
-      allocateObject(NoObject()) --> r;
-      C ObjectC(), S Self(r), Out Outer(r) |- code --> v.
+      allocateObject(NoObject()) --> outer;
+      allocateObject(Object(outer, {})) --> self;
+      C ObjectC(), S Self(self), Out Outer(outer) |- code --> v.
   
   [] : List(Statement) --> Done().
   

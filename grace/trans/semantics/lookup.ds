@@ -22,6 +22,7 @@ rules
   
   S Self(self), C MethodC() |- lookup(name) :: L --> m
     where
+      debug("lookup in method context") => _;
       case L[name?] of {
         true =>
           Method([], [Code(L[name])], self) => m
@@ -31,7 +32,7 @@ rules
       
   S Self(self) |- lookup(name) --> m
     where
-      debug("looking in self slots") => _;
+      debug("looking in self slots (non-method context)") => _;
       memberTable(self) --> tbl;
       print(WrappedMembers(tbl)) => _;
       case tbl[name?] of {
