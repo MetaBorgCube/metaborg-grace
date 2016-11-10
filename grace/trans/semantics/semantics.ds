@@ -29,17 +29,12 @@ signature
     
     call: M * List(V) --> V
     
-    saveConst: String * V * Members --> Members
-    saveConstants: List(String) * List(V) * Members --> Members
-
     addMember: String * List(String) * List(Statement) --> Unit
     addMembers: List(String) * List(List(Statement)) --> Unit
     
     createLocals: List(String) * List(List(Statement)) --> Unit
     
     wrapValues: List(V) --> List(List(Statement))
-    
-    noSuper: --> Ref
     
   native operators
     nativeIBinOp: String * Int * Int -> Int
@@ -152,7 +147,6 @@ rules
     where
       error("Error: cannot create method inside a methodContext") => _.
 
-
   /*
    * Object Constructors
    */
@@ -210,8 +204,6 @@ rules
       createLocals(names, wrapValues(args)) :: Locals {} --> _ :: Locals l; // scope?
       S Self(scope), C MethodC() |- code :: Locals l --> v;
       debug("done calling methods with some args") => _.
-
-  noSuper() --> allocateObject(NoObject()).
   
   wrapValues([]) --> [] : List(List(Statement)).
   
@@ -238,6 +230,9 @@ rules
       writeObject(self, Object(enc, sup, {name |--> mRef, tbl} )) --> _;
       debug("added member: '", name, "' successfully") => _.
   
+  /*
+   * Add locals
+   */
   createLocals([n|ns], [code|codes]) --> Unit()
     where
       writeLocal(n, code) --> _;

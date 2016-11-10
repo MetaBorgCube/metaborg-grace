@@ -4,13 +4,10 @@ Module(
   , Signatures(
       [ Sorts(
           [ SortDecl("call__Arrow")
-          , SortDecl("saveConst__Arrow")
-          , SortDecl("saveConstants__Arrow")
           , SortDecl("addMember__Arrow")
           , SortDecl("addMembers__Arrow")
           , SortDecl("createLocals__Arrow")
           , SortDecl("wrapValues__Arrow")
-          , SortDecl("noSuper__Arrow")
           , SortDecl("Program")
           , SortDecl("Statement")
           , SortDecl("Assignment")
@@ -73,21 +70,6 @@ Module(
             , Annos([MetafunAnno()])
             )
           , ConsDecl(
-              "saveConst"
-            , [SimpleSort("String"), SimpleSort("V"), MapSort(SimpleSort("String"), SimpleSort("Int"))]
-            , SimpleSort("saveConst__Arrow")
-            , Annos([MetafunAnno()])
-            )
-          , ConsDecl(
-              "saveConstants"
-            , [ ListSort(SimpleSort("String"))
-              , ListSort(SimpleSort("V"))
-              , MapSort(SimpleSort("String"), SimpleSort("Int"))
-              ]
-            , SimpleSort("saveConstants__Arrow")
-            , Annos([MetafunAnno()])
-            )
-          , ConsDecl(
               "addMember"
             , [SimpleSort("String"), ListSort(SimpleSort("String")), ListSort(SimpleSort("Statement"))]
             , SimpleSort("addMember__Arrow")
@@ -111,7 +93,6 @@ Module(
             , SimpleSort("wrapValues__Arrow")
             , Annos([MetafunAnno()])
             )
-          , ConsDecl("noSuper", [], SimpleSort("noSuper__Arrow"), Annos([MetafunAnno()]))
           , ConsDecl(
               "Program"
             , [ListSort(SimpleSort("Statement")), SimpleSort("String")]
@@ -768,42 +749,6 @@ Module(
             )
           , ArrowDecl(
               ArrowROs([SimpleSort("S"), SimpleSort("Out"), SimpleSort("C")])
-            , SimpleSort("saveConst__Arrow")
-            , ArrowRWs(
-                [ MapSort(SimpleSort("String"), SimpleSort("V"))
-                , MapSort(SimpleSort("Int"), SimpleSort("O"))
-                , MapSort(SimpleSort("Int"), SimpleSort("M"))
-                ]
-              )
-            , "default"
-            , MapSort(SimpleSort("String"), SimpleSort("Int"))
-            , ArrowRWs(
-                [ MapSort(SimpleSort("String"), SimpleSort("V"))
-                , MapSort(SimpleSort("Int"), SimpleSort("O"))
-                , MapSort(SimpleSort("Int"), SimpleSort("M"))
-                ]
-              )
-            )
-          , ArrowDecl(
-              ArrowROs([SimpleSort("S"), SimpleSort("Out"), SimpleSort("C")])
-            , SimpleSort("saveConstants__Arrow")
-            , ArrowRWs(
-                [ MapSort(SimpleSort("String"), SimpleSort("V"))
-                , MapSort(SimpleSort("Int"), SimpleSort("O"))
-                , MapSort(SimpleSort("Int"), SimpleSort("M"))
-                ]
-              )
-            , "default"
-            , MapSort(SimpleSort("String"), SimpleSort("Int"))
-            , ArrowRWs(
-                [ MapSort(SimpleSort("String"), SimpleSort("V"))
-                , MapSort(SimpleSort("Int"), SimpleSort("O"))
-                , MapSort(SimpleSort("Int"), SimpleSort("M"))
-                ]
-              )
-            )
-          , ArrowDecl(
-              ArrowROs([SimpleSort("S"), SimpleSort("Out"), SimpleSort("C")])
             , SimpleSort("addMember__Arrow")
             , ArrowRWs(
                 [ MapSort(SimpleSort("String"), SimpleSort("V"))
@@ -867,24 +812,6 @@ Module(
               )
             , "default"
             , ListSort(ListSort(SimpleSort("Statement")))
-            , ArrowRWs(
-                [ MapSort(SimpleSort("String"), SimpleSort("V"))
-                , MapSort(SimpleSort("Int"), SimpleSort("O"))
-                , MapSort(SimpleSort("Int"), SimpleSort("M"))
-                ]
-              )
-            )
-          , ArrowDecl(
-              ArrowROs([SimpleSort("S"), SimpleSort("Out"), SimpleSort("C")])
-            , SimpleSort("noSuper__Arrow")
-            , ArrowRWs(
-                [ MapSort(SimpleSort("String"), SimpleSort("V"))
-                , MapSort(SimpleSort("Int"), SimpleSort("O"))
-                , MapSort(SimpleSort("Int"), SimpleSort("M"))
-                ]
-              )
-            , "default"
-            , SimpleSort("Int")
             , ArrowRWs(
                 [ MapSort(SimpleSort("String"), SimpleSort("V"))
                 , MapSort(SimpleSort("Int"), SimpleSort("O"))
@@ -1496,7 +1423,7 @@ Module(
                 )
               , NamedDynamicEmitted([], "default", SimpleSort("wrapValues__Arrow"))
               , Target(
-                  VarRef("wvs2")
+                  VarRef("wvs4")
                 , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L2"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH2"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH2"))
@@ -1524,7 +1451,7 @@ Module(
           , Target(
               TypedListTail(
                 [TypedList([Con("Code", [VarRef("v1")])], "org.metaborg.grace.interpreter.generated.terms.List_IStatementTerm")]
-              , VarRef("wvs2")
+              , VarRef("wvs4")
               , "org.metaborg.grace.interpreter.generated.terms.List_List_IStatementTerm"
               )
             , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L2"))
@@ -1541,7 +1468,7 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  Con("writeLocal", [VarRef("name85"), Con("Uninitialized", [])])
+                  Con("writeLocal", [VarRef("name40"), Con("Uninitialized", [])])
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -1564,7 +1491,7 @@ Module(
         , "---"
         , Relation(
             Source(
-              Con("VariableL", [VarRef("name85"), Wld()])
+              Con("VariableL", [VarRef("name40"), Wld()])
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
               , LabelComp(SimpleSort("Out"), VarRef("o1"))
               , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -1616,7 +1543,7 @@ Module(
         , "---------"
         , Relation(
             Source(
-              Con("String", [VarRef("s5")])
+              Con("String", [VarRef("s9")])
             , [ LabelComp(SimpleSort("S"), Wld())
               , LabelComp(SimpleSort("Out"), Wld())
               , LabelComp(SimpleSort("C"), Wld())
@@ -1627,7 +1554,7 @@ Module(
             )
           , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
           , Target(
-              Con("StringV", [VarRef("s5")])
+              Con("StringV", [VarRef("s9")])
             , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L1"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH1"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH1"))
@@ -1643,7 +1570,7 @@ Module(
         , Relation(
             Source(
               Con("Self", [])
-            , [ LabelComp(SimpleSort("S"), Con("Self", [VarRef("self4")]))
+            , [ LabelComp(SimpleSort("S"), Con("Self", [VarRef("self8")]))
               , LabelComp(SimpleSort("Out"), Wld())
               , LabelComp(SimpleSort("C"), Wld())
               , LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L1"))
@@ -1653,7 +1580,7 @@ Module(
             )
           , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
           , Target(
-              Con("ObjectRef", [VarRef("self4")])
+              Con("ObjectRef", [VarRef("self8")])
             , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L1"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH1"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH1"))
@@ -1767,7 +1694,7 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  ListSource(VarRef("code19"), ListType("Statement"))
+                  ListSource(VarRef("code44"), ListType("Statement"))
                 , [ LabelComp(SimpleSort("S"), Con("Self", [VarRef("r1")]))
                   , LabelComp(SimpleSort("Out"), Con("Outer", [VarRef("r1")]))
                   , LabelComp(SimpleSort("C"), Con("ObjectC", []))
@@ -1790,7 +1717,7 @@ Module(
         , "---"
         , Relation(
             Source(
-              Con("Program", [VarRef("code19"), Wld()])
+              Con("Program", [VarRef("code44"), Wld()])
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
               , LabelComp(SimpleSort("Out"), VarRef("o1"))
               , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -1818,7 +1745,7 @@ Module(
             Source(
               Con("Outer", [])
             , [ LabelComp(SimpleSort("S"), Wld())
-              , LabelComp(SimpleSort("Out"), Con("Outer", [VarRef("outer2")]))
+              , LabelComp(SimpleSort("Out"), Con("Outer", [VarRef("outer4")]))
               , LabelComp(SimpleSort("C"), Wld())
               , LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L1"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH1"))
@@ -1827,7 +1754,7 @@ Module(
             )
           , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
           , Target(
-              Con("ObjectRef", [VarRef("outer2")])
+              Con("ObjectRef", [VarRef("outer4")])
             , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L1"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH1"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH1"))
@@ -1839,7 +1766,7 @@ Module(
         )
       , Rule(
           [ Formula(
-              Match(VarRef("s1"), Con("Self", [VarRef("selfRef0")]))
+              Match(VarRef("s1"), Con("Self", [VarRef("selfRef4")]))
             )
           , Formula(Match(NativeOp("debug", [String("new obj constructor starting...")]), Wld()))
           , Formula(
@@ -1856,7 +1783,7 @@ Module(
                 )
               , NamedDynamicEmitted([], "default", SimpleSort("allocateObject__Arrow"))
               , Target(
-                  VarRef("noParent1")
+                  VarRef("noParent4")
                 , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L2"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH2"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH2"))
@@ -1871,7 +1798,7 @@ Module(
                     "allocateObject"
                   , [Con(
                        "Object"
-                     , [VarRef("selfRef0"), VarRef("noParent1"), Map([])]
+                     , [VarRef("selfRef4"), VarRef("noParent4"), Map([])]
                      )]
                   )
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
@@ -1884,7 +1811,7 @@ Module(
                 )
               , NamedDynamicEmitted([], "default", SimpleSort("allocateObject__Arrow"))
               , Target(
-                  VarRef("newSelf1")
+                  VarRef("newSelf4")
                 , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L3"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH3"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH3"))
@@ -1895,9 +1822,9 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  ListSource(VarRef("code23"), ListType("Statement"))
-                , [ LabelComp(SimpleSort("S"), Con("Self", [VarRef("newSelf1")]))
-                  , LabelComp(SimpleSort("Out"), Con("Outer", [VarRef("selfRef0")]))
+                  ListSource(VarRef("code48"), ListType("Statement"))
+                , [ LabelComp(SimpleSort("S"), Con("Self", [VarRef("newSelf4")]))
+                  , LabelComp(SimpleSort("Out"), Con("Outer", [VarRef("selfRef4")]))
                   , LabelComp(SimpleSort("C"), Con("ObjectC", []))
                   , LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L3"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH3"))
@@ -1921,7 +1848,7 @@ Module(
             Source(
               Con(
                 "ObjectL"
-              , [Con("NoInherit", []), List([]), VarRef("code23")]
+              , [Con("NoInherit", []), List([]), VarRef("code48")]
               )
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
               , LabelComp(SimpleSort("Out"), VarRef("o1"))
@@ -1933,7 +1860,7 @@ Module(
             )
           , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
           , Target(
-              Con("ObjectRef", [VarRef("newSelf1")])
+              Con("ObjectRef", [VarRef("newSelf4")])
             , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L4"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH4"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH4"))
@@ -1948,7 +1875,7 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  VarRef("inherit2")
+                  VarRef("inherit4")
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -1974,7 +1901,7 @@ Module(
                     "allocateObject"
                   , [Con(
                        "Object"
-                     , [VarRef("whodoIinheritfrom0"), VarRef("r1"), Map([])]
+                     , [VarRef("whodoIinheritfrom4"), VarRef("r1"), Map([])]
                      )]
                   )
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
@@ -1987,7 +1914,7 @@ Module(
                 )
               , NamedDynamicEmitted([], "default", SimpleSort("allocateObject__Arrow"))
               , Target(
-                  VarRef("or2")
+                  VarRef("or4")
                 , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L3"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH3"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH3"))
@@ -1998,7 +1925,7 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  ListSource(VarRef("code24"), ListType("Statement"))
+                  ListSource(VarRef("code49"), ListType("Statement"))
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), Con("ObjectC", []))
@@ -2023,7 +1950,7 @@ Module(
             Source(
               Con(
                 "ObjectL"
-              , [VarRef("inherit2"), List([]), VarRef("code24")]
+              , [VarRef("inherit4"), List([]), VarRef("code49")]
               )
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
               , LabelComp(SimpleSort("Out"), VarRef("o1"))
@@ -2035,7 +1962,7 @@ Module(
             )
           , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
           , Target(
-              Con("ObjectRef", [VarRef("or2")])
+              Con("ObjectRef", [VarRef("or4")])
             , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L4"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH4"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH4"))
@@ -2050,7 +1977,7 @@ Module(
         , "---------"
         , Relation(
             Source(
-              Con("NumL", [VarRef("s4")])
+              Con("NumL", [VarRef("s8")])
             , [ LabelComp(SimpleSort("S"), Wld())
               , LabelComp(SimpleSort("Out"), Wld())
               , LabelComp(SimpleSort("C"), Wld())
@@ -2061,7 +1988,7 @@ Module(
             )
           , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
           , Target(
-              Con("NumV", [NativeOp("parseNumber", [VarRef("s4")])])
+              Con("NumV", [NativeOp("parseNumber", [VarRef("s8")])])
             , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L1"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH1"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH1"))
@@ -2070,54 +1997,6 @@ Module(
           )
         , TermKind()
         , "org.metaborg.grace.interpreter.generated.terms.NumL_1_Term"
-        )
-      , Rule(
-          [ Formula(
-              Relation(
-                Source(
-                  Con("allocateObject", [Con("NoObject", [])])
-                , [ LabelComp(SimpleSort("S"), VarRef("s1"))
-                  , LabelComp(SimpleSort("Out"), VarRef("o1"))
-                  , LabelComp(SimpleSort("C"), VarRef("c1"))
-                  , LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L1"))
-                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH1"))
-                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH1"))
-                  ]
-                )
-              , NamedDynamicEmitted([], "default", SimpleSort("allocateObject__Arrow"))
-              , Target(
-                  VarRef("r1")
-                , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L2"))
-                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH2"))
-                  , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH2"))
-                  ]
-                )
-              )
-            )
-          ]
-        , "---------"
-        , Relation(
-            Source(
-              Con("noSuper", [])
-            , [ LabelComp(SimpleSort("S"), VarRef("s1"))
-              , LabelComp(SimpleSort("Out"), VarRef("o1"))
-              , LabelComp(SimpleSort("C"), VarRef("c1"))
-              , LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L1"))
-              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH1"))
-              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH1"))
-              ]
-            )
-          , NamedDynamicEmitted([], "default", SimpleSort("noSuper__Arrow"))
-          , Target(
-              VarRef("r1")
-            , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L2"))
-              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH2"))
-              , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH2"))
-              ]
-            )
-          )
-        , TermKind()
-        , "org.metaborg.grace.interpreter.generated.terms.noSuper_0_Term"
         )
       , Rule(
           [ Formula(
@@ -2174,7 +2053,7 @@ Module(
                 Source(
                   Con(
                     "addMember"
-                  , [VarRef("name87"), VarRef("params4"), VarRef("code22")]
+                  , [VarRef("name42"), VarRef("params8"), VarRef("code47")]
                   )
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
@@ -2200,7 +2079,7 @@ Module(
             Source(
               Con(
                 "MethodL"
-              , [VarRef("name87"), Wld(), VarRef("params4"), VarRef("code22")]
+              , [VarRef("name42"), Wld(), VarRef("params8"), VarRef("code47")]
               )
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
               , LabelComp(SimpleSort("Out"), VarRef("o1"))
@@ -2300,7 +2179,7 @@ Module(
           [ Formula(
               Relation(
                 Source(
-                  VarRef("receiver2")
+                  VarRef("receiver4")
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -2322,7 +2201,7 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  Con("lookup", [VarRef("name30")])
+                  Con("lookup", [VarRef("name36")])
                 , [ LabelComp(SimpleSort("S"), Con("Self", [VarRef("r1")]))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -2344,7 +2223,7 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  ListSource(VarRef("args2"), ListType("Exp"))
+                  ListSource(VarRef("args8"), ListType("Exp"))
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -2391,7 +2270,7 @@ Module(
             Source(
               Con(
                 "MCallRecvL"
-              , [VarRef("receiver2"), VarRef("name30"), VarRef("args2")]
+              , [VarRef("receiver4"), VarRef("name36"), VarRef("args8")]
               )
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
               , LabelComp(SimpleSort("Out"), VarRef("o1"))
@@ -2491,7 +2370,7 @@ Module(
               Match(
                 NativeOp(
                   "debug"
-                , [String("generic implicit call of: '"), VarRef("name31"), String("'")]
+                , [String("generic implicit call of: '"), VarRef("name37"), String("'")]
                 )
               , Wld()
               )
@@ -2499,7 +2378,7 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  Con("lookup", [VarRef("name31")])
+                  Con("lookup", [VarRef("name37")])
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -2544,7 +2423,7 @@ Module(
               Match(
                 NativeOp(
                   "debug"
-                , [String("done generic implicit call of: '"), VarRef("name31"), String("'")]
+                , [String("done generic implicit call of: '"), VarRef("name37"), String("'")]
                 )
               , Wld()
               )
@@ -2553,7 +2432,7 @@ Module(
         , "---"
         , Relation(
             Source(
-              Con("MCallL", [VarRef("name31"), VarRef("l1")])
+              Con("MCallL", [VarRef("name37"), VarRef("l1")])
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
               , LabelComp(SimpleSort("Out"), VarRef("o1"))
               , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -2916,7 +2795,7 @@ Module(
           [ Formula(
               Relation(
                 Source(
-                  VarRef("e35")
+                  VarRef("e34")
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -2939,7 +2818,7 @@ Module(
         , "---"
         , Relation(
             Source(
-              Con("Inherit", [VarRef("e35"), Wld(), Wld()])
+              Con("Inherit", [VarRef("e34"), Wld(), Wld()])
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
               , LabelComp(SimpleSort("Out"), VarRef("o1"))
               , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -2964,7 +2843,7 @@ Module(
           [ Formula(
               Relation(
                 Source(
-                  VarRef("e21")
+                  VarRef("e28")
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -2987,7 +2866,7 @@ Module(
         , "---------"
         , Relation(
             Source(
-              Con("Expression", [VarRef("e21")])
+              Con("Expression", [VarRef("e28")])
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
               , LabelComp(SimpleSort("Out"), VarRef("o1"))
               , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3012,7 +2891,7 @@ Module(
           [ Formula(
               Relation(
                 Source(
-                  VarRef("e22")
+                  VarRef("e29")
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3035,7 +2914,7 @@ Module(
         , "---------"
         , Relation(
             Source(
-              Con("Declaration", [VarRef("e22")])
+              Con("Declaration", [VarRef("e29")])
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
               , LabelComp(SimpleSort("Out"), VarRef("o1"))
               , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3060,7 +2939,7 @@ Module(
           [ Formula(
               Relation(
                 Source(
-                  ListSource(VarRef("code39"), ListType("Statement"))
+                  ListSource(VarRef("code54"), ListType("Statement"))
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3082,7 +2961,7 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  Con("writeLocal", [VarRef("n4"), VarRef("v1")])
+                  Con("writeLocal", [VarRef("n9"), VarRef("v1")])
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3104,7 +2983,7 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  Con("createLocals", [VarRef("ns4"), VarRef("codes4")])
+                  Con("createLocals", [VarRef("ns9"), VarRef("codes14")])
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3129,8 +3008,8 @@ Module(
             Source(
               Con(
                 "createLocals"
-              , [ TypedListTail([VarRef("n4")], VarRef("ns4"), "org.metaborg.grace.interpreter.generated.terms.List_String")
-                , TypedListTail([VarRef("code39")], VarRef("codes4"), "org.metaborg.grace.interpreter.generated.terms.List_List_IStatementTerm")
+              , [ TypedListTail([VarRef("n9")], VarRef("ns9"), "org.metaborg.grace.interpreter.generated.terms.List_String")
+                , TypedListTail([VarRef("code54")], VarRef("codes14"), "org.metaborg.grace.interpreter.generated.terms.List_List_IStatementTerm")
                 ]
               )
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
@@ -3183,12 +3062,12 @@ Module(
           [ Formula(Match(VarRef("c1"), Con("MethodC", [])))
           , Formula(
               Match(
-                NativeOp("debug", [String("adding local: "), VarRef("name32")])
+                NativeOp("debug", [String("adding local: "), VarRef("name38")])
               , Wld()
               )
             )
           , CaseMatch(
-              MapHas(VarRef("L1"), VarRef("name32"))
+              MapHas(VarRef("L1"), VarRef("name38"))
             , [ CasePattern(
                   True()
                 , [ Formula(Match(NativeOp("error", [String("Cannot rebind to constant")]), Wld()))
@@ -3196,7 +3075,7 @@ Module(
                       Match(
                         NativeOp(
                           "error"
-                        , [String("Cannot rebind to constant: '"), VarRef("name32"), String("' ")]
+                        , [String("Cannot rebind to constant: '"), VarRef("name38"), String("' ")]
                         )
                       , Wld()
                       )
@@ -3210,7 +3089,7 @@ Module(
                   [ Formula(
                       Relation(
                         Source(
-                          VarRef("e24")
+                          VarRef("e31")
                         , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                           , LabelComp(SimpleSort("Out"), VarRef("o1"))
                           , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3221,7 +3100,7 @@ Module(
                         )
                       , NamedDynamicEmitted([], "default", SimpleSort("Exp"))
                       , Target(
-                          Cast(VarRef("v9"), SimpleSort("V"))
+                          Cast(VarRef("v54"), SimpleSort("V"))
                         , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L3"))
                           , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH3"))
                           , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH3"))
@@ -3232,7 +3111,7 @@ Module(
                   , Formula(
                       Relation(
                         Source(
-                          Con("writeLocal", [VarRef("name32"), VarRef("v9")])
+                          Con("writeLocal", [VarRef("name38"), VarRef("v54")])
                         , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                           , LabelComp(SimpleSort("Out"), VarRef("o1"))
                           , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3259,7 +3138,7 @@ Module(
         , "---"
         , Relation(
             Source(
-              Con("ConstantL", [VarRef("name32"), Wld(), VarRef("e24")])
+              Con("ConstantL", [VarRef("name38"), Wld(), VarRef("e31")])
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
               , LabelComp(SimpleSort("Out"), VarRef("o1"))
               , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3284,14 +3163,14 @@ Module(
           [ Formula(Match(VarRef("c1"), Con("ObjectC", [])))
           , Formula(
               Match(
-                NativeOp("debug", [String("adding member: "), VarRef("name84")])
+                NativeOp("debug", [String("adding member: "), VarRef("name39")])
               , Wld()
               )
             )
           , Formula(
               Relation(
                 Source(
-                  VarRef("e25")
+                  VarRef("e32")
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3315,7 +3194,7 @@ Module(
                 Source(
                   Con(
                     "addMember"
-                  , [ VarRef("name84")
+                  , [ VarRef("name39")
                     , TypedList([], "org.metaborg.grace.interpreter.generated.terms.List_String")
                     , TypedList([Con("Code", [VarRef("v1")])], "org.metaborg.grace.interpreter.generated.terms.List_IStatementTerm")
                     ]
@@ -3342,7 +3221,7 @@ Module(
         , "---"
         , Relation(
             Source(
-              Con("ConstantL", [VarRef("name84"), Wld(), VarRef("e25")])
+              Con("ConstantL", [VarRef("name39"), Wld(), VarRef("e32")])
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
               , LabelComp(SimpleSort("Out"), VarRef("o1"))
               , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3420,7 +3299,7 @@ Module(
               Match(
                 NativeOp(
                   "error"
-                , [String("Message not understood: '"), VarRef("name134"), String("'")]
+                , [String("Message not understood: '"), VarRef("name43"), String("'")]
                 )
               , Wld()
               )
@@ -3431,7 +3310,7 @@ Module(
             Source(
               Con(
                 "call"
-              , [Con("NoMethod", [VarRef("name134")]), Wld()]
+              , [Con("NoMethod", [VarRef("name43")]), Wld()]
               )
             , [ LabelComp(SimpleSort("S"), Wld())
               , LabelComp(SimpleSort("Out"), Wld())
@@ -3458,8 +3337,8 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  ListSource(VarRef("code25"), ListType("Statement"))
-                , [ LabelComp(SimpleSort("S"), Con("Self", [VarRef("scope5")]))
+                  ListSource(VarRef("code50"), ListType("Statement"))
+                , [ LabelComp(SimpleSort("S"), Con("Self", [VarRef("scope9")]))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), Con("MethodC", []))
                   , LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), Map([]))
@@ -3485,7 +3364,7 @@ Module(
                 "call"
               , [ Con(
                     "Method"
-                  , [List([]), VarRef("code25"), VarRef("scope5")]
+                  , [List([]), VarRef("code50"), VarRef("scope9")]
                   )
                 , List([])
                 ]
@@ -3561,8 +3440,8 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  ListSource(VarRef("code26"), ListType("Statement"))
-                , [ LabelComp(SimpleSort("S"), Con("Self", [VarRef("scope6")]))
+                  ListSource(VarRef("code51"), ListType("Statement"))
+                , [ LabelComp(SimpleSort("S"), Con("Self", [VarRef("scope10")]))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), Con("MethodC", []))
                   , LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L2"))
@@ -3589,7 +3468,7 @@ Module(
                 "call"
               , [ Con(
                     "Method"
-                  , [VarRef("l1"), VarRef("code26"), VarRef("scope6")]
+                  , [VarRef("l1"), VarRef("code51"), VarRef("scope10")]
                   )
                 , VarRef("vs1")
                 ]
@@ -3619,7 +3498,7 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  VarRef("e26")
+                  VarRef("e33")
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3641,7 +3520,7 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  Con("writeLocal", [VarRef("name86"), VarRef("v1")])
+                  Con("writeLocal", [VarRef("name41"), VarRef("v1")])
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3664,7 +3543,7 @@ Module(
         , "---"
         , Relation(
             Source(
-              Con("AssignmentL", [VarRef("name86"), VarRef("e26")])
+              Con("AssignmentL", [VarRef("name41"), VarRef("e33")])
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
               , LabelComp(SimpleSort("Out"), VarRef("o1"))
               , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3715,7 +3594,7 @@ Module(
           [ Formula(
               Relation(
                 Source(
-                  VarRef("e23")
+                  VarRef("e30")
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3738,7 +3617,7 @@ Module(
         , "---------"
         , Relation(
             Source(
-              Con("Assignment", [VarRef("e23")])
+              Con("Assignment", [VarRef("e30")])
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
               , LabelComp(SimpleSort("Out"), VarRef("o1"))
               , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3889,7 +3768,7 @@ Module(
                 Source(
                   Con(
                     "addMember"
-                  , [VarRef("n2"), TypedList([], "org.metaborg.grace.interpreter.generated.terms.List_String"), VarRef("code27")]
+                  , [VarRef("n8"), TypedList([], "org.metaborg.grace.interpreter.generated.terms.List_String"), VarRef("code52")]
                   )
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
@@ -3912,7 +3791,7 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  Con("addMembers", [VarRef("ns2"), VarRef("codes3")])
+                  Con("addMembers", [VarRef("ns8"), VarRef("codes13")])
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -3937,8 +3816,8 @@ Module(
             Source(
               Con(
                 "addMembers"
-              , [ TypedListTail([VarRef("n2")], VarRef("ns2"), "org.metaborg.grace.interpreter.generated.terms.List_String")
-                , TypedListTail([VarRef("code27")], VarRef("codes3"), "org.metaborg.grace.interpreter.generated.terms.List_List_IStatementTerm")
+              , [ TypedListTail([VarRef("n8")], VarRef("ns8"), "org.metaborg.grace.interpreter.generated.terms.List_String")
+                , TypedListTail([VarRef("code52")], VarRef("codes13"), "org.metaborg.grace.interpreter.generated.terms.List_List_IStatementTerm")
                 ]
               )
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
@@ -3963,13 +3842,13 @@ Module(
         )
       , Rule(
           [ Formula(
-              Match(VarRef("s1"), Con("Self", [VarRef("self6")]))
+              Match(VarRef("s1"), Con("Self", [VarRef("self9")]))
             )
           , Formula(
               Match(
                 NativeOp(
                   "debug"
-                , [String("attempt to write member: '"), VarRef("name135"), String("'")]
+                , [String("attempt to write member: '"), VarRef("name44"), String("'")]
                 )
               , Wld()
               )
@@ -3981,7 +3860,7 @@ Module(
                     "allocateMethod"
                   , [Con(
                        "Method"
-                     , [VarRef("params5"), VarRef("code28"), VarRef("self6")]
+                     , [VarRef("params9"), VarRef("code53"), VarRef("self9")]
                      )]
                   )
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
@@ -3994,7 +3873,7 @@ Module(
                 )
               , NamedDynamicEmitted([], "default", SimpleSort("allocateMethod__Arrow"))
               , Target(
-                  VarRef("mRef2")
+                  VarRef("mRef4")
                 , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L2"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH2"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH2"))
@@ -4005,7 +3884,7 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  Con("readObject", [VarRef("self6")])
+                  Con("readObject", [VarRef("self9")])
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -4018,7 +3897,7 @@ Module(
               , Target(
                   Con(
                     "Object"
-                  , [VarRef("enc2"), VarRef("sup3"), VarRef("tbl21")]
+                  , [VarRef("enc4"), VarRef("sup4"), VarRef("tbl4")]
                   )
                 , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L3"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH3"))
@@ -4032,14 +3911,14 @@ Module(
                 Source(
                   Con(
                     "writeObject"
-                  , [ VarRef("self6")
+                  , [ VarRef("self9")
                     , Con(
                         "Object"
-                      , [ VarRef("enc2")
-                        , VarRef("sup3")
+                      , [ VarRef("enc4")
+                        , VarRef("sup4")
                         , MapExtend(
-                            Map([Bind(VarRef("name135"), VarRef("mRef2"))])
-                          , VarRef("tbl21")
+                            Map([Bind(VarRef("name44"), VarRef("mRef4"))])
+                          , VarRef("tbl4")
                           )
                         ]
                       )
@@ -4067,7 +3946,7 @@ Module(
               Match(
                 NativeOp(
                   "debug"
-                , [String("added member: '"), VarRef("name135"), String("' successfully")]
+                , [String("added member: '"), VarRef("name44"), String("' successfully")]
                 )
               , Wld()
               )
@@ -4078,7 +3957,7 @@ Module(
             Source(
               Con(
                 "addMember"
-              , [VarRef("name135"), VarRef("params5"), VarRef("code28")]
+              , [VarRef("name44"), VarRef("params9"), VarRef("code53")]
               )
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
               , LabelComp(SimpleSort("Out"), VarRef("o1"))
@@ -4104,7 +3983,7 @@ Module(
           [ Formula(
               Relation(
                 Source(
-                  ArgRead(0){Var("p26")}
+                  ArgRead(0){Var("p45")}
                 , [ LabelComp(SimpleSort("C"), Con("ObjectC", []))
                   , LabelComp(SimpleSort("S"), Con("Self", [Fresh()]))
                   , LabelComp(SimpleSort("Out"), Con("Outer", [Fresh()]))
@@ -4157,7 +4036,7 @@ Module(
           [ Formula(
               Relation(
                 Source(
-                  VarRef("code20")
+                  VarRef("code45")
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -4181,7 +4060,7 @@ Module(
         , Relation(
             Source(
               Cast(
-                TypedList([VarRef("code20")], "org.metaborg.grace.interpreter.generated.terms.List_IStatementTerm")
+                TypedList([VarRef("code45")], "org.metaborg.grace.interpreter.generated.terms.List_IStatementTerm")
               , ListSort(SimpleSort("Statement"))
               )
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
@@ -4209,7 +4088,7 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  VarRef("code21")
+                  VarRef("code46")
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -4255,7 +4134,7 @@ Module(
         , Relation(
             Source(
               Cast(
-                TypedListTail([VarRef("code21")], VarRef("l1"), "org.metaborg.grace.interpreter.generated.terms.List_IStatementTerm")
+                TypedListTail([VarRef("code46")], VarRef("l1"), "org.metaborg.grace.interpreter.generated.terms.List_IStatementTerm")
               , ListSort(SimpleSort("Statement"))
               )
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
@@ -4308,7 +4187,7 @@ Module(
           [ Formula(
               Relation(
                 Source(
-                  VarRef("a4")
+                  VarRef("a8")
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -4332,7 +4211,7 @@ Module(
         , Relation(
             Source(
               Cast(
-                TypedList([VarRef("a4")], "org.metaborg.grace.interpreter.generated.terms.List_IExpTerm")
+                TypedList([VarRef("a8")], "org.metaborg.grace.interpreter.generated.terms.List_IExpTerm")
               , ListSort(SimpleSort("Exp"))
               )
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
@@ -4359,7 +4238,7 @@ Module(
           [ Formula(
               Relation(
                 Source(
-                  VarRef("a5")
+                  VarRef("a9")
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -4381,7 +4260,7 @@ Module(
           , Formula(
               Relation(
                 Source(
-                  ListSource(VarRef("as2"), ListType("Exp"))
+                  ListSource(VarRef("as4"), ListType("Exp"))
                 , [ LabelComp(SimpleSort("S"), VarRef("s1"))
                   , LabelComp(SimpleSort("Out"), VarRef("o1"))
                   , LabelComp(SimpleSort("C"), VarRef("c1"))
@@ -4392,7 +4271,7 @@ Module(
                 )
               , NamedDynamicEmitted([], "ea", ListSort(SimpleSort("Exp")))
               , Target(
-                  Cast(VarRef("vs4"), ListSort(SimpleSort("V")))
+                  Cast(VarRef("vs14"), ListSort(SimpleSort("V")))
                 , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L3"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH3"))
                   , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH3"))
@@ -4405,7 +4284,7 @@ Module(
         , Relation(
             Source(
               Cast(
-                TypedListTail([VarRef("a5")], VarRef("as2"), "org.metaborg.grace.interpreter.generated.terms.List_IExpTerm")
+                TypedListTail([VarRef("a9")], VarRef("as4"), "org.metaborg.grace.interpreter.generated.terms.List_IExpTerm")
               , ListSort(SimpleSort("Exp"))
               )
             , [ LabelComp(SimpleSort("S"), VarRef("s1"))
@@ -4418,7 +4297,7 @@ Module(
             )
           , NamedDynamicEmitted([], "ea", ListSort(SimpleSort("Exp")))
           , Target(
-              TypedListTail([VarRef("v1")], VarRef("vs4"), "org.metaborg.grace.interpreter.generated.terms.List_IVTerm")
+              TypedListTail([VarRef("v1")], VarRef("vs14"), "org.metaborg.grace.interpreter.generated.terms.List_IVTerm")
             , [ LabelComp(MapSort(SimpleSort("String"), SimpleSort("V")), VarRef("L3"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("O")), VarRef("OH3"))
               , LabelComp(MapSort(SimpleSort("Int"), SimpleSort("M")), VarRef("MH3"))

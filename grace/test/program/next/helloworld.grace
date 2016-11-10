@@ -6,6 +6,7 @@ def a = object {
     print "f";
     def test = 2;
   
+    print(self);
     print(evenBetterScoping);
     print(properScoping);
     print(test);
