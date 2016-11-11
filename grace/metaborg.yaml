@@ -9,6 +9,7 @@ dependencies:
   source:
   - org.metaborg:org.metaborg.meta.lib.analysis:${metaborgVersion}
   - org.metaborg:meta.lib.spoofax:${metaborgVersion}
+  - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
 pardonedLanguages:
 - EditorService
 - Stratego-Sugar
