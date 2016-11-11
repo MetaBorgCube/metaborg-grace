@@ -6,6 +6,7 @@ signature
     Context
     Self
     Outer
+    Phase
 
   constructors
     ObjectC : Context
@@ -13,8 +14,12 @@ signature
     BlockC  : Context
 
     Self    : Int -> Self
-    Outer   : Int -> Outer
+
+    Exec    : Phase
+    Build   : Phase
+    Init    : Phase
 
    components
      C : Context
      S : Self
+     P : Phase

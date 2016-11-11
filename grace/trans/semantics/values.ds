@@ -68,6 +68,7 @@ signature
     // wrapping for debug purposes
     WrappedO: O -> V
     WrappedM: M -> V
+    WrappedLS: List(Statement) -> V
     WrappedLCS: List(List(Statement)) -> V
     WrappedMembers: Members -> V
     Stored: O -> V
