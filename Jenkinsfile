@@ -16,7 +16,9 @@ node{
         mavenLocalRepo: "${env.JENKINS_HOME}/m2repos/${env.EXECUTOR_NUMBER}",
         mavenOpts: '-Xmx2G -Xms1G -Xss32m'
       ){
+        sh 'pwd'
         sh 'cd grace'
+        sh 'pwd'
         sh 'mvn -B -U clean verify -DforceContextQualifier=\$(date +%Y%m%d%H%M)'
       }
     }
