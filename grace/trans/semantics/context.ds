@@ -15,7 +15,6 @@ signature
     Self    : Int -> Self
     Outer   : Int -> Outer
 
-   components   
+   components
      C : Context
      S : Self
-     Out : Outer

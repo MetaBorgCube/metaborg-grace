@@ -52,14 +52,12 @@ rules
   
   p@Program(_, _) -init-> v
     where
-      C ObjectC(), S Self(fresh), Out Outer(fresh)
-        |- p :: OH {}, MH {}, L {} --> v.
+      C ObjectC(), S Self(fresh) |- p :: OH {}, MH {}, L {} --> v.
       
   Program(code, _) --> v
     where
-      allocateObject(NoObject()) --> outer;
-      allocateObject(Object(outer, {})) --> self;
-      C ObjectC(), S Self(self), Out Outer(outer) |- code --> v.
+      allocateObject(NoObject()) --> noObj;
+      C ObjectC(), S Self(noObj) |- code --> v.
   
   [] : List(Statement) --> Done().
   
@@ -150,14 +148,15 @@ rules
   S Self(selfRef) |- ObjectL(NoInherit(), [], code) --> ObjectRef(newSelf)
     where
       debug("new obj constructor starting...") => _;
-      allocateObject(Object(selfRef, {})) --> newSelf;
-      S Self(newSelf), Out Outer(selfRef), C ObjectC() |- code --> _; // exec code under new self, self becomes outer.
+      debug("current self: ") => _;
+      print(NumV(selfRef)) => _;
+      allocateObject(Object(selfRef, {})) --> newSelf; // current self becomes outer
+      S Self(newSelf), C ObjectC() |- code --> _; // exec code under new self, self becomes outer.
       debug("done constructing object") => _.  
    
   S Self(selfRef) |- ObjectL(inherit, [], code) --> ObjectRef(or)
     where
       error("inheritance currently not supported") => _;
-      inherit --> r;
       allocateObject(Object(selfRef, {})) --> or;
       C ObjectC() |- code --> _. // scope?
 
@@ -180,7 +179,9 @@ rules
   /*
    * Outer expression
    */
-  Out Outer(outer) |- Outer() --> ObjectRef(outer).
+  S Self(self) |- Outer() --> ObjectRef(outer) 
+    where
+      readObject(self) --> Object(outer, _).
 
   Ellipsis() --> Error()
     where
@@ -231,7 +232,8 @@ rules
       allocateMethod(Method(params, code, self)) --> mRef;
       readObject(self) --> Object(enc, tbl);
       writeObject(self, Object(enc, {name |--> mRef, tbl} )) --> _;
-      debug("added member: '", name, "' successfully") => _.
+      debug("added member: '", name, "' successfully") => _;
+      print(NumV(self)) => _.
   
   /*
    * Add locals (meta-function)

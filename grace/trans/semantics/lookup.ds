@@ -33,6 +33,7 @@ rules
   S Self(self) |- lookup(name) --> m
     where
       debug("looking in self slots (non-method context)") => _;
+      print(NumV(self)) => _;
       memberTable(self) --> tbl;
       print(WrappedMembers(tbl)) => _;
       case tbl[name?] of {
@@ -46,24 +47,27 @@ rules
   /*
    * Lookup in outer - recursive case (outer is a real object)
    */
-  Out Outer(outer) |- lookupInOuter(name) --> m
+  S Self(self) |- lookupInOuter(name) --> m
     where
-      readObject(outer) --> Object(outerOfOuterRef, tbl);
+      readObject(self) --> Object(outer, _);
+      readObject(outer) --> Object(_, tbl);
       debug("looking in outer (this object has an outer)") => _;
       debug("gotten outer") => _;
+      print(NumV(outer)) => _;
       print(WrappedMembers(tbl)) => _;
       case tbl[name?] of {
         true => // outer has the name
           readMethod(tbl[name]) --> m
         otherwise => // we have to look in the next outer
-          Out Outer(outerOfOuterRef) |- lookupInOuter(name) --> m
+          S Self(outer) |- lookupInOuter(name) --> m
       }.
   
   /*
    * Lookup in outer - base case (outer is not an object)
    */
-  Out Outer(outer) |- lookupInOuter(name) --> m
+  S Self(self) |- lookupInOuter(name) --> m
     where
+      readObject(self) --> Object(outer, _);
       readObject(outer) --> NoObject();
       debug("looking in outer (this object has no outer)") => _;
       NoMethod(name) => m.

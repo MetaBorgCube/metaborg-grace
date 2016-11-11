@@ -1,17 +1,24 @@
 print "the module object";
-print(self);
 def modulescope = 0;
 def a = object {
   print "the a object: ";
-  print(self);
+  print "outer of the a object: ";
     
   method f {
     print "the method self: ";
-    print(self); // a or module?
+    print "the outer of the method: ";
+    def modulescope = 13;
     print(modulescope);
   };
   
 };
 
 a.f;
+
+object {
+  object {
+    print "second try";
+    a.f;   
+  };
+};
 
