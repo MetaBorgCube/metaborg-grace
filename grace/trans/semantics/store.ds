@@ -4,54 +4,45 @@ imports
   trans/semantics/values
 
 signature
-  sort aliases
-    OHeap = Map(Int, O)
-    MHeap = Map(Int, M)
-    Locals = Map(String, V)
-
-  variables
-    OH : OHeap
-    MH : MHeap
-    L : Locals
-
+  
   constructors
+    WrappedL: Locals -> V
+    WrappedOHeap: OHeap -> V
+    WrappedMHeap: MHeap -> V
     
-    getOHeap: OHeap -> V
-    getMHeap: MHeap -> V
+  arrows
+
+    readObject(Ref) --> O
+    allocateObject(O) --> Ref
+    writeObject(Ref, O) --> O
     
-    Stored: O -> V
+    readMethod(Ref) --> M
+    allocateMethod(M) --> Ref
+    writeMethod(Ref, M) --> M
     
-    readObject: Ref --> O
-    allocateObject: O --> Ref
-    writeObject: Ref * O --> O
-    
-    readMethod: Ref --> M
-    allocateMethod: M --> Ref
-    writeMethod: Ref * M --> M
-    
-    writeLocal: String * V --> V
-    readLocal: String --> V
+    writeLocal(String , V) --> V
+    readLocal(String) --> V
 
 rules
   
-  readObject(addr) :: OH --> OH[addr].
+  readObject(addr) :: OH1 --> OH1[addr].
   
   allocateObject(o) --> addr
   where
     fresh => addr;
     writeObject(addr, o) --> _.
 
-  writeObject(addr, o) :: OH --> o :: OHeap {addr |--> o, OH}.
+  writeObject(addr, o) :: OH1 --> o :: OH {addr |--> o, OH1}.
   
-  readMethod(addr) :: MH --> MH[addr].
+  readMethod(addr) :: MH1 --> MH1[addr].
   
   allocateMethod(m) --> addr
   where
     fresh => addr;
     writeMethod(addr, m) --> _.
 
-  writeMethod(addr, m) :: MH --> m :: MHeap {addr |--> m, MH}.
+  writeMethod(addr, m) :: MH1 --> m :: MH {addr |--> m, MH1}.
   
-  writeLocal(name, v) :: L --> v :: Locals {name |--> v, L}.
+  writeLocal(name, v) :: L1 --> v :: L {name |--> v, L1}.
   
-  readLocal(name) :: L --> L[name].
+  readLocal(name) :: L1 --> L1[name].

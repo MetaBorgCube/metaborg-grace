@@ -3,41 +3,37 @@ module semantics/trans/semantics
 imports
   src-gen/ds-signatures/grace-sig
   src-gen/ds-signatures/grace-lowered-sig
-  
+
   trans/semantics/values
   trans/semantics/store
   trans/semantics/lookup
 
 signature
-  
+
   arrows
     Program -init-> V
     Program --> V
 
     List(Statement) --> V
+    List(Statement) -selectDecls-> List(Statement)
+    List(Statement) -selectStmts-> List(Statement)
 
     Exp --> V
     Statement --> V
     Declaration --> V
     Assignment --> V
-    
-    Inherit --> Ref
-    List(Exp) -ea-> List(V)
-    
-  constructors
-    
-    call: M * List(V) --> V
-    
-    saveConst: String * V * Members --> Members
-    saveConstants: List(String) * List(V) * Members --> Members
 
-    addMember: String * List(String) * List(Statement) --> Unit
-    addMembers: List(String) * List(List(Statement)) --> Unit
-    
-    wrapValues: List(V) --> List(List(Statement))
-    
-    noSuper: --> Ref
-    
+    Inherit --> Ref
+
+    List(Exp) -ea-> List(V)
+
+    call(M, List(V)) --> V
+
+    addMember(String, List(String), List(Statement)) --> Unit
+    addMembers(List(String), List(List(Statement))) --> Unit
+    createLocals(List(String), List(List(Statement))) --> Unit
+    wrapValues(List(V)) --> List(List(Statement))
+
   native operators
     nativeIBinOp: String * Int * Int -> Int
     nativePrint: V -> V
@@ -45,145 +41,257 @@ signature
     nativeMinus: V * V -> Int
     nativePlus: V * V -> Int
     nativeLte: V * V -> Bool
-    
+
 rules
-  
+
   Expression(e) --> e.
   Declaration(e) --> e.
   Assignment(e) --> e.
   Code(v) --> v.
-  
-  CS(i) -s-> i.
-  DS(i) -s-> i.
 
   NumL(s) --> NumV(parseNumber(s)).
   String(s) --> StringV(s).
-  
+
   p@Program(_, _) -init-> v
     where
-      CS CS(fresh), DS DS(fresh), C ObjectC() |- p :: OHeap {}, MHeap {}, Locals {} --> v.
-      
+      C ObjectC(), S Self(fresh), P Exec() |- p :: OH {}, MH {}, L {} --> v.
+
   Program(code, _) --> v
     where
-      allocateObject(NoObject()) --> r;
-      CS CS(r), DS DS(r), C ObjectC() |- code --> v.
-  
-  [] : List(Statement) --> Done().
-  
-  [code | [] ] : List(Statement) --> code.
+      allocateObject(NoObject()) --> noObj;
+      C ObjectC(), S Self(noObj) |- code --> v.
 
+  /*
+   * Code Execution
+   */
+  [] : List(Statement) --> Done().
+  [code | [] ] : List(Statement) --> code.
   [code | codes@[_|_] ] : List(Statement) --> codes
     where code --> _.
-  
-  MCallRecvL(e1, "==", [e2]) --> v
-    where
-      nativePrint(StringV("native ==")) => _;
-       e1 --> v1@NumV(_);
-       e2 --> v2@NumV(_);
-       case nativeEq(v1,v2) of {
-         true => MCallL("true", []) --> v
-         otherwise => MCallL("false", []) --> v
-       }.
 
-  MCallRecvL(e1, "<=", [e2]) --> v
-    where
-       nativePrint(StringV("native <=")) => _;
-       e1 --> v1@NumV(_);
-       e2 --> v2@NumV(_);
-       case nativeLte(v1,v2) of {
-         true => MCallL("true", []) --> v
-         otherwise => MCallL("false", []) --> v
-       };
-       nativePrint(StringV("result of MCallRecvL")) => _;
-       nativePrint(v) => _.
-   
-  MCallRecvL(v1@NumV(_), "-", [v2@NumV(_)]) --> NumV(nativeMinus(v1,v2)).
-  MCallRecvL(v1@NumV(_), "+", [v2@NumV(_)]) --> NumV(nativePlus(v1,v2))
-    where
-      nativePrint(StringV("plus")) => _.
-        
+  /*
+   * Declaration Selection
+   */
+  [] : List(Statement) -selectDecls-> [].
+  [d@Declaration(MethodL(_,_,_,_)) | ss] : List(Statement) -selectDecls-> [d | ss].
+  [d@Declaration(ConstantL(_,_,_)) | ss] : List(Statement) -selectDecls-> [d | ss].
+  [d@Declaration(VariableL(_,_)) | ss] : List(Statement) -selectDecls-> [d | ss].
+  [_ | ss] : List(Statement) -selectDecls-> ss.
+
+  /*
+   * Statement Selection
+   */
+  [] : List(Statement) -selectStmts-> [].
+  [s@Assignment(AssignmentL(_,_)) | ss] : List(Statement) -selectStmts-> [s | ss].
+  [s@Expression(_) | ss] : List(Statement) -selectStmts-> [s | ss].
+  [_ | ss] : List(Statement) -selectStmts-> ss.
+
+  /*
+   * Method Calls
+   */
   MCallRecvL(receiver, name, args) --> v
     where
        receiver --> ObjectRef(r);
-       CS CS(r), DS DS(r) |- lookup(name) --> m;
-       CS CS(r), DS DS(r) |- call(m, args) --> v.
-  
-  MCallL("base_print", [v]) --> nativePrint(v).
+       S Self(r) |- lookup(name) --> m;
+       S Self(r) |- call(m, args) --> v.
+
+  /*
+   * Implicit method calls (calls on self or outer)
+   */
+  MCallL("print", [v]) --> nativePrint(v).
 
   MCallL(name, vs) --> v
     where
+      debug("generic implicit call of: '", name, "'") => _;
       lookup(name) --> m;
-      call(m, vs) --> v.
-  
-  ConstantL(name, _, v) --> Done()
-    where
-      addMember(name, [], [Code(v)]) --> _.
-  
-  MethodL(name, _, params, code) --> Done()
-    where
-      C MethodC() |- addMember(name, params, code) --> _.
+      call(m, vs) --> v;
+      debug("done generic implicit call of: '", name, "'") => _.
 
-  ds |- ObjectL(inherit, [], code) --> ObjectRef(or)
+  /*
+   * Constants
+   */
+  C MethodC() |- ConstantL(name, _, e) :: L --> Done()
     where
-      allocateObject(Object(ds, inherit, {})) --> or;
-      CS CS(or), DS DS(or), C ObjectC() |- code --> _.
+      debug("adding local: ", name) => _;
+      case L[name?] of {
+        true =>
+          error("Cannot rebind to constant") => _;
+          error("Cannot rebind to constant: '", name, "' ") => _
+        otherwise =>
+          e --> v; // dynsem bug: no coersion in case switch
+          writeLocal(name, v) --> _       
+      }.
 
+  C ObjectC() |- ConstantL(name, _, e) --> Done()
+    where
+      debug("adding member: ", name) => _;
+      addMember(name, [], [Code(e)]) --> _.
+
+  P Build() |- ConstantL(name, _, _) --> Done()
+    where
+      debug("adding member: ", name) => _;
+      addMember(name, [], [Code(Uninitialized())]) --> _.
+
+  ConstantL(_, _, _) --> Error()
+    where
+      error("Error: unknown context for constant") => _.
+
+  /*
+   * Variables
+   */
+  C MethodC() |- VariableL(name, _) --> Done()
+    where
+      writeLocal(name, Uninitialized()) --> _.
+
+  C MethodC() |- AssignmentL(name, e) --> Done()
+    where
+      writeLocal(name, e) --> _.
+
+  VariableL(_, _) --> Error()
+    where
+      error("Variables outside methods not implemented") => _.
+
+  AssignmentL(_, _) --> Error()
+    where
+      error("Assignment outside methods not implemented") => _.
+
+  /*
+   * Methods
+   */
+  C ObjectC() |- MethodL(name, _, params, code) --> Done()
+    where
+      addMember(name, params, code) --> _.
+
+  C MethodC() |- MethodL(_, _, _, _) --> Error()
+    where
+      error("Error: cannot create method inside a methodContext") => _.
+
+  /*
+   * Object Constructors
+   */
+  S Self(selfRef) |- ObjectL(NoInherit(), [], code) --> ObjectRef(newSelf)
+    where
+            debug("new obj constructor starting...") => _;
+            debug("current self: ") => _;
+            print(NumV(selfRef)) => _;
+
+
+      allocateObject(Object(selfRef, {})) --> newSelf; // current self becomes outer
+
+      // build phase
+      code -selectDecls-> decls;
+      debug("selected declarations") => _;
+      print(WrappedLS(decls)) => _;
+      S Self(newSelf), P Build() |- decls --> _; 
+
+      // init phase
+      code -selectStmts-> stmts;
+            debug("selected statements") => _;
+            print(WrappedLS(stmts)) => _;
+      S Self(newSelf), P Init() |- stmts --> _;
+
+//      S Self(newSelf), C ObjectC() |- code --> _; // exec code under new self, self becomes outer.
+
+            debug("done constructing object") => _.  
+
+  S Self(selfRef) |- ObjectL(inherit, [], code) --> ObjectRef(or)
+    where
+      error("inheritance currently not supported") => _;
+      allocateObject(Object(selfRef, {})) --> or;
+      C ObjectC() |- code --> _. // scope?
+
+  /*
+   * Inherit expressions
+   */
   Inherit(e, _, _) --> r
     where
       e --> ObjectRef(r).
-      
+
   NoInherit() --> r
     where
       allocateObject(NoObject()) --> r.  
 
-  ds |- Self() --> ObjectRef(ds).
+  /*
+   * Self expression
+   */ 
+  S Self(self) |- Self() --> ObjectRef(self).
 
-  call(Method([], code, scope), []) --> v
+  /*
+   * Outer expression
+   */
+  S Self(self) |- Outer() --> ObjectRef(outer) 
     where
-      DS DS(scope) |- code --> v.
+      readObject(self) --> Object(outer, _).
 
-  call(Method(names@[_ | _], code, scope), args@[_ | _]) --> v
+  Ellipsis() --> Error()
     where
-      allocateObject(Object(scope, noSuper(), {})) --> call-scope;
-      DS DS(call-scope) |- addMembers(names,wrapValues(args)) --> _;
-      DS DS(call-scope) |- code --> v.
+      error("Attempt to evaluate ellipsis (...)") => _.
 
-  noSuper() --> allocateObject(NoObject()).
-  
+  /*
+   * call (meta-function).
+   */
+  call(NoMethod(name), _) --> Error() // should raise exception
+    where
+      error("Message not understood: '", name, "'") => _.
+
+  call(Method([], code, scope), []) :: L --> v :: L // executing a call doesnt change locals
+    where
+      debug("calling method with no args") => _;
+      S Self(scope), C MethodC() |- code :: L {} --> v. // scope? // always call with empty locals
+
+  call(Method(names@[_ | _], code, scope), args@[_ | _]) :: L --> v :: L // calling has no net effect on locals
+    where
+      debug("calling method with some args") => _;
+      createLocals(names, wrapValues(args)) :: L {} --> _ :: L1; // scope?
+      S Self(scope), C MethodC() |- code :: L1 --> v;
+      debug("done calling methods with some args") => _.
+
+  /*
+   * Re-wrap values into executable code (meta-function).
+   */ 
   wrapValues([]) --> [] : List(List(Statement)).
-  
+
   wrapValues([v|vs]) --> [ wv | wvs ] : List(List(Statement))
     where
       [Code(v)] : List(Statement) => wv;
       wrapValues(vs) --> wvs.
-  
+
   /*
-   * Add members
+   * Add members (meta-function)
    */
-  
   addMembers([], []) --> Unit().
-  
+
   addMembers([n | ns], [code | codes]) --> Unit()
     where
       addMember(n, [], code) --> _;
       addMembers(ns, codes) --> _.
-  
-  ds |- addMember(name, params, code) --> Unit()
+
+  S Self(self) |- addMember(name, params, code) --> Unit()
     where
-      allocateMethod(Method(params, code, ds)) --> mRef;
-      readObject(ds) --> Object(enc, sup, tbl);
-      writeObject(ds, Object(enc, sup, {name |--> mRef, tbl} )) --> _.
-      
+      debug("attempt to write member: '", name, "'") => _;
+      allocateMethod(Method(params, code, self)) --> mRef;
+      readObject(self) --> Object(enc, tbl);
+      writeObject(self, Object(enc, {name |--> mRef, tbl} )) --> _;
+      debug("added member: '", name, "' successfully") => _;
+      print(NumV(self)) => _.
+
   /*
-   * Evaluate arguments
+   * Add locals (meta-function)
    */
-  
+  createLocals([n|ns], [code|codes]) --> Unit()
+    where
+      writeLocal(n, code) --> _;
+      createLocals(ns, codes) --> _.
+
+  createLocals([], []) --> Unit().
+
+  /*
+   * Evaluate arguments (meta-function)
+   */
   [] : List(Exp) -ea-> [].
-  
   [a] : List(Exp) -ea-> [v] : List(V)
     where
       a --> v.
-  
   [a | as] : List(Exp) -ea-> [v | vs]
     where
       a --> v;

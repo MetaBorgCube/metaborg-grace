@@ -7,7 +7,7 @@ imports
   grace-lowered
 
 context-free start-symbols
-  
+
   Program
   Exp
 
@@ -20,7 +20,7 @@ context-free syntax
   Statement.Dialect             = <dialect <STRING>>
   Statement.Import              = <import <STRING> as <ID>>
   Statement.Assignment          = <<Assignment>;>
-  Statement.Declaration 		    = <<Declaration>;> {avoid}
+  Statement.Declaration 	    = <<Declaration>;> {avoid}
   Statement.Expression          = <<Exp>;>
 
 context-free syntax

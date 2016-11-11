@@ -1,104 +1,77 @@
 module trans/semantics/lookup
 
 imports
-  src-gen/ds-signatures/grace-sig
-  src-gen/ds-signatures/grace-lowered-sig
-
   trans/semantics/values
   trans/semantics/store
+  trans/semantics/context
 
 signature
 
-  constructors
-    lookup: String --> M
-    lookupSuper: String --> M
-    lookupOuter: String --> M
-    lookupLocal: String --> M
+  arrows
+    lookup(String) --> M
+    lookupInOuter(String) --> M
     
-    getSuper: --> Ref
-    getOuter: --> Ref
-    
-    memberTable: Ref --> Members
+    memberTable(Ref) --> Members
 
 rules
   
-  CS CS(rcs), DS DS(rds) |- lookup(name) --> m'
-    where
-      rcs == rds;
-      lookupSuper(name) --> m;
-      case m of {
-        m'@Method(_,_,_) =>
-        NoMethod(_) =>
-          lookupOuter(name) --> m'
-      }.
+  // look in local -> return,
+  //   else look both outer and super
+  //     if both, error,
+  //     else return either
   
-  CS CS(rcs), DS DS(rds) |- lookup(name) --> m
+  S Self(self), C MethodC() |- lookup(name) :: L --> m
     where
-      rcs != rds;
-      lookupSuper(name) --> mSuper@Method(_,_,_);
-      DS DS(rcs) |- lookupSuper(name) --> mCS;
-      case mCS of {
-        m@Method(_,_,_) =>
-        NoMethod(_) =>
-          mSuper => m
-      }.
-  
-  CS CS(rcs), DS DS(rds) |- lookup(name) --> m
-    where
-      rcs != rds;
-      lookupSuper(name) --> NoMethod(name);
-      lookupOuter(name) --> m.
-  
-  lookupOuter(name) --> NoMethod(name)
-    where
-      getOuter() --> r;
-      readObject(r) --> NoObject(). 
-  
-  lookupOuter(name) --> m
-    where
-      getOuter() --> r;
-      CS CS(r), DS DS(r) |- lookup(name) --> m.
-  
-  lookupSuper(name) --> m'
-  where
-    lookupLocal(name) --> m;
-    case m of {
-      m'@Method(_, _, _) =>
-      NoMethod(_) =>
-        getSuper() --> sr;
-        DS DS(sr) |- lookupSuper(name) --> m'
-      NoMethodAndStop(n') =>
-        NoMethod(n') => m'
-    }.
-  
-  ds |- lookupLocal(name) --> NoMethodAndStop(name)
-    where
-      readObject(ds) --> NoObject().
- 
-  ds |- lookupLocal(name) --> m
-    where
-      readObject(ds) --> Object(_,_,_);
-      memberTable(ds) --> tbl;
-      case tbl[name?] of {
+      debug("lookup in method context") => _;
+      case L[name?] of {
         true =>
-          tbl[name] => mr;
-          readMethod(mr) --> m
-        otherwise =>
-          NoMethod(name) => m
+          Method([], [Code(L[name])], self) => m
+        otherwise => 
+          true == false
       }.
       
-  ds |- getSuper() --> sup
-    where readObject(ds) --> Object(_, sup, _).
-
-  ds |- getSuper() --> ds
-    where readObject(ds) --> NoObject().
-    
-  ds |- getOuter() --> out
-    where readObject(ds) --> Object(out, _, _).
-
-  ds |- getOuter() --> ds
-    where readObject(ds) --> NoObject().
+  S Self(self) |- lookup(name) --> m
+    where
+      debug("looking in self slots (non-method context)") => _;
+      print(NumV(self)) => _;
+      memberTable(self) --> tbl;
+      print(WrappedMembers(tbl)) => _;
+      case tbl[name?] of {
+        true => 
+          readMethod(tbl[name]) --> m
+        otherwise =>          
+          debug("no such method: '", name, "' in this object") => _;
+          lookupInOuter(name) --> m
+      }.
+  
+  /*
+   * Lookup in outer - recursive case (outer is a real object)
+   */
+  S Self(self) |- lookupInOuter(name) --> m
+    where
+      readObject(self) --> Object(outer, _);
+      readObject(outer) --> Object(_, tbl);
+      debug("looking in outer (this object has an outer)") => _;
+      debug("gotten outer") => _;
+      print(NumV(outer)) => _;
+      print(WrappedMembers(tbl)) => _;
+      case tbl[name?] of {
+        true => // outer has the name
+          readMethod(tbl[name]) --> m
+        otherwise => // we have to look in the next outer
+          S Self(outer) |- lookupInOuter(name) --> m
+      }.
+  
+  /*
+   * Lookup in outer - base case (outer is not an object)
+   */
+  S Self(self) |- lookupInOuter(name) --> m
+    where
+      readObject(self) --> Object(outer, _);
+      readObject(outer) --> NoObject();
+      debug("looking in outer (this object has no outer)") => _;
+      NoMethod(name) => m.
   
   memberTable(r) --> tbl
     where
-      readObject(r) --> Object(_,_,tbl).
+      readObject(r) --> Object(_, tbl).

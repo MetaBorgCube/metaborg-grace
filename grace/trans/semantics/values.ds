@@ -4,61 +4,30 @@ imports
 
   src-gen/ds-signatures/grace-sig
   
-  trans/semantics/context
-
 signature
+
+  //    move to components.ds after import fix
+
+  sort aliases
+    OHeap = Map(Int, O)
+    MHeap = Map(Int, M)
+    Locals = Map(String, V)
+
+  components
+    OH : OHeap
+    MH : MHeap
+    L : Locals
+    
+  // ^^ move to components.ds after import fix
 
   sort aliases
     Ref = Int
     Members = Map(String, Int)
-    
-  constructors
-    NumV: Int -> V
-    StringV: String -> V
-    BoolV: Bool -> V
-    Done: V
 
-    //      enclosing object ref
-    //            super ref
-    //                  members (methods)
-    Object: Ref * Ref * Members -> O
-    
-    //      parameters
-    //                     code
-    //                                          self (decl)
-    Method: List(String) * List(Statement) * Ref -> M
-
-    NoObject: O
-    NoMethod: String -> M
-    NoMethodAndStop: String -> M
-    
-    Code: V -> Statement
-    
-    WrappedO: O -> V
-    WrappedM: M -> V
-    WrappedLCS: List(List(Statement)) -> V
-    
-    ObjectRef: Int -> V
-    
-    CS: Ref -> CS
-    DS: Ref -> DS
-    
-    Unit: Unit
-    
-    getMembers: Members -> V
-    
-  arrows
-  
-    CS -s-> Ref
-    DS -s-> Ref
-    
   sorts
     V // value
     O // object
     M // method
-    CS // callsite
-    DS // declaresite
-    C // context
     Unit
     Table
 
@@ -67,10 +36,51 @@ signature
     vs : List(V)
     o : O
     m : M
-    cs: CS
-    ds: DS
     r : Ref
+    
+  constructors
+    NumV: Int -> V
+    StringV: String -> V
+    BoolV: Bool -> V
+    ObjectRef: Int -> V
+    Done: V
+    Error: V
+    Uninitialized: V
 
+    //      enclosing object ref (outer)
+    //            super ref
+    //                  members (methods)
+    Object: Ref * Members -> O
+    
+    //      parameters
+    //                     code
+    //                                          self (decl)
+    Method: List(String) * List(Statement) * Ref -> M
+
+    Code: V -> Statement
+    
+    Unit: Unit
+    
+    NoObject: O
+    NoMethod: String -> M
+    NoMethodAndStop: String -> M
+
+    // wrapping for debug purposes
+    WrappedO: O -> V
+    WrappedM: M -> V
+    WrappedLS: List(Statement) -> V
+    WrappedLCS: List(List(Statement)) -> V
+    WrappedMembers: Members -> V
+    Stored: O -> V
+    
   native operators
     parseNumber: String -> Int
     print: V -> V
+    
+    error: String -> String
+    error: String * String -> String
+    error: String * String * String -> String
+    
+    debug: String -> String
+    debug: String * String -> String
+    debug: String * String * String -> String

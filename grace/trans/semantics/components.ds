@@ -1,0 +1,19 @@
+module trans/semantics/values
+
+imports
+//  trans/semantics/values
+//  trans/semantics/context
+
+signature
+
+  sort aliases
+    OHeap = Map(Int, O)
+    MHeap = Map(Int, M)
+    Locals = Map(String, V)
+
+  components
+    C : Context
+    S : Self
+    OH : OHeap
+    MH : MHeap
+    L : Locals

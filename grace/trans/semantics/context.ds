@@ -3,11 +3,23 @@ module trans/semantics/context
 signature
 
   sorts
-    C
+    Context
+    Self
+    Outer
+    Phase
 
   constructors
-    ObjectC: C
-    MethodC: C
-    BlockC: C
-    
-  
+    ObjectC : Context
+    MethodC : Context
+    BlockC  : Context
+
+    Self    : Int -> Self
+
+    Exec    : Phase
+    Build   : Phase
+    Init    : Phase
+
+   components
+     C : Context
+     S : Self
+     P : Phase
