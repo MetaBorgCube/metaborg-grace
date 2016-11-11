@@ -17,7 +17,7 @@ node{
         mavenOpts: '-Xmx2G -Xms1G -Xss32m'
       ){
         dir('grace') {
-          sh 'mvn -B -U clean install clean verify -DforceContextQualifier=\$(date +%Y%m%d%H%M)'
+          sh 'mvn -B -U -X clean install clean verify -DforceContextQualifier=\$(date +%Y%m%d%H%M)'
         }
       }
     }
