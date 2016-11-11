@@ -13,11 +13,11 @@ node{
 
     stage('Build and Test') {
       withMaven(
-        mavenLocalRepo: "${env.JENKINS_HOME}/m2repos/${env.EXECUTOR_NUMBER}",
+        mavenLocalRepo: "/tmp/${env.BRANCH_NAME}-${env.EXECUTOR_NUMBER}/.repository",
         mavenOpts: '-Xmx2G -Xms1G -Xss32m'
       ){
         dir('grace') {
-          sh 'mvn -B -U clean verify -DforceContextQualifier=\$(date +%Y%m%d%H%M)'
+          sh 'mvn -B -U clean install clean verify -DforceContextQualifier=\$(date +%Y%m%d%H%M)'
         }
       }
     }
