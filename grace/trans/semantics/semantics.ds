@@ -162,14 +162,14 @@ rules
     where
       addMember(name, params, code) --> _.
 
-  C MethodC() |- MethodL(_, _, _, _) --> Error()
+  C MethodC() |- MethodL(name, _, _, _) --> Error()
     where
-      error("Error: cannot create method inside a methodContext") => _.
+      error("Error: cannot create method: '", name, "' inside a methodContext") => _.
 
   /*
    * Object Constructors
    */
-  S Self(selfRef) |- ObjectL(NoInherit(), [], code) --> ObjectRef(newSelf)
+  S Self(selfRef), P Exec() |- ObjectL(NoInherit(), [], code) --> ObjectRef(newSelf)
     where
             debug("new obj constructor starting...") => _;
             debug("current self: ") => _;
@@ -182,23 +182,74 @@ rules
       code -selectDecls-> decls;
       debug("selected declarations") => _;
       print(WrappedLS(decls)) => _;
-      S Self(newSelf), P Build() |- decls --> _; 
+      
+      C ObjectC(), S Self(newSelf), P Build() |- decls --> _; 
 
       // init phase
       code -selectStmts-> stmts;
             debug("selected statements") => _;
             print(WrappedLS(stmts)) => _;
-      S Self(newSelf), P Init() |- stmts --> _;
+      C ObjectC(), S Self(newSelf), P Init() |- stmts --> _;
 
 //      S Self(newSelf), C ObjectC() |- code --> _; // exec code under new self, self becomes outer.
 
             debug("done constructing object") => _.  
 
-  S Self(selfRef) |- ObjectL(inherit, [], code) --> ObjectRef(or)
+
+  S Self(selfRef), P Exec() |- ObjectL(inherit, [], code) --> ObjectRef(newSelf)
     where
-      error("inheritance currently not supported") => _;
-      allocateObject(Object(selfRef, {})) --> or;
-      C ObjectC() |- code --> _. // scope?
+            debug("new obj constructor starting...") => _;
+            debug("current self: ") => _;
+            print(NumV(selfRef)) => _;
+      
+
+      allocateObject(Object(selfRef, {})) --> newSelf; // current self becomes outer
+
+      // build phase
+      code -selectDecls-> decls;
+      debug("selected declarations") => _;
+      print(WrappedLS(decls)) => _;
+      C ObjectC(), S Self(newSelf), P Build() |- decls --> _; 
+      
+      // initialize parents
+      P Build() |- inherit --> parentRef;
+      
+            debug("reference to parent: ") => _;
+            print(NumV(parentRef)) => _;
+
+      // init phase
+      code -selectStmts-> stmts;
+            debug("selected statements") => _;
+            print(WrappedLS(stmts)) => _;
+      C ObjectC(), S Self(newSelf), P Exec() |- stmts --> _;
+
+//      S Self(newSelf), C ObjectC() |- code --> _; // exec code under new self, self becomes outer.
+
+            debug("done constructing object") => _.  
+  
+  // we are currently building, now coming across an inherit expression
+  S Self(selfRef), P Build() |- ObjectL(NoInherit(), [], code) --> ObjectRef(selfRef)
+    where
+      code -selectDecls-> decls;
+      C ObjectC(), P Build() |- decls --> _. // just build decls, nothing else
+  S Self(selfRef), P Build() |- ObjectL(inherit, [], code) --> ObjectRef(selfRef)
+    where
+      inherit --> _; // eval inherit expr (still build context)
+      code -selectDecls-> decls;
+      C ObjectC(), P Build() |- decls --> _. // build decls
+  S Self(selfRef), P Init() |- ObjectL(NoInherit(), [], code) --> ObjectRef(selfRef)
+    where
+      code -selectStmts-> stmts;
+      C ObjectC(), P Exec() |- stmts --> _. // do as normal
+  S Self(selfRef), P Init() |- ObjectL(inherit, [], code) --> ObjectRef(selfRef)
+    where
+      inherit --> _; // eval inherit expr (still init context)
+      code -selectStmts-> stmts; // rest of the statements
+      C ObjectC(), P Exec() |- stmts --> _. // do as normal
+
+  ObjectL(_, _, _) --> ObjectRef(allocateObject(NoObject()))
+    where
+      error("No valid object constructor.") => _.
 
   /*
    * Inherit expressions
