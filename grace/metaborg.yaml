@@ -10,8 +10,9 @@ dependencies:
   - org.metaborg:org.metaborg.meta.lib.analysis:${metaborgVersion}
   - org.metaborg:meta.lib.spoofax:${metaborgVersion}
   - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
-build:
-  useBuildSystemSpec: true
+  java:
+  - org.metaborg:org.metaborg.meta.lang.dynsem.interpreter:${metaborgVersion}
+  - joda-time:joda-time:2.2
 pardonedLanguages:
 - EditorService
 - Stratego-Sugar
