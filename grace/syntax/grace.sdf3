@@ -91,7 +91,7 @@ context-free syntax
   Exp.MCallWDot                 = <<Exp>.<Part+>>								{left}
   Exp.MCallImpl                 = <<Part+>>										{left}
   Exp.MCallPrefixOp             = <<OperatorCF> <CallArgs>>						{left}
-  Exp.MCallPrefixOpExp          = <<OperatorCF> <Exp>>							{left}
+  Exp.MCallPrefixOpExp          = <<OperatorCF> <Exp>>							{left, prefer}
   
   Exp.LineupExp                 = <<Lineup>>
   Exp.Ellipsis                  = "..."

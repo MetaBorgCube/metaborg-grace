@@ -1,0 +1,15 @@
+module syntax-ambiguous
+
+language grace
+
+start symbol Program
+
+// tests that once were ambiguous but no are fixed, put here to prevent regressions.
+
+test prefix operator with number [[
+method a(v) {
+  var b; 
+  b := 3;
+  +4;
+};
+]] parse succeeds
