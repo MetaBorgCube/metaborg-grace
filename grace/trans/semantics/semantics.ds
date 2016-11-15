@@ -10,6 +10,10 @@ imports
 
 signature
 
+  constructors
+    // for debug purposes
+    WrappedP: Phase -> V
+    
   arrows
     Program -init-> V
     Program --> V
@@ -73,18 +77,32 @@ rules
    * Declaration Selection
    */
   [] : List(Statement) -selectDecls-> [].
-  [d@Declaration(MethodL(_,_,_,_)) | ss] : List(Statement) -selectDecls-> [d | ss].
-  [d@Declaration(ConstantL(_,_,_)) | ss] : List(Statement) -selectDecls-> [d | ss].
-  [d@Declaration(VariableL(_,_)) | ss] : List(Statement) -selectDecls-> [d | ss].
-  [_ | ss] : List(Statement) -selectDecls-> ss.
+  [d@Declaration(MethodL(_,_,_,_)) | ss] : List(Statement) -selectDecls-> [d | ss']
+    where
+      ss -selectDecls-> ss'.
+  [d@Declaration(ConstantL(_,_,_)) | ss] : List(Statement) -selectDecls-> [d | ss']
+    where
+      ss -selectDecls-> ss'.
+  [d@Declaration(VariableL(_,_)) | ss] : List(Statement) -selectDecls-> [d | ss']
+    where
+      ss -selectDecls-> ss'.
+  [_ | ss] : List(Statement) -selectDecls-> ss'
+    where
+      ss -selectDecls-> ss'.
 
   /*
    * Statement Selection
    */
   [] : List(Statement) -selectStmts-> [].
-  [s@Assignment(AssignmentL(_,_)) | ss] : List(Statement) -selectStmts-> [s | ss].
-  [s@Expression(_) | ss] : List(Statement) -selectStmts-> [s | ss].
-  [_ | ss] : List(Statement) -selectStmts-> ss.
+  [s@Assignment(AssignmentL(_,_)) | ss] : List(Statement) -selectStmts-> [s | ss']
+    where
+      ss -selectStmts-> ss'.
+  [s@Expression(_) | ss] : List(Statement) -selectStmts-> [s | ss']
+    where
+      ss -selectStmts-> ss'.
+  [_ | ss] : List(Statement) -selectStmts-> ss'
+    where
+      ss -selectStmts-> ss'.
 
   /*
    * Method Calls
@@ -98,10 +116,11 @@ rules
   /*
    * Implicit method calls (calls on self or outer)
    */
-  S Self(s) |- MCallL("print", [v]) --> nativePrint(v)
+  S Self(s), P p |- MCallL("print", [v]) --> nativePrint(v)
     where
       debug("printing from self: ") => _;
-      print(NumV(s)) => _.
+      print(NumV(s)) => _;
+      print(WrappedP(p)) => _.
 
   MCallL(name, vs) --> v
     where
@@ -180,7 +199,7 @@ rules
    */
   S Self(selfRef), P Exec() |- ObjectL(NoInherit(), [], code) --> ObjectRef(newSelf)
     where
-            debug("new obj constructor starting...") => _;
+            debug("new obj constructor starting (no-inh)...") => _;
             debug("current self: ") => _;
             print(NumV(selfRef)) => _;
 
@@ -189,17 +208,17 @@ rules
 
       // build phase
       code -selectDecls-> decls;
-      debug("selected declarations") => _;
-      print(WrappedLS(decls)) => _;
+            debug("selected declarations (non-inh)") => _;
+            print(WrappedLS(decls)) => _;
       
       C ObjectC(), S Self(newSelf), P Build() |- decls --> _; 
 
       // init phase
-            debug("selecting statements") => _;
+            debug("selecting statements (non-inh)") => _;
       code -selectStmts-> stmts;
             debug("selected statements") => _;
             print(WrappedLS(stmts)) => _;
-      C ObjectC(), S Self(newSelf), P Init() |- stmts --> _;
+      C ObjectC(), S Self(newSelf), P Exec() |- stmts --> _;
 
 //      S Self(newSelf), C ObjectC() |- code --> _; // exec code under new self, self becomes outer.
 
@@ -217,19 +236,21 @@ rules
 
       // build phase
       code -selectDecls-> decls;
-      debug("selected declarations") => _;
-      print(WrappedLS(decls)) => _;
+            debug("selected declarations (inh)") => _;
+            print(WrappedLS(decls)) => _;
       C ObjectC(), S Self(newSelf), P Build() |- decls --> _; 
       
-      // initialize parents
-      P Build() |- inherit --> parentRef;
+      // build & initialize parents
+      S Self(newSelf), P Build() |- inherit --> parentRef;
+      S Self(newSelf), P Init() |- inherit --> _;
       
             debug("reference to parent: ") => _;
             print(NumV(parentRef)) => _;
+            
 
       // init phase
       code -selectStmts-> stmts;
-            debug("selected statements") => _;
+            debug("selected statements (inh)") => _;
             print(WrappedLS(stmts)) => _;
       C ObjectC(), S Self(newSelf), P Exec() |- stmts --> _;
 
@@ -240,19 +261,23 @@ rules
   // we are currently building, now coming across an inherit expression
   S Self(selfRef), P Build() |- ObjectL(NoInherit(), [], code) --> ObjectRef(selfRef)
     where
+            debug("object constructor in build mode, NoInherit") => _;
       code -selectDecls-> decls;
       C ObjectC(), P Build() |- decls --> _. // just build decls, nothing else
   S Self(selfRef), P Build() |- ObjectL(inherit, [], code) --> ObjectRef(selfRef)
     where
+            debug("object constructor in build mode, Inherit") => _;
       inherit --> _; // eval inherit expr (still build context)
       code -selectDecls-> decls;
       C ObjectC(), P Build() |- decls --> _. // build decls
   S Self(selfRef), P Init() |- ObjectL(NoInherit(), [], code) --> ObjectRef(selfRef)
     where
+            debug("object constructor in init mode, NoInherit") => _;
       code -selectStmts-> stmts;
       C ObjectC(), P Exec() |- stmts --> _. // do as normal
   S Self(selfRef), P Init() |- ObjectL(inherit, [], code) --> ObjectRef(selfRef)
     where
+            debug("object constructor in init mode, Inherit") => _;
       inherit --> _; // eval inherit expr (still init context)
       code -selectStmts-> stmts; // rest of the statements
       C ObjectC(), P Exec() |- stmts --> _. // do as normal

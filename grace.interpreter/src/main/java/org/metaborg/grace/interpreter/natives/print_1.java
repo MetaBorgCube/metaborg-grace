@@ -17,7 +17,7 @@ public abstract class print_1 extends TermBuild {
 
       @Specialization
       public IVTerm doInt(IVTerm t) {
-    	  System.out.println(t);
+    	  System.err.println(t);
           return t;
       }
 
