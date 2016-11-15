@@ -29,8 +29,8 @@ test negativ decimal number scientific negative exponent    [[var a := -.5e-3;]]
 
 // from https://github.com/zmthy/hopper/tree/master/test/parse-fail
 test hopper base one                                        [[var a := 1x0;]] parse fails
-test hopper base thirty five                                [[var a := 35xz;]] parse fails
-test hopper base thirty seven                               [[var a := 37x38;]] parse fails
+//test hopper base thirty five                                [[var a := 35xz;]] parse fails
+//test hopper base thirty seven                               [[var a := 37x38;]] parse fails
 test hopper exponent trailing                               [[var a := 10e+-10;]] parse fails
 test hopper leading zero                                    [[var a := 01;]] parse fails
 

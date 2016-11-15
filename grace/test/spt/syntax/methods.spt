@@ -5,14 +5,16 @@ language grace
 start symbol Program
 
 test hopper ignore parameter variable [[method name(_) { _ };]] parse fails
-test hopper method in method [[
-method name {
-  method wrong {};
-};
-]] parse fails
-test hopper multipart operator [[
-object {
-  method +(a) *(b) {};
-};
-]] parse fails
+
+// We handle this at runtime
+//test hopper method in method [[
+//method name {
+//  method wrong {};
+//};
+//]] parse fails
+//test hopper multipart operator [[
+//object {
+//  method +(a) *(b) {};
+//};
+//]] parse fails
 

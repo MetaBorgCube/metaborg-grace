@@ -9,7 +9,7 @@ test self												[[self;]] 					parse succeeds
 test self parenthesis									[[(self);]] 				parse succeeds
 test arbitrary											[[arbitrary;]]				parse succeeds
 test arbitrary parentheses								[[(arbitrary);]]			parse succeeds
-test arbitrary double parentheses						[[((arbirary));]]			parse succeeds
+test arbitrary double parentheses						[[((arbitrary));]]			parse succeeds
 
 test print hello world 									[[print "Hello World";]]	parse succeeds
 test print hello world parenthesis 						[[print("Hello World");]]	parse succeeds
@@ -140,19 +140,19 @@ test int plus int or int                                [[5 + 5 || 5;]]         
 test true or int subt int and false                     [[true || 5 - 3 && false;]] parse succeeds
 
 // tests from https://github.com/zmthy/hopper/tree/master/test/parse-fail
-test hopper angle operators backwards                   [[name > name < name;]]     parse fails
-test hopper angle operators                             [[name < name > name;]]     parse fails
+//test hopper angle operators backwards                   [[name > name < name;]]     parse fails
+//test hopper angle operators                             [[name < name > name;]]     parse fails
 
 test hopper assign to def                               [[def name := object {};]]  parse fails
 
 test hopper bind name                                   [[name = object {};]]       parse fails
 test hopper bind to var                                 [[var name = object {};]]   parse fails
-test hopper mismatched operators                        [[object {} & object {} | object {};]] parse fails
+//test hopper mismatched operators                        [[object {} & object {} | object {};]] parse fails
 test hopper no bind def                                 [[def name;]]               parse fails
 
-test hopper outer alone                                 [[outer;]]                  parse fails
-test hopper super alone                                 [[super;]]                  parse fails
-test hopper tab in string                               [[ "	"; ]]               parse fails
+//test hopper outer alone                                 [[outer;]]                  parse fails
+//test hopper super alone                                 [[super;]]                  parse fails
+//test hopper tab in string                               [[ "	"; ]]               parse fails
 test hopper tab in program                              [[ object {};	 ]]         parse fails
 
 test hopper no end of string                            [[ " ]]                     parse fails
