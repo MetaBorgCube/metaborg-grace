@@ -5,34 +5,34 @@ language grace
 start symbol Program
 
 test empty expression                                   [[]]                        parse succeeds
-test self												[[self;]] 					parse succeeds
-test self parenthesis									[[(self);]] 				parse succeeds
-test arbitrary											[[arbitrary;]]				parse succeeds
-test arbitrary parentheses								[[(arbitrary);]]			parse succeeds
-test arbitrary double parentheses						[[((arbitrary));]]			parse succeeds
+test self                                               [[self;]]                   parse succeeds
+test self parenthesis                                   [[(self);]]                 parse succeeds
+test arbitrary                                          [[arbitrary;]]              parse succeeds
+test arbitrary parentheses                              [[(arbitrary);]]            parse succeeds
+test arbitrary double parentheses                       [[((arbitrary));]]          parse succeeds
 
-test print hello world 									[[print "Hello World";]]	parse succeeds
-test print hello world parenthesis 						[[print("Hello World");]]	parse succeeds
-test print number										[[print(5);]]				parse succeeds
-test print float number									[[print(5.5);]]				parse succeeds
-test print addition										[[print(5+5);]]				parse succeeds
+test print hello world                                  [[print "Hello World";]]    parse succeeds
+test print hello world parenthesis                      [[print("Hello World");]]   parse succeeds
+test print number                                       [[print(5);]]               parse succeeds
+test print float number                                 [[print(5.5);]]             parse succeeds
+test print addition                                     [[print(5+5);]]             parse succeeds
 
-test add no layout										[[5+5;]]					parse succeeds
-test add layout spaces									[[ 5 + 5 ;]]				parse succeeds
-test add layout tabs									[[ 5 	+ 		5 ;]]		parse fails
-test add identifier and number							[[5 + foo;]]				parse succeeds
-test add identifier and float							[[5.5 + foo;]]				parse succeeds
-test add floats											[[5.5 + 5.5;]]				parse succeeds
-test add identifiers									[[foo + foo ;]]				parse succeeds
-test add parentheses									[[(foo + foo);]]			parse succeeds
+test add no layout                                      [[5+5;]]                    parse succeeds
+test add layout spaces                                  [[ 5 + 5 ;]]                parse succeeds
+test add layout tabs                                    [[ 5    + 	 5 ;]]          parse fails
+test add identifier and number                          [[5 + foo;]]                parse succeeds
+test add identifier and float                           [[5.5 + foo;]]              parse succeeds
+test add floats                                         [[5.5 + 5.5;]]              parse succeeds
+test add identifiers                                    [[foo + foo ;]]             parse succeeds
+test add parentheses                                    [[(foo + foo);]]            parse succeeds
 
-test add and multiply									[[foo * foo + foo;]]		parse succeeds
-test add and multiply inner parentheses					[[(foo + foo) * foo;]]		parse succeeds
-test add and multiply outer parentheses					[[(foo + foo * foo);]]		parse succeeds
+test add and multiply                                   [[foo * foo + foo;]]        parse succeeds
+test add and multiply inner parentheses                 [[(foo + foo) * foo;]]      parse succeeds
+test add and multiply outer parentheses                 [[(foo + foo * foo);]]      parse succeeds
 
-test dot operator										[[foo.foo;]]				parse succeeds
-test multiple dot operator								[[foo.foo.foo;]]			parse succeeds
-test dot operator and call								[[foo.foo(5);]]				parse succeeds
+test dot operator                                       [[foo.foo;]]                parse succeeds
+test multiple dot operator                              [[foo.foo.foo;]]            parse succeeds
+test dot operator and call                              [[foo.foo(5);]]             parse succeeds
 
 test addition                                           [[5 + 5;]]                  parse succeeds
 test multiplication                                     [[5 * 5;]]                  parse succeeds
@@ -150,10 +150,11 @@ test hopper bind to var                                 [[var name = object {};]
 //test hopper mismatched operators                        [[object {} & object {} | object {};]] parse fails
 test hopper no bind def                                 [[def name;]]               parse fails
 
-//test hopper outer alone                                 [[outer;]]                  parse fails
-//test hopper super alone                                 [[super;]]                  parse fails
-//test hopper tab in string                               [[ "	"; ]]               parse fails
-test hopper tab in program                              [[ object {};	 ]]         parse fails
+//these test are valid in minigrace
+test hopper outer alone                                 [[outer;]]                  parse succeeds
+test hopper super alone                                 [[super;]]                  parse succeeds
+//test hopper tab in string                               [[ "  "; ]]               parse fails
+test hopper tab in program                              [[ object {}; 	 ]]         parse fails
 
 test hopper no end of string                            [[ " ]]                     parse fails
 test hopper suffix operator                             [[ object {}!;]]            parse fails
