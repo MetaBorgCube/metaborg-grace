@@ -12,7 +12,6 @@ dependencies:
   - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
   java:
   - org.metaborg:org.metaborg.meta.lang.dynsem.interpreter:${metaborgVersion}
-  - joda-time:joda-time:2.2
 pardonedLanguages:
 - EditorService
 - Stratego-Sugar
