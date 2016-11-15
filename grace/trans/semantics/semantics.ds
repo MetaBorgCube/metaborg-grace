@@ -98,7 +98,10 @@ rules
   /*
    * Implicit method calls (calls on self or outer)
    */
-  MCallL("print", [v]) --> nativePrint(v).
+  S Self(s) |- MCallL("print", [v]) --> nativePrint(v)
+    where
+      debug("printing from self: ") => _;
+      print(NumV(s)) => _.
 
   MCallL(name, vs) --> v
     where
@@ -129,8 +132,14 @@ rules
 
   P Build() |- ConstantL(name, _, _) --> Done()
     where
-      debug("adding member: ", name) => _;
+      debug("__BUILD__adding member: ", name) => _;
       addMember(name, [], [Code(Uninitialized())]) --> _.
+
+  P Init() |- ConstantL(name, _, e) --> Done()
+    where
+      debug("__INIT__ adding member: ", name) => _;
+      addMember(name, [], [Code(e)]) --> _.
+
 
   ConstantL(_, _, _) --> Error()
     where
@@ -186,6 +195,7 @@ rules
       C ObjectC(), S Self(newSelf), P Build() |- decls --> _; 
 
       // init phase
+            debug("selecting statements") => _;
       code -selectStmts-> stmts;
             debug("selected statements") => _;
             print(WrappedLS(stmts)) => _;
@@ -198,7 +208,7 @@ rules
 
   S Self(selfRef), P Exec() |- ObjectL(inherit, [], code) --> ObjectRef(newSelf)
     where
-            debug("new obj constructor starting...") => _;
+            debug("new obj constructor starting with inherit expression...") => _;
             debug("current self: ") => _;
             print(NumV(selfRef)) => _;
       
