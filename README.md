@@ -36,7 +36,7 @@ violates the constraints, and error recovery simply fails to produce an AST - wh
  
 #### Future improvements:
 
- - Have the definition of a custom (and local) layout as part of SDF3 and supported by JSGLR - the question this custom layout interacts with other productions.
- - Make layout constraints more declarative and part of SDF3 templates.
- - Maybe change the general layout excluding newlines and have a custom layout that includes them (using it in productions that spam multiple lines) and see how it influences the current solution .  
- - Integrate error recovery and the layout sensitive parser.
+ - Have the definition of a custom (and local) layout as part of SDF3 and supported by JSGLR - the question is how custom layout interacts with other productions.
+ - Make layout constraints more declarative maybe combining their specifications with SDF3 templates.
+ - Maybe change the general layout excluding newlines and have a custom layout that includes them (using it in productions that spam multiple lines) and see how it influences the current solution.  
+ - Integrate error recovery and layout sensitive parsing.
