@@ -25,10 +25,10 @@ http://metaborg.org/spoofax/
  
  - Layout constraints do not integrate properly with error recovery. Sometimes, a parse error can only be noticed when transforming the program (Show AST). For example, the program
  
-       class foo {
-         def x = 1
-        + 2; 
-       }
+         class foo {
+          def x = 1
+         + 2; 
+         }
 
 violates the constraints, and error recovery simply fails to produce an AST - which sometimes is not reflected in the editor.
  
