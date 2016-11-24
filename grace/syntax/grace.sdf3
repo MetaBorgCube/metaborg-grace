@@ -11,17 +11,48 @@ context-free start-symbols
   Program
   Exp
 
+// custom layout excluding newlines 
+// to be used in productions that where a newline matters
+syntax
+  
+  CustomLayout-LEX  = "//" ~[\n\r]*
+  CustomLayout-LEX  = [\ ]
+  CustomLayout-LEX  = CustomLayout-LEX CustomLayout-LEX {left}
+  CustomLayout?-LEX = 
+  CustomLayout?-LEX = CustomLayout-LEX  
+
 context-free syntax
 
-  Program.Program               = <<{Statement "\n"}*> <EOF>>
+  Program.Program               = <<{Statement "\n"}*>>
 
 context-free syntax
 
   Statement.Dialect             = <dialect <STRING>>
   Statement.Import              = <import <STRING> as <ID>>
-  Statement.Assignment          = <<Assignment>;>
-  Statement.Declaration 	    = <<Declaration>;> {avoid}
-  Statement.Expression          = <<Exp>;>
+  Statement.Assignment          = <<Assignment>;> {layout(1.first.col < 1.left.col)}
+  Statement.Declaration         = <<Declaration>;>   {avoid, layout(1.first.col < 1.left.col)}
+  Statement.MLDeclaration       = <<MLDeclaration>;> {avoid}
+  Statement.Expression          = <<Exp>;> {layout(1.first.col < 1.left.col)}
+  Statement.MLExpression        = <<MLExp>;>
+
+
+// Statements that might end in a newline
+syntax
+
+  Statement-CF.Assignment     = Assignment-CF CustomLayout?-LEX "\n" {layout(1.first.col < 1.left.col)}
+  Statement-CF.Expression     = Exp-CF CustomLayout?-LEX "\n"  {layout(1.first.col < 1.left.col)}
+  Statement-CF.MLExpression   = MLExp-CF CustomLayout?-LEX "\n" 
+  Statement-CF.Declaration    = Declaration-CF CustomLayout?-LEX "\n" {avoid, layout(1.first.col < 1.left.col)}
+  Statement-CF.MLDeclaration  = MLDeclaration-CF CustomLayout?-LEX "\n" {avoid}
+
+
+lexical restrictions
+  CustomLayout?-LEX -/- [\/].[\/]  
+  CustomLayout?-LEX -/- [\ ]
+
+syntax
+
+  Statement+-CF = Statement+-CF LAYOUT?-CF Statement+-CF  {layout(1.first.col == 2.first.col)}
 
 context-free syntax
 
@@ -30,17 +61,35 @@ context-free syntax
   VarInit.NoVarInit             = <>
   Declaration.Constant          = <def <ID><Annotations> = <Exp>> 
   Declaration.Variable          = <var <ID><Annotations><VarInit>> 
-  Declaration.MethodDecl        = <method <Prefix><MethodName+><Annotations> <MethodBody>>
-  Declaration.ClassDecl         = <
-                                    class <MethodName+>{
-                                      <Inherit><Use*><{Statement "\n"}*>
-                                    }
-                                  >
-  Declaration.TraitDecl         = <trait <MethodName+> <MethodBody>>
-  Use.Use                       = <
-									use <Exp><Alias><Exclude>;
+  MLDeclaration.MethodDecl      = <
+  method <Prefix><MethodName+><Annotations> {
+    <{Statement "\n"}*>
+  }> {layout(1.first.col + num(1) < 6.first.col)}
 
-								  >
+  MLDeclaration.ClassDecl         = <
+  class <MethodName+> {
+    <Inherit>
+    <Use*>
+    <{Statement "\n"}*>
+  }> {layout(1.first.col + num(1) < 4.first.col
+     && 1.first.col + num(1) < 5.first.col
+     && 1.first.col + num(1) < 6.first.col
+     && 4.first.col < 4.left.col
+     && 5.first.col < 5.left.col) }
+  
+  MLDeclaration.TraitDecl         = <
+  trait <MethodName+> {
+    <{Statement "\n"}*>
+  }> {layout(1.first.col + num(1) < 4.first.col)}
+  
+  Use.Use = <use <Exp><Alias><Exclude>;> {layout(1.first.col < 1.left.col)}
+  
+// Use can also end with a newline
+syntax
+  
+  Use-CF.Use = "use" CustomLayout?-LEX Exp-CF CustomLayout?-LEX Alias-CF CustomLayout?-LEX Exclude-CF CustomLayout?-LEX "\n" 
+  
+context-free syntax  
   
   MethodName.MethodID           = <<Identifier> <Params>>
   MethodName.MethodOp           = <<OperatorCF> <Params>>
@@ -64,19 +113,19 @@ context-free syntax
   Params.NoParams               = <>
   Param.Param                   = <<ID>>
 
-  MethodBody.MethodBody         = <
-									{
-									  <{Statement "\n"}*>
-									}
-								  >
-  
 context-free syntax
   
-  Exp.ObjectDecl                = <
-									object {
-									  <Inherit><Use*><{Statement "\n"}*>
-									}
-								  >
+  MLExp.ObjectDecl                = <
+	object {
+	  <Inherit>
+	  <Use*>
+	  <{Statement "\n"}*>
+	}
+  > {layout(1.first.col + num(1) < 3.first.col
+     && 1.first.col + num(1) < 4.first.col
+     && 1.first.col + num(1) < 5.first.col
+     && 3.first.col < 3.left.col
+     && 4.first.col < 4.left.col) }
   
   Exp.Number                    = <<NUM>>
   Exp.String                    = <<STRING>>
@@ -99,10 +148,9 @@ context-free syntax
   
   Exp.Return                    = <return <Exp>>
 
-context-free syntax
-  
+context-free syntax  
+
   Part.Part                     = <<Identifier><CallArgs>>
-  
   CallArgs.ArgsParen            = < (<{Exp ", "}+>)> {left}
   CallArgs.NoArgs               = <>
 
@@ -114,11 +162,18 @@ context-free syntax
     
   OperatorCF.OperatorCF         = <<Operator>>
   
-  Inherit.Inherit               = <
-                                    inherit <Exp><Alias><Exclude>;
-									
-  								  >
+  
+  
+  Inherit.Inherit               = <inherit <Exp><Alias><Exclude>;> 
   Inherit.NoInherit             = <>
+
+// Inherit can also end with a newline
+syntax
+  
+  Inherit-CF.Inherit = "inherit" CustomLayout?-LEX Exp-CF CustomLayout?-LEX Alias-CF CustomLayout?-LEX Exclude-CF CustomLayout?-LEX "\n" 
+
+context-free syntax  
+  
   Alias.Alias                   = < alias <ID> = <ID>>
   Alias.NoAlias                 = <>
   Exclude.Exclude               = < exclude <{ID ", "}*>>

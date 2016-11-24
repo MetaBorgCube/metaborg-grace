@@ -1,3 +1,4 @@
 class foo {
-  def a = 3;
-};
+   def x = 1
+  + 2
+}
