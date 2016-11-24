@@ -23,11 +23,11 @@ http://metaborg.org/spoofax/
  
  - Statements that end with an identifier as an expression currently need to end with a `;`. This is due to the specification of layout inside lists and optionals (as Identifiers can be followed by an optional `Part`).
  
- - Layout constraints do not integrate properly with error recovery. Sometimes, a parse error can only be noticed when transforming the program (Show AST). For example, the program
+ - Layout constraints do not integrate properly with error recovery. Sometimes, a parse error can only be noticed when transforming the program (Show AST). For example, the program (with an extra newline at the end)
  
          class foo {
-          def x = 1
-         + 2; 
+           def x = 1
+          + 2; 
          }
 
 violates the constraints, and error recovery simply fails to produce an AST - which sometimes is not reflected in the editor.
