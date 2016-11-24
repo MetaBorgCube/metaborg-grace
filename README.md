@@ -21,7 +21,7 @@ http://metaborg.org/spoofax/
 
  - The top-level list of statements needs to end with an extra newline.
  
- - Statements that end with an identifier as an expression currently need to end with a `;`. This is due to the specification of layout inside lists and optionals (as Identifiers can be followed by an optional `Part`).
+ - Statements that end with an identifier as an expression currently need to end with a `;`. This is due to the specification of layout inside lists and optionals (Identifiers can be followed by an optional `Part`, and the global layout inside the optional cannot be followed by `\n` - necessary to end the statement).
  
  - Layout constraints do not integrate properly with error recovery. Sometimes, a parse error can only be noticed when transforming the program (Show AST). For example, the program (with an extra newline at the end)
  
