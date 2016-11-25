@@ -1,5 +1,8 @@
 package org.metaborg.grace.interpreter.natives;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
+
 import org.metaborg.grace.interpreter.generated.terms.BoolV_1_Term;
 import org.metaborg.grace.interpreter.generated.terms.NumV_1_Term;
 import org.metaborg.grace.interpreter.generated.terms.StringV_1_Term;
@@ -18,15 +21,16 @@ public abstract class nativePrint_1 extends TermBuild {
 
       @Specialization
       public Object doInt(Object s) {
+    	  PrintStream out = getContext().getOutput();
     	  if (s.getClass() == StringV_1_Term.class) {
-    		  System.out.println( ((StringV_1_Term) s).get_1() );
+    		  out.println( ((StringV_1_Term) s).get_1() );
     	  }
     	  else if (s.getClass() == NumV_1_Term.class)
-    	      System.out.println(((NumV_1_Term) s).get_1());
+    		  out.println(((NumV_1_Term) s).get_1());
     	  else if (s.getClass() == BoolV_1_Term.class)
-    		  System.out.println(((BoolV_1_Term) s).get_1());
+    		  out.println(((BoolV_1_Term) s).get_1());
     	  else
-    		  System.out.println(s.toString() + " " + s.getClass() + " (unknown class)");
+    		  out.println(s.toString() + " " + s.getClass() + " (unknown class)");
           return s;
       }
 
