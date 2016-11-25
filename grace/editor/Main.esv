@@ -7,7 +7,7 @@ imports
 
 language
 
-  extensions : grace, grace-l
+  extensions : grace, grace-l, grc
 
   provider : target/metaborg/stratego.jar
   provider : target/metaborg/stratego-javastrat.jar
