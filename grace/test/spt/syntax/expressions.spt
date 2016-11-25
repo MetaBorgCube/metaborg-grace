@@ -153,7 +153,7 @@ test hopper no bind def                                 [[def name;]]           
 //these test are valid in minigrace
 test hopper outer alone                                 [[outer;]]                  parse succeeds
 test hopper super alone                                 [[super;]]                  parse succeeds
-//test hopper tab in string                               [[ "  "; ]]               parse fails
+//test hopper tab in string                               [[ "            "; ]]       parse fails
 test hopper tab in program                              [[ object {}; 	 ]]         parse fails
 
 test hopper no end of string                            [[ " ]]                     parse fails

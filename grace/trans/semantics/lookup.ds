@@ -20,21 +20,22 @@ rules
   //     if both, error,
   //     else return either
   
-  S Self(self), C MethodC() |- lookup(name) :: L --> m
+  S, C MethodC() |- lookup(name) :: L --> m
     where
       debug("lookup in method context for: '", name, "'") => _;
       case L[name?] of {
         true =>
-          Method([], [Code(L[name])], self) => m
-        otherwise => 
+          Method([], [Code(L[name])], S) => m
+        otherwise =>
+          NoMethod(name) => m; 
           true == false
       }.
       
-  S Self(self) |- lookup(name) --> m
+  S |- lookup(name) --> m
     where
       debug("looking in self slots (non-method context) for: '", name, "'") => _;
-      print(NumV(self)) => _;
-      memberTable(self) --> tbl;
+      print(NumV(S)) => _;
+      memberTable(S) --> tbl;
       print(WrappedMembers(tbl)) => _;
       case tbl[name?] of {
         true => 
@@ -47,11 +48,11 @@ rules
   /*
    * Lookup in outer - recursive case (outer is a real object)
    */
-  S Self(self) |- lookupInOuter(name) --> m
+  S |- lookupInOuter(name) --> m
     where
       debug("looking in outer slots for: '", name, "'") => _;
-      print(NumV(self)) => _;
-      readObject(self) --> Object(outer, _);
+      print(NumV(S)) => _;
+      readObject(S) --> Object(outer, _);
       print(NumV(outer)) => _;
       readObject(outer) --> Object(_, tbl);
       debug("looking in outer (this object has an outer)") => _;
@@ -62,7 +63,7 @@ rules
         true => // outer has the name
           readMethod(tbl[name]) --> m
         otherwise => // we have to look in the next outer
-          S Self(outer) |- lookupInOuter(name) --> m
+          S outer |- lookupInOuter(name) --> m
       }.
   
   lookupInOuter(name) --> NoMethod(name).
@@ -70,9 +71,9 @@ rules
   /*
    * Lookup in outer - base case (outer is not an object)
    */
-  S Self(self) |- lookupInOuter(name) --> m
+  S |- lookupInOuter(name) --> m
     where
-      readObject(self) --> Object(outer, _);
+      readObject(S) --> Object(outer, _);
       readObject(outer) --> NoObject();
       debug("looking in outer (this object has no outer)") => _;
       NoMethod(name) => m.

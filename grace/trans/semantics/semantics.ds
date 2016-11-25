@@ -58,12 +58,12 @@ rules
 
   p@Program(_, _) -init-> v
     where
-      C ObjectC(), S Self(fresh), P Exec() |- p :: OH {}, MH {}, L {} --> v.
+      C ObjectC(), S fresh, P Exec() |- p :: OH {}, MH {}, L {} --> v.
 
   Program(code, _) --> v
     where
-      allocateObject(NoObject()) --> noObj;
-      C ObjectC(), S Self(noObj) |- code --> v.
+      allocateObject(NoObject()) --> S;
+      C ObjectC(), S |- code --> v.
 
   /*
    * Code Execution
@@ -109,17 +109,17 @@ rules
    */
   MCallRecvL(receiver, name, args) --> v
     where
-       receiver --> ObjectRef(r);
-       S Self(r) |- lookup(name) --> m;
-       S Self(r) |- call(m, args) --> v.
+       receiver --> ObjectRef(S);
+       S |- lookup(name) --> m;
+       S |- call(m, args) --> v.
 
   /*
    * Implicit method calls (calls on self or outer)
    */
-  S Self(s), P p |- MCallL("print", [v]) --> nativePrint(v)
+  S, P p |- MCallL("print", [v]) --> nativePrint(v)
     where
       debug("printing from self: ") => _;
-      print(NumV(s)) => _;
+      print(NumV(S)) => _;
       print(WrappedP(p)) => _.
 
   MCallL(name, vs) --> v
@@ -197,85 +197,62 @@ rules
   /*
    * Object Constructors
    */
-  S Self(selfRef), P Exec() |- ObjectL(NoInherit(), [], code) --> ObjectRef(newSelf)
+  S, P Exec() |- ObjectL(NoInherit(), [], code) --> ObjectRef(newSelf)
     where
-            debug("new obj constructor starting (no-inh)...") => _;
-            debug("current self: ") => _;
-            print(NumV(selfRef)) => _;
-
-
-      allocateObject(Object(selfRef, {})) --> newSelf; // current self becomes outer
+      // allocate new object       
+      allocateObject(Object(S, {})) --> newSelf; // current self becomes outer
 
       // build phase
       code -selectDecls-> decls;
-            debug("selected declarations (non-inh)") => _;
-            print(WrappedLS(decls)) => _;
-      
-      C ObjectC(), S Self(newSelf), P Build() |- decls --> _; 
+      C ObjectC(), S newSelf, P Build() |- decls --> _; 
 
       // init phase
-            debug("selecting statements (non-inh)") => _;
       code -selectStmts-> stmts;
-            debug("selected statements") => _;
-            print(WrappedLS(stmts)) => _;
-      C ObjectC(), S Self(newSelf), P Exec() |- stmts --> _;
+      C ObjectC(), S newSelf, P Exec() |- stmts --> _.
 
-//      S Self(newSelf), C ObjectC() |- code --> _; // exec code under new self, self becomes outer.
-
-            debug("done constructing object") => _.  
-
-
-  S Self(selfRef), P Exec() |- ObjectL(inherit, [], code) --> ObjectRef(newSelf)
+  S, P Exec() |- ObjectL(inherit, [], code) --> ObjectRef(newSelf)
     where
-            debug("new obj constructor starting with inherit expression...") => _;
-            debug("current self: ") => _;
-            print(NumV(selfRef)) => _;
-      
-
-      allocateObject(Object(selfRef, {})) --> newSelf; // current self becomes outer
+      // allocate new object
+      allocateObject(Object(S, {})) --> newSelf; // current self becomes outer
 
       // build phase
       code -selectDecls-> decls;
-            debug("selected declarations (inh)") => _;
-            print(WrappedLS(decls)) => _;
-      C ObjectC(), S Self(newSelf), P Build() |- decls --> _; 
+      C ObjectC(), S newSelf, P Build() |- decls --> _; 
       
       // build & initialize parents
-      S Self(newSelf), P Build() |- inherit --> parentRef;
-      S Self(newSelf), P Init() |- inherit --> _;
+      case inherit of {
+        NoInherit() => 
+          
+        i@Inherit(_,_,_) => 
+          S newSelf, P Build() |- i --> _;
+          S newSelf, P Init() |- i --> _
+      };
       
-            debug("reference to parent: ") => _;
-            print(NumV(parentRef)) => _;
-            
-
       // init phase
       code -selectStmts-> stmts;
-            debug("selected statements (inh)") => _;
-            print(WrappedLS(stmts)) => _;
-      C ObjectC(), S Self(newSelf), P Exec() |- stmts --> _;
-
-//      S Self(newSelf), C ObjectC() |- code --> _; // exec code under new self, self becomes outer.
-
-            debug("done constructing object") => _.  
+      C ObjectC(), S newSelf, P Exec() |- stmts --> _.
   
   // we are currently building, now coming across an inherit expression
-  S Self(selfRef), P Build() |- ObjectL(NoInherit(), [], code) --> ObjectRef(selfRef)
+  S, P Build() |- ObjectL(NoInherit(), [], code) --> ObjectRef(S)
     where
             debug("object constructor in build mode, NoInherit") => _;
       code -selectDecls-> decls;
       C ObjectC(), P Build() |- decls --> _. // just build decls, nothing else
-  S Self(selfRef), P Build() |- ObjectL(inherit, [], code) --> ObjectRef(selfRef)
+  
+  S, P Build() |- ObjectL(inherit, [], code) --> ObjectRef(S)
     where
             debug("object constructor in build mode, Inherit") => _;
       inherit --> _; // eval inherit expr (still build context)
       code -selectDecls-> decls;
       C ObjectC(), P Build() |- decls --> _. // build decls
-  S Self(selfRef), P Init() |- ObjectL(NoInherit(), [], code) --> ObjectRef(selfRef)
+  
+  S, P Init() |- ObjectL(NoInherit(), [], code) --> ObjectRef(S)
     where
             debug("object constructor in init mode, NoInherit") => _;
       code -selectStmts-> stmts;
       C ObjectC(), P Exec() |- stmts --> _. // do as normal
-  S Self(selfRef), P Init() |- ObjectL(inherit, [], code) --> ObjectRef(selfRef)
+  
+  S, P Init() |- ObjectL(inherit, [], code) --> ObjectRef(S)
     where
             debug("object constructor in init mode, Inherit") => _;
       inherit --> _; // eval inherit expr (still init context)
@@ -300,14 +277,14 @@ rules
   /*
    * Self expression
    */ 
-  S Self(self) |- Self() --> ObjectRef(self).
+  S |- Self() --> ObjectRef(S).
 
   /*
    * Outer expression
    */
-  S Self(self) |- Outer() --> ObjectRef(outer) 
+  S |- Outer() --> ObjectRef(outer) 
     where
-      readObject(self) --> Object(outer, _).
+      readObject(S) --> Object(outer, _).
 
   Ellipsis() --> Error()
     where
@@ -323,13 +300,13 @@ rules
   call(Method([], code, scope), []) :: L --> v :: L // executing a call doesnt change locals
     where
       debug("calling method with no args") => _;
-      S Self(scope), C MethodC() |- code :: L {} --> v. // scope? // always call with empty locals
+      S scope, C MethodC() |- code :: L {} --> v. // scope? // always call with empty locals
 
   call(Method(names@[_ | _], code, scope), args@[_ | _]) :: L --> v :: L // calling has no net effect on locals
     where
       debug("calling method with some args") => _;
       createLocals(names, wrapValues(args)) :: L {} --> _ :: L1; // scope?
-      S Self(scope), C MethodC() |- code :: L1 --> v;
+      S scope, C MethodC() |- code :: L1 --> v;
       debug("done calling methods with some args") => _.
 
   /*
@@ -352,14 +329,14 @@ rules
       addMember(n, [], code) --> _;
       addMembers(ns, codes) --> _.
 
-  S Self(self) |- addMember(name, params, code) --> Unit()
+  S |- addMember(name, params, code) --> Unit()
     where
       debug("attempt to write member: '", name, "'") => _;
-      allocateMethod(Method(params, code, self)) --> mRef;
-      readObject(self) --> Object(enc, tbl);
-      writeObject(self, Object(enc, {name |--> mRef, tbl} )) --> _;
+      allocateMethod(Method(params, code, S)) --> mRef;
+      readObject(S) --> Object(enc, tbl);
+      writeObject(S, Object(enc, {name |--> mRef, tbl} )) --> _;
       debug("added member: '", name, "' successfully") => _;
-      print(NumV(self)) => _.
+      print(NumV(S)) => _.
 
   /*
    * Add locals (meta-function)
