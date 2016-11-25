@@ -19,6 +19,15 @@ grace/target/*
 
 grace.interpreter/src/main/java/org/metaborg/grace/interpreter/generated/*
 
+grace/doc/grace.aux
+grace/doc/grace.bbl
+grace/doc/grace.blg
+grace/doc/grace.log
+grace/doc/grace.out
+grace/doc/grace.pdf
+grace/doc/grace.synctex.gz
+grace/doc/grace.vtc
+
 # Gitignore java and eclipse
 .metadata
 bin/
