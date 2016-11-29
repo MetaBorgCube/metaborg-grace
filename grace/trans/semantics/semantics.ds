@@ -22,21 +22,22 @@ signature
     List(Statement) -selectDecls-> List(Statement)
     List(Statement) -selectStmts-> List(Statement)
 
-    Exp --> V
-    Statement --> V
+    Exp         --> V
+    Statement   --> V
     Declaration --> V
-    Assignment --> V
+    Declaration --> List(M)
+    Assignment  --> V
 
-    Inherit --> Ref
+    Inherit     --> Ref
 
     List(Exp) -ea-> List(V)
 
-    call(M, List(V)) --> V
-
-    addMember(String, List(String), List(Statement)) --> Unit
-    addMembers(List(String), List(List(Statement))) --> Unit
-    createLocals(List(String), List(List(Statement))) --> Unit
-    wrapValues(List(V)) --> List(List(Statement))
+    call        (M, List(V)) --> V
+    
+    addMember   (String, List(String), List(Statement))         --> Unit
+    addMembers  (List(String)        , List(List(Statement)))   --> Unit
+    createLocals(List(String)        , List(List(Statement)))   --> Unit
+    wrapValues  (List(V))                                       --> List(List(Statement))
 
   native operators
     nativeIBinOp: String * Int * Int -> Int
@@ -289,6 +290,11 @@ rules
   Ellipsis() --> Error()
     where
       error("Attempt to evaluate ellipsis (...)") => _.
+
+  TraitL(name, _, body) --> ms : List(M)
+    where
+      [] => ms.
+  
 
   /*
    * call (meta-function).

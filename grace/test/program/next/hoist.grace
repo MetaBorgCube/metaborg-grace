@@ -8,3 +8,9 @@ method do (arg) {
 
 do "thisaa";
 
+trait foo {
+    method a {
+      "5";
+    };
+    def a = 5;
+};

@@ -4,7 +4,7 @@ signature
 
   sorts
     Context
-    Self
+//    Self
     Outer
     Phase
 
@@ -12,8 +12,6 @@ signature
     ObjectC : Context
     MethodC : Context
     BlockC  : Context
-
-//    Self    : Int -> Self
 
     Exec    : Phase
     Build   : Phase
