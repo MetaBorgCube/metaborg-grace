@@ -20,6 +20,10 @@ signature
     allocateMethod(M) --> Ref
     writeMethod(Ref, M) --> M
     
+    allocateTrait(List(M)) --> Ref
+    writeTrait(Ref, List(M)) --> List(M)
+    readTrait(Ref) --> List(M)
+    
     writeLocal(String , V) --> V
     readLocal(String) --> V
 
@@ -34,7 +38,7 @@ rules
 
   writeObject(addr, o) :: OH1 --> o :: OH {addr |--> o, OH1}.
   
-  readMethod(addr) :: MH1 --> MH1[addr].
+  readMethod(addr) :: MH --> MH[addr].
   
   allocateMethod(m) --> addr
   where
@@ -45,4 +49,13 @@ rules
   
   writeLocal(name, v) :: L1 --> v :: L {name |--> v, L1}.
   
-  readLocal(name) :: L1 --> L1[name].
+  readLocal(name) :: L --> L[name].
+  
+  allocateTrait(ms) :: TH --> addr
+    where
+      fresh => addr;
+      writeTrait(addr, ms) --> _.
+      
+  writeTrait(addr, ms) :: TH1 --> ms :: TH {addr |--> ms, TH1}.
+
+  readTrait(addr) :: TH --> TH[addr].

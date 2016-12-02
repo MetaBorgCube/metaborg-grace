@@ -13,6 +13,7 @@ signature
   constructors
     // for debug purposes
     WrappedP: Phase -> V
+    WrappedMs: List(M) -> V
     
   arrows
     Program -init-> V
@@ -21,12 +22,14 @@ signature
     List(Statement) --> V
     List(Statement) -selectDecls-> List(Statement)
     List(Statement) -selectStmts-> List(Statement)
+    List(Statement) -selectMethods-> List(Declaration)
 
     Exp         --> V
     Statement   --> V
     Declaration --> V
-    Declaration --> List(M)
     Assignment  --> V
+    Declaration       -packTrait-> List(M)
+    List(Declaration) -packTrait-> List(M)
 
     Inherit     --> Ref
 
@@ -34,10 +37,11 @@ signature
 
     call        (M, List(V)) --> V
     
-    addMember   (String, List(String), List(Statement))         --> Unit
-    addMembers  (List(String)        , List(List(Statement)))   --> Unit
-    createLocals(List(String)        , List(List(Statement)))   --> Unit
-    wrapValues  (List(V))                                       --> List(List(Statement))
+    addMember   (String, List(String), List(Statement))       --> Unit
+    addTrait    (String, List(String), List(M))               --> Ref
+    addMembers  (List(String)        , List(List(Statement))) --> Unit
+    createLocals(List(String)        , List(List(Statement))) --> Unit
+    wrapValues  (List(V))                                     --> List(List(Statement))
 
   native operators
     nativeIBinOp: String * Int * Int -> Int
@@ -59,7 +63,7 @@ rules
 
   p@Program(_, _) -init-> v
     where
-      C ObjectC(), S fresh, P Exec() |- p :: OH {}, MH {}, L {} --> v.
+      C ObjectC(), S fresh, P Exec() |- p :: OH {}, MH {}, L {}, TH {} --> v.
 
   Program(code, _) --> v
     where
@@ -104,6 +108,17 @@ rules
   [_ | ss] : List(Statement) -selectStmts-> ss'
     where
       ss -selectStmts-> ss'.
+  /*
+   * Method Selection
+   */
+  [] : List(Statement) -selectMethods-> [].
+  [Declaration(method) | ss] : List(Statement) -selectMethods-> [method | mds]
+    where
+      method => MethodL(_,_,_,_);
+      ss -selectMethods-> mds.
+  [Declaration(_) | _] : List(Statement) -selectMethods-> []
+    where
+      error("Only methods may be declared inside traits.") => _.
 
   /*
    * Method Calls
@@ -291,11 +306,11 @@ rules
     where
       error("Attempt to evaluate ellipsis (...)") => _.
 
-  TraitL(name, _, body) --> ms : List(M)
+  S |- TraitL(name, params, body) --> Done()
     where
-      [] => ms.
-  
-
+      body -selectMethods-> ms;
+      addTrait(name, params, ms) --> tRef.
+      
   /*
    * call (meta-function).
    */
@@ -343,6 +358,10 @@ rules
       writeObject(S, Object(enc, {name |--> mRef, tbl} )) --> _;
       debug("added member: '", name, "' successfully") => _;
       print(NumV(S)) => _.
+
+  S |- addTrait(name, params, methods) --> TraitRef(r)
+    where
+      allocateTrait(methods) --> r.
 
   /*
    * Add locals (meta-function)

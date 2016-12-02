@@ -11,11 +11,13 @@ signature
   sort aliases
     OHeap = Map(Int, O)
     MHeap = Map(Int, M)
+    THeap = Map(Int, List(M))
     Locals = Map(String, V)
 
   components
     OH : OHeap
     MH : MHeap
+    TH : THeap
     L : Locals
     
   // ^^ move to components.ds after import fix
