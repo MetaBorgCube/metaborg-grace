@@ -6,7 +6,8 @@
 % for section-numbered lemmas etc., use "numberwithinsect"
  
 \usepackage{microtype}%if unwanted, comment out or use option "draft"
-
+\usepackage{grace}
+\lstset{language=Pascal}
 %\graphicspath{{./graphics/}}%helpful if your graphic files are in another directory
 
 \bibliographystyle{plainurl}% the recommended bibstyle
@@ -74,7 +75,12 @@ Notable absent features:
 \end{itemize}
 
 \section{Parsing}
-lalala
+lalala some inlining: \code{var a := 3}
+
+code useage:
+
+%\inputgrace{grace}{../test/program/demo/class-foo.grace}
+\lstinputlisting[language=Grace]{../test/program/demo/class-foo.grace}
 
 \begin{lstlisting}[caption={Useless code},label=list:8-6,captionpos=t,float,abovecaptionskip=-\medskipamount]
 for i:=maxint to 0 do 
@@ -82,6 +88,17 @@ begin
     j:=square(root(i));
 end;
 \end{lstlisting}
+
+\begin{grace}
+object {
+	var a := 4
+	def b = 4
+	method a {
+		12
+	}
+	def c = "hoi"	
+}
+\end{grace}
 
 \subsection{Transformation}
 nother subsection
@@ -110,6 +127,51 @@ The thesis report concludes with a concluding chapter with a discussion of the r
 I hereby thank Vlad Vergu for his work on DynSem and support of the Grace implementation; Andrew Black for assisting with the formalization of Grace object construction; Timothy Jones for his helpful tips on implementing Grace. Eelco Visser for his guidance and support; All members of the Programming Language department of Delft University of Technology for their help and company; \dots
 
 \appendix
+
+\definecolor{javared}{rgb}{0.6,0,0} % for strings
+\definecolor{javagreen}{rgb}{0.25,0.5,0.35} % comments
+\definecolor{javapurple}{rgb}{0.5,0,0.35} % keywords
+\definecolor{javadocblue}{rgb}{0.25,0.35,0.75} % javadoc
+\definecolor{darkblue}{rgb}{0.0,0.0,0.5} % darkblue
+
+
+\lstset{
+	language={Java},
+	keywords={where, rules, native, operators, module, imports, signature, constructors, arrows},
+	basicstyle=\small\ttfamily,%
+	keywordstyle=\color{javapurple}\small\ttfamily\bfseries,%
+	commentstyle={\color{javagreen}\small\ttfamily},%
+	stringstyle={\small\ttfamily},%
+%	identifierstyle=,
+	backgroundcolor=\color[rgb]{0.85,0.85,0.86},%
+	frame=single,framerule=0pt,xleftmargin=\fboxsep,xrightmargin=\fboxsep,%
+	mathescape=false,%
+	upquote=true,
+	string=[b]",
+	breaklines=false,
+	escapeinside={},
+	literate={./}{{{\color{blue}./}}}2 {.^}{{{\color{blue}.\^{}}}}2
+		{(}{{{\color{darkblue}(}}}1
+		{)}{{{\color{darkblue})}}}1
+		{\{}{{{\color{darkblue}\{}}}1
+		{\}}{{{\color{darkblue}\}}}}1
+		{[}{{{\color{darkblue}[}}}1
+		{]}{{{\color{darkblue}]}}}1
+		{|}{{{\color{darkblue}|}}}1
+		{->}{{{\color{darkblue}->}}}1
+		{=>}{{{\color{darkblue}=>}}}1
+		{-}{{{\color{darkblue}-}}}1
+		{-->}{{{\color{darkblue}-->}}}1
+		{|-}{{{\color{darkblue}|-}}}1
+		{>}{{{\color{darkblue}>}}}1
+		%{*}{{{\color{darkblue}*}}}1
+		{@}{{{\color{darkblue}@}}}1
+		{:}{{{\color{darkblue}:}}}1
+		{;}{{{\color{darkblue};}}}1
+		{,}{{{\color{darkblue},}}}1
+		{.}{{{\color{darkblue}.}}}1		}
+
+
 \section{Full semantics specification}
 The following code fragments specify the whole of the Grace dynamic semantics, and it's interpreter:
 \subsection{semantics.ds (main semantics)}
