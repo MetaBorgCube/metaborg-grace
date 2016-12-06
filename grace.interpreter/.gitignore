@@ -1,1 +1,9 @@
+
 /target/
+src/main/resources/specification.aterm
+src/main/resources/parsetable.tbl
+src/main/java/org/metaborg/grace/interpreter/generated
+src/main/java/org/metaborg/grace/interpreter/generated/terms
+src/main/java/org/metaborg/grace/interpreter/generated/terms/build
+src/main/java/org/metaborg/grace/interpreter/generated/terms/match
+/grace.launch

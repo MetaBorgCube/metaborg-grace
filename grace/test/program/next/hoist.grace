@@ -8,9 +8,8 @@ method do (arg) {
 
 do "thisaa";
 
-trait foo {
-    method a {
-      "5";
-    };
-    def a = 5;
-};
+
+//class A {
+//    use foo(5);
+//    print "hey";
+//};

@@ -1,4 +1,4 @@
-module semantics/trans/semantics
+module trans/semantics/semantics
 
 imports
   src-gen/ds-signatures/grace-sig
@@ -7,6 +7,8 @@ imports
   trans/semantics/values
   trans/semantics/store
   trans/semantics/lookup
+  trans/semantics/numbers
+  trans/semantics/booleans
 
 signature
 
@@ -22,14 +24,16 @@ signature
     List(Statement) --> V
     List(Statement) -selectDecls-> List(Statement)
     List(Statement) -selectStmts-> List(Statement)
-    List(Statement) -selectMethods-> List(Declaration)
+    List(Statement) -selectMethods-> List(Statement)
 
     Exp         --> V
     Statement   --> V
     Declaration --> V
     Assignment  --> V
-    Declaration       -packTrait-> List(M)
-    List(Declaration) -packTrait-> List(M)
+    
+//    List(M) --> List(Statement)
+    
+//    List(Use)   -us-> List(Statement)
 
     Inherit     --> Ref
 
@@ -38,7 +42,7 @@ signature
     call        (M, List(V)) --> V
     
     addMember   (String, List(String), List(Statement))       --> Unit
-    addTrait    (String, List(String), List(M))               --> Ref
+    addTrait    (String, List(String), List(Statement))       --> Unit
     addMembers  (List(String)        , List(List(Statement))) --> Unit
     createLocals(List(String)        , List(List(Statement))) --> Unit
     wrapValues  (List(V))                                     --> List(List(Statement))
@@ -50,6 +54,7 @@ signature
     nativeMinus: V * V -> Int
     nativePlus: V * V -> Int
     nativeLte: V * V -> Bool
+    concat: List(Statement) * List(Statement) -> List(Statement)
 
 rules
 
@@ -108,14 +113,14 @@ rules
   [_ | ss] : List(Statement) -selectStmts-> ss'
     where
       ss -selectStmts-> ss'.
+
   /*
    * Method Selection
    */
-  [] : List(Statement) -selectMethods-> [].
-  [Declaration(method) | ss] : List(Statement) -selectMethods-> [method | mds]
+  [] : List(Statement) -selectMethods-> [] : List(Statement).
+  [d@Declaration(MethodL(_,_,_,_)) | ss] : List(Statement) -selectMethods-> [d | ds] : List(Statement)
     where
-      method => MethodL(_,_,_,_);
-      ss -selectMethods-> mds.
+      ss -selectMethods-> ds.
   [Declaration(_) | _] : List(Statement) -selectMethods-> []
     where
       error("Only methods may be declared inside traits.") => _.
@@ -151,6 +156,7 @@ rules
   C MethodC() |- ConstantL(name, _, e) :: L --> Done()
     where
       debug("adding local: ", name) => _;
+      print(WrappedL(L)) => _;
       case L[name?] of {
         true =>
           error("Cannot rebind to constant") => _;
@@ -215,6 +221,9 @@ rules
    */
   S, P Exec() |- ObjectL(NoInherit(), [], code) --> ObjectRef(newSelf)
     where
+      // install trait methods on this object:
+//      use -us-> methods;
+    
       // allocate new object       
       allocateObject(Object(S, {})) --> newSelf; // current self becomes outer
 
@@ -225,6 +234,13 @@ rules
       // init phase
       code -selectStmts-> stmts;
       C ObjectC(), S newSelf, P Exec() |- stmts --> _.
+  
+//  [] : List(Use) -us-> [] : List(Statement).
+//  [Use(e, alias, exclude) | us] : List(Use) -us-> concat(ss, sss) : List(Statement)
+//    where
+//      e => MCallL(name, args);
+//      readTrait(name) --> ss;
+//      us -us-> sss.
 
   S, P Exec() |- ObjectL(inherit, [], code) --> ObjectRef(newSelf)
     where
@@ -306,7 +322,7 @@ rules
     where
       error("Attempt to evaluate ellipsis (...)") => _.
 
-  S |- TraitL(name, params, body) --> Done()
+  TraitL(name, params, body) --> Done()
     where
       body -selectMethods-> ms;
       addTrait(name, params, ms) --> tRef.
@@ -359,9 +375,9 @@ rules
       debug("added member: '", name, "' successfully") => _;
       print(NumV(S)) => _.
 
-  S |- addTrait(name, params, methods) --> TraitRef(r)
-    where
-      allocateTrait(methods) --> r.
+//  addTrait(name, params, sts) --> Unit()
+//    where
+//      writeTrait(name, sts) --> _.
 
   /*
    * Add locals (meta-function)

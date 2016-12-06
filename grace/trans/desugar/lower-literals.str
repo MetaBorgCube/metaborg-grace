@@ -2,9 +2,6 @@ module trans/desugar/lower-literals
 
 imports
 
-    libstratego-lib
-    libstratego-gpp
-    libstratego-aterm
     src-gen/signatures/grace-sig
     src-gen/signatures/grace-lowered-sig
     src-gen/signatures/general-sig
@@ -12,12 +9,15 @@ imports
     trans/desugar/desugar-common
 
 rules
-
-  lower-boolean-to-object: Boolean(True()) -> MCallL("true", [])
-        
-  lower-boolean-to-object: Boolean(False()) -> MCallL("false", [])
   
-  lower-number-to-object: Number(v) -> NumL(v)
+  lower-boolean-to-object: Boolean(v) -> <fail>
+   
+  //lower-boolean-to-object: Boolean(True()) -> MCallL("true", [])
+        
+  //lower-boolean-to-object: Boolean(False()) -> MCallL("false", [])
+  
+  lower-number-to-object: Number(v) -> <fail>
+//  lower-number-to-object: Number(v) -> NumL(v)
 
 //  lower-number-to-object: Number(v) ->
 //              ObjectL(

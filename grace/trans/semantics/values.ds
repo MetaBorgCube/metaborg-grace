@@ -11,7 +11,7 @@ signature
   sort aliases
     OHeap = Map(Int, O)
     MHeap = Map(Int, M)
-    THeap = Map(Int, List(M))
+    THeap = Map(String, List(Statement))
     Locals = Map(String, V)
 
   components

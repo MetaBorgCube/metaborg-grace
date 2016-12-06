@@ -37,7 +37,7 @@ lexical restrictions
   
   EOF           -/- ~[]
   
-  // Backslash chars in strings may not be followed by " 
+  // Backslash chars in strings may not be followed by doublequote
   
   BackSlashChar -/- [\"]
 

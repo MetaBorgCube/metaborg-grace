@@ -2,9 +2,6 @@ module trans/desugar/desugar
 
 imports
     
-    libstratego-lib
-    libstratego-gpp
-    libstratego-aterm
     src-gen/signatures/grace-sig
     src-gen/signatures/grace-lowered-sig
     src-gen/signatures/general-sig
