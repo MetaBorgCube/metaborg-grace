@@ -9,6 +9,7 @@ signature
     WrappedL: Locals -> V
     WrappedOHeap: OHeap -> V
     WrappedMHeap: MHeap -> V
+    WrappedVHeap: VHeap -> V
     
   arrows
 
@@ -23,11 +24,21 @@ signature
 //    writeTrait(String, List(Statement)) --> List(Statement)
 //    readTrait(String) --> List(Statement)
     
-    writeLocal(String , V) --> V
-    readLocal(String) --> V
+    writeLocalValue(String, V) --> V
+    readLocalValue(String) --> V
+    
+    writeLocal(String , Ref) --> Ref
+    readLocal(String) --> Ref
+    
+    readV(Ref) --> V
+    allocateV(V) --> Ref
+    writeV(Ref, V) --> V
 
 rules
 
+  /*
+   * Objects
+   */
   readObject(addr) :: OH1 --> OH1[addr].
   
   allocateObject(o) --> addr
@@ -37,6 +48,9 @@ rules
 
   writeObject(addr, o) :: OH1 --> o :: OH {addr |--> o, OH1}.
   
+  /*
+   * Methods
+   */
   readMethod(addr) :: MH --> MH[addr].
   
   allocateMethod(m) --> addr
@@ -46,10 +60,45 @@ rules
 
   writeMethod(addr, m) :: MH1 --> m :: MH {addr |--> m, MH1}.
   
-  writeLocal(name, v) :: L1 --> v :: L {name |--> v, L1}.
+  /*
+   * Locals
+   */
+  writeLocal(name, r) :: L1 --> r :: L {name |--> r, L1}.
   
   readLocal(name) :: L --> L[name].
   
+  /*
+   * Values
+   */
+  readV(addr) :: VH1 --> VH1[addr].
+  
+  allocateV(v) --> addr
+  where
+    fresh => addr;
+    writeV(addr, v) --> _.
+
+  writeV(addr, v) :: VH1 --> v :: VH {addr |--> v, VH1}.
+  
+  /*
+   * Local Values
+   */
+  writeLocalValue(name, v) :: L --> v
+    where
+      case L[name?] of {
+        true => 
+          writeV(L[name], v) --> _
+        otherwise =>
+          allocateV(v) --> newAddr;
+          writeLocal(name, newAddr) => _
+      }.
+  
+  readLocalValue(name) --> V
+    where
+      readV(readLocal(name)) --> V.
+  
+  /*
+   * Traits
+   */
 //  writeTrait(name, sts) :: TH1 --> sts :: TH {name |--> sts, TH1}.
 
 //  readTrait(name) :: TH --> TH[name].

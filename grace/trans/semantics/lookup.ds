@@ -23,9 +23,11 @@ rules
   S, C MethodC() |- lookup(name) :: L --> m
     where
       debug("lookup in method context for: '", name, "'") => _;
+      print(WrappedL(L)) => _;
       case L[name?] of {
         true =>
-          Method([], [Code(L[name])], S) => m
+          debug("found method '", name, "' in locals") => _;
+          Method([], [Code(readV(L[name]))], S) => m
         otherwise =>
           NoMethod(name) => m; 
           true == false

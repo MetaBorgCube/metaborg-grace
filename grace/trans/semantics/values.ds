@@ -4,21 +4,25 @@ imports
 
   src-gen/ds-signatures/grace-sig
   
+  trans/semantics/context
+  
 signature
 
   //    move to components.ds after import fix
 
   sort aliases
-    OHeap = Map(Int, O)
-    MHeap = Map(Int, M)
+    OHeap = Map(Ref, O)
+    MHeap = Map(Ref, M)
     THeap = Map(String, List(Statement))
-    Locals = Map(String, V)
+    VHeap = Map(Ref, V)
+    Locals = Map(String, Ref)
 
   components
     OH : OHeap
     MH : MHeap
     TH : THeap
     L : Locals
+    VH : VHeap
     
   // ^^ move to components.ds after import fix
 
@@ -73,6 +77,9 @@ signature
     WrappedLS: List(Statement) -> V
     WrappedLCS: List(List(Statement)) -> V
     WrappedMembers: Members -> V
+    WrappedP: Phase -> V
+    WrappedMs: List(M) -> V
+    
     Stored: O -> V
     
   native operators
