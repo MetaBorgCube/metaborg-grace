@@ -36,14 +36,14 @@ signature
 
     List(Exp) -ea-> List(V)
 
-    call        (M, List(V)) --> V
+    call (M, List(V)) --> V
     
-    addMember   (String, List(String), List(Statement))       --> Unit
-    addTrait    (String, List(String), List(Statement))       --> Unit
-    addMembers  (List(String)        , List(List(Statement))) --> Unit
-    createLocals(List(String)        , List(List(Statement))) --> Unit
-    removeLocals(List(String))                                --> Unit
-    wrapValues  (List(V))                                     --> List(List(Statement))
+    addMember (String, List(String), List(Statement)) --> Unit
+    addTrait (String, List(String), List(Statement)) --> Unit
+    addMembers (List(String) , List(List(Statement))) --> Unit
+    createLocals (List(String) , List(List(Statement))) --> Unit
+    removeLocals (List(String)) --> Unit
+    wrapValues (List(V)) --> List(List(Statement))
 
   native operators
     nativeIBinOp: String * Int * Int -> Int
@@ -162,15 +162,19 @@ rules
    */
   C MethodC() |- ConstantL(name, _, e) :: L --> Done()
     where
-      debug("adding local: ", name) => _;
+      debug("adding local constant: ", name) => _;
       print(WrappedL(L)) => _;
       case L[name?] of {
         true =>
+          debug("true case") => _;
           error("Cannot rebind to constant") => _;
           error("Cannot rebind to constant: '", name, "' ") => _
         otherwise =>
+          debug("otherwise case!") => _;
           e --> v; // dynsem bug: no coersion in case switch
-          writeLocalValue(name, v) --> _       
+          writeLocalValue(name, v) --> _ :: L1;
+          debug("post adding local") => _;
+          print(WrappedL(L1)) => _
       }.
 
   P Build() |- ConstantL(name, _, _) --> Done()
@@ -347,16 +351,16 @@ rules
     where
       error("Message not understood: '", name, "'") => _.
 
-  call(Method([], code, scope), []) --> v // executing a call doesnt change locals
+  call(Method([], code, scope, closure), []) :: L --> v :: L// executing a call doesnt change locals
     where
       debug("calling method with no args") => _;
-      S scope, C MethodC() |- code --> v. // scope? // always call with empty locals
+      S scope, C MethodC() |- code :: L closure --> v. // scope? // always call with empty locals
 
-  call(Method(names@[_ | _], code, scope), args@[_ | _]) --> v // calling has no net effect on locals
+  call(Method(names@[_ | _], code, scope, closure), args@[_ | _]) :: L --> v :: L // calling has no net effect on locals
     where
       debug("calling method with some args") => _;
-      createLocals(names, wrapValues(args)) --> _; // scope?
-      S scope, C MethodC() |- code  --> v;
+      createLocals(names, wrapValues(args)) :: L {} --> _ :: L params; // scope?
+      S scope, C MethodC() |- code :: L {params, closure} --> v;
       debug("done calling methods with some args") => _.
 
   /*
@@ -379,10 +383,10 @@ rules
       addMember(n, [], code) --> _;
       addMembers(ns, codes) --> _.
 
-  S |- addMember(name, params, code) --> Unit()
+  S |- addMember(name, params, code) :: L --> Unit()
     where
       debug("attempt to write member: '", name, "'") => _;
-      allocateMethod(Method(params, code, S)) --> mRef;
+      allocateMethod(Method(params, code, S, L)) --> mRef;
       readObject(S) --> Object(enc, tbl);
       debug("pre: ") => _;
       print(WrappedMembers(tbl)) => _;
@@ -405,7 +409,9 @@ rules
   createLocals([n|ns], [code|codes]) --> Unit()
     where
       writeLocalValue(n, code) --> _;
-      createLocals(ns, codes) --> _.
+      createLocals(ns, codes) --> _ :: L1;
+      debug("locals") => _;
+      print(WrappedL(L1)) => _.
 
   removeLocals([]) --> Unit().
 

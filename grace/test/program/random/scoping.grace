@@ -1,10 +1,16 @@
 method f (a) {
-  var c := 3;
+  def c = 3;
   object {
+    method h {
+      print(a); // should be fine
+      print(c); // should work fine
+      print(b); // errr
+    };
     method g (b) {
-//      print(c);
-      print(b);
       print(a);
+      print(c);
+      print(b);
+      h;
     };
   };
 };

@@ -6,4 +6,6 @@ src/main/java/org/metaborg/grace/interpreter/generated
 src/main/java/org/metaborg/grace/interpreter/generated/terms
 src/main/java/org/metaborg/grace/interpreter/generated/terms/build
 src/main/java/org/metaborg/grace/interpreter/generated/terms/match
+src/test/java/org/metaborg/grace/interpreter/generated/test
 /grace.launch
+/Testgrace.launch

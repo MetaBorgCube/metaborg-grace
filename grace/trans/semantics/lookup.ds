@@ -27,7 +27,8 @@ rules
       case L[name?] of {
         true =>
           debug("found method '", name, "' in locals") => _;
-          Method([], [Code(readV(L[name]))], S) => m
+          readLocalValue(name) --> v;
+          Method([], [Code(v)], S, {}) => m
         otherwise =>
           NoMethod(name) => m; 
           true == false

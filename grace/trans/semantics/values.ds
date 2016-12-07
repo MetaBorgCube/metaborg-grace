@@ -60,8 +60,9 @@ signature
     
     //      parameters
     //                     code
-    //                                          self (decl)
-    Method: List(String) * List(Statement) * Ref -> M
+    //                                       self  
+    //                                             'closure'
+    Method: List(String) * List(Statement) * Ref * Map(String, Ref) -> M
 
     Code: V -> Statement
     
