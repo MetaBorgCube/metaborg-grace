@@ -39,6 +39,7 @@ signature
     call (M, List(V)) --> V
     
     addMember (String, List(String), List(Statement)) --> Unit
+    updateMember (String, List(Statement)) --> Unit
     addTrait (String, List(String), List(Statement)) --> Unit
     addMembers (List(String) , List(List(Statement))) --> Unit
     createLocals (List(String) , List(List(Statement))) --> Unit
@@ -139,6 +140,7 @@ rules
        print(recv) => _;
        recv => ObjectRef(S);
        S |- lookup(name) --> m;
+       debug(name) => _;
        S |- call(m, args) --> v.
 
   /*
@@ -154,6 +156,7 @@ rules
     where
       debug("generic implicit call of: '", name, "'") => _;
       lookup(name) --> m;
+      debug(name) => _;
       call(m, vs) --> v;
       debug("done generic implicit call of: '", name, "'") => _.
 
@@ -205,15 +208,35 @@ rules
 
   C MethodC() |- AssignmentL(name, e) --> Done()
     where
-      writeLocalValue(name, e) --> _.
+      debug("assigning to local variable: '", name, "'.") => _ ;
+      lookup(name) --> Method(_,_,999,_);
+      debug("indeed a local var") => _;
+      writeLocalValue(name, e) --> _;
+      debug("done assigning to local variable: '", name, "'.") => _.
 
-  VariableL(_, _) --> Error()
+  VariableL(name, _) --> Error()
     where
-      error("Variables outside methods not implemented") => _.
+      addMember(name, [], [Code(Uninitialized())]) --> _.
 
   AssignmentL(name, e) --> Done()
     where
-      addMember(name, [], [Code(e)]) --> _.
+      debug("assigning to object member '", name, "'") => _;
+      lookup (name) --> m@Method(params,code,scope,locals);
+      readObject(scope) --> o@Object(_,tbl);
+      debug("object that '", name, "' resides in: ") => _;
+      print(WrappedMembers(tbl)) => _;
+      case tbl[name?] of {
+        true =>
+          debug("setting new value of: '", name, "'.") => _;
+          print(NumV(tbl[name])) => _;
+          e --> v;
+          Method(params, [Code(v)], scope, locals) => newMethod;
+          writeMethod(tbl[name], newMethod) --> _
+        otherwise =>
+          error("Error: '", name, "' should be in this object but is not found") => _
+      };
+      debug("done assigning to object member: '", name, "'.") => _.
+//      addMember(name, [], [Code(e)]) --> _.
 //      error("Assignment outside methods not implemented") => _.
 
   /*
@@ -386,14 +409,20 @@ rules
   S |- addMember(name, params, code) :: L --> Unit()
     where
       debug("attempt to write member: '", name, "'") => _;
+      
       allocateMethod(Method(params, code, S, L)) --> mRef;
       readObject(S) --> Object(enc, tbl);
+      
       debug("pre: ") => _;
       print(WrappedMembers(tbl)) => _;
+      
       writeObject(S, Object(enc, {name |--> mRef, tbl} )) --> _;
+      
       debug("added member: '", name, "' successfully") => _;
       debug("post: ") => _;
+      
       readObject(S) --> Object(_, tblPost);
+      
       print(WrappedMembers(tblPost)) => _;
       print(NumV(S)) => _.
 

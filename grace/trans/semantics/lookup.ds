@@ -20,7 +20,7 @@ rules
   //     if both, error,
   //     else return either
   
-  S, C MethodC() |- lookup(name) :: L --> m
+  C MethodC() |- lookup(name) :: L --> m
     where
       debug("lookup in method context for: '", name, "'") => _;
       print(WrappedL(L)) => _;
@@ -28,7 +28,7 @@ rules
         true =>
           debug("found method '", name, "' in locals") => _;
           readLocalValue(name) --> v;
-          Method([], [Code(v)], S, {}) => m
+          Method([], [Code(v)], 999, {}) => m
         otherwise =>
           NoMethod(name) => m; 
           true == false
@@ -78,7 +78,7 @@ rules
     where
       readObject(S) --> Object(outer, _);
       readObject(outer) --> NoObject();
-      debug("looking in outer (this object has no outer)") => _;
+//      debug("looking in outer (this object has no outer)") => _;
       NoMethod(name) => m.
   
   /*

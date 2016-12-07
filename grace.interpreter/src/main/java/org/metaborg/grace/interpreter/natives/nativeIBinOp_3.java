@@ -18,7 +18,7 @@ public abstract class nativeIBinOp_3 extends TermBuild {
 
       @Specialization
       public int doOp(String op, int v1, int v2) {
-    	  System.out.println("Executing native operator: " + op + " with type: " + op.getClass());
+//    	  System.out.println("Executing native operator: " + op + " with type: " + op.getClass());
     	  switch (op) {
     	  case "+":
     		  return v1 + v2;

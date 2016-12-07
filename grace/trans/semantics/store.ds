@@ -84,13 +84,13 @@ rules
    */
   writeLocalValue(name, v) :: L --> v
     where
-      debug("writing local value of: '", name, "'") => _;
+//      debug("writing local value of: '", name, "'") => _;
       case L[name?] of {
         true => 
-          debug("name already existed in local, overwriting") => _;
+//          debug("name already existed in local, overwriting") => _;
           writeV(L[name], v) --> _
         otherwise =>
-          debug("allocating new address to store in local") => _;
+//          debug("allocating new address to store in local") => _;
           allocateV(v) --> newAddr;
           writeLocal(name, newAddr) --> _
       }.
