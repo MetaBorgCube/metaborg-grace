@@ -10,15 +10,13 @@ method fibonacci(n) {
   };
 };
 
-print(fibonacci(10));
-//var n := 1;
-//
-//n := 2;
-//
-//def blk = { n := n + 1; };
-//
-//blk.apply;
-//blk.apply;
-//blk.apply;
-//
-//print(n);
+//print(fibonacci(13));
+var n := 1;
+
+def increment = { n := n + 1; };
+
+increment.apply;
+increment.apply;
+increment.apply;
+
+print(n);

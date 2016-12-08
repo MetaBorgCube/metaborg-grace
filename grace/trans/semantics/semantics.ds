@@ -209,7 +209,7 @@ rules
   C MethodC() |- AssignmentL(name, e) --> Done()
     where
       debug("assigning to local variable: '", name, "'.") => _ ;
-      lookup(name) --> Method(_,_,999,_);
+      lookup(name) --> ValueMethod(_);
       debug("indeed a local var") => _;
       writeLocalValue(name, e) --> _;
       debug("done assigning to local variable: '", name, "'.") => _.
@@ -373,8 +373,10 @@ rules
   call(NoMethod(name), _) --> Error() // should raise exception
     where
       error("Message not understood: '", name, "'") => _.
+   
+  call(ValueMethod(v), []) --> v.
 
-  call(Method([], code, scope, closure), []) :: L --> v :: L// executing a call doesnt change locals
+  call(Method([], code, scope, closure), []) :: L --> v :: L // executing a call doesnt change locals
     where
       debug("calling method with no args") => _;
       S scope, C MethodC() |- code :: L closure --> v. // scope? // always call with empty locals

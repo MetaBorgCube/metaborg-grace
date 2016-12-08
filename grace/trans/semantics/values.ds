@@ -54,24 +54,21 @@ signature
     Uninitialized: V
 
     //      enclosing object ref (outer)
-    //            super ref
-    //                  members (methods)
+    //            members (methods)
     Object: Ref * Members -> O
+    NoObject: O
     
-    //      parameters
-    //                     code
-    //                                       self  
-    //                                             'closure'
-    Method: List(String) * List(Statement) * Ref * Map(String, Ref) -> M
+    //           params         code              self  closure
+    Method:      List(String) * List(Statement) * Ref * Map(String, Ref) -> M
+    ValueMethod: V -> M
+    NoMethod:    String -> M
 
+    // for turning values back into executable code
     Code: V -> Statement
     
+    // for internal use
     Unit: Unit
     
-    NoObject: O
-    NoMethod: String -> M
-    NoMethodAndStop: String -> M
-
     // wrapping for debug purposes
     WrappedO: O -> V
     WrappedM: M -> V
@@ -80,8 +77,6 @@ signature
     WrappedMembers: Members -> V
     WrappedP: Phase -> V
     WrappedMs: List(M) -> V
-    
-    Stored: O -> V
     
   native operators
     parseNumber: String -> Int

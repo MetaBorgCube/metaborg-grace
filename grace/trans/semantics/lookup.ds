@@ -20,15 +20,17 @@ rules
   //     if both, error,
   //     else return either
   
-  C MethodC() |- lookup(name) :: L --> m
+  // always look in local, even in objectcontext: object contructor may be in method.
+  lookup(name) :: L --> m
     where
-      debug("lookup in method context for: '", name, "'") => _;
+      debug("lookup in method context (locals) for: '", name, "'") => _;
       print(WrappedL(L)) => _;
       case L[name?] of {
         true =>
           debug("found method '", name, "' in locals") => _;
           readLocalValue(name) --> v;
-          Method([], [Code(v)], 999, {}) => m
+          ValueMethod(v) => m
+//          Method([], [Code(v)], 999, {}) => m
         otherwise =>
           NoMethod(name) => m; 
           true == false
