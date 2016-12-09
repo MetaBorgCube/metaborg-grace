@@ -458,117 +458,117 @@ def aGraceLangTest = object {
 
         method test_116_builtintypematch {
             
-            t116_tryMatch(String, "hello")
-            t116_tryMatch(String, "hello" ++ "world")
-            t116_tryNoMatch(String, 1)
-            t116_tryMatch(Number, 1)
-            t116_tryNoMatch(Number, "hello")
-            t116_tryMatch(Boolean, true)
-            t116_tryNoMatch(Boolean, 1)
+            t116_tryMatch(String, "hello");
+            t116_tryMatch(String, "hello" ++ "world");
+            t116_tryNoMatch(String, 1);
+            t116_tryMatch(Number, 1);
+            t116_tryNoMatch(Number, "hello");
+            t116_tryMatch(Boolean, true);
+            t116_tryNoMatch(Boolean, 1);
             
-            assert(str)shouldBe("OK\nOK\nOK\nOK\nOK\nOK\nOK\n")
-        }
+            assert(str)shouldBe("OK\nOK\nOK\nOK\nOK\nOK\nOK\n");
+        };
 
         method test_117_literalmatch {
             
-            t117_tryMatch(1,1)
-            t117_tryNoMatch(1,2)
-            t117_tryMatch("test", "test")
-            t117_tryNoMatch("test", "wrong")
-            t117_tryMatch(true, true)
-            t117_tryNoMatch(true, false)
-            t117_tryNoMatch(1, true)
-            t117_tryNoMatch("test", true)
-            t117_tryNoMatch(true, 2)
+            t117_tryMatch(1,1);
+            t117_tryNoMatch(1,2);
+            t117_tryMatch("test", "test");
+            t117_tryNoMatch("test", "wrong");
+            t117_tryMatch(true, true);
+            t117_tryNoMatch(true, false);
+            t117_tryNoMatch(1, true);
+            t117_tryNoMatch("test", true);
+            t117_tryNoMatch(true, 2);
             
-            assert(str)shouldBe("OK\nOK\nOK\nOK\nOK\nOK\nOK\nOK\nOK\n")
-        }
+            assert(str)shouldBe("OK\nOK\nOK\nOK\nOK\nOK\nOK\nOK\nOK\n");
+        };
 
         method test_118_matchcasesimple {
             
-            out(t118_tryMatch 1)
-            out(t118_tryMatch 2)
-            out(t118_tryMatch "hello")
-            out(t118_tryMatch "world")
+            out(t118_tryMatch 1);
+            out(t118_tryMatch 2);
+            out(t118_tryMatch "hello");
+            out(t118_tryMatch "world");
             
-            assert(str)shouldBe("ONE\nNUMBER\nHELLO\nSTRING 'world'\n")
-        }
+            assert(str)shouldBe("ONE\nNUMBER\nHELLO\nSTRING 'world'\n");
+        };
 
         method test_120_nonlocalrecurse {            
-            out(t120_bar(5))    
-            assert(str)shouldBe("YE5\n")
-        }
+            out(t120_bar(5));
+            assert(str)shouldBe("YE5\n");
+        };
 
-        method test_123_matchingblockparen {      
-            t123_tryMatch 2
-            t123_tryMatch 1
+        method test_123_matchingblockparen {
+            t123_tryMatch 2;
+            t123_tryMatch 1;
             
-            assert(str)shouldBe("FALLTHROUGH 2\nONE\n")
-        }
+            assert(str)shouldBe("FALLTHROUGH 2\nONE\n");
+        };
 
         method test_124_matchingbare {        
-            t124_tryMatch 2
-            t124_tryMatch 1
+            t124_tryMatch 2;
+            t124_tryMatch 1;
             
-            assert(str)shouldBe("TWO\nFALLTHROUGH 1\n")
-        }
+            assert(str)shouldBe("TWO\nFALLTHROUGH 1\n");
+        };
 
         method test_129_anontype {
             def y = object {
-                def bar is readable = "OK"
-            }
-            t129_foo(y)
-            assert (str) shouldBe "OK\n"
-        }
+                def bar is readable = "OK";
+            };
+            t129_foo(y);
+            assert (str) shouldBe "OK\n";
+        };
         
         method test_129_anontypeFail {
             def y = object {
-                def bar = "OK\n"
-            }
-            assert {t129_foo(y)} shouldRaise (NoSuchMethod)
+                def bar = "OK\n";
+            };
+            assert {t129_foo(y);} shouldRaise (NoSuchMethod);
             // because y.bar is confidential
-        }
+        };
         
         method test_131_anonintersection {
-            type A = {
-                bar -> String
-            }
-            
-            type B = A & type {
-                quux -> Number
-            }
+//            type A = {
+//                bar -> String
+//            }
+//            
+//            type B = A & type {
+//                quux -> Number
+//            }
             
             def t131_context = object {
                 method btaker(b : B) {
-                    out "{b.bar}{b.quux}"
-                }   
-            }
+                    out "{b.bar}{b.quux}";
+                };
+            };
             def t131_barAndQuux = object {
-                def bar is readable = "YE"
-                def quux is readable = "5"
-            }
-            t131_context.btaker(t131_barAndQuux)
-            assert (str) shouldBe "YE5\n"
-        }
+                def bar is readable = "YE";
+                def quux is readable = "5";
+            };
+            t131_context.btaker(t131_barAndQuux);
+            assert (str) shouldBe "YE5\n";
+        };
         
         method test_131_anonintersectionFail {
-            type A = {
-                bar -> String
-            }
-            
-            type B = A & type {
-                quux -> Number
-            }
+//            type A = {
+//                bar -> String
+//            }
+//            
+//            type B = A & type {
+//                quux -> Number
+//            }
             def t131_context = object {
                 method btaker(b : B) {
-                    out "{b.bar}{b.quux}"
-                }   
-            }
+                    out "{b.bar}{b.quux}";
+                };
+            };
             def t131_noMethods = object {
-                def bar = "YE"
-                def quux = "5"
-            }
-            assert {t131_context.btaker(t131_noMethods)} shouldRaise(NoSuchMethod)
+                def bar = "YE";
+                def quux = "5";
+            };
+            assert {t131_context.btaker(t131_noMethods);} shouldRaise(NoSuchMethod);
             // because object does not have right methods
         }
         
@@ -579,159 +579,159 @@ def aGraceLangTest = object {
                 case { _ -> out "FAIL 2" }
             
             assert(str)shouldBe("SUCCESS\n")
-        }
+        };
 
         method test_133_exceptions {
             
             try {
-                var x := 1
-                x.nonExistentMethod
+                var x := 1;
+                x.nonExistentMethod;
             } catch {
-                e: ProgrammingError -> assert (e.exception) shouldBe (NoSuchMethod)
-            }
+                e -> assert (e.exception) shouldBe (NoSuchMethod);
+            };
             
             try {
-                ProgrammingError.raise "OK"
+                ProgrammingError.raise "OK";
             } catch {
-                e: ProgrammingError -> assert (e.exception) shouldBe (ProgrammingError)
+                e -> assert (e.exception) shouldBe (ProgrammingError);
             } catch {
-                e: Exception -> failBecause "ProgrammingError {e} caught as Exception"
-            }
-        }
+                e -> failBecause "ProgrammingError {e} caught as Exception";
+            };
+        };
 
         method test_134_exceptionrefine {
             
-            def MyException = Exception.refine "MyException"
-            out "OK; Refined an exception."
+            def MyException = Exception.refine "MyException";
+            out "OK; Refined an exception.";
             
             try {
-                MyException.raise "OK"
+                MyException.raise "OK";
             } catch {
-                e : MyException -> out "{e.message}; Caught a refined exception."
-            }
+                e -> out "{e.message}; Caught a refined exception.";
+            };
             
-            def MySubException = MyException.refine "MySubException"
-            def MySubException2 = MyException.refine "MySubException"
-            out "OK; Refined sub-exceptions."
+            def MySubException = MyException.refine "MySubException";
+            def MySubException2 = MyException.refine "MySubException";
+            out "OK; Refined sub-exceptions.";
             
             try {
-                MyException.raise "OK"
+                MyException.raise "OK";
             } catch {
-                e : MyException ->
-                    out "{e.message}; Caught a refined exception with super-exception."
+                e ->
+                    out "{e.message}; Caught a refined exception with super-exception.";
             } catch {
-                e : MySubException ->
-                    out "Failed; Did not catch a refined exception as super-exception."
-            }
+                e ->
+                    out "Failed; Did not catch a refined exception as super-exception.";
+            };
             
-            assert(str)shouldBe("OK; Refined an exception.\nOK; Caught a refined exception.\nOK; Refined sub-exceptions.\nOK; Caught a refined exception with super-exception.\n")
-        }
+            assert(str)shouldBe("OK; Refined an exception.\nOK; Caught a refined exception.\nOK; Refined sub-exceptions.\nOK; Caught a refined exception with super-exception.\n");
+        };
 
         method test_135_finally {
             
-            var count := 0
+            var count := 0;
             try {
-                out "OK; inside main block."
-                Exception.raise "OK"
-                out "Failed; exception did not terminate block."
+                out "OK; inside main block.";
+                Exception.raise "OK";
+                out "Failed; exception did not terminate block.";
             } catch {
-                e : Exception ->
+                e  ->
                     out "OK."
-                    count := count + 1
+                    count := count + 1;
             } finally {
-                out "OK."
-                count := count + 2
-            }
+                out "OK.";
+                count := count + 2;
+            };
             
             match (count)
-                case { 3 -> out "OK; both exception handler and finally ran." }
-                case { 2 -> out "Failed; exception handler did not run." }
-                case { 1 -> out "Failed; finally block did not run." }
-                case { 0 -> out "Failed; neither exception handler nor finally ran." }
-                case { _ -> out "Failed; something is very broken." }
+                case { 3 -> out "OK; both exception handler and finally ran."; }
+                case { 2 -> out "Failed; exception handler did not run."; }
+                case { 1 -> out "Failed; finally block did not run."; }
+                case { 0 -> out "Failed; neither exception handler nor finally ran."; }
+                case { _ -> out "Failed; something is very broken."; };
             
             
-            assert(str)shouldBe("OK; inside main block.\nOK.\nOK.\nOK; both exception handler and finally ran.\n")
-        }
+            assert(str)shouldBe("OK; inside main block.\nOK.\nOK.\nOK; both exception handler and finally ran.\n");
+        };
 
-        method test_136_finallynonlocal {
-            t136_baz
-            match (t136_count)
-                case { 7 -> out "OK; all finallies ran." }
-                case { 6 -> out "Failed; inner finally did not run." }
-                case { 5 -> out "Failed; middle finally did not run." }
-                case { 4 -> out "Failed; only outer finally ran." }
-                case { 3 -> out "Failed; outer finally did not run." }
-                case { 2 -> out "Failed; only middle finally ran." }
-                case { 1 -> out "Failed; only inner finally ran." }
-                case { 0 -> out "Failed; no finally blocks ran." }
-                case { _ -> out "Failed; something is very broken." }
-            
-            assert(str)shouldBe("OK.\nOK.\nOK.\nOK; all finallies ran.\n")
-        }
+//        method test_136_finallynonlocal {
+//            t136_baz;
+//            match (t136_count)
+//                case { 7 -> out "OK; all finallies ran."; }
+//                case { 6 -> out "Failed; inner finally did not run."; }
+//                case { 5 -> out "Failed; middle finally did not run."; }
+//                case { 4 -> out "Failed; only outer finally ran."; }
+//                case { 3 -> out "Failed; outer finally did not run."; }
+//                case { 2 -> out "Failed; only middle finally ran."; }
+//                case { 1 -> out "Failed; only inner finally ran."; }
+//                case { 0 -> out "Failed; no finally blocks ran."; }
+//                case { _ -> out "Failed; something is very broken."; };
+//            
+//            assert(str)shouldBe("OK.\nOK.\nOK.\nOK; all finallies ran.\n");
+//        };
 
         method test_137_inheritance {
-            out(t137_c.bar)
-            out(t137_a.x)
-            out(t137_c.x)
-            assert (str) shouldBe "3\n2\n1\n"
-        }
+            out(t137_c.bar);
+            out(t137_a.x);
+            out(t137_c.x);
+            assert (str) shouldBe "3\n2\n1\n";
+        };
         
         method test_138_fractionalnum {
-            out(1.0026)
-            assert(str) shouldBe "1.0026\n"
-        }
+            out(1.0026);
+            assert(str) shouldBe "1.0026\n";
+        };
 
         method test_139_inheritouter {
             def a = object {
                 method new {
                     object {
-                        out(outer)
-                    }
-                }
-                method asString { "a" }
-            }
+                        out(outer);
+                    };
+                };
+                method asString { "a"; };
+            };
             
             def context = object {
-                method asString { "m" }
-                a.new
+                method asString { "m"; };
+                a.new;
                 object {
-                    inherit a.new
-                    out(outer)
-                }
-            }
-            assert (str) shouldBe "a\na\nm\n"
-        }
+                    inherit a.new;
+                    out(outer);
+                };
+            };
+            assert (str) shouldBe "a\na\nm\n";
+        };
         
-        method test_142_anontypevalue {
-            if (type { y -> String }.match(t142_x)) then {
-                out(t142_x.y)
-            }
-
-            match(t142_x)
-                case { z : type { y -> String} -> out(z.y) }
-            assert (str) shouldBe "ok\nok\n"
-        }
+//        method test_142_anontypevalue {
+//            if (type { y -> String }.match(t142_x)) then {
+//                out(t142_x.y);
+//            };
+//
+//            match(t142_x)
+//                case { z : type { y -> String} -> out(z.y); };
+//            assert (str) shouldBe "ok\nok\n";
+//        };
         
         method test_143_repeat {
-            repeat 1 times { out "once" }
-            repeat 4 times { out "four times" }
-            repeat 0 times { out "this should not appear" }
-            repeat (-2) times { out "this should not appear either" }
-            assert (str) shouldBe "once\nfour times\nfour times\nfour times\nfour times\n"
-        }
+            repeat 1 times { out "once"; };
+            repeat 4 times { out "four times"; };
+            repeat 0 times { out "this should not appear"; };
+            repeat (-2) times { out "this should not appear either"; };
+            assert (str) shouldBe "once\nfour times\nfour times\nfour times\nfour times\n";
+        };
         
         method test_145_builtInListDo {
-            def l = [1, 2, 3, 4]
-            out(l)
-            l.do { each -> out(each) }
-            assert (str) shouldBe "[1, 2, 3, 4]\n1\n2\n3\n4\n"
-        }
+            def l = [1, 2, 3, 4];
+            out(l);
+            l.do { each -> out(each) };
+            assert (str) shouldBe "[1, 2, 3, 4]\n1\n2\n3\n4\n";
+        };
 
-    }
-}
+    };
+};
 
-def graceLangTest = gU.testSuite.fromTestMethodsIn(aGraceLangTest) named "t003"
-graceLangTest.runAndPrintResults
+def graceLangTest = gU.testSuite.fromTestMethodsIn(aGraceLangTest) named "t003";
+graceLangTest.runAndPrintResults;
 
 
