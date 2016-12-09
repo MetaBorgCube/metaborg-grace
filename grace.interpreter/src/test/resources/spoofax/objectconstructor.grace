@@ -1,0 +1,3 @@
+object {
+  print 5;
+};

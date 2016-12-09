@@ -170,7 +170,6 @@ rules
       case L[name?] of {
         true =>
           debug("true case") => _;
-          error("Cannot rebind to constant") => _;
           error("Cannot rebind to constant: '", name, "' ") => _
         otherwise =>
           debug("otherwise case!") => _;
@@ -310,8 +309,8 @@ rules
             debug("object constructor in build mode, NoInherit") => _;
       code -selectDecls-> decls;
       C ObjectC(), P Build() |- decls --> _. // just build decls, nothing else
-  
-  S, P Build() |- ObjectL(inherit, [], code) --> ObjectRef(S)
+ 
+  S, P Build() |- ObjectL(inherit@Inherit(_,_,_), [], code) --> ObjectRef(S)
     where
             debug("object constructor in build mode, Inherit") => _;
       inherit --> _; // eval inherit expr (still build context)
@@ -324,7 +323,7 @@ rules
       code -selectStmts-> stmts;
       C ObjectC(), P Exec() |- stmts --> _. // do as normal
   
-  S, P Init() |- ObjectL(inherit, [], code) --> ObjectRef(S)
+  S, P Init() |- ObjectL(inherit@Inherit(_,_,_), [], code) --> ObjectRef(S)
     where
             debug("object constructor in init mode, Inherit") => _;
       inherit --> _; // eval inherit expr (still init context)

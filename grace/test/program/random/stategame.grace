@@ -13,7 +13,7 @@ class game(initial) {
   method play(n) {
     if (n == value) then {
         print "you win!";
-    } else {
+    } else {W
         print "try again!";
     };
   };
