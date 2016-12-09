@@ -9,3 +9,7 @@ src/main/java/org/metaborg/grace/interpreter/generated/terms/match
 src/test/java/org/metaborg/grace/interpreter/generated/test
 /grace.launch
 /Testgrace.launch
+/grace (Daemon).launch
+/grace-server
+/grace-client
+/grace
