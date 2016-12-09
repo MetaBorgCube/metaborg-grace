@@ -423,7 +423,7 @@ def aGraceLangTest = object {
                 };
             };
             
-//            a.field := 3;
+            a.field := 3;
             
             assert(str)shouldBe("assigned 3 to field\n");
         };
