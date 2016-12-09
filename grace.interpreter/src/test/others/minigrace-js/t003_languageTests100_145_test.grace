@@ -1,133 +1,133 @@
 import "gUnit" as gU
 
-var str := ""
+var str := "";
 method out(s) {
-    str := str ++ s ++ "\n"
-}
+    str := str ++ s ++ "\n";
+};
 
 // space for methods
 
 method t108_a {
-  out("out")
-}
+  out("out");
+};
 method t116_tryMatch(pattern, obj) {
     if (pattern.match(obj)) then {
-        out "OK"
+        out "OK";
     } else {
-        out "Not OK; {obj} should have matched"
-    }
-}
+        out "Not OK; {obj} should have matched";
+    };
+};
 method t116_tryNoMatch(pattern, obj) {
     if (pattern.match(obj)) then {
-        out "Not OK; {obj} should not have matched"
+        out "Not OK; {obj} should not have matched";
     } else {
-        out "OK"
-    }
-}
+        out "OK";
+    };
+};
 method t117_tryMatch(pattern, value) {
     if (pattern.match(value)) then {
-        out "OK"
+        out "OK";
     } else {
-        out "Not OK; {pattern} should have matched {value}"
-    }
-}
+        out "Not OK; {pattern} should have matched {value}";
+    };
+};
 method t117_tryNoMatch(pattern, value) {
     if (pattern.match(value)) then {
-        out "Not OK; {pattern} should not have matched {value}"
+        out "Not OK; {pattern} should not have matched {value}";
     } else {
-        out "OK"
-    }
-}
-type Pair = {
-    left -> Number
-    right -> Number
-}
-method t118_tryMatch(o) {
-    match(o)
-        case { 1 -> "ONE" }
-        case { _ : Number -> "NUMBER" }
-        case { "hello" -> "HELLO" }
-        case { x : String -> "STRING '{x}'" }
-}
-var t120_theBlock
+        out "OK";
+    };
+};
+//type Pair = {
+//    left -> Number
+//    right -> Number
+//}
+//method t118_tryMatch(o) {
+//    match(o)
+//        case { 1 -> "ONE" }
+//        case { _ : Number -> "NUMBER" }
+//        case { "hello" -> "HELLO" }
+//        case { x : String -> "STRING '{x}'" }
+//}
+var t120_theBlock;
 method t120_bar(n) {
     if (n == 4) then {
-        t120_theBlock := { return "YE" }
-    }
+        t120_theBlock := { return "YE" };
+    };
     if (n == 0) then {
-        return "NO"
-    }
+        return "NO";
+    };
     if (n == 1) then {
-        t120_theBlock.apply
-    }
-    "{t120_bar(n - 1)}{n}"
-}
-def t123_a = 1
-method t123_tryMatch(x) {
-    match(x)
-        case { y : String -> out "STRING" }
-        case { (t123_a) -> out "ONE" }
-        case { y : Number -> out "FALLTHROUGH {y}" }
-}
-method t124_tryMatch(x) {
-    match(x)
-        case { y : String -> out "STRING" }
-        case { 2 -> out "TWO" }
-        case { y -> out "FALLTHROUGH {y}" }
-}
-method t129_foo(x : type { bar -> String }) {
-    out(x.bar)
-}
+        t120_theBlock.apply;
+    };
+    "{t120_bar(n - 1);}{n;}";
+};
+def t123_a = 1;
+//method t123_tryMatch(x) {
+//    match(x)
+//        case { y : String -> out "STRING" }
+//        case { (t123_a) -> out "ONE" }
+//        case { y : Number -> out "FALLTHROUGH {y}" }
+//}
+//method t124_tryMatch(x) {
+//    match(x)
+//        case { y : String -> out "STRING" }
+//        case { 2 -> out "TWO" }
+//        case { y -> out "FALLTHROUGH {y}" }
+//}
+//method t129_foo(x : type { bar -> String }) {
+//    out(x.bar)
+//}
 
-var t136_count := 0
+var t136_count := 0;
 method t136_foo(x) {
     try (x)
-        catch { e : Exception -> out "Failed; no exception was raised." }
-        finally { out "OK." ; t136_count := t136_count + 1}
-}
+        catch { e : Exception -> out "Failed; no exception was raised."; }
+        finally { out "OK." ; t136_count := t136_count + 1;};
+};
 method t136_bar(x) {
-    try { t136_foo(x) }
-        finally { out "OK." ; t136_count := t136_count + 2 }
+    try { t136_foo(x); }
+        finally { out "OK." ; t136_count := t136_count + 2; };
 }
 method t136_baz {
     try {
-        t136_bar { return 1 }
+        t136_bar { return 1; };
     } finally {
-        out "OK."
-        t136_count := t136_count + 4
-    }
-}
+        out "OK.";
+        t136_count := t136_count + 4;
+    };
+};
 method t137_parent {
     object {
-        def x is readable = foo
-        method foo { 1 }
-        method bar { 0 }
-    }
-}
+        def x is readable = foo;
+        method foo { 1 };
+        method bar { 0 };
+    };
+};
 method t137_child {
     object {
-        inherit t137_parent
-        method bar { 3 }
-    }
-}
+        inherit t137_parent;
+        method bar { 3; };
+    };
+};
 def t137_a = object {
-    inherit t137_parent
-    method foo { 2 }
-}
+    inherit t137_parent;
+    method foo { 2; };
+};
 def t137_c = object {
-    inherit t137_child
-}
+    inherit t137_child;
+};
 def t139_a = object {
     method new {
         object {
-            print(outer)
-        }
-    }
-    method asString { "a" }
+            print(outer);
+        };
+    };
+    method asString { "a"; };
 }
 def t142_x = object {
-    method y -> String { "ok" }
-}
+    method y { "ok"; };
+};
 
 //  *****************************
 //  **   start of test suite   **
@@ -136,353 +136,353 @@ def t142_x = object {
 
 def aGraceLangTest = object {
     class forMethod(m) {
-        inherit gU.testCaseNamed(m)
+        inherit gU.testCaseNamed(m);
 
         method setup {
-            str := ""
-        }
+            str := "";
+        };
 
         method test_100_squarebracket {
-            def aString = "test"
+            def aString = "test";
             
-            out(aString.at(1))
-            out(aString.at(2))
-            out(aString.at(3).size)
+            out(aString.at(1));
+            out(aString.at(2));
+            out(aString.at(3).size);
             
-            assert(str)shouldBe("t\ne\n1\n")
-        }
+            assert(str)shouldBe("t\ne\n1\n");
+        };
 
         method test_101_super {
             object {
                 class aa(v') {
-                    var v := v'
+                    var v := v';
                     method foo {
-                        out "A's foo: {self.v}"
-                    }
+                        out "A's foo: {self.v}";
+                    };
                     method baz {
-                        out "A's baz"
-                    }
-                }
+                        out "A's baz";
+                    };
+                };
                 class bb(x) {
-                    inherit aa(x) alias aabaz = baz
+                    inherit aa(x) alias aabaz = baz;
                     method bar {
-                        out "B's bar"
-                    }
+                        out "B's bar";
+                    };
                     method baz {
-                        out "B's baz invokes..."
-                        aabaz
-                    }
-                }
+                        out "B's baz invokes...";
+                        aabaz;
+                    };
+                };
                 class cc(y) {
-                    inherit bb(y) alias bbbaz = baz
+                    inherit bb(y) alias bbbaz = baz;
                     method baz {
-                        out "C's baz invokes..."
-                        bbbaz
-                    }
-                }
+                        out "C's baz invokes...";
+                        bbbaz;
+                    };
+                };
                 
-                var b := cc "ARGUMENT"
-                b.foo
-                b.bar
-                b.baz
+                var b := cc "ARGUMENT";
+                b.foo;
+                b.bar;
+                b.baz;
             
-                assert(str)shouldBe("A's foo: ARGUMENT\nB's bar\nC's baz invokes...\nB's baz invokes...\nA's baz\n")
-            }
-        }
+                assert(str)shouldBe("A's foo: ARGUMENT\nB's bar\nC's baz invokes...\nB's baz invokes...\nA's baz\n");
+            };
+        };
 
         method test_102_outersuper {
             def a = object {
                 method new {
                     object {
                         method test {
-                            outerA'smethod
-                        }
-                    }
-                }
+                            outerA'smethod;
+                        };
+                    };
+                };
                 method outerA'smethod {
-                    out "Hello"
-                }
-            }
+                    out "Hello";
+                };
+            };
             def b = object {
                 method new {
                     object {
-                        inherit a.new
+                        inherit a.new;
                         method test2 {
-                            outerB'smethod
-                        }
-                    }
-                }
+                            outerB'smethod;
+                        };
+                    };
+                };
                 method outerB'smethod {
-                    out "world"
-                }
-            }
+                    out "world";
+                };
+            };
             
-            def ab = b.new
-            ab.test
-            ab.test2
+            def ab = b.new;
+            ab.test;
+            ab.test2;
             
-            assert(str)shouldBe("Hello\nworld\n")
-        }
+            assert(str)shouldBe("Hello\nworld\n");
+        };
         
         class a_103 {
-            method foo { "world" }
-        }
+            method foo { "world"; };
+        };
         
         class b_103 {
-            inherit a_103
-            method bar { "hello {foo}" }
+            inherit a_103;
+            method bar { "hello {foo}"; };
         }
         
         class c_103 {
-            inherit b_103
-            method quux { "X " ++ bar }
+            inherit b_103;
+            method quux { "X " ++ bar; };
         }
         
         class d_103 {
-            inherit c_103
-            method foo is override { "Nyssa" }
-        }
+            inherit c_103;
+            method foo is override { "Nyssa"; };
+        };
 
-        type T_103 = {
-            foo -> String
-            quux -> String
-        }
+//        type T_103 = {
+//            foo -> String
+//            quux -> String
+//        }
 
         method test_103_inherit2 {
-            def x = b_103
-            assert (x.bar) shouldBe "hello world"
-            def y:T_103 = c_103
-            assert(y.quux) shouldBe "X hello world"
-            def z:T_103 = d_103
-            assert(z.quux) shouldBe "X hello Nyssa"
-        }
+            def x = b_103;
+            assert (x.bar) shouldBe "hello world";
+            def y = c_103;
+            assert(y.quux) shouldBe "X hello world";
+            def z = d_103;
+            assert(z.quux) shouldBe "X hello Nyssa";
+        };
 
         method test_104_objstatement {
             def a = object {
-                var x := 1
-                x := x + 2
-                out(x)
+                var x := 1;
+                x := x + 2;
+                out(x);
                 method foo {
-                    out(x)
-                }
+                    out(x);
+                };
                 def b = object {
-                    outer.foo
-                }
-            }
+                    outer.foo;
+                };
+            };
             
             
-            assert(str)shouldBe("3\n3\n")
-        }
+            assert(str)shouldBe("3\n3\n");
+        };
         
 
         method test_105_classstatement {
             object {
                 class x(y) {
-                    out(y)
+                    out(y);
                     object {
-                        out(y)
-                    }
-                }
+                        out(y);
+                    };
+                };
                 
-                x(5)
+                x(5);
                 
                 
-                assert(str)shouldBe("5\n5\n")
-            }
-        }
+                assert(str)shouldBe("5\n5\n");
+            };
+        };
 
         method test_107_downcall {
             object {
             
                 class aa {
                   method a {
-                    b
-                  }
+                    b;
+                  };
                   method b {
-                    out("A")
-                  }
-                }
+                    out("A");
+                  };
+                };
                 
                 class bb {
-                  inherit aa
+                  inherit aa;
                   method b {
-                    out("B")
-                  }
-                }
+                    out("B");
+                  };
+                };
                 
-                bb.a
+                bb.a;
                 
-                assert(str)shouldBe("B\n")
-            }
-        }
+                assert(str)shouldBe("B\n");
+            };
+        };
 
         method test_108_classouter {
             
             def A = object {
                 class new {
-                    method b { t108_a }
-                }
-            }
+                    method b { t108_a; };
+                };
+            };
             
-            A.new.b
+            A.new.b;
             
-            assert(str)shouldBe("out\n")
-        }
+            assert(str)shouldBe("out\n");
+        };
 
         method test_111_numericbase {
-            out(1234)
-            out(0x4d2)
-            out(16x4d2)
-            out(2x10011010010)
-            out(8x2322)
-            out(25x1o9)
-            out(36xya)
+            out(1234);
+            out(0x4d2);
+            out(16x4d2);
+            out(2x10011010010);
+            out(8x2322);
+            out(25x1o9);
+            out(36xya);
             
-            assert(str)shouldBe("1234\n1234\n1234\n1234\n1234\n1234\n1234\n")
-        }
+            assert(str)shouldBe("1234\n1234\n1234\n1234\n1234\n1234\n1234\n");
+        };
 
         method test_112_nonnewconstructor {
             def aCat = object {
                 class named(name) {
                     method describe {
-                        out "A cat called {name}"
-                    }
-                }
-            }
+                        out "A cat called {name}";
+                    };
+                };
+            };
             
-            def myCat = aCat.named "Timothy"
-            def yourCat = aCat.named "Gregory"
-            myCat.describe
-            yourCat.describe
+            def myCat = aCat.named "Timothy";
+            def yourCat = aCat.named "Gregory";
+            myCat.describe;
+            yourCat.describe;
             
-            assert(str)shouldBe("A cat called Timothy\nA cat called Gregory\n")
-        }
+            assert(str)shouldBe("A cat called Timothy\nA cat called Gregory\n");
+        };
 
         method test_113_mpmnconstructor {
             object {
                 class named(aName) coloured (aColour) {
-                    def colour = aColour
-                    def name = aName
-                    var miceEaten := 0
+                    def colour = aColour;
+                    def name = aName;
+                    var miceEaten := 0;
                     method describe {
-                        out "{name} is a {colour} cat"
-                    }
-                }
+                        out "{name} is a {colour} cat";
+                    };
+                };
                 
-                def myCat = named "Timothy" coloured ("black")
-                def yourCat = named "Gregory" coloured ("tortoiseshell")
+                def myCat = named "Timothy" coloured ("black");
+                def yourCat = named "Gregory" coloured ("tortoiseshell");
                 
-                myCat.describe
-                yourCat.describe
+                myCat.describe;
+                yourCat.describe;
                 
-                assert(str)shouldBe("Timothy is a black cat\nGregory is a tortoiseshell cat\n")
-            }
-        }
+                assert(str)shouldBe("Timothy is a black cat\nGregory is a tortoiseshell cat\n");
+            };
+        };
 
         method test_114_inheritboolean {
             
             def x = object {
-                inherit true
+                inherit true;
                 method isAnX {
-                    self
-                }
-            }
+                    self;
+                };
+            };
             
             def y = object {
-                inherit false
+                inherit false;
                 method isAnX {
-                    false
-                }
-            }
+                    false;
+                };
+            };
             
             if (x) then {
-                out "OK"
+                out "OK";
             } else {
-                out "Not OK; x inherit true and should be true."
-            }
+                out "Not OK; x inherit true and should be true.";
+            };
             if (y) then {
-                out "Not OK; y inherit false and should be false."
+                out "Not OK; y inherit false and should be false.";
             } else {
-                out "OK"
-            }
+                out "OK";
+            };
             if (x.isAnX) then {
-                out "OK"
+                out "OK";
             } else {
-                out "Not OK; x.isAnX should return a true value."
-            }
+                out "Not OK; x.isAnX should return a true value.";
+            };
             if (x == true) then {
-                out "OK"
+                out "OK";
             } else {
-                out "Not OK; two booleanish object are equal if they share the same prototype and underlying value"
-            }
+                out "Not OK; two booleanish object are equal if they share the same prototype and underlying value";
+            };
             if (true == !y) then {
-                out "OK"
+                out "OK";
             } else {
-                out "Not OK; !y should be true."
-            }
+                out "Not OK; !y should be true.";
+            };
             if (false == !x) then {
-                out "OK"
+                out "OK";
             } else {
-                out "Not OK; !x should be false."
-            }
+                out "Not OK; !x should be false.";
+            };
             
-            assert(str)shouldBe("OK\nOK\nOK\nOK\nOK\nOK\n")
-        }
+            assert(str)shouldBe("OK\nOK\nOK\nOK\nOK\nOK\n");
+        };
 
-        method test_115_typematch {
-            type Foo = {
-                bar
-                baz
-            }
-            def x = object {
-                def bar = 1
-                def baz = 2
-            }
-            def y = object {
-                def baz = 2
-            }
-            if (Foo.match(x)) then {
-                out "OK"
-            } else {
-                out "Not OK; x conforms to type Foo"
-            }
-            if (Foo.match(y)) then {
-                out "Not OK; y does not conform to type Foo"
-            } else {
-                out "OK"
-            }
-            
-            assert(str)shouldBe("OK\nOK\n")
-        }
+//        method test_115_typematch {
+//            type Foo = {
+//                bar
+//                baz
+//            }
+//            def x = object {
+//                def bar = 1
+//                def baz = 2
+//            }
+//            def y = object {
+//                def baz = 2
+//            }
+//            if (Foo.match(x)) then {
+//                out "OK"
+//            } else {
+//                out "Not OK; x conforms to type Foo"
+//            }
+//            if (Foo.match(y)) then {
+//                out "Not OK; y does not conform to type Foo"
+//            } else {
+//                out "OK"
+//            }
+//            
+//            assert(str)shouldBe("OK\nOK\n")
+//        }
         
 
-        method test_116_builtintypematch {
-            
-            t116_tryMatch(String, "hello")
-            t116_tryMatch(String, "hello" ++ "world")
-            t116_tryNoMatch(String, 1)
-            t116_tryMatch(Number, 1)
-            t116_tryNoMatch(Number, "hello")
-            t116_tryMatch(Boolean, true)
-            t116_tryNoMatch(Boolean, 1)
-            
-            assert(str)shouldBe("OK\nOK\nOK\nOK\nOK\nOK\nOK\n")
-        }
+//        method test_116_builtintypematch {
+//            
+//            t116_tryMatch(String, "hello")
+//            t116_tryMatch(String, "hello" ++ "world")
+//            t116_tryNoMatch(String, 1)
+//            t116_tryMatch(Number, 1)
+//            t116_tryNoMatch(Number, "hello")
+//            t116_tryMatch(Boolean, true)
+//            t116_tryNoMatch(Boolean, 1)
+//            
+//            assert(str)shouldBe("OK\nOK\nOK\nOK\nOK\nOK\nOK\n")
+//        }
 
         method test_117_literalmatch {
             
-            t117_tryMatch(1,1)
-            t117_tryNoMatch(1,2)
-            t117_tryMatch("test", "test")
-            t117_tryNoMatch("test", "wrong")
-            t117_tryMatch(true, true)
-            t117_tryNoMatch(true, false)
-            t117_tryNoMatch(1, true)
-            t117_tryNoMatch("test", true)
-            t117_tryNoMatch(true, 2)
+            t117_tryMatch(1,1);
+            t117_tryNoMatch(1,2);
+            t117_tryMatch("test", "test");
+            t117_tryNoMatch("test", "wrong");
+            t117_tryMatch(true, true);
+            t117_tryNoMatch(true, false);
+            t117_tryNoMatch(1, true);
+            t117_tryNoMatch("test", true);
+            t117_tryNoMatch(true, 2);
             
-            assert(str)shouldBe("OK\nOK\nOK\nOK\nOK\nOK\nOK\nOK\nOK\n")
-        }
+            assert(str)shouldBe("OK\nOK\nOK\nOK\nOK\nOK\nOK\nOK\nOK\n");
+        };
 
         method test_118_matchcasesimple {
             
