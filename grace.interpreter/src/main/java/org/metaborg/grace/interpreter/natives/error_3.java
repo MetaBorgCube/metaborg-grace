@@ -7,25 +7,21 @@ import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.source.SourceSection;
 
-@NodeChildren(
-  { @NodeChild(value = "s", type = TermBuild.class),
-	@NodeChild(value = "s2", type = TermBuild.class),
-	@NodeChild(value = "s3", type = TermBuild.class)})
+@NodeChildren({ @NodeChild(value = "s", type = TermBuild.class), @NodeChild(value = "s2", type = TermBuild.class),
+		@NodeChild(value = "s3", type = TermBuild.class) })
 public abstract class error_3 extends TermBuild {
 
-      public error_3(SourceSection source) {
-          super(source);
-      }
+	public error_3(SourceSection source) {
+		super(source);
+	}
 
-      @Specialization
-      public Object doInt(Object s, Object s2, Object s3) {
-    	  String r = s.toString() + s2.toString() + s3.toString();
-    	  System.err.println(r);
-    	  throw new RuntimeException(r);
-//    	  return r;
-      }
+	@Specialization
+	public Object doInt(Object s, Object s2, Object s3) {
+		String r = s.toString() + s2.toString() + s3.toString();
+		throw new RuntimeException(r);
+	}
 
-      public static TermBuild create(SourceSection source, TermBuild s, TermBuild s2, TermBuild s3) {
-          return error_3NodeGen.create(source, s, s2, s3);
-      }
+	public static TermBuild create(SourceSection source, TermBuild s, TermBuild s2, TermBuild s3) {
+		return error_3NodeGen.create(source, s, s2, s3);
+	}
 }
