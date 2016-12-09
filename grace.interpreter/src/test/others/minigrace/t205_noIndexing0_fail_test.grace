@@ -2,8 +2,10 @@ import "gUnit" as gU
 
 class objWithX {
     var x is public := 2;
-//    method [](index) { index + x }
-//    method []:=(index) { x := index }
+    method [](index) { index + x; 
+    }
+    method []:=(index) { x := index; 
+    }
 };
 
 

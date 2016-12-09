@@ -1,3 +1,3 @@
 import "io" as io
 
-def io = 1
+def io = 1;
