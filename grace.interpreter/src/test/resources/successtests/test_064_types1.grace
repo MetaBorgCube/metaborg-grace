@@ -1,0 +1,12 @@
+var x := "Hello";
+var y;
+y := x;
+y := x ++ " world";
+var a := 3;
+a := 5;
+a := a * a;
+var b := true;
+b := !b;
+print(y);
+print(a);
+print(b);
