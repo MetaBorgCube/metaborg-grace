@@ -3,7 +3,7 @@ class Base {
     def x = 11;
     
     method a {
-        x + y;
+        x + y; // y is not resolved
     };
 };
 
@@ -13,7 +13,7 @@ class Middle {
     def y = 13;
     
     method a {
-        x + y + z;
+        x + y + z; // y, z are not resolved
     };
 };
 
