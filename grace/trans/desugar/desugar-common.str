@@ -1,7 +1,6 @@
 module trans/desugar/desugar-common
 
 imports
-    
     src-gen/signatures/grace-sig
     src-gen/signatures/grace-lowered-sig
     src-gen/signatures/general-sig

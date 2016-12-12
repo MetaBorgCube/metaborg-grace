@@ -15,21 +15,19 @@ rules
 
   desugar-all = innermost(desugar)
   
-  desugar = desugar-class-declaration <+
-            
-            desugar-flatten-methodID <+
-            desugar-flatten-methodPart <+
-            
-            desugar-blockExp <+
-            desugar-block <+
-            desugar-block-to-object <+
-            desugar-arg-noargs <+
-            desugar-arg-argsparen <+
-			desugar-argBlock <+
-            
-            desugar-flatten-objectdecl <+
-            desugar-flatten-declaration <+
-            fail
+  desugar =
+    desugar-class-declaration
+    <+ desugar-flatten-methodID
+    <+ desugar-flatten-methodPart
+    <+ desugar-blockExp 
+    <+ desugar-block
+    <+ desugar-block-to-object
+    <+ desugar-arg-noargs
+    <+ desugar-arg-argsparen
+    <+ desugar-argBlock
+    <+ desugar-flatten-objectdecl
+    <+ desugar-flatten-declaration
+    <+ desugar-unquote-strings
   
   desugar-all-post: ast -> <lower-post-all> <lower-all> ast
 
@@ -118,5 +116,8 @@ rules
         , MethodBody(code)
         )
       )])
+
+  desugar-unquote-strings:
+    String(s) -> String(<unquote(?'"')> s)
 
   desugar-fail: a -> <fail>
