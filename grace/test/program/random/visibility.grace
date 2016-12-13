@@ -7,6 +7,8 @@ object {
     var f is writable; // Confidential access, public assignment
     var g is public; // Public access and assignment
     var h is readable, writable; // Public access and assignment
+    method k is override {}; // overrides something
+    method l is manifest { 5; }; // type statically determinable
 };
 
 var a is readable; //  readable

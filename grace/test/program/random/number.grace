@@ -10,7 +10,7 @@ method fibonacci(n) {
   };
 };
 
-//print(fibonacci(13));
+print(fibonacci(10));
 var n := 1;
 
 def increment = { n := n + 1; };

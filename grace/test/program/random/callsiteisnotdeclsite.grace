@@ -6,7 +6,7 @@ class s {
 def a = object {
   inherit s;
   def y = 3;
-  base_print(f);
+  print(f);
 };
 
 // 3

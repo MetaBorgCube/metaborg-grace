@@ -17,3 +17,7 @@ object {
   };
   print "a";
 };
+
+method f {
+  return 5.a;
+};
