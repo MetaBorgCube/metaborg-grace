@@ -34,7 +34,7 @@ lexical syntax
 
   Operator = "." {reject}
   Operator = "..." {reject}
-  Operator = ":=" {reject}
+//  Operator = ":=" {reject}
   Operator = "=" {reject}
   Operator = ";" {reject}
   Operator = "{" {reject}
