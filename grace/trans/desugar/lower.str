@@ -21,7 +21,7 @@ rules
           lower-objectdecl <+
           lower-constant <+
           lower-variable <+
-          lower-assignment <+
+//          lower-assignment <+
           lower-trait <+
           lower-fail
   
@@ -53,14 +53,14 @@ rules
         as := <flatten-list> <lower-arguments> args
   
   lower-mdecl:
-    MethodDecl(_, [MethodID(mName, ps)], annotations, MethodBody(cs)) ->
+    MethodDecl([MethodID(mName, ps)], annotations, MethodBody(cs)) ->
       MethodL(name,annotations, paramNames, cs)
       with
         paramNames := <lower-params> ps;
         name := <name-to-string> mName 
 
   lower-mdecl:
-    MethodDecl(prfx, [MethodOp(mName, ps)], annotations, MethodBody(cs)) ->
+    MethodDecl([MethodOp(mName, ps)], annotations, MethodBody(cs)) ->
       MethodL(name,annotations, params, cs)
       with
         name := <name-to-string> mName; 
@@ -77,7 +77,7 @@ rules
   lower-variable: Variable(a, b, NoVarInit()) -> VariableL(a,b)
   lower-variable: Variable(a, b, VarInit(exp)) -> [VariableL(a,b), AssignmentL(a,exp)]
   
-  lower-assignment: Assignment(a,b) -> AssignmentL(a, b)
+//  lower-assignment: Assignment(a,b) -> AssignmentL(a, b)
 
   lower-trait: TraitDecl([MethodID(tName, ps)], MethodBody(code)) -> 
     TraitL(name, params, code)

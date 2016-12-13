@@ -38,7 +38,7 @@ rules
   desugar-class-declaration:
     ClassDecl(mIDs, inh, use, code) ->
       MethodDecl(
-        NoPrefix(), mIDs, NoAnnotations(),
+        mIDs, NoAnnotations(),
         MethodBody([
           Expression(ObjectDecl(inh,use,code))
         ])
@@ -99,8 +99,7 @@ rules
         [],
         [ Declaration(
             MethodDecl(
-              NoPrefix()
-            , [MethodID(ID("apply"), NoParams())]
+              [MethodID(ID("apply"), NoParams())]
             , NoAnnotations()
             , MethodBody(code)
             )
@@ -112,8 +111,7 @@ rules
     BlockWParams(BlockParams(params), code) -> 
       ObjectDecl(NoInherit(), [], [Declaration(
         MethodDecl(
-          NoPrefix()
-        , [MethodID(ID("apply"), Params(params))]
+          [MethodID(ID("apply"), Params(params))]
         , NoAnnotations()
         , MethodBody(code)
         )
