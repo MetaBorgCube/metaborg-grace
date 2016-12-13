@@ -1,9 +1,9 @@
 method t118_tryMatch(o) {
     match(o)
-        case { 1 -> "ONE" }
-        case { _ : Number -> "NUMBER" }
-        case { "hello" -> "HELLO" }
-        case { x : String -> "STRING '{x}'" }
+        case { 1 -> "ONE"; }
+        case { _ : Number -> "NUMBER"; }
+        case { "hello" -> "HELLO"; }
+        case { x : String -> "STRING '{x}'"; };
 };
 
 print(t118_tryMatch 1);
