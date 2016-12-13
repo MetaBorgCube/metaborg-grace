@@ -91,7 +91,7 @@ context-free syntax
   Exp.Boolean                   = <<Boolean>>
   Exp.Self                      = "self"
   Exp.Outer                     = "outer"
-  Exp.PlaceHolder               = "_"
+//  Exp.PlaceHolder               = "_"
   
   Outer.Outer                   = "outer"
   Exp.OuterChain                = < <{Outer "."}+>>            {avoid}
@@ -113,6 +113,9 @@ context-free syntax
   Case.Case                     = [case { [{CaseExp ", "}+] [Arrow] [{Statement "\n"}*] }]
   Case.Case                     = [case ({ [{CaseExp ", "}+] [Arrow] [{Statement "\n"}*] })]
   CaseExp.CaseExp               = <<CaseLiteral>>
+  CaseExp.CaseExpMulti          = <<CaseLiteral> <BoolOp> <CaseLiteral>>
+  BoolOp.Or                     = "|"
+  BoolOp.And                    = "&"
   CaseExp.ExpParens             = <(<Exp>)>
   CaseExp.Identifier            = <<Identifier>>
   CaseExp.ExpTyped              = <<Identifier> : <CaseType>>
