@@ -5,7 +5,6 @@ language grace
 start symbol Program
 
 test match case [[
-
 match("foo")
     case { ( y.apply ) → print("It matches 1") }
     case( { "hello" → print("It matches 2") })

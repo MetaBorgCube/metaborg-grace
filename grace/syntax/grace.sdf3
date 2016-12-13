@@ -109,13 +109,21 @@ context-free syntax
   
   Exp.Return                    = <return <Exp>>               {right}
   
-  Exp.MatchCase                 = <match (<Exp>) <Case+>>
+  Exp.MatchCase                 = <match (<Exp>) <Case+>>      {prefer} // over methodcall
   Case.Case                     = [case { [{CaseExp ", "}+] [Arrow] [{Statement "\n"}*] }]
-  CaseExp.Exp                   = <(<Exp>)>
-  CaseExp.ExpTyped              = <<Exp> : <CaseType>>
+  Case.Case                     = [case ({ [{CaseExp ", "}+] [Arrow] [{Statement "\n"}*] })]
+  CaseExp.CaseExp               = <<CaseLiteral>>
+  CaseExp.ExpParens             = <(<Exp>)>
+  CaseExp.Identifier            = <<Identifier>>
+  CaseExp.ExpTyped              = <<Identifier> : <CaseType>>
   CaseType.Type                 = <<Identifier>>
+  CaseLiteral.Number            = <<NUM>>
+  CaseLiteral.String            = <<STRING>>
+  CaseLiteral.Boolean           = <<Boolean>>
+  
   Arrow.Ascii                   = "->"
   Arrow.Unicode                 = "→"
+  
   
 context-free syntax
   
