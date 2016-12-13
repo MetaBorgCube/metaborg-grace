@@ -4,9 +4,15 @@ language grace
 
 start symbol Program
 
-test match case [[
+test match case 1 [[
 match("foo")
-    case { ( y.apply ) → print("It matches 1") }
-    case( { "hello" → print("It matches 2") })
-    case( { _ : Unknown → print("Last resort") });
-]]
+    case { ( y.apply ) -> print("It matches 1"); }
+    case( { "hello" -> print("It matches 2"); })
+    case( { _ : Unknown -> print("Last resort"); });
+]] 0 warnings 0 errors
+
+test match case 2 [[match (5) case { 5 -> do; };]] 0 warnings 0 errors
+test match case 3 [[match (5) case { _ -> do; };]] 0 warnings 0 errors
+test match case 4 [[match (5) case { 5, _ -> do; };]] 0 warnings 0 errors
+test match case 5 [[match (5) case { x -> do; };]] 0 warnings 0 errors
+test match case 6 [[match (5) case { 5 -> do; };]] 0 warnings 0 errors

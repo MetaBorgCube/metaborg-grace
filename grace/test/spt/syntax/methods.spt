@@ -5,17 +5,17 @@ language grace
 start symbol Program
 
 
-test method                                 [[method hey (parameter) { };]]
+test method                                 [[method hey (parameter) { };]] 0 warnings 0 errors
 test method empty params                    [[method hey () { };]] parse fails
-test method with body                       [[method hey (par) { do "hey"; };]]
-test method no parameters                   [[method hey { do; };]]
-test method no parameters no body           [[method hey { };]]
+test method with body                       [[method hey (par) { do "hey"; };]] 0 warnings 0 errors
+test method no parameters                   [[method hey { do; };]] 0 warnings 0 errors
+test method no parameters no body           [[method hey { };]] 0 warnings 0 errors
 test method multipart                       [[method hey (there) do { };]] parse fails
-test method multipart 2                     [[method hey (there) do (this) { };]]
-test method multipart 3                     [[method hey (there) do (this, that) { };]]
-test method multipart 4                     [[method hey (there) do (this) and (that) { };]]
+test method multipart 2                     [[method hey (there) do (this) { };]] 0 warnings 0 errors
+test method multipart 3                     [[method hey (there) do (this, that) { };]] 0 warnings 0 errors
+test method multipart 4                     [[method hey (there) do (this) and (that) { };]] 0 warnings 0 errors
 test method multipart 5                     [[method hey (there) do () { };]] parse fails
-test method from minigrace                  [[method t029_foo(a)bar(b) { };]]
+test method from minigrace                  [[method t029_foo(a)bar(b) { };]] 0 warnings 0 errors
 test method mixfix with no param            [[method field do (val) { print "hey"; };]] parse fails
 
 test hopper ignore parameter variable       [[method name(_) { _ };]] parse fails

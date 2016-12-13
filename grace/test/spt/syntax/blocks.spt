@@ -4,10 +4,10 @@ language grace
 
 start symbol Program
 
-test just empty block [[{};]]
-test method call in block [[{ do.something; };]]
-test block with argument [[{ i -> i + 1; };]]
-test block with 2 arguments [[{ sum, next -> sum + next; };]]
-test block with placeholder [[{ _ -> do; };]]
-test block with multiple placeholders [[{ _, _ -> do; };]]
-test block with some placeholders [[{ a, _ -> do; };]]
+test just empty block [[{};]] 0 warnings 0 errors
+test method call in block [[{ do.something; };]] 0 warnings 0 errors
+test block with argument [[{ i -> i + 1; };]] 0 warnings 0 errors
+test block with 2 arguments [[{ sum, next -> sum + next; };]] 0 warnings 0 errors
+test block with placeholder [[{ _ -> do; };]] 0 warnings 0 errors
+test block with multiple placeholders [[{ _, _ -> do; };]] 0 warnings 0 errors
+test block with some placeholders [[{ a, _ -> do; };]] 0 warnings 0 errors

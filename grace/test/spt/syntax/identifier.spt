@@ -4,13 +4,13 @@ language grace
 
 start symbol Program
 
-test simple identifier                [[foo;]]
-test single letter                    [[f;]]
-test single capital letter            [[F;]]
-test single letter and prime          [[f';]]
-test single letter and underscore     [[f_;]]
-test single letter and digit          [[f6;]]
-test single underscore                [[_;]]
+test simple identifier                [[foo;]]          0 warnings 0 errors
+test single letter                    [[f;]]            0 warnings 0 errors
+test single capital letter            [[F;]]            0 warnings 0 errors
+test single letter and prime          [[f';]]           0 warnings 0 errors
+test single letter and underscore     [[f_;]]           0 warnings 0 errors
+test single letter and digit          [[f6;]]           0 warnings 0 errors
+test single underscore                [[_;]]            0 warnings 0 errors
 //test single unicode letter            [[e�]]             parse succeeds
 //test word with unicode                [[foo�]]          parse succeeds
 test word with primes                 [[fkfkf'feff'ffe'fe;]]
@@ -19,7 +19,7 @@ test word with underscores            [[efe_Fefe__feefe_f;]]
 test trailing apostrophe              [[var var' := 3;]]
 test trailing underscore              [[var var_ := 3;]]
 
-test single digit                     [[5;]]            parse succeeds
+test single digit                     [[5;]]            0 warnings 0 errors
 test single prime                     [[';]]            parse fails
 test id with dot prefix               [[.a;]]           parse fails
 test id with dot suffix               [[a.;]]           parse fails
@@ -28,14 +28,14 @@ test id with tripledot prefix         [[...a;]]         parse fails
 test id with tripledot infix          [[a...a;]]        parse fails
 test id with tripledot suffix         [[a...;]]         parse fails
 
-test id with assign prefix            [[:=a;]]          parse succeeds
+test id with assign prefix            [[:=a;]]          0 warnings 0 errors
 
 test id with equals prefix            [[=a;]]           parse fails
 test id with equals infix             [[a=a;]]          parse fails
 test id with equals suffix            [[a=;]]           parse fails
 
 test id with semicolon prefix         [[;a;]]           parse fails
-test id with semicolon suffix         [[a;]]            parse succeeds
+test id with semicolon suffix         [[a;]]            0 warnings 0 errors
 
 test id with openbrace prefix         [[{a;]]           parse fails
 test id with openbrace infix          [[a{a;]]          parse fails
