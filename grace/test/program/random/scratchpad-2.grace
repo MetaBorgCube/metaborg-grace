@@ -1,10 +1,12 @@
-def a = 3;
-f;
+val := do;
 
-object {
-  ...;
-};
+a.b := 13;
 
-name.f;
-f(23);
-base_print "hello";
+self.a := 1;
+self.a := do;
+
+outer.b := do (true) while {other;};
+
+var x := 12;
+var x := do;
+var x := do (true) while {other;};

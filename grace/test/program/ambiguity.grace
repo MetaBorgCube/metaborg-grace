@@ -21,3 +21,19 @@ object {
 method f {
   return 5.a;
 };
+
+method prefix& {
+    out "Called prefix&";
+};
+
+var a := object {
+    method field:=(val) {
+        print("assigned " ++ val ++ " to field");
+    };
+};
+
+a.field := 13;
+
+trait h {
+  method a { };
+};

@@ -16,7 +16,6 @@ method a(v) {
 
 test operator and method call with receiver [[
 5 + a . b;
-
 ]] parse succeeds
 
 test operator and method call with receiver no spaces [[
@@ -26,3 +25,16 @@ test operator and method call with receiver no spaces [[
 test return with method with dot [[
   return a.b;
 ]]
+
+test print string plus number [[
+print("m.map = " + m.map);
+]]
+
+test assignmentmethod [[
+var a := object {
+  method field:=(val) {
+    print("assigned " ++ val ++ " to field");
+  };
+};
+a.field := 13;
+]]          

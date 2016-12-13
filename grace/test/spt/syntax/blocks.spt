@@ -4,20 +4,10 @@ language grace
 
 start symbol Program
 
-test just empty block [[
-{};
-]] parse succeeds
-
-test method call in block [[
-{ do.something; };
-]] parse succeeds
-
-test block with argument [[
-{ i -> i + 1; };
-]] parse succeeds
-
-test block with 2 arguments [[
-{ sum, next -> sum + next; };
-]] parse succeeds
-
-
+test just empty block [[{};]]
+test method call in block [[{ do.something; };]]
+test block with argument [[{ i -> i + 1; };]]
+test block with 2 arguments [[{ sum, next -> sum + next; };]]
+test block with placeholder [[{ _ -> do; };]]
+test block with multiple placeholders [[{ _, _ -> do; };]]
+test block with some placeholders [[{ a, _ -> do; };]]

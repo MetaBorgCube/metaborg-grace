@@ -1,0 +1,16 @@
+module syntax-assignments
+
+language grace
+
+start symbol Program
+
+test new var                        [[var a;]]
+test new var with assignment        [[var a := 13;]]
+test assignment                     [[a := 13;]]
+
+test assignment to specific field   [[x.val := 2;]]
+
+test assignment to self field       [[self.a := 1;]]
+
+test assignment to outer            [[outer.b := 1;]]
+

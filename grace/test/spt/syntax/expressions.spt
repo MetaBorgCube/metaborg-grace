@@ -139,6 +139,15 @@ test string with escaped tab                            [["string with \t tab";]
 test int plus int or int                                [[5 + 5 || 5;]]             parse succeeds
 test true or int subt int and false                     [[true || 5 - 3 && false;]] parse succeeds
 
+test outer                                              [[outer;]]
+test outerchain                                         [[outer.outer;]]
+test outerchain with call                               [[outer.outer.do("hey");]]
+test long outerchain                                    [[outer.outer.outer.outer.do "something";]]
+
+test self                                               [[self;]]
+test self with call                                     [[self.do "some";]]
+test selfchain is not allowed                           [[self.self.do "some";]] parse fails
+
 // tests from https://github.com/zmthy/hopper/tree/master/test/parse-fail
 //test hopper angle operators backwards                   [[name > name < name;]]     parse fails
 //test hopper angle operators                             [[name < name > name;]]     parse fails
