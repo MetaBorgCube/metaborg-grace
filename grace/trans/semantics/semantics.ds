@@ -63,7 +63,7 @@ rules
   Code(v) --> v.
 
   NumL(s) --> NumV(parseNumber(s)).
-  String(s) --> StringV(s).
+//  String(s) --> StringV(s).
 
   p@Program(_, _) -init-> v
     where
@@ -353,9 +353,9 @@ rules
   /*
    * Outer expression
    */
-  S |- Outer() --> ObjectRef(outer) 
-    where
-      readObject(S) --> Object(outer, _).
+//  S |- Outer() --> ObjectRef(outer) 
+//    where
+//      readObject(S) --> Object(outer, _).
 
   Ellipsis() --> Error()
     where
