@@ -1,0 +1,463 @@
+module trans/semantics/semantics
+
+imports
+  src-gen/ds-signatures/grace-sig
+  src-gen/ds-signatures/grace-lowered-sig
+
+  trans/semantics/values
+  trans/semantics/store
+  trans/semantics/lookup
+  trans/semantics/numbers
+  trans/semantics/booleans
+  trans/semantics/context
+
+signature
+
+
+  arrows
+    Program -init-> V
+    Program --> V
+
+    List(Statement) --> V
+    List(Statement) -selectDecls-> List(Statement)
+    List(Statement) -selectStmts-> List(Statement)
+    List(Statement) -selectMethods-> List(Statement)
+
+    Exp         --> V
+    Statement   --> V
+    Declaration --> V
+    Assignment  --> V
+    
+//    List(M) --> List(Statement)
+    
+//    List(Use)   -us-> List(Statement)
+
+    Inherit     --> Ref
+
+    List(Exp) -ea-> List(V)
+
+    call (M, List(V)) --> V
+    
+    addMember (String, List(String), List(Statement)) --> Unit
+    updateMember (String, List(Statement)) --> Unit
+    addTrait (String, List(String), List(Statement)) --> Unit
+    addMembers (List(String) , List(List(Statement))) --> Unit
+    createLocals (List(String) , List(List(Statement))) --> Unit
+    removeLocals (List(String)) --> Unit
+    wrapValues (List(V)) --> List(List(Statement))
+
+  native operators
+    nativeIBinOp: String * Int * Int -> Int
+    nativePrint: V -> V
+    nativeEq: V * V -> Bool
+    nativeMinus: V * V -> Int
+    nativePlus: V * V -> Int
+    nativeLte: V * V -> Bool
+    concat: List(Statement) * List(Statement) -> List(Statement)
+
+rules
+
+  Expression(e) --> e.
+  Declaration(e) --> e.
+  Assignment(e) --> e.
+  Code(v) --> v.
+
+  NumL(s) --> NumV(parseNumber(s)).
+  String(s) --> StringV(s).
+
+  p@Program(_, _) -init-> v
+    where
+      C ObjectC(), S fresh, P Exec() |- p :: OH {}, MH {}, L {}, TH {}, VH {} --> v.
+
+  Program(code, _) --> v
+    where
+      allocateObject(NoObject()) --> S;
+      C ObjectC(), S |- code --> v :: L;
+      debug("end locals: ") => _;
+      print(WrappedL(L)) => _.
+
+  /*
+   * Code Execution
+   */
+  [] : List(Statement) --> Done().
+  [code | [] ] : List(Statement) --> code.
+  [code | codes@[_|_] ] : List(Statement) --> codes
+    where code --> _.
+
+  /*
+   * Declaration Selection
+   */
+  [] : List(Statement) -selectDecls-> [].
+  [d@Declaration(MethodL(_,_,_,_)) | ss] : List(Statement) -selectDecls-> [d | ss']
+    where
+      ss -selectDecls-> ss'.
+  [d@Declaration(ConstantL(_,_,_)) | ss] : List(Statement) -selectDecls-> [d | ss']
+    where
+      ss -selectDecls-> ss'.
+  [d@Declaration(VariableL(_,_)) | ss] : List(Statement) -selectDecls-> [d | ss']
+    where
+      ss -selectDecls-> ss'.
+  [_ | ss] : List(Statement) -selectDecls-> ss'
+    where
+      ss -selectDecls-> ss'.
+
+  /*
+   * Statement Selection
+   */
+  [] : List(Statement) -selectStmts-> [].
+  [Declaration(ConstantL(name,_,e)) | ss] : List(Statement) -selectStmts-> [s | ss']
+    where
+      Assignment(AssignmentL(name,e)) => s;
+      ss -selectStmts-> ss'.
+  [s@Assignment(AssignmentL(_,_)) | ss] : List(Statement) -selectStmts-> [s | ss']
+    where
+      ss -selectStmts-> ss'.
+  [s@Expression(_) | ss] : List(Statement) -selectStmts-> [s | ss']
+    where
+      ss -selectStmts-> ss'.
+  [_ | ss] : List(Statement) -selectStmts-> ss'
+    where
+      ss -selectStmts-> ss'.
+
+  /*
+   * Method Selection
+   */
+  [] : List(Statement) -selectMethods-> [] : List(Statement).
+  [d@Declaration(MethodL(_,_,_,_)) | ss] : List(Statement) -selectMethods-> [d | ds] : List(Statement)
+    where
+      ss -selectMethods-> ds.
+  [Declaration(_) | _] : List(Statement) -selectMethods-> []
+    where
+      error("Only methods may be declared inside traits.") => _.
+
+  /*
+   * Method Calls
+   */
+  MCallRecvL(receiver, name, args) --> v
+    where
+       receiver --> recv;
+       debug("receiver: ") => _;
+       print(recv) => _;
+       recv => ObjectRef(S);
+       S |- lookup(name) --> m;
+       debug(name) => _;
+       S |- call(m, args) --> v.
+
+  /*
+   * Implicit method calls (calls on self or outer)
+   */
+  S, P p |- MCallL("print", [v]) --> nativePrint(v)
+    where
+      debug("printing from self: ") => _;
+      print(NumV(S)) => _;
+      print(WrappedP(p)) => _.
+
+  MCallL(name, vs) --> v
+    where
+      debug("generic implicit call of: '", name, "'") => _;
+      lookup(name) --> m;
+      debug(name) => _;
+      call(m, vs) --> v;
+      debug("done generic implicit call of: '", name, "'") => _.
+
+  /*
+   * Constants
+   */
+  C MethodC() |- ConstantL(name, _, e) :: L --> Done()
+    where
+      debug("adding local constant: ", name) => _;
+      print(WrappedL(L)) => _;
+      case L[name?] of {
+        true =>
+          debug("true case") => _;
+          error("Cannot rebind to constant: '", name, "' ") => _
+        otherwise =>
+          debug("otherwise case!") => _;
+          e --> v; // dynsem bug: no coersion in case switch
+          writeLocalValue(name, v) --> _ :: L1;
+          debug("post adding local") => _;
+          print(WrappedL(L1)) => _
+      }.
+
+  P Build() |- ConstantL(name, _, _) --> Done()
+    where
+      debug("__BUILD__adding member: ", name) => _;
+      addMember(name, [], [Code(Uninitialized())]) --> _.
+
+  P Init() |- ConstantL(name, _, e) --> Done()
+    where
+      debug("__INIT__ adding member: ", name) => _;
+      addMember(name, [], [Code(e)]) --> _.
+
+  C ObjectC() |- ConstantL(name, _, e) --> Done()
+    where
+      debug("adding member: ", name) => _;
+      addMember(name, [], [Code(e)]) --> _.
+
+  ConstantL(_, _, _) --> Error()
+    where
+      error("Error: unknown context for constant") => _.
+
+  /*
+   * Variables
+   */
+  C MethodC() |- VariableL(name, _) --> Done()
+    where
+      writeLocalValue(name, Uninitialized()) --> _.
+
+  C MethodC() |- AssignmentL(name, e) --> Done()
+    where
+      debug("assigning to local variable: '", name, "'.") => _ ;
+      lookup(name) --> ValueMethod(_);
+      debug("indeed a local var") => _;
+      writeLocalValue(name, e) --> _;
+      debug("done assigning to local variable: '", name, "'.") => _.
+
+  VariableL(name, _) --> Error()
+    where
+      addMember(name, [], [Code(Uninitialized())]) --> _.
+
+  AssignmentL(name, e) --> Done()
+    where
+      debug("assigning to object member '", name, "'") => _;
+      lookup (name) --> m@Method(params,code,scope,locals);
+      readObject(scope) --> o@Object(_,tbl);
+      debug("object that '", name, "' resides in: ") => _;
+      print(WrappedMembers(tbl)) => _;
+      case tbl[name?] of {
+        true =>
+          debug("setting new value of: '", name, "'.") => _;
+          print(NumV(tbl[name])) => _;
+          e --> v;
+          Method(params, [Code(v)], scope, locals) => newMethod;
+          writeMethod(tbl[name], newMethod) --> _
+        otherwise =>
+          error("Error: '", name, "' should be in this object but is not found") => _
+      };
+      debug("done assigning to object member: '", name, "'.") => _.
+//      addMember(name, [], [Code(e)]) --> _.
+//      error("Assignment outside methods not implemented") => _.
+
+  /*
+   * Methods
+   */
+  C ObjectC() |- MethodL(name, _, params, code) --> Done()
+    where
+      addMember(name, params, code) --> _.
+
+  C MethodC() |- MethodL(name, _, _, _) --> Error()
+    where
+      error("Error: cannot create method: '", name, "' inside a methodContext") => _.
+
+//  /*
+//   * Object Constructors
+//   */
+//  S, P Exec() |- ObjectL(NoInherit(), [], code) --> ObjectRef(newSelf)
+//    where
+//      // install trait methods on this object:
+////      use -us-> methods;
+//    
+//      // allocate new object       
+//      allocateObject(Object(S, {})) --> newSelf; // current self becomes outer
+//
+//      // build phase
+//      code -selectDecls-> decls;
+//      C ObjectC(), S newSelf, P Build() |- decls --> _; 
+//
+//      // init phase
+//      code -selectStmts-> stmts;
+//      C ObjectC(), S newSelf, P Exec() |- stmts --> _
+//      ;
+////      .
+//      debug("members of this object: ") => _;
+//      readObject(newSelf) --> Object(_, members);
+//      print(WrappedMembers(members)) => _.
+      
+  
+//  [] : List(Use) -us-> [] : List(Statement).
+//  [Use(e, alias, exclude) | us] : List(Use) -us-> concat(ss, sss) : List(Statement)
+//    where
+//      e => MCallL(name, args);
+//      readTrait(name) --> ss;
+//      us -us-> sss.
+
+  S, P Exec() |- ObjectL(inherit, [], code) --> ObjectRef(newSelf)
+    where
+      // allocate new object
+      allocateObject(Object(S, {})) --> newSelf; // current self becomes outer
+
+      // build phase
+      code -selectDecls-> decls;
+      C ObjectC(), S newSelf, P Build() |- decls --> _; 
+      
+      // build & initialize parents
+      case inherit of {
+        NoInherit() => 
+          
+        i@Inherit(_,_,_) => 
+          S newSelf, P Build() |- i --> _;
+          S newSelf, P Init() |- i --> _
+      };
+      
+      // init phase
+      code -selectStmts-> stmts;
+      C ObjectC(), S newSelf, P Exec() |- stmts --> _.
+  
+  // we are currently building, now coming across an inherit expression
+  S, P Build() |- ObjectL(NoInherit(), [], code) --> ObjectRef(S)
+    where
+            debug("object constructor in build mode, NoInherit") => _;
+      code -selectDecls-> decls;
+      C ObjectC(), P Build() |- decls --> _. // just build decls, nothing else
+ 
+  S, P Build() |- ObjectL(inherit@Inherit(_,_,_), [], code) --> ObjectRef(S)
+    where
+            debug("object constructor in build mode, Inherit") => _;
+      inherit --> _; // eval inherit expr (still build context)
+      code -selectDecls-> decls;
+      C ObjectC(), P Build() |- decls --> _. // build decls
+  
+  S, P Init() |- ObjectL(NoInherit(), [], code) --> ObjectRef(S)
+    where
+            debug("object constructor in init mode, NoInherit") => _;
+      code -selectStmts-> stmts;
+      C ObjectC(), P Exec() |- stmts --> _. // do as normal
+  
+  S, P Init() |- ObjectL(inherit@Inherit(_,_,_), [], code) --> ObjectRef(S)
+    where
+            debug("object constructor in init mode, Inherit") => _;
+      inherit --> _; // eval inherit expr (still init context)
+      code -selectStmts-> stmts; // rest of the statements
+      C ObjectC(), P Exec() |- stmts --> _. // do as normal
+
+  ObjectL(_, _, _) --> ObjectRef(allocateObject(NoObject()))
+    where
+      error("No valid object constructor.") => _.
+
+  /*
+   * Inherit expressions
+   */
+  Inherit(e, _, _) --> r
+    where
+      e --> ObjectRef(r).
+
+  NoInherit() --> r
+    where
+      allocateObject(NoObject()) --> r.
+
+  /*
+   * Self expression
+   */ 
+  S |- Self() --> ObjectRef(S).
+
+  /*
+   * Outer expression
+   */
+  S |- Outer() --> ObjectRef(outer) 
+    where
+      readObject(S) --> Object(outer, _).
+
+  Ellipsis() --> Error()
+    where
+      error("Attempt to evaluate ellipsis (...)") => _.
+
+  TraitL(name, params, body) --> Done()
+    where
+      body -selectMethods-> ms;
+      addTrait(name, params, ms) --> tRef.
+      
+  /*
+   * call (meta-function).
+   */
+  call(NoMethod(name), _) --> Error() // should raise exception
+    where
+      error("Message not understood: '", name, "'") => _.
+   
+  call(ValueMethod(v), []) --> v.
+
+  call(Method([], code, scope, closure), []) :: L --> v :: L // executing a call doesnt change locals
+    where
+      debug("calling method with no args") => _;
+      S scope, C MethodC() |- code :: L closure --> v. // scope? // always call with empty locals
+
+  call(Method(names@[_ | _], code, scope, closure), args@[_ | _]) :: L --> v :: L // calling has no net effect on locals
+    where
+      debug("calling method with some args") => _;
+      createLocals(names, wrapValues(args)) :: L {} --> _ :: L params; // scope?
+      S scope, C MethodC() |- code :: L {params, closure} --> v;
+      debug("done calling methods with some args") => _.
+
+  /*
+   * Re-wrap values into executable code (meta-function).
+   */ 
+  wrapValues([]) --> [] : List(List(Statement)).
+
+  wrapValues([v|vs]) --> [ wv | wvs ] : List(List(Statement))
+    where
+      [Code(v)] : List(Statement) => wv;
+      wrapValues(vs) --> wvs.
+
+  /*
+   * Add members (meta-function)
+   */
+  addMembers([], []) --> Unit().
+
+  addMembers([n | ns], [code | codes]) --> Unit()
+    where
+      addMember(n, [], code) --> _;
+      addMembers(ns, codes) --> _.
+
+  S |- addMember(name, params, code) :: L --> Unit()
+    where
+      debug("attempt to write member: '", name, "'") => _;
+      
+      allocateMethod(Method(params, code, S, L)) --> mRef;
+      readObject(S) --> Object(enc, tbl);
+      
+      debug("pre: ") => _;
+      print(WrappedMembers(tbl)) => _;
+      
+      writeObject(S, Object(enc, {name |--> mRef, tbl} )) --> _;
+      
+      debug("added member: '", name, "' successfully") => _;
+      debug("post: ") => _;
+      
+      readObject(S) --> Object(_, tblPost);
+      
+      print(WrappedMembers(tblPost)) => _;
+      print(NumV(S)) => _.
+
+//  addTrait(name, params, sts) --> Unit()
+//    where
+//      writeTrait(name, sts) --> _.
+
+  /*
+   * Add locals (meta-function)
+   */
+  createLocals([], []) --> Unit().
+
+  createLocals([n|ns], [code|codes]) --> Unit()
+    where
+      writeLocalValue(n, code) --> _;
+      createLocals(ns, codes) --> _ :: L1;
+      debug("locals") => _;
+      print(WrappedL(L1)) => _.
+
+  removeLocals([]) --> Unit().
+
+  removeLocals([n|ns]) --> Unit()
+    where
+      writeLocalValue(n, Uninitialized()) --> _;
+      removeLocals(ns) --> _.
+
+  /*
+   * Evaluate arguments (meta-function)
+   */
+  [] : List(Exp) -ea-> [].
+  [a] : List(Exp) -ea-> [v] : List(V)
+    where
+      a --> v.
+  [a | as] : List(Exp) -ea-> [v | vs]
+    where
+      a --> v;
+      as -ea-> vs : List(V).

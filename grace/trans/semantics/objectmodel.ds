@@ -1,0 +1,216 @@
+module trans/semantics/objectmodel
+
+imports
+  src-gen/ds-signatures/grace-sig
+
+imports
+  trans/semantics/values
+  trans/semantics/environment
+  trans/semantics/statements
+  trans/semantics/new-store
+  trans/semantics/runtime/natives
+
+signature
+  sorts
+    Addr
+
+  sorts
+    Object
+    Member
+    
+  sort aliases
+    Self = Addr
+    HeapData = Object
+    Tbl = Map(String, V)
+
+  constructors
+    Obj: Addr * Tbl -> Object
+    ClosV: List(String) * Code * Env * Addr -> V
+    RefV: Addr -> V {implicit}
+  
+  components
+    S : Addr
+    O : Addr
+    
+  arrows
+      
+    add-member(String, V) --> U
+    
+    lookup-method(String) --> V
+    lookup-method(V, String) --> V
+    
+    init-object(V) --> Addr
+    init-methods(Closures) --> U
+    init-fields(Closures) --> U
+    
+    new-object() --> Addr
+//    outer(V) --> V
+    
+rules
+
+  P Exec() |- ol@ObjectL(_, [], _) --> init-object(fo)
+  where
+    P Flatten() |- ol --> fo@FlatObject(_).
+  
+  init-object(FlatObject(closures)) --> S
+  where
+    new-object() --> S;
+    S |- init-methods(closures) --> U();
+    S |- init-fields(closures) --> U().
+
+rules /* member operations */
+
+  O |- new-object() --> S
+  where
+    allocate(Obj(O, {})) --> S.
+
+  S |- add-member(x, v) --> U()
+  where
+    read(S) --> Obj(O, members);
+    update(S, Obj(O, { x |--> v, members})) --> _.
+
+//  outer(S) --> O
+//  where
+//    read(S) --> Obj(O, _).
+
+  S, O |- lookup-method(S', x) --> v
+  where
+    S == S';
+    read(S') --> Obj(O', members);
+    case members[x?] of {
+      true =>
+        members[x] => v
+      false =>
+        S O, O O' |- lookup-method(O, x) --> v
+    }.
+
+  S |- lookup-method(S', x) --> v
+  where
+    S != S';
+    read(S') --> Obj(_, members);
+    case members[x?] of {
+      true =>
+        members[x] => v
+      false =>
+        halt-error("No member: ", x) --> _;
+        DoneV() => v
+    }.
+
+
+/* ========== INIT METHODS =========== */
+
+signature
+  arrows
+    Closure -method-> U
+    Code -method-> U
+    Statement -method-> U
+
+rules
+
+  O |- Declaration(MethodL(name, _, params, code)) -method-> U()
+  where
+    add-member(name, ClosV(params, code, {}, O)) --> U().
+  
+  _ : Statement -method-> U().
+
+  init-methods([]) --> U().
+  
+  init-methods([clos | closs]) --> init-methods(closs)
+  where
+    clos -method-> U().
+  
+  Closure(O, code) -method-> U()
+  where
+    O |- code -method-> U().
+
+  [] : Code -method-> U().
+  
+  [c |cs] : Code -method-> U()
+  where
+    c -method-> U();
+    cs -method-> U().
+
+
+
+/* ========== INIT FIELDS =========== */
+signature
+  arrows
+    Closure -field-> U
+    Code -field-> U
+    Statement -field-> U
+
+rules /* init-fields */
+  
+  Declaration(ConstantL(name, _, v)) -field-> U()
+  where
+    add-member(name, v) --> U().
+  
+  Declaration(VariableL(name, _)) -field-> U()
+  where
+    add-member(name, Uninitialized()) --> U().
+  
+  Declaration(MethodL(_, _, _, _)) -field-> U().
+  
+  s : Statement -field-> U()
+  where
+    s --> v.
+  
+  init-fields([]) --> U().
+  
+  init-fields([clos | closs]) --> init-fields(closs)
+  where
+    clos -field-> U().
+
+  Closure(O, code) -field-> U()
+  where
+    O |- code -field-> U().
+  
+  [] : Code -field-> U().
+  
+  [c |cs] : Code -field-> U()
+  where
+    c -field-> U();
+    cs -field-> U().
+
+
+/* ========== OBJECT FLATTENING =========== */
+signature
+  sorts
+    Phase
+  
+  constructors
+    Exec    : Phase
+    Flatten : Phase
+    
+  components
+    P : Phase
+    
+  sorts
+    Closure
+    
+  sort aliases
+    Closures = List(Closure)
+
+  constructors
+    Closure: Addr * Code -> Closure    
+    FlatObject: List(Closure) -> V
+
+  native operators
+    concatClosures : Closures * Closures -> Closures
+
+  arrows
+    Inherit --> V
+
+rules
+
+  O, P Flatten() |- ObjectL(inherit, [], code) --> FlatObject(concatClosures(closures-inherited, [Closure(O, code)])) //FlatObject(closures-inherited ++ [Closure(O, code)])
+  where
+    P Flatten() |- inherit --> FlatObject(closures-inherited).
+
+  P Flatten() |- NoInherit() --> FlatObject([]).
+  
+  P Flatten() |- Inherit(e, _, _) --> e. // TODO this is where to check whether the inherit expression actually returns a fresh object
+
+    
+    
+    

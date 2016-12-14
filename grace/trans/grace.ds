@@ -2,4 +2,15 @@ module trans/grace
 
 imports
   trans/semantics/semantics
+
+signature
+  arrows
+    Program -init-> (V * H)
+
+rules
+
+  p@Program(_, _) -init-> (v, H)
+    where
+      next() --> base;
+      O base, S base, P Exec() |- p :: H {} --> v :: H.
   

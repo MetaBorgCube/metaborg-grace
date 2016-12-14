@@ -1,91 +1,15 @@
 module trans/semantics/values
 
-imports
-
-  src-gen/ds-signatures/grace-sig
-  
-  trans/semantics/context
-  
 signature
 
-  //    move to components.ds after import fix
-
-  sort aliases
-    OHeap = Map(Ref, O)
-    MHeap = Map(Ref, M)
-    THeap = Map(String, List(Statement))
-    VHeap = Map(Ref, V)
-    Locals = Map(String, Ref)
-
-  components
-    OH : OHeap
-    MH : MHeap
-    TH : THeap
-    L : Locals
-    VH : VHeap
-    
-  // ^^ move to components.ds after import fix
-
-  sort aliases
-    Ref = Int
-    Members = Map(String, Int)
-
   sorts
-    V // value
-    O // object
-    M // method
-    Unit
-    Table
+    V
+    U
+
+  constructors
+    Uninitialized: V
+    U : U
 
   variables
     v : V
     vs : List(V)
-    o : O
-    m : M
-    r : Ref
-    
-  constructors
-    NumV: Int -> V
-    StringV: String -> V
-    BoolV: Bool -> V
-    ObjectRef: Int -> V
-    Done: V
-    Error: V
-    Uninitialized: V
-
-    //      enclosing object ref (outer)
-    //            members (methods)
-    Object: Ref * Members -> O
-    NoObject: O
-    
-    //           params         code              self  closure
-    Method:      List(String) * List(Statement) * Ref * Map(String, Ref) -> M
-    ValueMethod: V -> M
-    NoMethod:    String -> M
-
-    // for turning values back into executable code
-    Code: V -> Statement
-    
-    // for internal use
-    Unit: Unit
-    
-    // wrapping for debug purposes
-    WrappedO: O -> V
-    WrappedM: M -> V
-    WrappedLS: List(Statement) -> V
-    WrappedLCS: List(List(Statement)) -> V
-    WrappedMembers: Members -> V
-    WrappedP: Phase -> V
-    WrappedMs: List(M) -> V
-    
-  native operators
-    parseNumber: String -> Int
-    print: V -> V
-    
-    error: String -> String
-    error: String * String -> String
-    error: String * String * String -> String
-    
-    debug: String -> String
-    debug: String * String -> String
-    debug: String * String * String -> String

@@ -4,7 +4,6 @@ signature
 
   sorts
     Context
-//    Self
     Outer
     Phase
 
@@ -15,9 +14,7 @@ signature
 
     Exec    : Phase
     Build   : Phase
-    Init    : Phase
     
    components
      C : Context
-     S : Int
      P : Phase

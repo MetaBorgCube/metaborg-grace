@@ -1,0 +1,34 @@
+module trans/semantics/new-store
+
+signature
+  sorts
+    HeapData
+    
+  sort aliases
+    Addr = Int
+    H = Map(Addr, HeapData)
+  
+  components
+    H : H
+
+  arrows
+    allocate(HeapData) :: H --> Addr :: H
+    update(Addr, HeapData) :: H --> Addr :: H
+    read(Addr) :: H --> HeapData :: H
+    has(Addr) :: H --> Bool :: H
+    next() --> Addr
+        
+rules
+  
+  allocate(data) :: H --> addr :: H {addr |--> data, H}
+  where
+    next() --> addr.
+  
+  read(addr) :: H --> H[addr] :: H.
+
+  update(addr, data) :: H --> addr :: H {addr |--> data, H}.
+  
+  next() --> fresh.
+  
+  has(addr) :: H --> H[addr?] :: H.
+  

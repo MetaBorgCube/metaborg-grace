@@ -1,0 +1,22 @@
+module trans/semantics/statements
+
+imports
+  src-gen/ds-signatures/grace-sig
+  trans/semantics/values
+  trans/semantics/expressions
+
+signature
+  constructors
+    DoneV : V
+  
+  sort aliases
+    Code = List(Statement)
+
+  arrows
+    Statement --> V
+    Code --> V
+
+rules
+
+  // unwrap expression
+  Expression(e) --> e.

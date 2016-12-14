@@ -7,9 +7,9 @@ import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChild(value = "stringbuild", type = TermBuild.class)
-public abstract class parseNumber_1 extends TermBuild {
+public abstract class parseI_1 extends TermBuild {
 
-	public parseNumber_1(SourceSection source) {
+	public parseI_1(SourceSection source) {
 		super(source);
 	}
 
@@ -19,6 +19,6 @@ public abstract class parseNumber_1 extends TermBuild {
 	}
 
 	public static TermBuild create(SourceSection source, TermBuild stringbuild) {
-		return parseNumber_1NodeGen.create(source, stringbuild);
+		return parseI_1NodeGen.create(source, stringbuild);
 	}
 }

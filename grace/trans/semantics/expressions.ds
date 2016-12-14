@@ -1,0 +1,59 @@
+module trans/semantics/expressions
+
+imports
+  src-gen/ds-signatures/grace-sig
+  trans/semantics/values
+  trans/semantics/statements
+  trans/semantics/objectmodel
+  
+signature
+  arrows
+    Exp --> V
+    List(Exp) --> List(V)
+    
+    resolve-call(V, String, List(V)) --> V
+    
+    call(V, V, List(V)) --> V
+    
+  native operators
+    nativePrint: V -> V
+
+rules
+
+  MCallL("print", [e]) --> nativePrint(v)
+  where
+    e --> v.
+  
+  MCallL(x, es) --> MCallRecvL(Self(), x, es).
+  
+  MCallRecvL(e, x, es) --> resolve-call(v, x, vs)
+  where
+    e --> v;
+    es --> vs.
+  
+  [] : List(Exp) --> [].
+  
+  [e | es] : List(Exp) --> [ v | vs ]
+  where
+    e --> v;
+    es --> vs.
+
+rules
+  
+  resolve-call(recv, x, vs) --> call(recv, mv, vs)
+  where
+    lookup-method(recv, x) --> mv.
+  
+  // field access
+  call(_, mv, []) --> mv
+  where
+    mv =!=> ClosV(_, _, _, _).
+
+//  // method call
+//  call(S, ClosV([], code, _, O), []) --> v
+//  where
+//    S, O |- code --> v.
+    
+     
+
+    

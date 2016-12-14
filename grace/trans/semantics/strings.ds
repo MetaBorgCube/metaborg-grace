@@ -1,0 +1,13 @@
+module trans/semantics/strings
+
+imports
+  src-gen/ds-signatures/grace-lowered-sig
+  trans/semantics/expressions
+
+signature
+  constructors
+    StringV : String -> V
+
+rules
+
+  String(s) --> StringV(s).
