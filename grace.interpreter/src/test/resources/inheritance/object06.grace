@@ -1,6 +1,6 @@
 method base {
     object {
-        def param is public = -500;
+        def param is public = 100;
         def x1 is public = param;
     };
 };

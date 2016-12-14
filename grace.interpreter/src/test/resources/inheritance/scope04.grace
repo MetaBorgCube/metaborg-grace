@@ -9,7 +9,7 @@ class A {
         inherit CinA;
         
         method inA {
-            -2;
+            2;
         };
     };
 };
