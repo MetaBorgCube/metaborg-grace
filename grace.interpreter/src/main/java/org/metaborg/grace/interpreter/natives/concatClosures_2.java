@@ -21,16 +21,22 @@ public abstract class concatClosures_2 extends TermBuild {
 
 	@Specialization
 	public List_IClosureTerm doOp(List_IClosureTerm a, List_IClosureTerm b) {
+		
 		// FIXME inefficient
-		IClosureTerm[] bTerms = new IClosureTerm[b.size()];
-		Iterator<IClosureTerm> bIter = b.iterator();
+		IClosureTerm[] aTerms = new IClosureTerm[a.size()];
+		Iterator<IClosureTerm> aIter = a.iterator();
 		int idx = 0;
-		while (bIter.hasNext()) {
-			bTerms[idx] = bIter.next();
+		while (aIter.hasNext()) {
+			aTerms[idx] = aIter.next();
 			idx++;
 		}
-
-		return a.addAll(bTerms);
+		idx--;
+		for(; idx >= 0; idx--){
+			b = b.add(aTerms[idx]);
+		}
+		
+		
+		return b;
 	}
 
 	public static TermBuild create(SourceSection source, TermBuild left, TermBuild right) {
