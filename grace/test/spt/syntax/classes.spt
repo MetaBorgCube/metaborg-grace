@@ -1,0 +1,87 @@
+module syntax-classes
+
+language grace
+
+start symbol Program
+
+test class simple [[class A { };]] 0 warnings 0 errors
+test class parameters [[class A(x) { };]] 0 warnings 0 errors
+test class mixfix [[class A (x) B (y) { };]] 0 warnings 0 errors
+test class mixfix may not end with name [[class A (x) B { };]] parse fails
+test class mixfix many parameters [[class A (x,y) B (c,v,d) C (r) { };]] 0 warnings 0 errors
+test class with full stop [[class X.new(y) { };]] 0 warnings 0 errors
+test class with two full stops fails [[class X.y.new(y) { };]] parse fails
+
+test class inherit [[
+class A {
+  inherit b;
+};
+]] 0 warnings 0 errors
+
+test class use [[
+class A {
+  use a;
+};
+]] 0 warnings 0 errors
+
+test class two uses [[
+class A {
+  use a;
+  use b;
+};
+]] 0 warnings 0 errors
+
+test class inherit and use [[
+class A {
+  inherit b;
+  use a;
+};
+]] 0 warnings 0 errors
+
+test class inherit alias [[
+class A {
+  inherit b alias n = m;
+};
+]] 0 warnings 0 errors
+
+test class inherit alias with parameters [[
+class A {
+  inherit b alias n(_) = m(_);
+};
+]] 0 warnings 0 errors
+
+test class inherit exclude [[
+class A {
+  inherit b exclude c;
+};
+]] 0 warnings 0 errors
+
+test class inherit exclude with parameters [[
+class A {
+  inherit b exclude c(_)d(f,_);
+};
+]] 0 warnings 0 errors
+
+test class inherit multiple exclude [[
+class A {
+  inherit b exclude f exclude g;
+};
+]] 0 warnings 0 errors
+
+test class inherit multiple alias [[
+class A {
+  inherit b alias f = g alias h = j;
+};
+]] 0 warnings 0 errors
+
+test class inherit many modifyers[[
+class A {
+  inherit b exclude f alias f = g exclude g alias h = j exclude w;
+};
+]] 0 warnings 0 errors
+
+test class inherit multiple exclude no comma [[
+class A {
+  inherit b exclude f,g
+};
+]] parse fails
