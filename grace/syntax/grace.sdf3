@@ -32,15 +32,18 @@ context-free syntax
   Declaration.Variable          = <var <Identifier><Annotations><VarInit>>
   Declaration.MethodDecl        = <method <MethodNames><Annotations> <MethodBody>>
   Declaration.ClassDecl         = <
-                                   class <MethodNames>{
+                                   class <ClassName>{
                                        <Inherit><Use*><{Statement "\n"}*>
                                    }
                                   >
   Declaration.TraitDecl         = <trait <MethodNames> <MethodBody>>
   Use.Use                       = <
-                                       use <Exp><Alias><Exclude>;
+                                       use <Exp> <Modifier*>;
 
                                   >
+  ClassName.FullStop            = <<ID>.<MethodNames>>
+  ClassName.MethodName          = <<MethodNames>>
+                                  
   MethodNames.Single            = <<MethodNameNoParam>>
   MethodNames.Multiple          = <<MethodName+>>
                                   
@@ -91,7 +94,6 @@ context-free syntax
   Exp.Boolean                   = <<Boolean>>
   Exp.Self                      = "self"
   Exp.Outer                     = "outer"
-//  Exp.PlaceHolder               = "_"
   
   Outer.Outer                   = "outer"
   Exp.OuterChain                = < <{Outer "."}+>>            {avoid}
@@ -110,15 +112,15 @@ context-free syntax
   Exp.Return                    = <return <Exp>>               {right}
   
   Exp.MatchCase                 = <match (<Exp>) <Case+>>      {prefer} // over methodcall
-  Case.Case                     = [case { [{CaseExp ", "}+] [Arrow] [{Statement "\n"}*] }]
-  Case.Case                     = [case ({ [{CaseExp ", "}+] [Arrow] [{Statement "\n"}*] })]
+  Case.Case                     = [case { [CaseExp] [Arrow] [{Statement "\n"}*] }]
+  Case.CaseParen                = [case ({ [CaseExp] [Arrow] [{Statement "\n"}*] })]
   CaseExp.CaseExp               = <<CaseLiteral>>
   CaseExp.CaseExpMulti          = <<CaseLiteral> <BoolOp> <CaseLiteral>>
-  BoolOp.Or                     = "|"
-  BoolOp.And                    = "&"
   CaseExp.ExpParens             = <(<Exp>)>
   CaseExp.Identifier            = <<Identifier>>
   CaseExp.ExpTyped              = <<Identifier> : <CaseType>>
+  BoolOp.Or                     = "|"
+  BoolOp.And                    = "&"
   CaseType.Type                 = <<Identifier>>
   CaseLiteral.Number            = <<NUM>>
   CaseLiteral.String            = <<STRING>>
@@ -144,14 +146,15 @@ context-free syntax
   OperatorCF.OperatorCF         = <<Operator>>
   
   Inherit.Inherit               = <
-                                    inherit <Exp><Alias><Exclude>;
+                                   inherit <Exp> <Modifier*>;
                   
                                   >
   Inherit.NoInherit             = <>
-  Alias.Alias                   = < alias <Identifier> = <Identifier>>
-  Alias.NoAlias                 = <>
-  Exclude.Exclude               = < exclude <{Identifier ", "}*>>
-  Exclude.NoExclude             = <>
+                                  
+  Modifier.Alias                = <<Alias>>
+  Modifier.Exclude              = <<Exclude>>
+  Alias.Alias                   = < alias <MethodNames> = <MethodNames>>
+  Exclude.Exclude               = < exclude <MethodNames>>
   
   Boolean.True                  = "true"
   Boolean.False                 = "false"

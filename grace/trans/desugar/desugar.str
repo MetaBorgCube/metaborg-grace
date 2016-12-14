@@ -88,16 +88,16 @@ rules
     Block(BlockWParams(a, b)) -> BlockWParams(a, b)
    
   desugar-block:
-    Block(a) -> BlockWParams(BlockParams(NoParams()), a) 
+    Block(a) -> BlockWParams(BlockParams([]), a) 
 
   desugar-block-to-object:
-    BlockWParams(BlockParams(NoParams()), code)-> 
+    BlockWParams(BlockParams([]), code)-> 
       ObjectDecl(
         NoInherit(),
         [],
         [ Declaration(
             MethodDecl(
-              [MethodID(ID("apply"), NoParams())]
+              [MethodID(ID("apply"), Params([]))]
             , NoAnnotations()
             , MethodBody(code)
             )
