@@ -7,7 +7,6 @@ class A {
 
 print(A.a);
 
-
 def after = -1;
 
 print(A.b);
