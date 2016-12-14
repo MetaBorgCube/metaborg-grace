@@ -110,7 +110,10 @@ context-free syntax
   
   Exp.Return                    = <return <Exp>>               {right}
   
-  Exp.MatchCase                 = <match (<Exp>) <Case+>>      {prefer} // over methodcall
+  Exp.MatchCase                 = <
+                                   match (<Exp>)
+                                       <{Case "\n"}+>
+                                  > {prefer} // over methodcall
   Case.Case                     = [case { [CaseExp] [Arrow] [{Statement "\n"}*] }]
   Case.CaseParen                = [case ({ [CaseExp] [Arrow] [{Statement "\n"}*] })]
   CaseExp.CaseExp               = <<CaseLiteral>>
