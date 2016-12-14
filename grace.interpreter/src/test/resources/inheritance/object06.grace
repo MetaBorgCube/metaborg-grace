@@ -1,0 +1,15 @@
+method base {
+    object {
+        def param is public = -500;
+        def x1 is public = param;
+    };
+};
+
+def myobj = object {
+    inherit base;
+    
+    def param is public = 500;
+};
+
+print(myobj.param);
+print(myobj.x1);
