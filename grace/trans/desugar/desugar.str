@@ -34,14 +34,28 @@ rules
   desugar-program: Program(a, b) -> Program([Expression(ObjectDecl(NoInherit(), [], a))], b)
   
   desugar-class-declaration:
-    ClassDecl(mIDs, inh, use, code) ->
+    ClassDecl(MethodName(mIDs), inh, use, code) ->
       MethodDecl(
-        mIDs, NoAnnotations(),
+        mIDs,
+        NoAnnotations(),
         MethodBody([
           Expression(ObjectDecl(inh,use,code))
         ])
       )
-  
+  desugar-class-declaration:
+    ClassDecl(FullStop(iden, mIDs), inh, use, code) ->      
+      Constant(iden , NoAnnotations(), Expression (
+        ObjectDecl(NoInherit(), [], [
+          MethodDecl(
+            mIDs,
+            NoAnnotations(),
+            MethodBody([
+              Expression(ObjectDecl(inh,use,code))
+            ])
+          )
+        ])
+      ))
+      
   desugar-flatten-methodID: [ MethodID(ID(n1), Params(p1)), MethodID(ID(n2), Params(p2)) | mids ] ->
       [MethodID(ID(name), Params(ps)) | mids ]
     with
@@ -64,6 +78,8 @@ rules
 
   desugar-arg:  ArgNumber(a) -> Number(a)
   desugar-arg: ArgBoolean(a) -> Boolean(a)
+  desugar-arg:  ArgString(a) -> String(a)
+  desugar-arg:  ArgLineup(a) -> LineupExp(a)
   desugar-arg:  ArgsParen(a) -> a
   desugar-arg:             a -> a
 
@@ -97,7 +113,7 @@ rules
         [],
         [ Declaration(
             MethodDecl(
-              [MethodID(ID("apply"), Params([]))]
+              Single(MethodID(ID("apply")))
             , NoAnnotations()
             , MethodBody(code)
             )
@@ -109,7 +125,7 @@ rules
     BlockWParams(BlockParams(params), code) -> 
       ObjectDecl(NoInherit(), [], [Declaration(
         MethodDecl(
-          [MethodID(ID("apply"), Params(params))]
+          Multiple([MethodID(ID("apply"), Params(params))])
         , NoAnnotations()
         , MethodBody(code)
         )

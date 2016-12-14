@@ -72,7 +72,6 @@ context-free syntax
   Annotation.Overrides          = "override"
   
   Params.Params                 = <(<{Param ", "}+>)>
-//  Params.NoParams               = <>
   Param.Param                   = <<Identifier>>
 
   MethodBody.MethodBody         = <

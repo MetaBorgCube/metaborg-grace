@@ -33,7 +33,7 @@ rules
   pp-debug :
     ast -> result
     with
-       result := <pp-grace-string> ast
+       result := <pp-grace-string> <alltd(String(quote(!'"')))> ast
     <+ <bottomup(try(not(is-string); not(is-list); not(pp-grace-string); debug(!"cannot pp ")))> ast
     ;  result := ""
 
