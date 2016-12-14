@@ -22,10 +22,11 @@ rules
   where
     code --> v.
 
-
   [] : Code --> DoneV().
+
+  [c] : Code --> c.
   
-  [c | cs] : Code --> v
+  [c | cs@[_|_]] : Code --> v
   where
     c --> _;
     cs --> v.

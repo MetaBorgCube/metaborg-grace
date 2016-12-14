@@ -9,6 +9,8 @@ imports
   trans/semantics/statements
   trans/semantics/new-store
   trans/semantics/runtime/natives
+  
+  trans/semantics/strings
 
 signature
   sorts
@@ -33,7 +35,6 @@ signature
     O : Addr
     
   arrows
-      
     add-member(String, V) --> U
     
     lookup-method(String) --> V
@@ -44,13 +45,16 @@ signature
     init-fields(Closures) --> U
     
     new-object() --> Addr
-//    outer(V) --> V
     
+    current-self() --> V
+
 rules
 
-  P Exec() |- ol@ObjectL(_, [], _) --> init-object(fo)
+  S, P Exec() |- ol@ObjectL(_, [], _) --> S'
   where
-    P Flatten() |- ol --> fo@FlatObject(_).
+    O S, P Flatten() |- ol --> fo@FlatObject(_);
+    init-object(fo) --> S'.
+    
   
   init-object(FlatObject(closures)) --> S
   where
@@ -60,18 +64,14 @@ rules
 
 rules /* member operations */
 
-  O |- new-object() --> S
-  where
-    allocate(Obj(O, {})) --> S.
+  O |- new-object() --> allocate(Obj(O, {})).
+
+  S |- current-self() --> S.
 
   S |- add-member(x, v) --> U()
   where
     read(S) --> Obj(O, members);
     update(S, Obj(O, { x |--> v, members})) --> _.
-
-//  outer(S) --> O
-//  where
-//    read(S) --> Obj(O, _).
 
   S, O |- lookup-method(S', x) --> v
   where
@@ -207,9 +207,11 @@ rules
   where
     P Flatten() |- inherit --> FlatObject(closures-inherited).
 
-  P Flatten() |- NoInherit() --> FlatObject([]).
+  NoInherit() --> FlatObject([]).
   
-  P Flatten() |- Inherit(e, _, _) --> e. // TODO this is where to check whether the inherit expression actually returns a fresh object
+  Inherit(e, _, _) --> v // TODO this is where to check whether the inherit expression actually returns a fresh object
+  where
+    e --> v.
 
     
     

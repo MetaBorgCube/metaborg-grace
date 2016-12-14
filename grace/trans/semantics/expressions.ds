@@ -20,6 +20,8 @@ signature
 
 rules
 
+  Self() --> current-self().
+
   MCallL("print", [e]) --> nativePrint(v)
   where
     e --> v.
@@ -40,19 +42,24 @@ rules
 
 rules
   
-  resolve-call(recv, x, vs) --> call(recv, mv, vs)
+  resolve-call(recv, x, vs) --> v
   where
-    lookup-method(recv, x) --> mv.
+    lookup-method(recv, x) --> mv;
+    call(recv, mv, vs) --> v.
   
   // field access
   call(_, mv, []) --> mv
   where
     mv =!=> ClosV(_, _, _, _).
 
-//  // method call
-//  call(S, ClosV([], code, _, O), []) --> v
-//  where
-//    S, O |- code --> v.
+  // method call with no arguments
+  call(S, ClosV([], code, _, O), []) --> v
+  where
+    S, O |- code --> v.
+  
+  call(S, ClosV(_, code, _, O), [_|_]) --> DoneV()
+  where
+    halt-error("You haven't told me how to call functions with arguments", "") --> _.
     
      
 
