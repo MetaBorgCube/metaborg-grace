@@ -12,5 +12,6 @@ rules
   p@Program(_, _) -init-> (v, H)
     where
       next() --> base;
+//          nativePrint(NumV(base : Int)) => _;
       O base, S base, P Exec() |- p :: H {} --> v :: H.
   

@@ -11,6 +11,7 @@ imports
   trans/semantics/runtime/natives
   
   trans/semantics/strings
+  trans/semantics/numbers
 
 signature
   sorts
@@ -47,26 +48,32 @@ signature
     new-object() --> Addr
     
     current-self() --> V
+    current-outer() --> V
 
 rules
 
   S, P Exec() |- ol@ObjectL(_, [], _) --> S'
   where
-    O S, P Flatten() |- ol --> fo@FlatObject(_);
-    init-object(fo) --> S'.
+    O S |- new-object() --> S';
+    S', O S, P Flatten() |- ol --> FlatObject(closures);
+    S', O S |- init-methods(closures) --> U();
+    S', O S |- init-fields(closures) --> U().
     
-  
-  init-object(FlatObject(closures)) --> S
-  where
-    new-object() --> S;
-    S |- init-methods(closures) --> U();
-    S |- init-fields(closures) --> U().
-
 rules /* member operations */
 
-  O |- new-object() --> allocate(Obj(O, {})).
+  O |- new-object() --> S
+  where
+    allocate(Obj(O, {})) --> S;
+        nativePrint(StringV("=======================")) => _;
+        nativePrint(StringV("Allocating: ")) => _;
+        nativePrint(NumV(S: Int)) => _;
+        nativePrint(NumV(O: Int)) => _;
+        nativePrint(StringV("=======================")) => _.
+    
 
   S |- current-self() --> S.
+  
+  O |- current-outer() --> O.
 
   S |- add-member(x, v) --> U()
   where
