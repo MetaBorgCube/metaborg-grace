@@ -10,7 +10,7 @@ imports
 
 rules
 
-desugar-case: 
+desugar-case(|liftedname): 
           Case(
             ExpParens(
               caseExpression
@@ -20,7 +20,7 @@ desugar-case:
           ) ->
           ID("???")
 
-desugar-case:
+desugar-case(|liftedname):
           Case(
             CaseExp(caseExpression)
           , _
@@ -28,312 +28,70 @@ desugar-case:
           ) ->
           ID("???")
           
-desugar-case:
+desugar-case(|liftedname):
   Case(ExpTyped(iden, Type(typeId)), _, body) ->
-    [  Part(
-         ID("elseif")
-       , ArgBlock(
-           Block(
-             [ Expression(
-                 MCallWDot(
-                   MCallImpl([Part( typeId , NoArgs())])
-                 , [ Part(
-                       ID("match")
-                     , ArgsParen([MCallImpl([Part(ID("m_lifted"), NoArgs())])])
-                     )
-                   ]
-                 )
-               )
-             ]
-           )
-         )
-       )
-     , Part(ID("then"), ArgBlock(Block( body' )))
-    ]
-     where
-       body' := <replace-binds(|iden)> body
-
-// replace occurences of the bound case block parameter with the lifted one
-replace-binds(|iden): ast -> ast'
-  where 
-    ast' := <alltd(replace-id(|iden))> ast
-
-replace-id(|iden): iden -> ID("m_lifted")
-
-desugar-case: a -> a
- where
-   <debug(!"error: unkown case type")>
-   <fail>
-
-desugar-caseparen-to-case: CaseParen(a,b,c) -> Case(a,b,c)
-
-desugar-match-case: Expression(
-      MatchCase(
-        matchExpression
-      , cases
-      )
-    ) -> 
-    Expression(
-      MCallWDot(
-        BlockExp(
-          BlockWParams(
-            BlockParams([Param(ID("m_lifted"))])
-          , [ Expression(
-                MCallImpl(
-                  [ Part(
-                      ID("if")
-                    , ArgsParen(
-                        [ MCallWDot(
-                            BlockExp(
-                              Block(
-                                [ Declaration(
-                                    Constant(
-                                      ID("v_lifted")
-                                    , NoAnnotations()
-                                    , MCallWDot(
-                                        MCallImpl([Part(ID("y"), NoArgs())])
-                                      , [Part(ID("apply"), NoArgs())]
-                                      )
-                                    )
-                                  )
-                                , Expression(
-                                    MCallOpEx(
-                                      MCallOpEx(
-                                        MCallOpEx(
-                                          MCallOpEx(
-                                            MCallWDot(
-                                              MCallImpl([Part(ID("Number"), NoArgs())])
-                                            , [ Part(
-                                                  ID("match")
-                                                , ArgsParen([MCallImpl([Part(ID("m_lifted"), NoArgs())])])
-                                                )
-                                              ]
-                                            )
-                                          , OperatorCF("&&")
-                                          , BlockExp(
-                                              Block(
-                                                [ Expression(
-                                                    MCallWDot(
-                                                      MCallImpl([Part(ID("Number"), NoArgs())])
-                                                    , [ Part(
-                                                          ID("match")
-                                                        , ArgsParen([MCallImpl([Part(ID("v_lifted"), NoArgs())])])
-                                                        )
-                                                      ]
-                                                    )
-                                                  )
-                                                ]
-                                              )
-                                            )
-                                          )
-                                        , OperatorCF("&&")
-                                        , BlockExp(
-                                            Block(
-                                              [ Expression(
-                                                  MCallOpEx(
-                                                    MCallImpl([Part(ID("v_lifted"), NoArgs())])
-                                                  , OperatorCF("==")
-                                                  , MCallImpl([Part(ID("m_lifted"), NoArgs())])
-                                                  )
-                                                )
-                                              ]
-                                            )
-                                          )
-                                        )
-                                      , OperatorCF("||")
-                                      , MCallOpEx(
-                                          MCallOpEx(
-                                            MCallWDot(
-                                              MCallImpl([Part(ID("String"), NoArgs())])
-                                            , [ Part(
-                                                  ID("match")
-                                                , ArgsParen([MCallImpl([Part(ID("m_lifted"), NoArgs())])])
-                                                )
-                                              ]
-                                            )
-                                          , OperatorCF("&&")
-                                          , BlockExp(
-                                              Block(
-                                                [ Expression(
-                                                    MCallWDot(
-                                                      MCallImpl([Part(ID("String"), NoArgs())])
-                                                    , [ Part(
-                                                          ID("match")
-                                                        , ArgsParen([MCallImpl([Part(ID("v_lifted"), NoArgs())])])
-                                                        )
-                                                      ]
-                                                    )
-                                                  )
-                                                ]
-                                              )
-                                            )
-                                          )
-                                        , OperatorCF("&&")
-                                        , BlockExp(
-                                            Block(
-                                              [ Expression(
-                                                  MCallOpEx(
-                                                    MCallImpl([Part(ID("v_lifted"), NoArgs())])
-                                                  , OperatorCF("==")
-                                                  , MCallImpl([Part(ID("m_lifted"), NoArgs())])
-                                                  )
-                                                )
-                                              ]
-                                            )
-                                          )
-                                        )
-                                      )
-                                    , OperatorCF("||")
-                                    , MCallOpEx(
-                                        MCallOpEx(
-                                          MCallWDot(
-                                            MCallImpl([Part(ID("Boolean"), NoArgs())])
-                                          , [ Part(
-                                                ID("match")
-                                              , ArgsParen([MCallImpl([Part(ID("m_lifted"), NoArgs())])])
-                                              )
-                                            ]
-                                          )
-                                        , OperatorCF("&&")
-                                        , BlockExp(
-                                            Block(
-                                              [ Expression(
-                                                  MCallWDot(
-                                                    MCallImpl([Part(ID("Boolean"), NoArgs())])
-                                                  , [ Part(
-                                                        ID("match")
-                                                      , ArgsParen([MCallImpl([Part(ID("v_lifted"), NoArgs())])])
-                                                      )
-                                                    ]
-                                                  )
-                                                )
-                                              ]
-                                            )
-                                          )
-                                        )
-                                      , OperatorCF("&&")
-                                      , BlockExp(
-                                          Block(
-                                            [ Expression(
-                                                MCallOpEx(
-                                                  MCallImpl([Part(ID("v_lifted"), NoArgs())])
-                                                , OperatorCF("==")
-                                                , MCallImpl([Part(ID("m_lifted"), NoArgs())])
-                                                )
-                                              )
-                                            ]
-                                          )
-                                        )
-                                      )
-                                    )
-                                  )
-                                ]
-                              )
-                            )
-                          , [Part(ID("apply"), NoArgs())]
-                          )
-                        ]
-                      )
-                    )
-                  , Part(
-                      ID("then")
-                    , ArgBlock(
-                        Block(
-                          [ Expression(
-                              MCallImpl(
-                                [Part(ID("print"), ArgsParen([String("\"It matches 1\"")]))]
-                              )
+     [ Part(
+          ID("if")
+        , ArgsParen(
+            [ MCallWDot(
+                BlockExp(
+                  BlockWParams(
+                    BlockParams([Param( iden )])
+                  , [ Expression(
+                        MCallWDot(
+                          MCallImpl([Part(ID( typeId ), NoArgs())])
+                        , [ Part(
+                              ID("match")
+                            , ArgsParen([MCallImpl([Part( iden , NoArgs())])])
                             )
                           ]
                         )
                       )
-                    )
-                  , Part(
-                      ID("elseif")
-                    , ArgBlock(
-                        Block(
-                          [ Expression(
-                              MCallOpEx(
-                                MCallWDot(
-                                  MCallImpl([Part(ID("String"), NoArgs())])
-                                , [ Part(
-                                      ID("match")
-                                    , ArgsParen([MCallImpl([Part(ID("m_lifted"), NoArgs())])])
-                                    )
-                                  ]
-                                )
-                              , OperatorCF("&&")
-                              , BlockExp(
-                                  Block(
-                                    [ Expression(
-                                        MCallOpEx(
-                                          MCallImpl([Part(ID("x"), NoArgs())])
-                                        , OperatorCF("==")
-                                        , String("\"hello\"")
-                                        )
-                                      )
-                                    ]
-                                  )
-                                )
-                              )
-                            )
-                          ]
-                        )
-                      )
-                    )
-                  , Part(
-                      ID("then")
-                    , ArgBlock(
-                        Block(
-                          [ Expression(
-                              MCallImpl(
-                                [Part(ID("print"), ArgsParen([String("\"It matches 2\"")]))]
-                              )
-                            )
-                          ]
-                        )
-                      )
-                    )
-                  , Part(
-                      ID("elseif")
-                    , ArgBlock(
-                        Block(
-                          [ Expression(
-                              MCallWDot(
-                                MCallImpl([Part(ID("Unknown"), NoArgs())])
-                              , [ Part(
-                                    ID("match")
-                                  , ArgsParen([MCallImpl([Part(ID("m_lifted"), NoArgs())])])
-                                  )
-                                ]
-                              )
-                            )
-                          ]
-                        )
-                      )
-                    )
-                  , Part(
-                      ID("then")
-                    , ArgBlock(
-                        Block(
-                          [ Expression(
-                              MCallImpl(
-                                [Part(ID("print"), ArgsParen([String("\"Last resort\"")]))]
-                              )
-                            )
-                          ]
-                        )
-                      )
-                    )
-                  ]
+                    ]
+                  )
                 )
+              , [ Part(
+                    ID("apply")
+                  , ArgsParen([MCallImpl([Part(ID( liftedname ), NoArgs())])])
+                  )
+                ]
               )
             ]
           )
         )
-      , [Part(ID("apply"), ArgsParen([matchExpression]))]
+      , Part(ID("then"), ArgBlock(Block( body )))
+      ]
+    where
+      <debug(!"match on typecase")> iden
+
+desugar-case(|liftedname): a -> <fail>
+ where
+   <debug(!"error: unkown case type")> a
+
+desugar-caseparen-to-case: CaseParen(a,b,c) -> Case(a,b,c)
+desugar-caseparen-to-case: Case(a,b,c) -> Case(a,b,c)
+
+desugar-match-case:
+  MatchCase(matchExpression, cases) -> 
+    MCallWDot(
+      BlockExp(
+        BlockWParams(
+          BlockParams([Param(ID(liftedname))])
+        , [ Expression(
+              MCallImpl(
+                cases''
+              )
+            )
+          ]
+        )
       )
+    , [Part(ID("apply"), ArgsParen([matchExpression]))]
     )
       where
+        <debug(!"match on matchcase expression")> matchExpression;
+        liftedname := <concat-strings> ["m_lifted_", <newname>];
+        <debug(!"new name: ")> liftedname;
         cases' := <map(desugar-caseparen-to-case)> cases;
-        cases'' := <map(desugar-case)> cases'
+        <debug(!"removed caseparen: ")> cases';
+        cases'' := <map(desugar-case(|liftedname))> cases';
+        <debug(!"desugared cases: ")> cases''

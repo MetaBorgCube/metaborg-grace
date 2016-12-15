@@ -92,10 +92,6 @@ context-free syntax
   Exp.String                    = <<STRING>>
   Exp.Boolean                   = <<Boolean>>
   Exp.Self                      = "self"
-  Exp.Outer                     = "outer"
-  
-  Outer.Outer                   = "outer"
-  Exp.OuterChain                = < <{Outer "."}+>>            {avoid}
   
   Exp                           = <(<Exp>)>                    {bracket}
   Exp.MCallOpEx                 = <<Exp> <OperatorCF> <Exp>>   {left, prefer}

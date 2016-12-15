@@ -17,7 +17,7 @@ lexical syntax
   ID = "is" {reject}
   ID = "method" {reject}
   ID = "object" {reject}
-  ID = "outer" {reject}
+//  ID = "outer" {reject}
   ID = "prefix" {reject}                  
   ID = "required" {reject}
   ID = "return" {reject}

@@ -95,7 +95,6 @@ rules
     where
       flattened := <flatten-list> code
   
-  lower-params: NoParams() -> []
   lower-params: Params(ps) -> <lower-params> ps
   lower-params: [Param(n)] -> [n]
   lower-params: [Param(n) | bs] -> [n | <lower-params> bs ]

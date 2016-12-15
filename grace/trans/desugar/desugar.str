@@ -57,18 +57,48 @@ rules
           )
         ])
       ))
-      
+  
+  desugar-flatten-methodID: [ MethodID(ID(n), Params(ps)) ] -> 
+      [ MethodID(ID(name), Params(ps)) ]
+    where
+      name := <concat-strings> [n, <param-string> ps];
+      <not-substring(!"(")> n
   desugar-flatten-methodID: [ MethodID(ID(n1), Params(p1)), MethodID(ID(n2), Params(p2)) | mids ] ->
       [MethodID(ID(name), Params(ps)) | mids ]
     with
-      name := <concat-strings> [n1, "_", n2];
+      name := <concat-strings> [n1, <param-string> p1, n2, <param-string> p2];
       ps   := <concat> [p1,p2]
-    
+  
+  not-substring(s) = is-substring(s) < fail + id
+  
+  desugar-flatten-methodPart: [Part(ID(n), NoArgs())] -> <fail>
+  desugar-flatten-methodPart: [Part(ID(n), a@_)] -> [Part(ID(name), a)]
+    where
+      name := <concat-strings> [n, <param-string> a];
+      <is-argument> a;
+      // only if n does not contain (
+      <not-substring(!"(")> n
   desugar-flatten-methodPart: [Part(ID(n1), args1), Part(ID(n2), args2) | ps ] ->
       [Part(ID(name), ArgsParen(args)) | ps]
     with
-      name := <concat-strings> [n1, "_", n2];
+      name := <concat-strings> [n1, <param-string> args1, n2, <param-string> args2];
       args := <flatten-list> <map(desugar-arg)> [args1, args2]
+  
+  param-string: ps -> <concat-strings> <flatten-list> <concat> [ ["("] , <commas> <map(!"_")> ps , [")"]]
+    where
+      <is-list> ps
+  param-string: ArgsParen(ps) -> <param-string> ps
+  param-string: p -> "(_)"
+
+  commas: [] -> []
+  commas: [ a | [] ] -> [ a ]
+  commas: [ a | as ] -> [ a , "," | <commas> as]
+
+  neq(|a,b) = equal(|a, b) < fail + id
+  
+  is-argument: a -> a
+    where
+       <neq(|a, NoArgs())> a
 
   desugar-flatten-objectdecl: ObjectDecl(a, b, xs) -> ObjectDecl(a, b, ys)
     where

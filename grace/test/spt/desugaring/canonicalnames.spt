@@ -1,0 +1,43 @@
+module syntax-canonicalnames
+
+language grace
+
+start symbol Program
+
+test method direct [[a;]] run desugar-complete to
+Program([Expression(ObjectL(_,_,[Expression(MCallL("a",_))]))],_)
+
+test method with argument no parens [[a "5";]] run desugar-complete to
+Program([Expression(ObjectL(_,_,[Expression(MCallL("a(_)",_))]))],_)
+
+test method with argument no parens [[a { };]] run desugar-complete to
+Program([Expression(ObjectL(_,_,[Expression(MCallL("a(_)",_))]))],_)
+
+test method with argument no parens [[a 5;]] run desugar-complete to
+Program([Expression(ObjectL(_,_,[Expression(MCallL("a(_)",_))]))],_)
+
+test method with argument no parens [[a [1,2];]] run desugar-complete to
+Program([Expression(ObjectL(_,_,[Expression(MCallL("a(_)",_))]))],_)
+
+test method with argument parens [[a("5");]] run desugar-complete to
+Program([Expression(ObjectL(_,_,[Expression(MCallL("a(_)",_))]))],_)
+
+test method with multiple argument parens [[a("5", 24);]] run desugar-complete to
+Program([Expression(ObjectL(_,_,[Expression(MCallL("a(_,_)",_))]))],_)
+
+test method multipart no parens [[a "v" b "w";]] run desugar-complete to
+Program([Expression(ObjectL(_,_,[Expression(MCallL("a(_)b(_)",_))]))],_)
+
+test method multipart parens [[a("v")b("w");]] run desugar-complete to
+Program([Expression(ObjectL(_,_,[Expression(MCallL("a(_)b(_)",_))]))],_)
+
+test method multipart with parens [[a("v", "q") b ("w");]] run desugar-complete to
+Program([Expression(ObjectL(_,_,[Expression(MCallL("a(_,_)b(_)",_))]))],_)
+
+
+
+
+
+
+
+

@@ -4,166 +4,169 @@ language grace
 
 start symbol Program
 
-test empty expression                                   [[]]                        0 warnings 0 errors
-test self                                               [[self;]]                   0 warnings 0 errors
-test self parenthesis                                   [[(self);]]                 0 warnings 0 errors
-test arbitrary                                          [[arbitrary;]]              0 warnings 0 errors
-test arbitrary parentheses                              [[(arbitrary);]]            0 warnings 0 errors
-test arbitrary double parentheses                       [[((arbitrary));]]          0 warnings 0 errors
+test empty expression [[]] 0 warnings 0 errors
+test self [[self;]] 0 warnings 0 errors
+test self parenthesis [[(self);]] 0 warnings 0 errors
+test arbitrary [[arbitrary;]] 0 warnings 0 errors
+test arbitrary parentheses [[(arbitrary);]] 0 warnings 0 errors
+test arbitrary double parentheses [[((arbitrary));]] 0 warnings 0 errors
 
-test print hello world                                  [[print "Hello World";]]    0 warnings 0 errors
-test print hello world parenthesis                      [[print("Hello World");]]   0 warnings 0 errors
-test print number                                       [[print(5);]]               0 warnings 0 errors
-test print float number                                 [[print(5.5);]]             0 warnings 0 errors
-test print addition                                     [[print(5+5);]]             0 warnings 0 errors
+test print hello world [[print "Hello World";]] 0 warnings 0 errors
+test print hello world parenthesis [[print("Hello World");]] 0 warnings 0 errors
+test print number [[print(5);]] 0 warnings 0 errors
+test print float number [[print(5.5);]] 0 warnings 0 errors
+test print addition [[print(5+5);]] 0 warnings 0 errors
 
-test add no layout                                      [[5+5;]]                    0 warnings 0 errors
-test add layout spaces                                  [[ 5 + 5 ;]]                0 warnings 0 errors
-test add layout tabs                                    [[ 5    + 	 5 ;]]          parse fails
-test add identifier and number                          [[5 + foo;]]                0 warnings 0 errors
-test add identifier and float                           [[5.5 + foo;]]              0 warnings 0 errors
-test add floats                                         [[5.5 + 5.5;]]              0 warnings 0 errors
-test add identifiers                                    [[foo + foo ;]]             0 warnings 0 errors
-test add parentheses                                    [[(foo + foo);]]            0 warnings 0 errors
+test add no layout [[5+5;]] 0 warnings 0 errors
+test add layout spaces [[ 5 + 5 ;]] 0 warnings 0 errors
+test add layout tabs [[ 5 + 	 5 ;]] parse fails
+test add identifier and number [[5 + foo;]] 0 warnings 0 errors
+test add identifier and float [[5.5 + foo;]] 0 warnings 0 errors
+test add floats [[5.5 + 5.5;]] 0 warnings 0 errors
+test add identifiers [[foo + foo ;]] 0 warnings 0 errors
+test add parentheses [[(foo + foo);]] 0 warnings 0 errors
 
-test add and multiply                                   [[foo * foo + foo;]]        0 warnings 0 errors
-test add and multiply inner parentheses                 [[(foo + foo) * foo;]]      0 warnings 0 errors
-test add and multiply outer parentheses                 [[(foo + foo * foo);]]      0 warnings 0 errors
+test add and multiply [[foo * foo + foo;]] 0 warnings 0 errors
+test add and multiply inner parentheses [[(foo + foo) * foo;]] 0 warnings 0 errors
+test add and multiply outer parentheses [[(foo + foo * foo);]] 0 warnings 0 errors
 
-test dot operator                                       [[foo.foo;]]                0 warnings 0 errors
-test multiple dot operator                              [[foo.foo.foo;]]            0 warnings 0 errors
-test dot operator and call                              [[foo.foo(5);]]             0 warnings 0 errors
+test dot operator [[foo.foo;]] 0 warnings 0 errors
+test multiple dot operator [[foo.foo.foo;]] 0 warnings 0 errors
+test dot operator and call [[foo.foo(5);]] 0 warnings 0 errors
 
-test addition                                           [[5 + 5;]]                  0 warnings 0 errors
-test multiplication                                     [[5 * 5;]]                  0 warnings 0 errors
-test subtraction                                        [[5 - 5;]]                  0 warnings 0 errors
-test parens                                             [[(5 + 5);]]                0 warnings 0 errors
-test parens and more                                    [[(5 + 5) + 5;]]            0 warnings 0 errors
+test addition [[5 + 5;]] 0 warnings 0 errors
+test multiplication [[5 * 5;]] 0 warnings 0 errors
+test subtraction [[5 - 5;]] 0 warnings 0 errors
+test parens [[(5 + 5);]] 0 warnings 0 errors
+test parens and more [[(5 + 5) + 5;]] 0 warnings 0 errors
 
-test addition three                                     [[5 + 5 + 5;]]              0 warnings 0 errors
-test multiplication three                               [[5 * 5 * 5;]]              0 warnings 0 errors
-test subtraction three                                  [[5 - 5 - 5;]]              0 warnings 0 errors
-test division three                                     [[5 / 5 / 5;]]              0 warnings 0 errors
+test addition three [[5 + 5 + 5;]] 0 warnings 0 errors
+test multiplication three [[5 * 5 * 5;]] 0 warnings 0 errors
+test subtraction three [[5 - 5 - 5;]] 0 warnings 0 errors
+test division three [[5 / 5 / 5;]] 0 warnings 0 errors
 
-test plus mult                                          [[5 + 5 * 5;]]              0 warnings 0 errors
-test mult plus                                          [[5 * 5 + 5;]]              0 warnings 0 errors
-test plus subt                                          [[5 + 5 - 5;]]              0 warnings 0 errors
-test subt plus                                          [[5 - 5 + 5;]]              0 warnings 0 errors
-test plus divi                                          [[5 + 5 / 5;]]              0 warnings 0 errors
-test divi plus                                          [[5 / 5 + 5;]]              0 warnings 0 errors
+test plus mult [[5 + 5 * 5;]] 0 warnings 0 errors
+test mult plus [[5 * 5 + 5;]] 0 warnings 0 errors
+test plus subt [[5 + 5 - 5;]] 0 warnings 0 errors
+test subt plus [[5 - 5 + 5;]] 0 warnings 0 errors
+test plus divi [[5 + 5 / 5;]] 0 warnings 0 errors
+test divi plus [[5 / 5 + 5;]] 0 warnings 0 errors
 
-test mult subt                                          [[5 * 5 - 5;]]              0 warnings 0 errors
-test subt mult                                          [[5 - 5 * 5;]]              0 warnings 0 errors
-test mult divi                                          [[5 * 5 / 5;]]              0 warnings 0 errors
-test divi mult                                          [[5 / 5 * 5;]]              0 warnings 0 errors
+test mult subt [[5 * 5 - 5;]] 0 warnings 0 errors
+test subt mult [[5 - 5 * 5;]] 0 warnings 0 errors
+test mult divi [[5 * 5 / 5;]] 0 warnings 0 errors
+test divi mult [[5 / 5 * 5;]] 0 warnings 0 errors
 
-test subt divi                                          [[5 - 5 / 5;]]              0 warnings 0 errors
-test divi subt                                          [[5 / 5 - 5;]]              0 warnings 0 errors
+test subt divi [[5 - 5 / 5;]] 0 warnings 0 errors
+test divi subt [[5 / 5 - 5;]] 0 warnings 0 errors
 
-test mult four                                          [[5 * 5 * 5 * 5;]]          0 warnings 0 errors
-test mult five                                          [[5 * 5 * 5 * 5 * 5;]]      0 warnings 0 errors
-test plus three parens                                  [[(5 + 5 + 5);]]            0 warnings 0 errors
-test plus identifiers                                   [[a + a;]]                  0 warnings 0 errors
-test plus id and lit                                    [[a + 5;]]                  0 warnings 0 errors
-test plus lit and id                                    [[5 + a;]]                  0 warnings 0 errors
-test greater then                                       [[5 > 5;]]                  0 warnings 0 errors
-test less then                                          [[5 < 5;]]                  0 warnings 0 errors
-test greater or equal                                   [[5 >= 5;]]                 0 warnings 0 errors
-test less or equal                                      [[5 <= 5;]]                 0 warnings 0 errors
-test boolean or                                         [[5 || 5;]]                 0 warnings 0 errors
-test boolean and                                        [[5 && 5;]]                 0 warnings 0 errors
+test mult four [[5 * 5 * 5 * 5;]] 0 warnings 0 errors
+test mult five [[5 * 5 * 5 * 5 * 5;]] 0 warnings 0 errors
+test plus three parens [[(5 + 5 + 5);]] 0 warnings 0 errors
+test plus identifiers [[a + a;]] 0 warnings 0 errors
+test plus id and lit [[a + 5;]] 0 warnings 0 errors
+test plus lit and id [[5 + a;]] 0 warnings 0 errors
+test greater then [[5 > 5;]] 0 warnings 0 errors
+test less then [[5 < 5;]] 0 warnings 0 errors
+test greater or equal [[5 >= 5;]] 0 warnings 0 errors
+test less or equal [[5 <= 5;]] 0 warnings 0 errors
+test boolean or [[5 || 5;]] 0 warnings 0 errors
+test boolean and [[5 && 5;]] 0 warnings 0 errors
 
-test plus different identifiers                         [[a + b;]]                  0 warnings 0 errors
+test plus different identifiers [[a + b;]] 0 warnings 0 errors
 
-test sigle identifier                                   [[a;]]                      0 warnings 0 errors
+test sigle identifier [[a;]] 0 warnings 0 errors
 
-test id subt                                            [[(id(a)) - a;]]            0 warnings 0 errors
-test id mult                                            [[(id(a)) * a;]]            0 warnings 0 errors
-test id divi                                            [[(id(a)) / a;]]            0 warnings 0 errors
+test id subt [[(id(a)) - a;]] 0 warnings 0 errors
+test id mult [[(id(a)) * a;]] 0 warnings 0 errors
+test id divi [[(id(a)) / a;]] 0 warnings 0 errors
 
-test id plus id plus id                                 [[a + a + a;]]              0 warnings 0 errors
-test id subt id plus id                                 [[a - a + a;]]              0 warnings 0 errors
-test id plus id subt id                                 [[a + a - a;]]              0 warnings 0 errors
-test id subt id subt id                                 [[a - a - a;]]              0 warnings 0 errors
-test id mult id plus id                                 [[a * a + a;]]              0 warnings 0 errors
-test id plus id mult id                                 [[a + a * a;]]              0 warnings 0 errors
-test id mult id mult id                                 [[a * a * a;]]              0 warnings 0 errors
-test id mult id divi id                                 [[a * a / a;]]              0 warnings 0 errors
-test id divi id mult id                                 [[a / a * a;]]              0 warnings 0 errors
-test id divi id divi id                                 [[a / a / a;]]              0 warnings 0 errors
-test id subt id divi id                                 [[a - a / a;]]              0 warnings 0 errors
-test id divi id subt id                                 [[a / a - a;]]              0 warnings 0 errors
-test id plus id divi id                                 [[a + a / a;]]              0 warnings 0 errors
-test id divi id plus id                                 [[a / a + a;]]              0 warnings 0 errors
-test id mult id subt id                                 [[a * a - a;]]              0 warnings 0 errors
-test id subt id mult id                                 [[a - a * a;]]              0 warnings 0 errors
+test id plus id plus id [[a + a + a;]] 0 warnings 0 errors
+test id subt id plus id [[a - a + a;]] 0 warnings 0 errors
+test id plus id subt id [[a + a - a;]] 0 warnings 0 errors
+test id subt id subt id [[a - a - a;]] 0 warnings 0 errors
+test id mult id plus id [[a * a + a;]] 0 warnings 0 errors
+test id plus id mult id [[a + a * a;]] 0 warnings 0 errors
+test id mult id mult id [[a * a * a;]] 0 warnings 0 errors
+test id mult id divi id [[a * a / a;]] 0 warnings 0 errors
+test id divi id mult id [[a / a * a;]] 0 warnings 0 errors
+test id divi id divi id [[a / a / a;]] 0 warnings 0 errors
+test id subt id divi id [[a - a / a;]] 0 warnings 0 errors
+test id divi id subt id [[a / a - a;]] 0 warnings 0 errors
+test id plus id divi id [[a + a / a;]] 0 warnings 0 errors
+test id divi id plus id [[a / a + a;]] 0 warnings 0 errors
+test id mult id subt id [[a * a - a;]] 0 warnings 0 errors
+test id subt id mult id [[a - a * a;]] 0 warnings 0 errors
 
-test id subt paren id subt id paren                     [[a - (a - a);]]            0 warnings 0 errors
-test paren id subt id paren subt id                     [[(a - a) - a;]]            0 warnings 0 errors
-test paren id subt paren id subt id paren paren         [[(a - (a - a));]]          0 warnings 0 errors
-test paren paren id subt id paren subt id paren         [[((a - a) - a);]]          0 warnings 0 errors
+test id subt paren id subt id paren [[a - (a - a);]] 0 warnings 0 errors
+test paren id subt id paren subt id [[(a - a) - a;]] 0 warnings 0 errors
+test paren id subt paren id subt id paren paren [[(a - (a - a));]] 0 warnings 0 errors
+test paren paren id subt id paren subt id paren [[((a - a) - a);]] 0 warnings 0 errors
 
-test id plus four times                                 [[a + a + a + a;]]          0 warnings 0 errors
+test id plus four times [[a + a + a + a;]] 0 warnings 0 errors
 
-test id plus five times                                 [[a + a + a + a + a;]]      0 warnings 0 errors
+test id plus five times [[a + a + a + a + a;]] 0 warnings 0 errors
 
-test ture or false or true                              [[true || false || true;]]  0 warnings 0 errors
+test ture or false or true [[true || false || true;]] 0 warnings 0 errors
 
-test true or false or true or false or true             [[true || false || true || false || true;]] 0 warnings 0 errors
+test true or false or true or false or true [[true || false || true || false || true;]] 0 warnings 0 errors
 
-test int plus id dot id                                 [[5 + a.b;]]                0 warnings 0 errors
+test int plus id dot id [[5 + a.b;]] 0 warnings 0 errors
 
-test int plus id dot id spaces                          [[5 + a . b;]]              0 warnings 0 errors
+test int plus id dot id spaces [[5 + a . b;]] 0 warnings 0 errors
 
-test int                                                [[5;]]                      0 warnings 0 errors
+test int [[5;]] 0 warnings 0 errors
 
-test string                                             [["bla";]]                  0 warnings 0 errors
+test string [["bla";]] 0 warnings 0 errors
 
-test true                                               [[true;]]                   0 warnings 0 errors
-test true                                               [[false;]]                  0 warnings 0 errors
+test true [[true;]] 0 warnings 0 errors
+test true [[false;]] 0 warnings 0 errors
 
-test id dot id                                          [[a . b;]]                  0 warnings 0 errors
+test id dot id [[a . b;]] 0 warnings 0 errors
 
-test id space int                                       [[b 5;]]                    0 warnings 0 errors
-test int plus id dot id space int                       [[5 + a . b 6;]]            0 warnings 0 errors
-test int plus paren id dot id int paren                 [[5 + (a . b 6);]]          0 warnings 0 errors
+test id space int [[b 5;]] 0 warnings 0 errors
+test int plus id dot id space int [[5 + a . b 6;]] 0 warnings 0 errors
+test int plus paren id dot id int paren [[5 + (a . b 6);]] 0 warnings 0 errors
 
-test not true                                           [[!true;]]                  0 warnings 0 errors
-test not false                                          [[!false;]]                 0 warnings 0 errors
+test not true [[!true;]] 0 warnings 0 errors
+test not false [[!false;]] 0 warnings 0 errors
 
-test true and false                                     [[true && false;]]          0 warnings 0 errors
-test true or false                                      [[true || false;]]          0 warnings 0 errors
+test true and false [[true && false;]] 0 warnings 0 errors
+test true or false [[true || false;]] 0 warnings 0 errors
 
-test string with escaped tab                            [["string with \t tab";]]   0 warnings 0 errors
+test string with escaped tab [["string with \t tab";]] 0 warnings 0 errors
 
-test int plus int or int                                [[5 + 5 || 5;]]             0 warnings 0 errors
-test true or int subt int and false                     [[true || 5 - 3 && false;]] 0 warnings 0 errors
+test int plus int or int [[5 + 5 || 5;]] 0 warnings 0 errors
+test true or int subt int and false [[true || 5 - 3 && false;]] 0 warnings 0 errors
 
-test outer                                              [[outer;]]
-test outerchain                                         [[outer.outer;]]
-test outerchain with call                               [[outer.outer.do("hey");]]
-test long outerchain                                    [[outer.outer.outer.outer.do "something";]]
+test outer [[outer;]] 0 warnings 0 errors
+test outerchain [[outer.outer;]] 0 warnings 0 errors
+test outerchain with call in the middle [[other.do.outer;]] 0 warnings 0 errors
+test outerchain with calls in the middle [[other.a.b.outer.a.b;]] 0 warnings 0 errors
 
-test self                                               [[self;]]
-test self with call                                     [[self.do "some";]]
-test selfchain is not allowed                           [[self.self.do "some";]] parse fails
+test outerchain with call [[outer.outer.do("hey");]] 0 warnings 0 errors
+test long outerchain [[outer.outer.outer.outer.do "something";]] 0 warnings 0 errors
+
+test self [[self;]] 0 warnings 0 errors
+test self with call [[self.do "some";]] 0 warnings 0 errors
+test selfchain is not allowed [[self.self.do "some";]] parse fails
 
 // tests from https://github.com/zmthy/hopper/tree/master/test/parse-fail
-//test hopper angle operators backwards                   [[name > name < name;]]     parse fails
-//test hopper angle operators                             [[name < name > name;]]     parse fails
+//test hopper angle operators backwards [[name > name < name;]] parse fails
+//test hopper angle operators [[name < name > name;]] parse fails
 
-test hopper assign to def                               [[def name := object {};]]  parse fails
+test hopper assign to def [[def name := object {};]] parse fails
 
-test hopper bind name                                   [[name = object {};]]       parse fails
-test hopper bind to var                                 [[var name = object {};]]   parse fails
-//test hopper mismatched operators                        [[object {} & object {} | object {};]] parse fails
-test hopper no bind def                                 [[def name;]]               parse fails
+test hopper bind name [[name = object {};]] parse fails
+test hopper bind to var [[var name = object {};]] parse fails
+//test hopper mismatched operators [[object {} & object {} | object {};]] parse fails
+test hopper no bind def [[def name;]] parse fails
 
 //these test are valid in minigrace
-test hopper outer alone                                 [[outer;]]                  0 warnings 0 errors
-test hopper super alone                                 [[super;]]                  0 warnings 0 errors
-//test hopper tab in string                               [[ "            "; ]]       parse fails
-test hopper tab in program                              [[ object {}; 	 ]]         parse fails
+test hopper outer alone [[outer;]] 0 warnings 0 errors
+test hopper super alone [[super;]] 0 warnings 0 errors
+//test hopper tab in string [[ " "; ]] parse fails
+test hopper tab in program [[ object {}; 	 ]] parse fails
 
-test hopper no end of string                            [[ " ]]                     parse fails
-test hopper suffix operator                             [[ object {}!;]]            parse fails
+test hopper no end of string [[ " ]] parse fails
+test hopper suffix operator [[ object {}!;]] parse fails
