@@ -30,7 +30,7 @@ rules
   
   MCallL(x, es) --> MCallRecvL(Self(), x, es).
   
-  MCallRecvL(e, x, es) --> resolve-call(v, x, vs)
+  P Exec() |- MCallRecvL(e, x, es) --> resolve-call(v, x, vs)
   where
     e --> v;
     es --> vs.
@@ -44,11 +44,9 @@ rules
 
 rules
   
-  resolve-call(recv@RefV(addr), x, vs) --> v
+  resolve-call(recv, x, vs) --> v
   where
     lookup-method(recv, x) --> mv;
-//      nativePrint(StringV("Calling function name:")) => _;
-//      nativePrint(StringV(x)) => _;
     call(recv, mv, vs) --> v.
   
   // field access
@@ -57,14 +55,11 @@ rules
     mv =!=> ClosV(_, _, _, _).
 
   // method call with no arguments
-  call(S, ClosV([], code, _, O), []) --> v
+  call(S, ClosV(O, [], code, _), []) --> v
   where
-//      nativePrint(StringV("Exec closure:")) => _;
-//      nativePrint(NumV(S:Int)) => _;
-//      nativePrint(NumV(O:Int)) => _;
     S, O |- code --> v.
   
-  call(S, ClosV(_, code, _, O), [_|_]) --> DoneV()
+  call(S, ClosV(O, _, code, _), [_|_]) --> DoneV()
   where
     halt-error("You haven't told me how to call functions with arguments", "") --> _.
     

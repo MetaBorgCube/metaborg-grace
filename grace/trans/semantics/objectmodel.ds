@@ -28,7 +28,7 @@ signature
 
   constructors
     Obj: Addr * Tbl -> Object
-    ClosV: List(String) * Code * Env * Addr -> V
+    ClosV: Addr * List(String) * Code * Env -> V
     RefV: Addr -> V {implicit}
   
   components
@@ -38,7 +38,6 @@ signature
   arrows
     add-member(String, V) --> U
     
-    lookup-method(String) --> V
     lookup-method(V, String) --> V
     
     init-methods(Closures) --> U
@@ -63,12 +62,6 @@ rules /* member operations */
   new-object(O) --> S
   where
     allocate(Obj(O, {})) --> S.
-//        nativePrint(StringV("=======================")) => _;
-//        nativePrint(StringV("Allocating: ")) => _;
-//        nativePrint(NumV(S: Int)) => _;
-//        nativePrint(NumV(O: Int)) => _;
-//        nativePrint(StringV("=======================")) => _.
-    
 
   S |- current-self() --> S.
   
@@ -115,7 +108,7 @@ rules
 
   O |- Declaration(MethodL(name, _, params, code)) -method-> U()
   where
-    add-member(name, ClosV(params, code, {}, O)) --> U().
+    add-member(name, ClosV(O, params, code, {})) --> U().
   
   _ : Statement -method-> U().
 
@@ -211,9 +204,13 @@ rules
 
   S, P Flatten() |- ObjectL(inherit, [], code) --> FlatObject(concatClosures(closures-inherited, [Closure(S, code)])) //FlatObject(closures-inherited ++ [Closure(O, code)])
   where
-//        nativePrint(StringV("Closing over:")) => _;
-//        nativePrint(NumV(S:Int)) => _;
     P Flatten() |- inherit --> FlatObject(closures-inherited).
+
+  P Flatten() |- MCallRecvL(e, x, es) --> v
+  where
+    P Exec() |- e --> recv;
+    P Exec() |- es --> vs;
+    P Flatten() |- resolve-call(recv, x, vs) --> v.
 
   NoInherit() --> FlatObject([]).
   
