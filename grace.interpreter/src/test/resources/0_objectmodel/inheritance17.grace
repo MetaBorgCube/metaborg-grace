@@ -13,7 +13,7 @@ method A {
 def x = object {
     inherit A;
     
-    def f is public = {foobar -> print("B"); 1; }.apply(45);
+    def f is public = { print("B"); 1; }.apply;
  
     method g {
         99;
