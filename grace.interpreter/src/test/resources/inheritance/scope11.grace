@@ -15,6 +15,8 @@ def l0 is public = object {
       method A {
         object {
             inherit B;
+            
+            def x is public = 42;
         };
       };
     };
