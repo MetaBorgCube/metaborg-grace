@@ -23,7 +23,7 @@ method m {
 };
 
 print("m.map");
-print(m.map);
+print(m.map.asString);
 print("A.trait.map");
-print(A.TRAIT.map);
+print(A.TRAIT.map.asString);
 print(m.asString);
