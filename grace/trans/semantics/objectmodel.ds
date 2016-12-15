@@ -41,11 +41,10 @@ signature
     lookup-method(String) --> V
     lookup-method(V, String) --> V
     
-    init-object(V) --> Addr
     init-methods(Closures) --> U
     init-fields(Closures) --> U
     
-    new-object() --> Addr
+    new-object(Addr) --> Addr
     
     current-self() --> V
     current-outer() --> V
@@ -54,21 +53,21 @@ rules
 
   S, P Exec() |- ol@ObjectL(_, [], _) --> S'
   where
-    O S |- new-object() --> S';
-    S', O S, P Flatten() |- ol --> FlatObject(closures);
-    S', O S |- init-methods(closures) --> U();
-    S', O S |- init-fields(closures) --> U().
+    new-object(S) --> S';
+    P Flatten() |- ol --> FlatObject(closures);
+    S' |- init-methods(closures) --> U();
+    S' |- init-fields(closures) --> U().
     
 rules /* member operations */
 
-  O |- new-object() --> S
+  new-object(O) --> S
   where
-    allocate(Obj(O, {})) --> S;
-        nativePrint(StringV("=======================")) => _;
-        nativePrint(StringV("Allocating: ")) => _;
-        nativePrint(NumV(S: Int)) => _;
-        nativePrint(NumV(O: Int)) => _;
-        nativePrint(StringV("=======================")) => _.
+    allocate(Obj(O, {})) --> S.
+//        nativePrint(StringV("=======================")) => _;
+//        nativePrint(StringV("Allocating: ")) => _;
+//        nativePrint(NumV(S: Int)) => _;
+//        nativePrint(NumV(O: Int)) => _;
+//        nativePrint(StringV("=======================")) => _.
     
 
   S |- current-self() --> S.
@@ -210,8 +209,10 @@ signature
 
 rules
 
-  O, P Flatten() |- ObjectL(inherit, [], code) --> FlatObject(concatClosures(closures-inherited, [Closure(O, code)])) //FlatObject(closures-inherited ++ [Closure(O, code)])
+  S, P Flatten() |- ObjectL(inherit, [], code) --> FlatObject(concatClosures(closures-inherited, [Closure(S, code)])) //FlatObject(closures-inherited ++ [Closure(O, code)])
   where
+//        nativePrint(StringV("Closing over:")) => _;
+//        nativePrint(NumV(S:Int)) => _;
     P Flatten() |- inherit --> FlatObject(closures-inherited).
 
   NoInherit() --> FlatObject([]).
