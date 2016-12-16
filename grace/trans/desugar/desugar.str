@@ -26,7 +26,7 @@ rules
     <+ desugar-mcallprefixopexp
     <+ desugar-blockExp 
     <+ desugar-block
-    <+ desugar-block-to-object
+//    <+ desugar-block-to-object
     <+ desugar-arg-noargs
     <+ desugar-arg-argsparen
     <+ desugar-argBlock
@@ -150,32 +150,35 @@ rules
   desugar-block:
     Block(a) -> BlockWParams(BlockParams([]), a) 
 
-  desugar-block-to-object:
-    BlockWParams(BlockParams([]), code)-> 
-      ObjectDecl(
-        NoInherit(),
-        [],
-        [ Declaration(
-            MethodDecl(
-              Single(MethodID(ID("apply")))
-            , NoAnnotations()
-            , MethodBody(code)
-            )
-          )
-        ]
-      )
-      
-  desugar-block-to-object:
-    BlockWParams(BlockParams(params), code) -> 
-      ObjectDecl(NoInherit(), [], [Declaration(
-        MethodDecl(
-          Multiple([MethodID(ID("apply"), Params(params))])
-        , NoAnnotations()
-        , MethodBody(code)
-        )
-      )])
+//  desugar-block-to-object:
+//    BlockWParams(BlockParams([]), code)-> 
+//      ObjectDecl(
+//        NoInherit(),
+//        [],
+//        [ Declaration(
+//            MethodDecl(
+//              Single(MethodID(ID("apply")))
+//            , NoAnnotations()
+//            , MethodBody(code)
+//            )
+//          )
+//        ]
+//      )
+//      
+//  desugar-block-to-object:
+//    BlockWParams(BlockParams(params), code) -> 
+//      ObjectDecl(NoInherit(), [], [Declaration(
+//        MethodDecl(
+//          Multiple([MethodID(ID("apply"), Params(params))])
+//        , NoAnnotations()
+//        , MethodBody(code)
+//        )
+//      )])
 
   desugar-unquote-strings:
     String(s) -> String(<unquote(?'"')> s)
 
+  desugar-unquote-strings:
+    ArgString(s) -> ArgString(<unquote(?'"')> s)
+    
   desugar-fail: a -> <fail>

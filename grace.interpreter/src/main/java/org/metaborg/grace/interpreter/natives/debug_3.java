@@ -1,5 +1,6 @@
 package org.metaborg.grace.interpreter.natives;
 
+import org.metaborg.grace.interpreter.generated.graceLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 
@@ -19,7 +20,7 @@ public abstract class debug_3 extends TermBuild {
 	@Specialization
 	public Object doInt(Object s, Object s2, Object s3) {
 		String r = s.toString() + s2.toString() + s3.toString();
-		if (DynSemContext.LANGUAGE.isDEBUG()) {
+		if (((graceLanguage) DynSemContext.LANGUAGE).isDEBUG()) {
 			System.err.println(r);
 		}
 		return r;

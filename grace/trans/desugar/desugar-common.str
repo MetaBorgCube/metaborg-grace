@@ -10,3 +10,6 @@ rules
   name-to-string: ID(a) -> a where <is-string> a
   name-to-string: OperatorCF(a) -> a where <is-string> a
   name-to-string: a -> a
+  
+  name-to-id: ID(a) -> ID(a)
+  name-to-id: OperatorCF(a) -> ID(a) where <is-string> a

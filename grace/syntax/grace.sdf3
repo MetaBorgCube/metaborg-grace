@@ -49,11 +49,11 @@ context-free syntax
                                   
   MethodNameNoParam.MethodID    = <<Identifier>>
   MethodNameNoParam.MethodOp    = <<OperatorCF>>
-  MethodNameNoParam.PrefixOp    = <<PrefixOperator>>
+//  MethodNameNoParam.PrefixOp    = <<PrefixOperator>>
   
   MethodName.MethodID           = <<Identifier> <Params>>
   MethodName.MethodOp           = <<OperatorCF> <Params>>
-  MethodName.PrefixOp           = <<PrefixOperator> <Params>>
+//  MethodName.PrefixOp           = <<PrefixOperator> <Params>>
   
 //  Prefix.Prefix                 = "prefix"
 //  Prefix.NoPrefix               = <>

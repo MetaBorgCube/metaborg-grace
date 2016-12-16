@@ -1,5 +1,6 @@
 package org.metaborg.grace.interpreter.natives;
 
+import org.metaborg.grace.interpreter.generated.graceLanguage;
 import org.metaborg.grace.interpreter.generated.terms.IVTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
@@ -17,7 +18,7 @@ public abstract class print_1 extends TermBuild {
 
 	@Specialization
 	public IVTerm doInt(IVTerm t) {
-		if (DynSemContext.LANGUAGE.isDEBUG()) {
+		if (((graceLanguage) DynSemContext.LANGUAGE).isDEBUG()) {
 			System.err.println(t);
 		}
 		return t;

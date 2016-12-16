@@ -3,6 +3,7 @@ module general
 lexical syntax
 
   ID             = [a-zA-Z] [a-zA-Z0-9\'\_]* Assign?
+  ID             = PrefixOperator
   Assign         = ":="
   NUM.Integer    = [1-9][0-9]* // prefer neg int over neg operator
   NUM.IntegerZ   = "0" // prefer neg int over neg operator
