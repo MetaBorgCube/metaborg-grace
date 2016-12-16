@@ -28,7 +28,7 @@ test id with tripledot prefix         [[...a;]]         parse fails
 test id with tripledot infix          [[a...a;]]        parse fails
 test id with tripledot suffix         [[a...;]]         parse fails
 
-test id with assign prefix            [[:=a;]]          0 warnings 0 errors
+test id with assign prefix            [[:=a;]]          parse fails
 
 test id with equals prefix            [[=a;]]           parse fails
 test id with equals infix             [[a=a;]]          parse fails

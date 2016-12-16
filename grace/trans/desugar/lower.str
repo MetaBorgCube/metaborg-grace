@@ -75,7 +75,7 @@ rules
   lower-constant: Constant(a, b, c) -> ConstantL(a, b, c)
     
   lower-variable: Variable(a, b, NoVarInit()) -> VariableL(a,b)
-  lower-variable: Variable(a, b, VarInit(exp)) -> [VariableL(a,b), AssignmentL(a,exp)]
+//  lower-variable: Variable(a, b, VarInit(exp)) -> [VariableL(a,b), AssignmentL(a,exp)]
   
 //  lower-assignment: Assignment(a,b) -> AssignmentL(a, b)
 

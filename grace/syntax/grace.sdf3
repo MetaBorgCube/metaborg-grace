@@ -19,8 +19,8 @@ context-free syntax
 
   Statement.Dialect             = <dialect <STRING>>
   Statement.Import              = <import <STRING> as <Identifier>>
-  Statement.Assignment          = <<Assignment>;>
-  Statement.Declaration         = <<Declaration>;> {avoid}
+//  Statement.Assignment          = <<Assignment>;>
+  Statement.Declaration         = <<Declaration>;>
   Statement.Expression          = <<Exp>;>
 
 context-free syntax
@@ -95,9 +95,10 @@ context-free syntax
   
   Exp                           = <(<Exp>)>                    {bracket}
   Exp.MCallOpEx                 = <<Exp> <OperatorCF> <Exp>>   {left, prefer}
+  Exp.MCallOpExAssign           = <<Exp> := <Exp>>             {left, prefer}
   Exp.MCallWDot                 = <<Exp>.<Part+>>              {left}
   Exp.MCallImpl                 = <<Part+>>                    {left}
-  Exp.MCallPrefixOp             = <<OperatorCF> <CallArgs>>    {left}
+//  Exp.MCallPrefixOp             = <<OperatorCF> <CallArgs>>    {left}
   Exp.MCallPrefixOpExp          = <<OperatorCF> <Exp>>         {left, prefer}
   
   Exp.LineupExp                 = <<Lineup>>
@@ -164,3 +165,5 @@ context-free syntax
 context-free priorities
 
   Exp.MCallWDot > Exp.Return
+  ,
+  Exp.MCallWDot > Exp.MCallOpEx > Exp.MCallOpExAssign

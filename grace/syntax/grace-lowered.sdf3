@@ -8,22 +8,22 @@ imports
 
 context-free syntax
 
-  Exp.MCallL			  = <<STRING>(<{Exp ", "}*>)>
-  Exp.MCallRecvL		  = <<Exp>.<STRING>(<{Exp ", "}*>)>
+  Exp.MCallL			  = <_c <Identifier>(<{Exp ", "}*>)>
+  Exp.MCallRecvL		  = <_cr <Exp>.<Identifier>(<{Exp ", "}*>)>
   Exp.ObjectL             = <
 							_object {
 							  <Inherit><Use*><{Statement "\n"}*>
 							}
 							>
   Declaration.MethodL     = <
-							_method <STRING><Annotations> (<{STRING ", "}*>) {
+							_method <Identifier><Annotations> (<{STRING ", "}*>) {
 							  <{Statement "\n"}*>
 							}
 							>
-  Declaration.ConstantL   = <<STRING><Annotations> = <Exp>>
-  Declaration.VariableL   = <<STRING><Annotations>>
-  Declaration.TraitL      = <_trait <STRING> (<{STRING ", "}*>) <{Statement "\n"}*>>
+  Declaration.ConstantL   = <_def <Identifier> <Annotations> = <Exp>>
+  Declaration.VariableL   = <_var <Identifier> <Annotations>>
+  Declaration.TraitL      = <_trait <Identifier> (<{STRING ", "}*>) <{Statement "\n"}*>>
   
-  Assignment.AssignmentL  = <<STRING> := <Exp>>
+//  Assignment.AssignmentL  = <<Identifier> := <Exp>>
   
   Exp.NumL				  = <_number(<NUM>)> {avoid}

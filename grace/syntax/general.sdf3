@@ -5,10 +5,10 @@ lexical syntax
   ID             = [a-zA-Z] [a-zA-Z0-9\'\_]* Assign?
   Assign         = ":="
   NUM.Integer    = [1-9][0-9]* // prefer neg int over neg operator
-  NUM.Integer    = "0" // prefer neg int over neg operator
+  NUM.IntegerZ   = "0" // prefer neg int over neg operator
   NUM.Decimal    = [0-9]* "." [0-9]+
   NUM.RadixNum   = [02-9][0-9]* [xX] [a-zA-Z0-9]+ // some radix number
-  NUM.RadixNum   = [1][0-9]+ [xX] [a-zA-Z0-9]+ // some radix number
+  NUM.RadixNum2  = [1][0-9]+ [xX] [a-zA-Z0-9]+ // some radix number
   NUM.SciNum     = [0-9]* "."? [0-9]+ [eE] "-"? [0-9]+ // scientific notation
   PrefixOperator = "prefix" Operator
   Operator       = [\!\?\@\#\%\^\&\|\~\=\+\-\*\/\\\>\<\:\.\$]+

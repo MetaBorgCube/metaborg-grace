@@ -38,3 +38,7 @@ var a := object {
 };
 a.field := 13;
 ]] 0 warnings 0 errors
+
+test hard assignment [[
+self.val := self.val + 1;
+]] 0 warnings 0 errors

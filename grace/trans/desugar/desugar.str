@@ -21,6 +21,9 @@ rules
     <+ desugar-match-case
     <+ desugar-flatten-methodID
     <+ desugar-flatten-methodPart
+    <+ desugar-mcallopexp
+    <+ desugar-mcallopexpassign
+    <+ desugar-mcallprefixopexp
     <+ desugar-blockExp 
     <+ desugar-block
     <+ desugar-block-to-object
@@ -100,6 +103,15 @@ rules
     where
        <neq(|a, NoArgs())> a
 
+  desugar-mcallopexp: MCallOpEx(receiver, OperatorCF(name), arg)->
+    MCallWDot(receiver, [Part(ID(name), ArgsParen([arg]))])
+  
+  desugar-mcallopexpassign: MCallOpExAssign(receiver, arg)->
+    MCallWDot(receiver, [Part(ID(":="), ArgsParen([arg]))])
+    
+  desugar-mcallprefixopexp: MCallPrefixOpExp(OperatorCF( op ), arg )->
+    MCallWDot(arg, [Part(ID(<concat-strings> ["prefix", op]), NoArgs())])
+  
   desugar-flatten-objectdecl: ObjectDecl(a, b, xs) -> ObjectDecl(a, b, ys)
     where
       ys := <flatten-list> xs;
