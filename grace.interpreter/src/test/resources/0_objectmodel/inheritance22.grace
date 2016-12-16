@@ -1,6 +1,6 @@
 method A {
     object {
-        { print("Call f"); self.f; }.apply;
+        { print("Call f"); outer.f; }.apply;
         
         method f {
             print("A.f");
