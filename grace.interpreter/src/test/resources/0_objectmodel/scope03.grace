@@ -2,7 +2,7 @@ class A {
     def inA = 42;
     
     class CinA {
-        def inCinA is public = inA;
+        def inCinA is public = outer.inA;
         
         method inA {
             4;
@@ -10,4 +10,4 @@ class A {
     };
 };
 
-print(A.CinA.inCinA);
+print(self.A.CinA.inCinA);

@@ -9,10 +9,10 @@ method A {
 };
 
 def x = object {
-    inherit A;
+    inherit outer.A;
     
     def f is public = 42;
  
 };
 
-print(x.f);
+print(self.x.f);

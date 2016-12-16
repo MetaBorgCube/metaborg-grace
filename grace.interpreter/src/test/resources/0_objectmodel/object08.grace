@@ -1,22 +1,22 @@
 class Base {
     def const = 1;
     
-    def x1 is public = funF;
+    def x1 is public = self.funF;
     
     method funF {
-        const;
+        self.const;
     };
 };
 
 class Top {
-    inherit Base;
+    inherit outer.Base;
     
     def const = 3;
     
     method funF {
-        const;
+        self.const;
     };
 };
 
-print(Base.x1);
-print(Top.x1);
+print(self.Base.x1);
+print(self.Top.x1);

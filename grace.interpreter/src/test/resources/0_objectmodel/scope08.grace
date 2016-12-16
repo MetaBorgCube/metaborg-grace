@@ -3,15 +3,15 @@ class A {
     
     method CinA {
       object {
-        def inCinA is public = inA;
+        def inCinA is public = outer.inA;
       };
     };
     
     method CinA2 {
       object {
-        inherit CinA;
+        inherit outer.CinA;
       };
     };
 };
 
-print(A.CinA2.inCinA);
+print(self.A.CinA2.inCinA);

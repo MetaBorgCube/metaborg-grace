@@ -1,19 +1,19 @@
 class Base {
     def const = 1;
     
-    print(fun);
+    print(self.fun);
     
     method fun {
-        const;
+        self.const;
     };
 };
 
 class Top {
-    inherit Base;
+    inherit outer.Base;
     
     def const = 3;
     
-    print(fun);
+    print(self.fun);
 };
 
-Top;
+self.Top;

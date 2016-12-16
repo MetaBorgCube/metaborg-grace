@@ -5,12 +5,12 @@ class A {
 };
 
 class B {
-  inherit A;
+  inherit outer.A;
   
   method f {
     print("B.f");
   };
 };
 
-A.f;
-B.f;
+self.A.f;
+self.B.f;

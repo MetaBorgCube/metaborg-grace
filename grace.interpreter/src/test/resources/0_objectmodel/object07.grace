@@ -1,6 +1,6 @@
 class Base {
 
-    def x1 is public = funF;
+    def x1 is public = self.funF;
     
     method funF {
         1;
@@ -8,12 +8,12 @@ class Base {
 };
 
 class Top {
-    inherit Base;
+    inherit outer.Base;
     
     method funF {
         3;
     };
 };
 
-print(Base.x1);
-print(Top.x1);
+print(self.Base.x1);
+print(self.Top.x1);

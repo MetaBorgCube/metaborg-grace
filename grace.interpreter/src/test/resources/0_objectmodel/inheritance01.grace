@@ -5,9 +5,9 @@ class A {
 };
 
 class B {
-  inherit A;
+  inherit outer.A;
   
 };
 
-A.f;
-B.f;
+self.A.f;
+self.B.f;

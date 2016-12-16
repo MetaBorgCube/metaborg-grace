@@ -3,14 +3,14 @@ class OuterOuter {
         def inOuter = 3;
         
         class Inner {
-            def inInner is public = inOuter;
+            def inInner is public = outer.inOuter;
         };
     };
     
     class Side {
-        inherit Outer;
+        inherit outer.Outer;
     };
 };
 
-print(OuterOuter.Side.Inner.inInner);
-print(OuterOuter.Outer.Inner.inInner);
+print(self.OuterOuter.Side.Inner.inInner);
+print(self.OuterOuter.Outer.Inner.inInner);

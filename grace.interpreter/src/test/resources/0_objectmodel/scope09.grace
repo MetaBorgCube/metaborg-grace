@@ -2,15 +2,15 @@ def xxx = 42;
 
 method CinA {
   object {
-    def inCinA is public = xxx;
+    def inCinA is public = outer.xxx;
   };
 };
 
 
 method CinA2 {
   object {
-    inherit CinA;
+    inherit outer.CinA;
   };
 };
 
-print(CinA2.inCinA);
+print(self.CinA2.inCinA);

@@ -3,28 +3,28 @@ class Base {
     def x = 11;
     
     method a {
-        x + y; // y is not resolved
+        self.x + self.y; // y is not resolved
     };
 };
 
 class Middle {
-    inherit Base;
+    inherit outer.Base;
     
     def y = 13;
     
     method a {
-        x + y + z; // y, z are not resolved
+        self.x + self.y + self.z; // y, z are not resolved
     };
 };
 
 class Top {
-    inherit Middle;
+    inherit outer.Middle;
 
     def z = 17;
 
     method a {
-        x + y + z;
+        self.x + self.y + self.z;
     };
 };
 
-print(Top.a);
+print(self.Top.a);

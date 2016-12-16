@@ -17,4 +17,4 @@ method A {
     };
 };
 
-print(A.boo);
+print(self.A.boo);

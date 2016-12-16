@@ -1,24 +1,24 @@
 class Base {
     def const = 1;
     
-    def x1 is public = fun;
+    def x1 is public = self.fun;
     
     method fun {
-        const;
+        self.const;
     };
 };
 
 class Top {
-    inherit Base;
+    inherit outer.Base;
     
     def const = 3;
     
     def onlyhere = 6;
     
     method fun {
-        const + onlyhere;
+        self.const + self.onlyhere;
     };
     
 };
 
-print(Top); // error because variable onlyhere not allocated yet
+print(self.Top); // error because variable onlyhere not allocated yet

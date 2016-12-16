@@ -6,7 +6,7 @@ method classA {
 
 method classB {
     object {
-        inherit classA;
+        inherit outer.classA;
         
         method m2 {
           
@@ -16,15 +16,15 @@ method classB {
 
 method classC {
     object {
-        inherit classB;
+        inherit outer.classB;
         
         method m1 {
-           d1 := d1 + 1; // should fail here because minigrace fails?
-           d1;
+           self.d1 := self.d1 + 1; // should fail here because minigrace fails?
+           self.d1;
         };
         
-        var d1 := 0 + m1;
+        var d1 := 0 + self.m1;
     };
 };
 
-print(classC.m1);
+print(self.classC.m1);

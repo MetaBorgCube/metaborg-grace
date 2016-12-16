@@ -8,14 +8,14 @@ object {
               11;
           };
           
-          f;
-          g;
+          self.f;
+          self.g;
       };
   };
   
   method B {
       object {
-          inherit A;
+          inherit outer.A;
           
           def f is public = { print("B.f - init"); 17; }.apply;
        
@@ -24,20 +24,20 @@ object {
               23;
           };
           
-          f;
-          g;
+          self.f;
+          self.g;
       };
   };
   
   print("INIT myA >>>>>>>>");
-  def myA = A;
+  def myA = self.A;
   print("<<<<<< INIT myA");
   print("INIT myB >>>>>>>>");
-  def myB = B;
+  def myB = self.B;
   print("<<<<<< INIT myB");
   
-  print(myA.f);
-  print(myA.g);
-  print(myB.f);
-  print(myB.g);
+  print(self.myA.f);
+  print(self.myA.g);
+  print(self.myB.f);
+  print(self.myB.g);
 };

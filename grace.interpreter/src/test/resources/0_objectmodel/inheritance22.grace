@@ -1,6 +1,6 @@
 method A {
     object {
-        { print("Call f"); f; }.apply;
+        { print("Call f"); self.f; }.apply;
         
         method f {
             print("A.f");
@@ -10,9 +10,9 @@ method A {
 };
 
 def x = object {
-    inherit A;
+    inherit outer.A;
     
     def f is public = { print("B.f"); 13; }.apply;
 };
 
-print(x.f);
+print(self.x.f);

@@ -9,12 +9,12 @@ class A {
 };
 
 class B {
-  inherit A;
+  inherit outer.A;
   
   method f {
     print("B.f");
   };
 };
 
-A.a;
-B.a;
+self.A.a;
+self.B.a;

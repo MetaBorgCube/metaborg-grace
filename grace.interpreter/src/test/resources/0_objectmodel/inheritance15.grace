@@ -2,15 +2,15 @@ class Base {
     def const = 1;
     
     method fun {
-        const;
+        self.const;
     };
 };
 
 class Top {
-    inherit Base;
+    inherit outer.Base;
     
     def const = 3;
     
 };
 
-print(Top.fun);
+print(self.Top.fun);

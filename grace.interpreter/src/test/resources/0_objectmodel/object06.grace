@@ -1,15 +1,15 @@
 method base {
     object {
         def param is public = 100;
-        def x1 is public = param;
+        def x1 is public = self.param;
     };
 };
 
 def myobj = object {
-    inherit base;
+    inherit outer.base;
     
     def param is public = 500;
 };
 
-print(myobj.param);
-print(myobj.x1);
+print(self.myobj.param);
+print(self.myobj.x1);

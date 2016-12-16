@@ -5,7 +5,7 @@ method A {
 };
 
 def x = object {
-    inherit A;
+    inherit outer.A;
     
  
     method f {
@@ -14,4 +14,4 @@ def x = object {
     };
 };
 
-print(x.f);
+print(self.x.f);

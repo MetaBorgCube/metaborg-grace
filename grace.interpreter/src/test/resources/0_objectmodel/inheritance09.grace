@@ -6,7 +6,7 @@ class Base {
 };
 
 class Middle {
-    inherit Base;
+    inherit outer.Base;
     
     method a {
         print("Middle.a");
@@ -14,13 +14,13 @@ class Middle {
 };
 
 class Top {
-    inherit Middle;
+    inherit outer.Middle;
 
     method a {
         print("Top.a");
     };
 };
 
-Base.a;
-Middle.a;
-Top.a;
+self.Base.a;
+self.Middle.a;
+self.Top.a;

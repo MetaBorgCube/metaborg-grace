@@ -11,12 +11,12 @@ class A {
 };
 
 class B {
-  inherit A;
+  inherit outer.A;
   
   def myconst = 1;
   
   method f(theblock) {
-    theblock.apply(myconst);
+    theblock.apply(self.myconst);
   };
   
   method increase(x) {
@@ -25,8 +25,8 @@ class B {
   
 };
 
-def myB = B;
+def myB = self.B;
 
-def result = myB.f({ x -> myB.increase(x); });
+def result = self.myB.f({ x -> self.myB.increase(x); });
 
-print(result);
+print(self.result);

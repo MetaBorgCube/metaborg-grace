@@ -3,13 +3,13 @@ object {
   def before = 1;
   
   class A {
-      def a is public = before;
-      def b is public = after;
+      def a is public = outer.before;
+      def b is public = outer.after;
   };
   
-  print(A.a);
+  print(self.A.a);
   
   def after = -1;
   
-  print(A.b);
+  print(self.A.b);
 };

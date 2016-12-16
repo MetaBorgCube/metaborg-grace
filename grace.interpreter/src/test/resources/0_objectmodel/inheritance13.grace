@@ -14,16 +14,16 @@ method A {
 
 method m {
     object {
-        inherit A.TRAIT;
+        inherit outer.A.TRAIT;
         
         method asString {
-          map.asString;
+          self.map.asString;
         };
     };
 };
 
 print("m.map");
-print(m.map.asString);
+print(self.m.map.asString);
 print("A.trait.map");
-print(A.TRAIT.map.asString);
-print(m.asString);
+print(self.A.TRAIT.map.asString);
+print(self.m.asString);

@@ -3,30 +3,30 @@ class Base {
     def x = 11;
     
     method a {
-        x;
+        self.x;
     };
 };
 
 class Middle {
-    inherit Base;
+    inherit outer.Base;
     
     def y = 13;
     
     method a {
-        x + y;
+        self.x + self.y;
     };
 };
 
 class Top {
-    inherit Middle;
+    inherit outer.Middle;
 
     def z = 17;
 
     method a {
-        x + y + z;
+        self.x + self.y + self.z;
     };
 };
 
-print(Base.a);
-print(Middle.a);
-print(Top.a);
+print(self.Base.a);
+print(self.Middle.a);
+print(self.Top.a);

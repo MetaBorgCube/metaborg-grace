@@ -5,9 +5,9 @@ class A {
 };
 
 class B {
-  inherit A;
+  inherit outer.A;
   
-  def x is readable = f;
+  def x is readable = self.f;
   
   method f {
     2;
@@ -15,4 +15,4 @@ class B {
   
 };
 
-print(B.x);
+print(self.B.x);

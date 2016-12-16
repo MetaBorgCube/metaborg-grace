@@ -8,4 +8,4 @@ def l0 is public = object {
     };
 };
 
-print(l0.l1.f);
+print(self.l0.l1.f);

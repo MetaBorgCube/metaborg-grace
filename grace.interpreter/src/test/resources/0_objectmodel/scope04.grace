@@ -2,11 +2,11 @@ class A {
     def inA = 42;
     
     class CinA {
-        def inCinA is public = inA;
+        def inCinA is public = outer.inA;
     };
     
     class CinA2 {
-        inherit CinA;
+        inherit outer.CinA;
         
         method inA {
             2;
@@ -14,4 +14,4 @@ class A {
     };
 };
 
-print(A.CinA2.inCinA);
+print(self.A.CinA2.inCinA);

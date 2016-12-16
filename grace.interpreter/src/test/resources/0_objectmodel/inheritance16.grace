@@ -8,11 +8,11 @@ method A {
     };
 };
 
-A.TRAIT;
+self.A.TRAIT;
 
 def obj = object {
-  inherit A.TRAIT;
+  inherit outer.A.TRAIT;
   
 };
 
-print(obj.msg);
+print(self.obj.msg);
