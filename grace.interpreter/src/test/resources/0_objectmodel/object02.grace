@@ -28,7 +28,7 @@ method middle {
 
 
 object {
-    inherit middle;
+    inherit outer.middle;
     
     def x4 = outer.log("Top before code");
     

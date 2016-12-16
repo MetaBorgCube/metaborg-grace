@@ -13,7 +13,7 @@ class Middle {
     def y = 13;
     
     method a {
-        self.x + self.y;
+        (self.x) + (self.y);
     };
 };
 
@@ -23,7 +23,7 @@ class Top {
     def z = 17;
 
     method a {
-        self.x + self.y + self.z;
+        (self.x) + (self.y) + (self.z);
     };
 };
 
