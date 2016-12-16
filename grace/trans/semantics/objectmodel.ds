@@ -38,7 +38,7 @@ signature
   arrows
     add-member(String, V) --> U
     
-    lookup-method(V, String) --> V
+    lookup-member(V, String) --> V
     
     init-methods(Closures) --> U
     init-fields(Closures) --> U
@@ -72,7 +72,7 @@ rules /* member operations */
     read(S) --> Obj(O, members);
     update(S, Obj(O, { x |--> v, members})) --> _.
 
-  S, O |- lookup-method(S', x) --> v
+  S, O |- lookup-member(S', x) --> v
   where
     S == S';
     read(S') --> Obj(O', members);
@@ -80,10 +80,10 @@ rules /* member operations */
       true =>
         members[x] => v
       false =>
-        S O, O O' |- lookup-method(O, x) --> v
+        S O, O O' |- lookup-member(O, x) --> v
     }.
 
-  S |- lookup-method(S', x) --> v
+  S |- lookup-member(S', x) --> v
   where
     S != S';
     read(S') --> Obj(_, members);

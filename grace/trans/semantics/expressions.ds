@@ -28,6 +28,7 @@ rules
   where
     e --> v.
   
+  // FIXME this is blatently wrong :)
   MCallL(x, es) --> MCallRecvL(Self(), x, es).
   
   P Exec() |- MCallRecvL(e, x, es) --> resolve-call(v, x, vs)
@@ -46,7 +47,7 @@ rules
   
   resolve-call(recv, x, vs) --> v
   where
-    lookup-method(recv, x) --> mv;
+    lookup-member(recv, x) --> mv;
     call(recv, mv, vs) --> v.
   
   // field access
