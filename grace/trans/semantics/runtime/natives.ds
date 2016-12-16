@@ -5,6 +5,7 @@ signature
     parseI : String -> Int
     nativeIBinOp: String * Int * Int -> Int
     error: String * String -> String
+    addI: Int * Int -> Int
     
   arrows
     string2int(String) --> Int

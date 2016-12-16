@@ -5,6 +5,7 @@ imports
   trans/semantics/values
   trans/semantics/statements
   trans/semantics/objectmodel
+  trans/semantics/functions
   
 signature
   arrows
@@ -12,11 +13,6 @@ signature
     List(Exp) --> List(V)
     
     resolve-call(V, String, List(V)) --> V
-    
-    call(V, V, List(V)) --> V
-    
-  native operators
-    nativePrint: V -> V
 
 rules
 
@@ -24,18 +20,6 @@ rules
   
   Outer() --> current-outer().
 
-  MCallL("print", [e]) --> nativePrint(v)
-  where
-    e --> v.
-  
-  // FIXME this is blatently wrong :)
-  MCallL(x, es) --> MCallRecvL(Self(), x, es).
-  
-  P Exec() |- MCallRecvL(e, x, es) --> resolve-call(v, x, vs)
-  where
-    e --> v;
-    es --> vs.
-  
   [] : List(Exp) --> [].
   
   [e | es] : List(Exp) --> [ v | vs ]
@@ -45,24 +29,6 @@ rules
 
 rules
   
-  resolve-call(recv, x, vs) --> v
-  where
-    lookup-member(recv, x) --> mv;
-    call(recv, mv, vs) --> v.
-  
-  // field access
-  call(_, mv, []) --> mv
-  where
-    mv =!=> ClosV(_, _, _, _).
-
-  // method call with no arguments
-  call(S, ClosV(O, [], code, _), []) --> v
-  where
-    S, O |- code --> v.
-  
-  call(S, ClosV(O, _, code, _), [_|_]) --> DoneV()
-  where
-    halt-error("You haven't told me how to call functions with arguments", "") --> _.
     
      
 

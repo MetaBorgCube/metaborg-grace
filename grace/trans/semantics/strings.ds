@@ -3,6 +3,7 @@ module trans/semantics/strings
 imports
   src-gen/ds-signatures/grace-lowered-sig
   trans/semantics/expressions
+  trans/semantics/values
 
 signature
   constructors

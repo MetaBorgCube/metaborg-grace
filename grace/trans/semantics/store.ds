@@ -1,4 +1,4 @@
-module trans/semantics/new-store
+module trans/semantics/store
 
 signature
   sorts
@@ -15,7 +15,6 @@ signature
     allocate(HeapData) :: H --> Addr :: H
     update(Addr, HeapData) :: H --> Addr :: H
     read(Addr) :: H --> HeapData :: H
-    has(Addr) :: H --> Bool :: H
     next() --> Addr
         
 rules
@@ -29,6 +28,4 @@ rules
   update(addr, data) :: H --> addr :: H {addr |--> data, H}.
   
   next() --> fresh.
-  
-  has(addr) :: H --> H[addr?] :: H.
   

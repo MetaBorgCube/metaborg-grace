@@ -1,4 +1,4 @@
-module trans/semantics/numbers
+module trans/semantics/booleans
 
 imports
   src-gen/ds-signatures/grace-lowered-sig

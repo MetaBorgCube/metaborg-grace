@@ -2,10 +2,11 @@ module trans/semantics/statements
 
 imports
   src-gen/ds-signatures/grace-sig
-  trans/semantics/values
   trans/semantics/expressions
+  trans/semantics/values
 
 signature
+  sorts V
   constructors
     DoneV : V
   

@@ -6,12 +6,13 @@ imports
 imports
   trans/semantics/values
   trans/semantics/objectmodel
+  trans/semantics/functions
   trans/semantics/expressions
   trans/semantics/statements
   trans/semantics/numbers
   trans/semantics/booleans
   trans/semantics/strings
-
+  
 signature
   arrows
     Program --> V

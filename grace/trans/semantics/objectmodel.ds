@@ -5,13 +5,13 @@ imports
 
 imports
   trans/semantics/values
-  trans/semantics/environment
-  trans/semantics/statements
-  trans/semantics/new-store
+  trans/semantics/store
   trans/semantics/runtime/natives
   
   trans/semantics/strings
   trans/semantics/numbers
+  trans/semantics/functions
+  trans/semantics/statements
 
 signature
   sorts
@@ -24,24 +24,34 @@ signature
   sort aliases
     Self = Addr
     HeapData = Object
-    Tbl = Map(String, V)
+    Slots = Map(Int, V)
+    Methods = Map(String, V)
+
+  constructors // extra instructions
+    SlotRead : Int -> Statement
+    SlotWrite : Int * Exp -> Statement 
 
   constructors
-    Obj: Addr * Tbl -> Object
-    ClosV: Addr * List(String) * Code * Env -> V
+    Obj: Addr * Slots * Methods -> Object
     RefV: Addr -> V {implicit}
   
   components
     S : Addr
     O : Addr
+    SC : Int
     
   arrows
-    add-member(String, V) --> U
+    add-slot(V) --> Int
+    read-slot(Int) --> V
+    write-slot(Int, V) --> U
     
-    lookup-member(V, String) --> V
+    add-method(String, V) --> U
     
+    lookup-method(V, String) --> V
+    
+    alloc-slots(Closures) --> U
     init-methods(Closures) --> U
-    init-fields(Closures) --> U
+    init-object(Closures) --> U
     
     new-object(Addr) --> Addr
     
@@ -53,49 +63,131 @@ rules
   S, P Exec() |- ol@ObjectL(_, [], _) --> S'
   where
     new-object(S) --> S';
-    P Flatten() |- ol --> FlatObject(closures);
+    S S', O S, P Flatten() |- ol --> FlatObject(closures);
+    S' |- alloc-slots(closures) --> U();
     S' |- init-methods(closures) --> U();
-    S' |- init-fields(closures) --> U().
-    
-rules /* member operations */
-
-  new-object(O) --> S
+    S' |- init-object(closures) --> U().
+  
+  SlotRead(i) --> read-slot(i).
+  
+  SlotWrite(i, e) --> DoneV()
   where
-    allocate(Obj(O, {})) --> S.
+    e --> v;
+    write-slot(i, v) --> _.
+
+rules /* object operations */
 
   S |- current-self() --> S.
   
   O |- current-outer() --> O.
 
-  S |- add-member(x, v) --> U()
+  new-object(O) --> S
   where
-    read(S) --> Obj(O, members);
-    update(S, Obj(O, { x |--> v, members})) --> _.
+    allocate(Obj(O, {}, {})) --> S.
 
-  S, O |- lookup-member(S', x) --> v
+  S |- add-slot(v) :: SC --> SC :: SC addI(SC, 1)
+  where
+    read(S) --> Obj(O, slots, methods);
+    update(S, Obj(O, {SC |--> v, slots}, methods)) --> _.
+  
+  S |- read-slot(i) --> slots[i]
+  where
+    read(S) --> Obj(_, slots, _).
+  
+  S |- write-slot(i, v) --> U()
+  where
+    read(S) --> Obj(O, slots, methods);
+    update(S, Obj(O, {i |--> v, slots}, methods)) --> _.
+
+  S |- add-method(x, v) --> U()
+  where
+    read(S) --> Obj(O, slots, methods);
+    update(S, Obj(O, slots, {x |--> v, methods})) --> _.
+  
+  S, O |- lookup-method(S', x) --> v
   where
     S == S';
-    read(S') --> Obj(O', members);
-    case members[x?] of {
+    read(S') --> Obj(O', _, methods);
+    case methods[x?] of {
       true =>
-        members[x] => v
+        methods[x] => v
       false =>
-        S O, O O' |- lookup-member(O, x) --> v
+        S O, O O' |- lookup-method(O, x) --> v
     }.
 
-  S |- lookup-member(S', x) --> v
+  S |- lookup-method(S', x) --> v
   where
     S != S';
-    read(S') --> Obj(_, members);
-    case members[x?] of {
+    read(S') --> Obj(_, _, methods);
+    case methods[x?] of {
       true =>
-        members[x] => v
+        methods[x] => v
       false =>
-        halt-error("No member: ", x) --> _;
+        halt-error("No method: ", x) --> _;
         DoneV() => v
     }.
 
+/* ========== SLOT ALLOCATION ======== */
+signature
+  arrows
+    Closure -slot-> U
+    Code -slot-> U
+    Statement -slot-> U
+    
+rules
 
+  Declaration(ConstantL(name, _, v)) -slot-> U()
+  where
+    add-slot(v) --> i;
+    field-getter(name, i) --> (name_getter, getter);
+    add-method(name_getter, getter) --> _.
+  
+  Declaration(VariableL(name, _)) -slot-> U()
+  where
+    add-slot(Uninitialized()) --> i;
+    field-getter(name, i) --> (name_getter, getter);
+    add-method(name_getter, getter) --> _;
+    field-setter(name, i) --> (name_setter, setter);
+    add-method(name_setter, setter) --> _.
+    
+  _ : Statement -slot-> U().
+  
+  alloc-slots([]) --> U().
+  
+  alloc-slots([clos | closs]) --> alloc-slots(closs)
+  where
+    clos -slot-> U().
+  
+  Closure(O, code) -slot-> U()
+  where
+    O |- code :: SC 0 -slot-> U() :: SC _.
+
+  [] : Code -slot-> U().
+  
+  [c |cs] : Code -slot-> U()
+  where
+    c -slot-> U();
+    cs -slot-> U().
+
+/* ========== FIELD METHOD GENERATION ======= */
+signature
+  arrows
+    field-getter(String, Int) --> (String * V)
+    field-setter(String, Int) --> (String * V)
+  
+rules
+  
+  field-getter(x, i) --> (x, getter)
+  where
+    method-closure(MethodL(x, NoAnnotations(), [], [SlotRead(i)])) --> getter.
+  
+  field-setter(x, i) --> (x_set, setter)
+  where
+    halt-error("Shit ", "happens") --> _;
+    "setter_name" => x_set;
+    "param_name" => x_param;
+    method-closure(MethodL(x_set, NoAnnotations(), [x_param], [SlotWrite(i, MCallL(x_param, [] : List(Exp)))])) --> setter.
+  
 /* ========== INIT METHODS =========== */
 
 signature
@@ -103,12 +195,13 @@ signature
     Closure -method-> U
     Code -method-> U
     Statement -method-> U
-
+    
 rules
 
-  O |- Declaration(MethodL(name, _, params, code)) -method-> U()
+  Declaration(m@MethodL(name, _, _, _)) -method-> U()
   where
-    add-member(name, ClosV(O, params, code, {})) --> U().
+    method-closure(m) --> closv;
+    add-method(name, closv) --> U().
   
   _ : Statement -method-> U().
 
@@ -129,48 +222,36 @@ rules
     c -method-> U();
     cs -method-> U().
 
+/* ========= INIT OBJECTS =========== */
 
-
-/* ========== INIT FIELDS =========== */
 signature
   arrows
-    Closure -field-> U
-    Code -field-> U
-    Statement -field-> U
+    Closure -init-> U
+    Code -init-> U
+    Statement -init-> U
 
 rules /* init-fields */
   
-  Declaration(ConstantL(name, _, v)) -field-> U()
-  where
-    add-member(name, v) --> U().
-  
-  Declaration(VariableL(name, _)) -field-> U()
-  where
-    add-member(name, Uninitialized()) --> U().
-  
-  Declaration(MethodL(_, _, _, _)) -field-> U().
-  
-  s : Statement -field-> U()
+  s : Statement -init-> U()
   where
     s --> v.
   
-  init-fields([]) --> U().
+  init-object([]) --> U().
   
-  init-fields([clos | closs]) --> init-fields(closs)
+  init-object([clos | closs]) --> init-object(closs)
   where
-    clos -field-> U().
+    clos -init-> U().
 
-  Closure(O, code) -field-> U()
+  Closure(O, code) -init-> U()
   where
-    O |- code -field-> U().
+    O |- code -init-> U().
   
-  [] : Code -field-> U().
+  [] : Code -init-> U().
   
-  [c |cs] : Code -field-> U()
+  [c |cs] : Code -init-> U()
   where
-    c -field-> U();
-    cs -field-> U().
-
+    c -init-> U();
+    cs -init-> U().
 
 /* ========== OBJECT FLATTENING =========== */
 signature
@@ -202,7 +283,7 @@ signature
 
 rules
 
-  S, P Flatten() |- ObjectL(inherit, [], code) --> FlatObject(concatClosures(closures-inherited, [Closure(S, code)])) //FlatObject(closures-inherited ++ [Closure(O, code)])
+  O, P Flatten() |- ObjectL(inherit, [], code) --> FlatObject(concatClosures(closures-inherited, [Closure(O, code)])) //FlatObject(closures-inherited ++ [Closure(O, code)])
   where
     P Flatten() |- inherit --> FlatObject(closures-inherited).
 
@@ -217,7 +298,5 @@ rules
   Inherit(e, _, _) --> v // TODO this is where to check whether the inherit expression actually returns a fresh object
   where
     e --> v.
-
-    
     
     
