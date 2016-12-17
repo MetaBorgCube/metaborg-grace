@@ -40,20 +40,6 @@ signature
     O : Addr
     SC : Int
     
-  arrows
-    add-slot(V) --> Int
-    read-slot(Int) --> V
-    write-slot(Int, V) --> U
-    
-    add-method(String, V) --> U
-    
-    lookup-method(V, String) --> V
-    
-    new-object(Addr) --> Addr
-    
-    current-self() --> V
-    current-outer() --> V
-
 rules
 
   S, P Exec() |- ObjectL(inherit, [], code) --> S'
@@ -71,58 +57,6 @@ rules
   where
     e --> v;
     write-slot(i, v) --> _.
-
-rules /* object operations */
-
-  S |- current-self() --> S.
-  
-  O |- current-outer() --> O.
-
-  new-object(O) --> S
-  where
-    allocate(Obj(O, {}, {})) --> S.
-
-  S |- add-slot(v) :: SC --> SC :: SC addI(SC, 1)
-  where
-    read(S) --> Obj(O, slots, methods);
-    update(S, Obj(O, {SC |--> v, slots}, methods)) --> _.
-  
-  S |- read-slot(i) --> slots[i]
-  where
-    read(S) --> Obj(_, slots, _).
-  
-  S |- write-slot(i, v) --> U()
-  where
-    read(S) --> Obj(O, slots, methods);
-    update(S, Obj(O, {i |--> v, slots}, methods)) --> _.
-
-  S |- add-method(x, v) --> U()
-  where
-    read(S) --> Obj(O, slots, methods);
-    update(S, Obj(O, slots, {x |--> v, methods})) --> _.
-  
-  S, O |- lookup-method(S', x) --> v
-  where
-    S == S';
-    read(S') --> Obj(O', _, methods);
-    case methods[x?] of {
-      true =>
-        methods[x] => v
-      false =>
-        S O, O O' |- lookup-method(O, x) --> v
-    }.
-
-  S |- lookup-method(S', x) --> v
-  where
-    S != S';
-    read(S') --> Obj(_, _, methods);
-    case methods[x?] of {
-      true =>
-        methods[x] => v
-      false =>
-        halt-error("No method: ", x) --> _;
-        DoneV() => v
-    }.
 
 /* ========== SLOT ALLOCATION ======== */
 signature
@@ -288,5 +222,73 @@ rules
   Inherit(e, _, _) --> v // TODO this is where to check whether the inherit expression actually returns a fresh object
   where
     e --> v.
+
+/* ======== OBJECT META-FUNCTIONS ========= */
+
+signature
+  arrows
+    new-object(Addr) --> Addr
+
+    add-slot(V) --> Int
+    read-slot(Int) --> V
+    write-slot(Int, V) --> U
     
+    add-method(String, V) --> U
+    
+    lookup-method(V, String) --> V
+    
+    current-self() --> V
+    current-outer() --> V
+
+rules
+
+  S |- current-self() --> S.
+  
+  O |- current-outer() --> O.
+
+  new-object(O) --> S
+  where
+    allocate(Obj(O, {}, {})) --> S.
+
+  S |- add-slot(v) :: SC --> SC :: SC addI(SC, 1)
+  where
+    read(S) --> Obj(O, slots, methods);
+    update(S, Obj(O, {SC |--> v, slots}, methods)) --> _.
+  
+  S |- read-slot(i) --> slots[i]
+  where
+    read(S) --> Obj(_, slots, _).
+  
+  S |- write-slot(i, v) --> U()
+  where
+    read(S) --> Obj(O, slots, methods);
+    update(S, Obj(O, {i |--> v, slots}, methods)) --> _.
+
+  S |- add-method(x, v) --> U()
+  where
+    read(S) --> Obj(O, slots, methods);
+    update(S, Obj(O, slots, {x |--> v, methods})) --> _.
+  
+  S, O |- lookup-method(S', x) --> v
+  where
+    S == S';
+    read(S') --> Obj(O', _, methods);
+    case methods[x?] of {
+      true =>
+        methods[x] => v
+      false =>
+        S O, O O' |- lookup-method(O, x) --> v
+    }.
+
+  S |- lookup-method(S', x) --> v
+  where
+    S != S';
+    read(S') --> Obj(_, _, methods);
+    case methods[x?] of {
+      true =>
+        methods[x] => v
+      false =>
+        halt-error("No method: ", x) --> _;
+        DoneV() => v
+    }.
     
