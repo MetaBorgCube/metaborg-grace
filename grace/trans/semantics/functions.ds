@@ -2,9 +2,13 @@ module trans/semantics/functions
 
 imports
   trans/semantics/values
+  trans/semantics/statements
   trans/semantics/objectmodel
   
 signature
+  sorts
+    Addr
+
   constructors
     ClosV: Addr * List(String) * Code * Env -> V
 

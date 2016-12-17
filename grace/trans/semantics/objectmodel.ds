@@ -47,9 +47,8 @@ rules
     new-object(S) --> S';
     S S', O S, P Flatten() |- inherit --> FlatObject(closures-inherited);
     concatClosures(closures-inherited, [Closure(S, code)]) => closures;
-    S' |- init-slots(closures) --> closures';
-    S' |- init-methods(closures') --> closures'';
-    S' |- init-object(closures'') --> _.
+    S' |- install-methods(closures) --> U();
+    S' |- init-object(closures) --> U().
   
   SlotRead(i) --> read-slot(i).
   
@@ -58,45 +57,91 @@ rules
     e --> v;
     write-slot(i, v) --> _.
 
-/* ========== SLOT ALLOCATION ======== */
+/* ========== INIT METHODS =========== */
+
 signature
   arrows
-    init-slots(Closures) --> Closures
-    alloc-slots(Closures) --> Closures
-    Closure -slot-> Closure
-    Code -slot-> Code
+    install-methods(Closures) --> U
+    
+    Closure -method-> U
+    Code -method-> U
+    Statement -method -> U
+    
+rules
+
+  install-methods([]) --> U().
+  
+  install-methods([clos | closs]) --> install-methods(closs)
+  where
+    clos -method-> _.
+  
+  Closure(O, code) -method-> U()
+  where
+    O |- code -method-> _.
+    
+  [] : Code -method-> U().
+  
+  [c | cs] : Code -method-> U()
+  where
+    c -method-> _;
+    cs -method-> _.
+
+  Declaration(m@MethodL(name, _, _, _)) -method-> U()
+  where
+    add-method(name, method-closure(m)) --> _.
+  
+  _ : Statement -method -> U().
+
+/* ========== OBJECT INIT ======== */
+signature
+  arrows
+    init-object(Closures) --> U
+    init-object-aux(Closures) --> U
+    
+    Closure -obji-> U
+    Code -obji-> U
+    Statement -obji -> U
     
 rules
   
-  init-slots(closures) --> closures'
+  init-object(closures) --> U()
   where
-    alloc-slots(closures) :: SC 0 --> closures' :: SC _.
+    init-object-aux(closures) :: SC 0 --> _ :: SC _.
   
-  alloc-slots([]) --> [].
+  init-object-aux([]) --> U().
   
-  alloc-slots([clos | closs]) --> [clos' | alloc-slots(closs)]
+  init-object-aux([clos | closs]) --> init-object-aux(closs)
   where
-    clos -slot-> clos'.
+    clos -obji-> _.
   
-  Closure(O, code) -slot-> Closure(O, code')
+  Closure(O, code) -obji-> U()
   where
-    O |- code -slot-> code'.
+    O |- code -obji-> _.
+    
+  [] : Code -obji-> U().
   
-  [] : Code -slot-> [].
-  
-  [Declaration(ConstantL(name, _, e)) | ss] : Code -slot-> [SlotWrite(i, e), Declaration(field-getter(name, i)) | ss']
+  [c | cs] : Code -obji-> U()
   where
-    add-slot(Uninitialized()) --> i;
-    ss -slot-> ss'.
+    c -obji-> _;
+    cs -obji-> _.
 
-  [Declaration(VariableL(name, _)) | ss] : Code -slot-> [Declaration(field-getter(name, i)), Declaration(field-setter(name, i)) | ss']
+  Declaration(ConstantL(name, _, e)) -obji-> U()
   where
     add-slot(Uninitialized()) --> i;
-    ss -slot-> ss'.
-  
-  [s | ss] : Code -slot-> [s | ss']
+    Declaration(field-getter(name, i)) -method-> _;
+    SlotWrite(i, e) --> _.
+
+  Declaration(VariableL(name, _)) -obji-> U()
   where
-    ss -slot-> ss'. 
+    add-slot(Uninitialized()) --> i;
+    Declaration(field-getter(name, i)) -method-> _;
+    Declaration(field-setter(name, i)) -method-> _.
+
+  Declaration(MethodL(_, _, _, _)) --> U().
+
+  s : Statement -obji-> U()
+  where
+    s --> _.
 
 /* ========== FIELD METHOD GENERATION ======= */
 signature
@@ -113,69 +158,7 @@ rules
     halt-error("Shit ", "happens") --> _;
     "setter_name" => x_set;
     "param_name" => x_param.
-  
-/* ========== INIT METHODS =========== */
 
-signature
-  arrows
-    init-methods(Closures) --> Closures
-    Closure -method-> Closure
-    Code -method-> Code
-    
-rules
-
-  init-methods([]) --> [].
-  
-  init-methods([clos | closs]) --> [clos' | init-methods(closs)]
-  where
-    clos -method-> clos'.
-  
-  Closure(O, code) -method-> Closure(O, code')
-  where
-    O |- code -method-> code'.
-  
-  [] : Code -method-> [].
-  
-  [Declaration(m@MethodL(name, _, _, _)) | ss] : Code -method-> ss'
-  where
-    add-method(name, method-closure(m)) --> _;
-    ss -method-> ss'.
-  
-  [s | ss] : Code -method-> [s | ss']
-  where
-    ss -method-> ss'.
-
-/* ========= INIT OBJECTS =========== */
-
-signature
-  arrows
-    init-object(Closures) --> U
-    Closure -obj-> U
-    Code -obj-> U
-    Statement -obj-> U
-
-rules /* init-fields */
-  
-  s : Statement -obj-> U()
-  where
-    s --> v.
-  
-  init-object([]) --> U().
-  
-  init-object([clos | closs]) --> init-object(closs)
-  where
-    clos -obj-> U().
-
-  Closure(O, code) -obj-> U()
-  where
-    O |- code -obj-> U().
-  
-  [] : Code -obj-> U().
-  
-  [c |cs] : Code -obj-> U()
-  where
-    c -obj-> U();
-    cs -obj-> U().
 
 /* ========== OBJECT FLATTENING =========== */
 signature
