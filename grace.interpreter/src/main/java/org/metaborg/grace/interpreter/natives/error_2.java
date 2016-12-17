@@ -15,7 +15,7 @@ public abstract class error_2 extends TermBuild {
 	}
 
 	@Specialization
-	public Object doInt(Object s, Object s2) {
+	public Object doObjects(Object s, Object s2) {
 		String r = s.toString() + s2.toString();
 		throw new RuntimeException(r);
 	}
