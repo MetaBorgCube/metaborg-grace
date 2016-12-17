@@ -14,7 +14,7 @@ method base {
         
         def param is public = { x -> print("param init in Base"); -500;}.apply;
         
-        def z is public = self.crap + self.param;
+        def z is public = (self.crap) + (self.param);
         
         method crap {
             print("Crap in Base");

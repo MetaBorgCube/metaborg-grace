@@ -12,7 +12,7 @@ method base {
         
         def x2 = outer.log("Base after code");
         
-        def z is public = self.crap + self.param;
+        def z is public = (self.crap) + (self.param);
         
         def param = { x -> print("param init in Base"); -500;}.apply;
         
