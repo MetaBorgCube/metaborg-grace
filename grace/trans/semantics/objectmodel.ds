@@ -66,7 +66,7 @@ signature
     Closure -member-> Closure
     Code -member-> Code
     
-    Declaration -method-> U
+    install-method(Declaration) --> U
     
 rules
 
@@ -88,30 +88,27 @@ rules
   
   [Declaration(m@MethodL(_, _, _, _)) | cs] : Code -member-> cs'
   where
-    m -method-> _;
+    install-method(m) --> _;
     cs -member-> cs'.
   
   [Declaration(VariableL(name, _)) | cs] : Code -member-> cs'
   where
     add-slot(name) --> i;
-    field-getter(name, i) --> d-getter;
-    d-getter -method-> _;
-    field-setter(name, i) --> d-setter;
-    d-setter -method-> _;
+    install-method(field-getter(name, i)) --> _;
+    install-method(field-setter(name, i)) --> _;
     cs -member-> cs'.
   
   [Declaration(ConstantL(name, _, e)) | cs] : Code -member-> [SlotWrite(i, e) | cs']
   where
     add-slot(name) --> i;
-    field-getter(name, i) --> d-getter;
-    d-getter -method-> _;
+    install-method(field-getter(name, i)) --> _;
     cs -member-> cs'.
   
   [c | cs] : Code -member-> [c | cs']
   where
     cs -member-> cs'.
   
-  m@MethodL(name, _, _, _) -method-> U()
+  install-method(m@MethodL(name, _, _, _)) --> U()
   where
     add-method(name, method-closure(m)) --> _.
 
