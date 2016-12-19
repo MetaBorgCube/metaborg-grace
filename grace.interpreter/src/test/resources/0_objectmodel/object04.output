@@ -1,6 +1,7 @@
 Base before code
 Base code
 Base after code
+param init in Base
 Crap in Top
 Middle before code
 Middle code
@@ -8,4 +9,5 @@ Middle after code
 Top before code
 Top code
 Top after code
--458
+param init in Top
+165
