@@ -150,8 +150,8 @@ context-free syntax
                                   >
   Inherit.NoInherit             = <>
                                   
-  Modifier.Alias                = <<Alias>>
-  Modifier.Exclude              = <<Exclude>>
+  Modifier.AliasModifier        = <<Alias>>
+  Modifier.ExcludeModifier      = <<Exclude>>
   Alias.Alias                   = < alias <MethodNames> = <MethodNames>>
   Exclude.Exclude               = < exclude <MethodNames>>
   
