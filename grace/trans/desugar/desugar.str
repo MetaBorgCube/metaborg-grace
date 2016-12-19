@@ -26,7 +26,6 @@ rules
     <+ desugar-mcallprefixopexp
     <+ desugar-blockExp 
     <+ desugar-block
-//    <+ desugar-block-to-object
     <+ desugar-arg-noargs
     <+ desugar-arg-argsparen
     <+ desugar-argBlock
@@ -39,23 +38,23 @@ rules
   desugar-program: Program(a, b) -> Program([Expression(ObjectDecl(NoInherit(), [], a))], b)
   
   desugar-class-declaration:
-    ClassDecl(MethodName(mIDs), inh, use, code) ->
+    ClassDecl(MethodName(mIDs), type, inh, use, code) ->
       MethodDecl(
         mIDs,
         NoAnnotations(),
-        WildCard(), //TODO type
+        type,
         MethodBody([
           Expression(ObjectDecl(inh,use,code))
         ])
       )
   desugar-class-declaration:
-    ClassDecl(FullStop(iden, mIDs), inh, use, code) ->      
+    ClassDecl(FullStop(iden, mIDs), type, inh, use, code) ->      
       Constant(iden, WildCard(), NoAnnotations(), Expression ( //TODO type
         ObjectDecl(NoInherit(), [], [
           MethodDecl(
             mIDs,
             NoAnnotations(),
-            WildCard(), //TODO type
+            type,
             MethodBody([
               Expression(ObjectDecl(inh,use,code))
             ])
@@ -63,17 +62,23 @@ rules
         ])
       ))
   
-  desugar-flatten-methodID: [ MethodID(ID(n), typeArg, Params(ps)) ] -> //TODO type 
-      [ MethodID(ID(name), Params(ps)) ]
+  desugar-flatten-methodID: [ MethodID(ID(n), typeArg, Params(ps)) ] -> 
+      [ MethodID(ID(name), typeArg, Params(ps)) ]
     where
       name := <concat-strings> [n, <param-string> ps];
       <not-substring(!"(")> n
-  desugar-flatten-methodID: [ MethodID(ID(n1), typeArg, Params(p1)), MethodID(ID(n2), typeArg, Params(p2)) | mids ] ->
-      [MethodID(ID(name), WildCard(), Params(ps)) | mids ] //TODO types
+  desugar-flatten-methodID: [ MethodID(ID(n1), typeArg1, Params(p1)), MethodID(ID(n2), typeArg2, Params(p2)) | mids ] ->
+      [MethodID(ID(name), types, Params(ps)) | mids ]
     with
+      types := <merge-typeargs> [typeArg1, typeArg2];
       name := <concat-strings> [n1, <param-string> p1, n2, <param-string> p2];
       ps   := <concat> [p1,p2]
   
+  merge-typeargs: [ ArgType(ls) , ArgType(ls2) ] -> ArgType(<concat> [ls,ls2])
+  merge-typeargs: [ NoArgType() , ArgType(ls2) ] -> ArgType([ls2])
+  merge-typeargs: [ ArgType(ls) , NoArgType()  ] -> ArgType([ls])
+  merge-typeargs: [ NoArgType() , NoArgType()  ] -> NoArgType()
+   
   not-substring(s) = is-substring(s) < fail + id
   
   desugar-flatten-methodPart: [Part(ID(n), NoArgs())] -> <fail>
@@ -151,31 +156,6 @@ rules
    
   desugar-block:
     Block(a) -> BlockWParams(BlockParams([]), a) 
-
-//  desugar-block-to-object:
-//    BlockWParams(BlockParams([]), code)-> 
-//      ObjectDecl(
-//        NoInherit(),
-//        [],
-//        [ Declaration(
-//            MethodDecl(
-//              Single(MethodID(ID("apply")))
-//            , NoAnnotations()
-//            , MethodBody(code)
-//            )
-//          )
-//        ]
-//      )
-//      
-//  desugar-block-to-object:
-//    BlockWParams(BlockParams(params), code) -> 
-//      ObjectDecl(NoInherit(), [], [Declaration(
-//        MethodDecl(
-//          Multiple([MethodID(ID("apply"), Params(params))])
-//        , NoAnnotations()
-//        , MethodBody(code)
-//        )
-//      )])
 
   desugar-unquote-strings:
     String(s) -> String(<unquote(?'"')> s)

@@ -32,7 +32,7 @@ context-free syntax
   Declaration.Variable          = <var <Identifier><TypeAnn><Annotations><VarInit>>
   Declaration.MethodDecl        = <method <MethodNames> <Annotations> <TypeRuleRightHand> <MethodBody>>
   Declaration.ClassDecl         = <
-                                   class <ClassName>{
+                                   class <ClassName> <TypeRuleRightHand> {
                                        <Inherit><Use*><{Statement "\n"}*>
                                    }
                                   >
@@ -62,7 +62,7 @@ context-free syntax
   TypeBlock.TypeBlock           = <{ <{TypeRule "\n"}*> }>
   
   TypeRule.TypeRule             = <<MethodNames> <TypeRuleRightHand>;>
-  TypeRuleRightHand.RH          = [-> [TypeExp][ArgType]]
+  TypeRuleRightHand.RH          = [-> [TypeExp]]
   TypeRuleRightHand.NoRH        = <>
   
 //  TypeConf.TypeConf             = [[TypeExp] <: [TypeExp]]

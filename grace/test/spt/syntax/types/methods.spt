@@ -35,3 +35,8 @@ method f (p: type { Foo -> Boolean; }, q) -> Boolean { };
 test method typed parameters ad hoc and untyped multipart[[
 method f (p: type { Foo -> Boolean; }, q) g (b: Number) -> Boolean { };
 ]] 0 warnings 0 errors
+
+test method with parametric type [[
+method f -> Foo[[Number]] { };
+]] 0 warnings 0 errors
+
