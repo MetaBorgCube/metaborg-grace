@@ -176,13 +176,13 @@ test type string [[type String = {
 };]] 0 warnings 0 errors
 
 test type object [[type Object = {
-    == (other: Object) -> Boolean
-    != (other: Object) -> Boolean // the inverse of ==
-    hash -> Number
-    match (other: Object) -> MatchResult
-    asString -> String
-    asDebugString -> String
-    :: (other:Object) -> Binding
+    == (other: Object) -> Boolean;
+    != (other: Object) -> Boolean; // the inverse of ==
+    hash -> Number;
+    match (other: Object) -> MatchResult;
+    asString -> String;
+    asDebugString -> String;
+    :: (other:Object) -> Binding;
 };]] 0 warnings 0 errors
 
 //test parametric type [[type MyParametricType[[A, B]] =
@@ -210,31 +210,31 @@ test type object [[type Object = {
 
 test type simple string [[
 type String = type {
-    asString -> String
-    ++(o : String) -> String
+    asString -> String;
+    ++(o : String) -> String;
 };
 ]] 0 warnings 0 errors
 
 test type simple number [[
 type Number = type {
-    asString -> String
-    +(o : Number) -> Number
-    *(o : Number) -> Number
-    -(o : Number) -> Number
-    /(o : Number) -> Number
-    ^(o : Number) -> Number
-    %(o : Number) -> Number
+    asString -> String;
+    +(o : Number) -> Number;
+    *(o : Number) -> Number;
+    -(o : Number) -> Number;
+    /(o : Number) -> Number;
+    ^(o : Number) -> Number;
+    %(o : Number) -> Number;
 };
 ]] 0 warnings 0 errors
 
 test type boolean [[
 type Boolean = type {
-    ifTrue(b) -> Done
-    ifFalse(b) -> Done
-    ifTrue(b1) ifFalse(b2)
-    &&(o : Boolean) -> Boolean
-    ||(o : Boolean) -> Boolean
-    andAlso(b)
-    orElse(b)
+    ifTrue(b) -> Done;
+    ifFalse(b) -> Done;
+    ifTrue(b1) ifFalse(b2);
+    &&(o : Boolean) -> Boolean;
+    ||(o : Boolean) -> Boolean;
+    andAlso(b);
+    orElse(b);
 };
 ]] 0 warnings 0 errors

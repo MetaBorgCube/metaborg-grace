@@ -66,10 +66,10 @@ context-free syntax
   TypeRuleRightHand.NoRH        = <>
   
 //  TypeConf.TypeConf             = [[TypeExp] <: [TypeExp]]
-  TypeExp.Union                 = <<TypeExp> + <TypeExp>>
-  TypeExp.Subtract              = <<TypeExp> - <TypeExp>>
-  TypeExp.Intersect             = <<TypeExp> & <TypeExp>>
-  TypeExp.Variant               = <<TypeExp> | <TypeExp>>
+  TypeExp.Union                 = <<TypeExp> + <TypeExp>> {left}
+  TypeExp.Subtract              = <<TypeExp> - <TypeExp>> {left}
+  TypeExp.Intersect             = <<TypeExp> & <TypeExp>> {left}
+  TypeExp.Variant               = <<TypeExp> | <TypeExp>> {left}
   TypeExp.TypeID                = <<Identifier> <ArgType>>
   
   TypeExp.AnonType              = <type <TypeBlock>>
@@ -111,12 +111,14 @@ context-free syntax
                                    }
                                   >
   
+  Exp.TypeExp                   = <<TypeExp>> {avoid}
   Exp.Number                    = <<NUM>>
   Exp.String                    = <<STRING>>
   Exp.Boolean                   = <<Boolean>>
   Exp.Self                      = "self"
   
   Exp                           = <(<Exp>)>                    {bracket}
+  
   Exp.MCallOpEx                 = <<Exp> <OperatorCF> <Exp>>   {left, prefer}
   Exp.MCallOpExAssign           = <<Exp> := <Exp>>             {left, prefer}
   Exp.MCallWDot                 = <<Exp>.<Part+>>              {left}
@@ -189,4 +191,4 @@ context-free priorities
 
   Exp.MCallWDot > Exp.Return
   ,
-  Exp.MCallWDot > Exp.MCallOpEx > Exp.MCallOpExAssign
+  Exp.MCallWDot > Exp.MCallOpEx > Exp.MCallOpExAssign > Exp.TypeExp
