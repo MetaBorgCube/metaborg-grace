@@ -4,7 +4,7 @@ try {
     Exception.raise "OK";
     print "Failed; exception did not terminate block.";
 } catch {
-    e  ->
+    e : Exception ->
         print "OK.";
         count := count + 1;
 } finally {

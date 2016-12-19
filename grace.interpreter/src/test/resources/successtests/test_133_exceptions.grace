@@ -8,7 +8,7 @@ try {
 try {
     ProgrammingError.raise "OK";
 } catch {
-    e -> assert (e.exception) shouldBe (ProgrammingError);
+    e: ProgrammingError -> assert (e.exception) shouldBe (ProgrammingError);
 } catch {
-    e -> failBecause "ProgrammingError {e} caught as Exception";
+    e: Exception -> failBecause "ProgrammingError {e} caught as Exception";
 };

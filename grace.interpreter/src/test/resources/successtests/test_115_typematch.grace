@@ -1,6 +1,6 @@
 type Foo = {
-    bar
-    baz
+    bar;
+    baz;
 };
 def x = object {
     def bar = 1;

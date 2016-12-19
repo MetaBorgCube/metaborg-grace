@@ -1,22 +1,22 @@
 type A = {
-    foo(arg:String) -> String
+    foo(arg:String) -> String;
 };
 
 type B = {
-    bar(arg : Number) -> Number
+    bar(arg : Number) -> Number;
 };
 
-def ab = object {
-    method foo(s) {
+def ab : A & B = object {
+    method foo(s:String) {
         s;
     };
 
-    method bar(n) {
+    method bar(n:Number) {
         n;
     };
 };
 print(ab.foo("Hello"));
-def a = ab;
-def b = ab;
+def a:A = ab;
+def b : B = ab;
 print(a.foo("World"));
 print(b.bar(73));

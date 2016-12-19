@@ -1,21 +1,21 @@
 type A[[T]] = {
-    foo(_ : T) -> Number
-    bar(_ : Number) -> T
+    foo(_ : T) -> Number;
+    bar(_ : Number) -> T;
 };
 
-var a := object {
-    method foo(x) { x.size; };
-    method bar(y){ "{y}"; };
+var a : A[[String]] := object {
+    method foo(x : String) -> Number { x.size; };
+    method bar(y : Number) -> String { "{y}"; };
 };
 
-def b = object {
-    method foo(x) { 1; };
-    method bar(y) { y < 0; };
+def b : A[[Boolean]] = object {
+    method foo(x : Boolean) -> Number { 1; };
+    method bar(y : Number) -> Boolean { y < 0; };
 };
 
-def c = object {
-    method foo(x) { x.size; };
-    method bar(y) { "{y}"; };
+def c : A[[String]] = object {
+    method foo(x : String) -> Number { x.size; };
+    method bar(y : Number) -> String { "{y}"; };
 };
 
 a := c;

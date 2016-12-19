@@ -1,4 +1,4 @@
-method t079_test(a) {
+method t079_test(a : String) -> String | Number {
     return a;
 };
 

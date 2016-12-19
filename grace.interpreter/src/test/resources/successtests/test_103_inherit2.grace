@@ -18,13 +18,13 @@ class d_103 {
 };
 
 type T_103 = {
-    foo -> String
-    quux -> String
+    foo -> String;
+    quux -> String;
 };
 
 def x = b_103;
 print (x.bar);
-def y = c_103;
+def y:T_103 = c_103;
 print(y.quux);
-def z = d_103;
+def z:T_103 = d_103;
 print(z.quux);

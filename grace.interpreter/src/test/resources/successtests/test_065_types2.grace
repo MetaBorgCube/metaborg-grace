@@ -1,11 +1,11 @@
 type X = {
-    foo(s : String) -> String
+    foo(s : String) -> String;
 };
             
-var x := object {
-    method foo(s) {
+var x : X := object {
+    method foo(s: String) -> String {
         s;
     };
 };
-def y = x.foo("Hello");
+def y : String = x.foo("Hello");
 print(y);

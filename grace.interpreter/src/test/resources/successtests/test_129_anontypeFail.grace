@@ -1,4 +1,4 @@
-method t129_foo(x : type { bar -> String }) {
+method t129_foo(x : type { bar -> String; }) {
     print(x.bar);
 };
 

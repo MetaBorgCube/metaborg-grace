@@ -14,9 +14,9 @@ print "OK; Refined sub-exceptions.";
 try {
     MyException.raise "OK";
 } catch {
-    e ->
+    e : MyException ->
         print "{e.message}; Caught a refined exception with super-exception.";
 } catch {
-    e ->
+    e : MySubException->
         print "Failed; Did not catch a refined exception as super-exception.";
 };
