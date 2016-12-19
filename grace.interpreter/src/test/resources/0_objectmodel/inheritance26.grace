@@ -3,7 +3,7 @@ method A {
     def f is public = 13;
     
     print("Init A");
-    print(f);
+    print(self.f);
   };
 };
 
