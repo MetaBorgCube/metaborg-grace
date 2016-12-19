@@ -38,7 +38,6 @@ signature
   components
     S : Addr
     O : Addr
-    SC : Int
     
 rules
 
@@ -47,8 +46,8 @@ rules
     new-object(S) --> S';
     S S', O S, P Flatten() |- inherit --> FlatObject(closures-inherited);
     concatClosures(closures-inherited, [Closure(S, code)]) => closures;
-    S' |- install-methods(closures) --> U();
-    S' |- init-object(closures) --> U().
+    S' |- install-members(closures) --> closures';
+    S' |- init-object(closures') --> U().
   
   SlotRead(i) --> read-slot(i).
   
@@ -61,42 +60,65 @@ rules
 
 signature
   arrows
-    install-methods(Closures) --> U
+    install-members(Closures) --> Closures
+    install-members-aux(Closures) --> Closures
     
-    Closure -method-> U
-    Code -method-> U
-    Statement -method -> U
+    Closure -member-> Closure
+    Code -member-> Code
+    
+    Declaration -method-> U
     
 rules
 
-  install-methods([]) --> U().
-  
-  install-methods([clos | closs]) --> install-methods(closs)
+  install-members(closures) --> closures'
   where
-    clos -method-> _.
-  
-  Closure(O, code) -method-> U()
-  where
-    O |- code -method-> _.
-    
-  [] : Code -method-> U().
-  
-  [c | cs] : Code -method-> U()
-  where
-    c -method-> _;
-    cs -method-> _.
+    install-members-aux(closures) :: NS 0, GS {} --> closures' :: NS _, GS _.
 
-  Declaration(m@MethodL(name, _, _, _)) -method-> U()
+  install-members-aux([]) --> [].
+  
+  install-members-aux([clos | closs]) --> [clos' | install-members-aux(closs)]
+  where
+    clos -member-> clos'.
+  
+  Closure(O, code) -member-> Closure(O, code')
+  where
+    O |- code -member-> code'.
+    
+  [] : Code -member-> [].
+  
+  [Declaration(m@MethodL(_, _, _, _)) | cs] : Code -member-> cs'
+  where
+    m -method-> _;
+    cs -member-> cs'.
+  
+  [Declaration(VariableL(name, _)) | cs] : Code -member-> cs'
+  where
+    add-slot(name) --> i;
+    field-getter(name, i) --> d-getter;
+    d-getter -method-> _;
+    field-setter(name, i) --> d-setter;
+    d-setter -method-> _;
+    cs -member-> cs'.
+  
+  [Declaration(ConstantL(name, _, e)) | cs] : Code -member-> [SlotWrite(i, e) | cs']
+  where
+    add-slot(name) --> i;
+    field-getter(name, i) --> d-getter;
+    d-getter -method-> _;
+    cs -member-> cs'.
+  
+  [c | cs] : Code -member-> [c | cs']
+  where
+    cs -member-> cs'.
+  
+  m@MethodL(name, _, _, _) -method-> U()
   where
     add-method(name, method-closure(m)) --> _.
-  
-  _ : Statement -method -> U().
 
 /* ========== OBJECT INIT ======== */
 signature
   arrows
     init-object(Closures) --> U
-    init-object-aux(Closures) --> U
     
     Closure -obji-> U
     Code -obji-> U
@@ -104,13 +126,9 @@ signature
     
 rules
   
-  init-object(closures) --> U()
-  where
-    init-object-aux(closures) :: SC 0 --> _ :: SC _.
+  init-object([]) --> U().
   
-  init-object-aux([]) --> U().
-  
-  init-object-aux([clos | closs]) --> init-object-aux(closs)
+  init-object([clos | closs]) --> init-object(closs)
   where
     clos -obji-> _.
   
@@ -124,20 +142,6 @@ rules
   where
     c -obji-> _;
     cs -obji-> _.
-
-  Declaration(ConstantL(name, _, e)) -obji-> U()
-  where
-    add-slot(Uninitialized()) --> i;
-    Declaration(field-getter(name, i)) -method-> _;
-    SlotWrite(i, e) --> _.
-
-  Declaration(VariableL(name, _)) -obji-> U()
-  where
-    add-slot(Uninitialized()) --> i;
-    Declaration(field-getter(name, i)) -method-> _;
-    Declaration(field-setter(name, i)) -method-> _.
-
-  Declaration(MethodL(_, _, _, _)) --> U().
 
   s : Statement -obji-> U()
   where
@@ -212,7 +216,8 @@ signature
   arrows
     new-object(Addr) --> Addr
 
-    add-slot(V) --> Int
+    add-slot(String) --> Int
+    
     read-slot(Int) --> V
     write-slot(Int, V) --> U
     
@@ -222,6 +227,10 @@ signature
     
     current-self() --> V
     current-outer() --> V
+  
+  components
+    NS : Int // NextSlot
+    GS : Map(String, Int) // GivenSlots
 
 rules
 
@@ -233,11 +242,16 @@ rules
   where
     allocate(Obj(O, {}, {})) --> S.
 
-  S |- add-slot(v) :: SC --> SC :: SC addI(SC, 1)
+  add-slot(x) :: GS --> GS[x] :: GS
   where
-    read(S) --> Obj(O, slots, methods);
-    update(S, Obj(O, {SC |--> v, slots}, methods)) --> _.
+    GS[x?] == true.
   
+  S |- add-slot(x) :: NS, GS --> NS :: NS addI(NS, 1), GS {x |--> NS, GS}
+  where
+    GS[x?] == false;
+    read(S) --> Obj(O, slots, methods);
+    update(S, Obj(O, {NS |--> Uninitialized(), slots}, methods)) --> _.
+    
   S |- read-slot(i) --> slots[i]
   where
     read(S) --> Obj(_, slots, _).
