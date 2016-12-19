@@ -15,22 +15,25 @@ signature
     
     Boolean(False()) --> BoolV(false).
     
-    MCallRecvL(BoolV(a), "||", [BoolV(b)]) --> BoolV(a)
+    MCallRecvL(BoolV(a), ID("||"), [BoolV(b)]) --> BoolV(a)
       where
         a == b.
         
-    MCallRecvL(BoolV(a), "||", [BoolV(b)]) --> BoolV(true)
+    MCallRecvL(BoolV(a), ID("||"), [BoolV(b)]) --> BoolV(true)
       where
         a != b.
             
-    MCallRecvL(BoolV(a), "&&", [BoolV(b)]) --> BoolV(a)
+    MCallRecvL(BoolV(a), ID("&&"), [BoolV(b)]) --> BoolV(a)
       where
         a == b.
         
-    MCallRecvL(BoolV(a), "&&", [BoolV(b)]) --> BoolV(false)
+    MCallRecvL(BoolV(a), ID("&&"), [BoolV(b)]) --> BoolV(false)
       where
         a != b.
-        
+    
+    
+    
+    
 //    MCallRecvL(BoolV(true), "ifTrue_ifFalse", [e1, e2]) --> v
 //      where
 //        e1 --> ve1;

@@ -18,8 +18,6 @@ rules
 
   Self() --> current-self().
   
-  Outer() --> current-outer().
-
   [] : List(Exp) --> [].
   
   [e | es] : List(Exp) --> [ v | vs ]

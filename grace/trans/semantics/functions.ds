@@ -10,16 +10,16 @@ signature
     Addr
 
   constructors
-    ClosV: Addr * List(String) * Code * Env -> V
+    ClosV: Addr * List(Identifier) * Code * Env -> V
 
   arrows
     method-closure(Declaration) --> V
     call(V, V, List(V)) --> V
     
     read-local(String) --> V
-    bind-local(String, V) --> U
-    bind-locals(List(String), List(V)) --> U
-  
+    bind-local(Identifier, V) --> U
+    bind-locals(List(Identifier), List(V)) --> U
+    
   sort aliases
     Env = Map(String, V)
   
@@ -31,14 +31,24 @@ signature
 
 rules
 
-  MCallL("print", [e]) --> nativePrint(v)
+  MCallL(ID("print(_)"), [e]) --> nativePrint(v)
   where
     e --> v.
-  
-  MCallL(x, []) --> read-local(x).
-  
-  P Exec() |- MCallRecvL(e, x, es) --> resolve-call(v, x, vs)
+
+  MCallL(ID(x), []) --> read-local(x)
   where
+    x != "outer".
+  
+  MCallL(ID("outer"), []) --> current-outer().
+  
+  P Exec() |- MCallRecvL(e, ID("outer"), []) --> v
+  where
+    e --> RefV(S);
+    S |- current-outer() --> v.
+  
+  P Exec() |- MCallRecvL(e, ID(x), es) --> resolve-call(v, x, vs)
+  where
+    x != "outer";
     e --> v;
     es --> vs.
 
@@ -51,7 +61,6 @@ rules
     lookup-method(recv, x) --> mv;
     call(recv, mv, vs) --> v.
   
-  
   call(S, ClosV(O, params, code, env), vs) --> v
   where
     bind-locals(params, vs) :: L env --> _ :: L;
@@ -59,7 +68,9 @@ rules
   
   read-local(x) :: L --> L[x] :: L.
   
-  bind-local(x, v) :: L --> U() :: L {x |--> v, L}.
+  bind-local(ID(x), v) :: L --> U() :: L {x |--> v, L}.
+  
+  bind-local(WildCard(), _) :: L --> U() :: L.
   
   bind-locals([], []) --> U().
   
@@ -67,4 +78,3 @@ rules
   where
     bind-local(x, v) --> _;
     bind-locals(xs, vs) --> _.
-

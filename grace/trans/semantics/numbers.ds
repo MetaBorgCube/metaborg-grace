@@ -13,27 +13,25 @@ signature
   
 rules
   
-  NumL(s) --> Number(s).
-  
   Number(a) --> NumV(string2int(a)).
   
-  MCallRecvL(NumV(a), "==", [NumV(b)]) --> BoolV(true)
+  MCallRecvL(NumV(a), ID("=="), [NumV(b)]) --> BoolV(true)
     where
       a == b.
   
-  MCallRecvL(NumV(a), "==", [NumV(b)]) --> BoolV(false)
+  MCallRecvL(NumV(a), ID("=="), [NumV(b)]) --> BoolV(false)
     where
       a != b.
       
-  MCallRecvL(NumV(a), "!=", [NumV(b)]) --> BoolV(false)
+  MCallRecvL(NumV(a), ID("!="), [NumV(b)]) --> BoolV(false)
     where
       a == b.
       
-  MCallRecvL(NumV(a), "!=", [NumV(b)]) --> BoolV(true)
+  MCallRecvL(NumV(a), ID("!="), [NumV(b)]) --> BoolV(true)
     where
       a != b.
   
-  MCallRecvL(NumV(a), op, [NumV(b)]) -->
+  MCallRecvL(NumV(a), ID(op), [NumV(b)]) -->
       NumV(nativeIBinOp(op, a, b)).
         
     
