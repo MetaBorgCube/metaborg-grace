@@ -14,17 +14,14 @@ context-free syntax
 							_object {
 							  <Inherit><Use*><{Statement "\n"}*>
 							}
-							>
-  Exp.BlockL              = [_block { [Identifier*] -> [{Statement "\n"}*]]
+							> {prefer}
+  Exp.BlockL              = [_block { [Identifier*] -> [{Statement "\n"}*] }] {prefer}
   Declaration.MethodL     = <
 							_method <Identifier><Annotations> (<{Identifier ", "}*>) {
 							  <{Statement "\n"}*>
 							}
-							>
-  Declaration.ConstantL   = <_def <Identifier> <Annotations> = <Exp>>
-  Declaration.VariableL   = <_var <Identifier> <Annotations>>
-  Declaration.TraitL      = <_trait <Identifier> (<{Identifier ", "}*>) <{Statement "\n"}*>>
-  
-//  Assignment.AssignmentL  = <<Identifier> := <Exp>>
-  
-//  Exp.NumL				  = <_number(<NUM>)> {avoid}
+							> {prefer}
+  Declaration.ConstantL   = <_def <Identifier> <Annotations> = <Exp>> {prefer}
+  Declaration.VariableL   = <_var <Identifier> <Annotations>> {prefer}
+  Declaration.TraitL      = <_trait <Identifier> (<{Identifier ", "}*>) <{Statement "\n"}*>> {prefer}
+
