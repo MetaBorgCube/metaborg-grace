@@ -4,95 +4,93 @@ language grace
 
 start symbol Program
 
-test simple identifier					 				[[foo;]]	 					parse succeeds
-test single letter										[[f;]]	 					parse succeeds
-test single capital letter								[[F;]]						parse succeeds
-test single letter and prime							[[f';]]	 					parse succeeds
-test single letter and underscore						[[f_;]]	 					parse succeeds
-test single letter and digit							[[f6;]]	 					parse succeeds
-test single underscore									[[_;]]	 					parse succeeds
-//test single unicode letter								[[e�]]	 					parse succeeds
-//test word with unicode									[[foo�]]					parse succeeds
-test word with primes									[[fkfkf'feff'ffe'fe;]]		parse succeeds
-test word with underscores								[[efe_Fefe__feefe_f;]]		parse succeeds
+test simple identifier                [[foo;]]          0 warnings 0 errors
+test single letter                    [[f;]]            0 warnings 0 errors
+test single capital letter            [[F;]]            0 warnings 0 errors
+test single letter and prime          [[f';]]           0 warnings 0 errors
+test single letter and underscore     [[f_;]]           0 warnings 0 errors
+test single letter and digit          [[f6;]]           0 warnings 0 errors
+test single underscore                [[_;]]            0 warnings 0 errors
+//test single unicode letter            [[e�]]             parse succeeds
+//test word with unicode                [[foo�]]          parse succeeds
+test word with primes                 [[fkfkf'feff'ffe'fe;]]
+test word with underscores            [[efe_Fefe__feefe_f;]]
 
-test trailing apostrophe                                [[var var' := 3;]]          parse succeeds
-test trailing underscore                                [[var var_ := 3;]]          parse succeeds
+test trailing apostrophe              [[var var' := 3;]]
+test trailing underscore              [[var var_ := 3;]]
 
-test single digit										[[5;]]						parse succeeds
-test single prime										[[']]						parse fails
-test id with dot prefix									[[.a]]						parse fails
-test id with dot suffix									[[a.]]						parse fails
+test single digit                     [[5;]]            0 warnings 0 errors
+test single prime                     [[';]]            parse fails
+test id with dot prefix               [[.a;]]           parse fails
+test id with dot suffix               [[a.;]]           parse fails
 
-test id with tripledot prefix							[[...a]]					parse fails
-test id with tripledot infix							[[a...a]]					parse fails
-test id with tripledot suffix							[[a...]]					parse fails
+test id with tripledot prefix         [[...a;]]         parse fails
+test id with tripledot infix          [[a...a;]]        parse fails
+test id with tripledot suffix         [[a...;]]         parse fails
 
-test id with assign prefix								[[:=a]]						parse fails
-test id with assign infix								[[a:=a]]					parse fails
+test id with assign prefix            [[:=a;]]          parse fails
 
-test id with equals prefix								[[=a]]						parse fails
-test id with equals infix								[[a=a]]						parse fails
-test id with equals suffix								[[a=]]						parse fails
+test id with equals prefix            [[=a;]]           parse fails
+test id with equals infix             [[a=a;]]          parse fails
+test id with equals suffix            [[a=;]]           parse fails
 
-test id with semicolon prefix							[[;a]]						parse fails
-test id with semicolon infix							[[a;a]]						parse fails
-test id with semicolon suffix							[[a;]]						parse succeeds
+test id with semicolon prefix         [[;a;]]           parse fails
+test id with semicolon suffix         [[a;]]            0 warnings 0 errors
 
-test id with openbrace prefix							[[{a]]						parse fails
-test id with openbrace infix							[[a{a]]						parse fails
-test id with openbrace suffix							[[a{]]						parse fails
+test id with openbrace prefix         [[{a;]]           parse fails
+test id with openbrace infix          [[a{a;]]          parse fails
+test id with openbrace suffix         [[a{;]]           parse fails
 
-test id with closebrace prefix							[[}a]]						parse fails
-test id with closebrace infix							[[a}a]]						parse fails
-test id with closebrace suffix							[[a}]]						parse fails
+test id with closebrace prefix        [[}a;]]           parse fails
+test id with closebrace infix         [[a}a;]]          parse fails
+test id with closebrace suffix        [[a};]]           parse fails
 
-test id with opensquarebrace prefix						[[ [a]]						parse fails
-test id with opensquarebrace infix						[[a[a]]						parse fails
-test id with opensquarebrace suffix						[[a[]]						parse fails
+test id with opensquarebrace prefix   [[ [a;]]          parse fails
+test id with opensquarebrace infix    [[a[a;]]          parse fails
+test id with opensquarebrace suffix   [[a[;]]           parse fails
 
-test id with closesquarebrace prefix					[[]a]]						parse fails
-test id with closesquarebrace infix						[[a]a]]						parse fails
-test id with closesquarebrace suffix					[[a] ]]						parse fails
+test id with closesquarebrace prefix  [[]a;]]           parse fails
+test id with closesquarebrace infix   [[a]a;]]          parse fails
+test id with closesquarebrace suffix  [[a] ;]]          parse fails
 
-test id with openparen prefix							[[(a]]						parse fails
-test id with openparen infix							[[a(a]]						parse fails
-test id with openparen suffix							[[a(]]						parse fails
+test id with openparen prefix         [[(a;]]           parse fails
+test id with openparen infix          [[a(a;]]          parse fails
+test id with openparen suffix         [[a(;]]           parse fails
 
-test id with closeparen prefix							[[)a]]						parse fails
-test id with closeparen infix							[[a)a]]						parse fails
-test id with closeparen suffix							[[a)]]						parse fails
+test id with closeparen prefix        [[)a;]]           parse fails
+test id with closeparen infix         [[a)a;]]          parse fails
+test id with closeparen suffix        [[a);]]           parse fails
 
-test id with colon prefix								[[:a]]						parse fails
-test id with colon infix								[[a:a]]						parse fails
-test id with colon suffix								[[a:]]						parse fails
+test id with colon prefix             [[:a;]]           parse fails
+test id with colon infix              [[a:a;]]          parse fails
+test id with colon suffix             [[a:;]]           parse fails
 
-test id with arrow prefix								[[->a]]						parse fails
-test id with arrow infix								[[a->a]]					parse fails
-test id with arrow suffix								[[a->]]						parse fails
+test id with arrow prefix             [[->a;]]          parse fails
+test id with arrow infix              [[a->a;]]         parse fails
+test id with arrow suffix             [[a->;]]          parse fails
 
-test id with opendiamond suffix							[[a<]]						parse fails
-test id with closediamond suffix						[[a>]]						parse fails
+test id with opendiamond suffix       [[a<;]]           parse fails
+test id with closediamond suffix      [[a>;]]           parse fails
 
-test keyword alias										[[alias]]					parse fails
-test keyword as											[[as]]						parse fails
-test keyword class										[[class]]					parse fails
-test keyword def										[[def]]						parse fails
-test keyword dialect									[[dialect]]					parse fails
-test keyword exclude									[[exclude]]					parse fails
-test keyword import										[[import]]					parse fails
-test keyword inherit									[[inherit]]					parse fails
-test keyword is											[[is]]						parse fails
-test keyword method										[[method]]					parse fails
-test keyword object										[[object]]					parse fails
-//test keyword outer										[[outer]]					parse fails
-test keyword prefix										[[prefix]]					parse fails
-test keyword required									[[required]]				parse fails
-test keyword return										[[return]]					parse fails
-//test keyword self										[[self]]					parse fails
-test keyword Self										[[Self]]					parse fails
-test keyword trait										[[trait]]					parse fails
-test keyword type										[[type]]					parse fails
-test keyword use										[[use]]						parse fails
-test keyword var										[[var]]						parse fails
-test keyword where										[[where]]					parse fails
+test keyword alias                    [[alias;]]        parse fails
+test keyword as                       [[as;]]           parse fails
+test keyword class                    [[class;]]        parse fails
+test keyword def                      [[def;]]          parse fails
+test keyword dialect                  [[dialect;]]      parse fails
+test keyword exclude                  [[exclude;]]      parse fails
+test keyword import                   [[import;]]       parse fails
+test keyword inherit                  [[inherit;]]      parse fails
+test keyword is                       [[is;]]           parse fails
+test keyword method                   [[method;]]       parse fails
+test keyword object                   [[object;]]       parse fails
+//test keyword outer                    [[outer]]         parse fails
+test keyword prefix                   [[prefix;]]       parse fails
+test keyword required                 [[required;]]     parse fails
+test keyword return                   [[return;]]       parse fails
+//test keyword self                     [[self]]          parse fails
+test keyword Self                     [[Self]]          parse fails
+test keyword trait                    [[trait;]]        parse fails
+test keyword type                     [[type;]]         parse fails
+test keyword use                      [[use;]]          parse fails
+test keyword var                      [[var;]]          parse fails
+test keyword where                    [[where;]]        parse fails

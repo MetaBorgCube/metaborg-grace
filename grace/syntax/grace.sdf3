@@ -18,37 +18,48 @@ context-free syntax
 context-free syntax
 
   Statement.Dialect             = <dialect <STRING>>
-  Statement.Import              = <import <STRING> as <ID>>
-  Statement.Assignment          = <<Assignment>;>
-  Statement.Declaration 	    = <<Declaration>;> {avoid}
+  Statement.Import              = <import <STRING> as <Identifier>>
+//  Statement.Assignment          = <<Assignment>;>
+  Statement.Declaration         = <<Declaration>;>
   Statement.Expression          = <<Exp>;>
 
 context-free syntax
 
-  Assignment.Assignment         = <<ID> := <Exp>>
+//  Assignment.Assignment         = <<ID> := <Exp>>
   VarInit.VarInit               = < := <Exp>>
   VarInit.NoVarInit             = <>
-  Declaration.Constant          = <def <ID><Annotations> = <Exp>> 
-  Declaration.Variable          = <var <ID><Annotations><VarInit>> 
-  Declaration.MethodDecl        = <method <Prefix><MethodName+><Annotations> <MethodBody>>
+  Declaration.Constant          = <def <Identifier><Annotations> = <Exp>>
+  Declaration.Variable          = <var <Identifier><Annotations><VarInit>>
+  Declaration.MethodDecl        = <method <MethodNames><Annotations> <MethodBody>>
   Declaration.ClassDecl         = <
-                                    class <MethodName+>{
-                                      <Inherit><Use*><{Statement "\n"}*>
-                                    }
+                                   class <ClassName>{
+                                       <Inherit><Use*><{Statement "\n"}*>
+                                   }
                                   >
-  Declaration.TraitDecl         = <trait <MethodName+> <MethodBody>>
+  Declaration.TraitDecl         = <trait <MethodNames> <MethodBody>>
   Use.Use                       = <
-									use <Exp><Alias><Exclude>;
+                                       use <Exp> <Modifier*>;
 
-								  >
+                                  >
+  ClassName.FullStop            = <<ID>.<MethodNames>>
+  ClassName.MethodName          = <<MethodNames>>
+                                  
+  MethodNames.Single            = <<MethodNameNoParam>>
+  MethodNames.Multiple          = <<MethodName+>>
+                                  
+  MethodNameNoParam.MethodID    = <<Identifier>>
+  MethodNameNoParam.MethodOp    = <<OperatorCF>>
+//  MethodNameNoParam.PrefixOp    = <<PrefixOperator>>
   
   MethodName.MethodID           = <<Identifier> <Params>>
   MethodName.MethodOp           = <<OperatorCF> <Params>>
+//  MethodName.PrefixOp           = <<PrefixOperator> <Params>>
   
-  Prefix.Prefix                 = "prefix "
-  Prefix.NoPrefix               = <>
+//  Prefix.Prefix                 = "prefix"
+//  Prefix.NoPrefix               = <>
   
   Identifier.ID                 = <<ID>>
+  Identifier.WildCard           = "_"
   
   Annotations.Annotations       = < is <{Annotation ", "}+>>
   Annotations.NoAnnotations     = <>
@@ -58,52 +69,71 @@ context-free syntax
   Annotation.Writeable          = "writable"
   Annotation.Confidential       = "confidential"
   Annotation.Manifest           = "manifest"
-  Annotation.Overrides          = "overrides"
+  Annotation.Overrides          = "override"
   
-  Params.Params                 = <(<{Param ", "}*>)>
-  Params.NoParams               = <>
-  Param.Param                   = <<ID>>
+  Params.Params                 = <(<{Param ", "}+>)>
+  Param.Param                   = <<Identifier>>
 
   MethodBody.MethodBody         = <
-									{
-									  <{Statement "\n"}*>
-									}
-								  >
-  
+                                   {
+                                       <{Statement "\n"}*>
+                                   }
+                                  >
+   
 context-free syntax
   
   Exp.ObjectDecl                = <
-									object {
-									  <Inherit><Use*><{Statement "\n"}*>
-									}
-								  >
+                                   object {
+                                       <Inherit><Use*><{Statement "\n"}*>
+                                   }
+                                  >
   
   Exp.Number                    = <<NUM>>
   Exp.String                    = <<STRING>>
   Exp.Boolean                   = <<Boolean>>
   Exp.Self                      = "self"
-  Exp.Outer                     = "outer"
-  Exp.PlaceHolder               = "_"
   
-  Exp                           = <(<Exp>)>										{bracket}
-
-  Exp.MCallOpEx                 = <<Exp> <OperatorCF> <Exp>>					{left}
-  Exp.MCallWDot                 = <<Exp>.<Part+>>								{left}
-  Exp.MCallImpl                 = <<Part+>>										{left}
-  Exp.MCallPrefixOp             = <<OperatorCF> <CallArgs>>						{left}
-  Exp.MCallPrefixOpExp          = <<OperatorCF> <Exp>>							{left, prefer}
+  Exp                           = <(<Exp>)>                    {bracket}
+  Exp.MCallOpEx                 = <<Exp> <OperatorCF> <Exp>>   {left, prefer}
+  Exp.MCallOpExAssign           = <<Exp> := <Exp>>             {left, prefer}
+  Exp.MCallWDot                 = <<Exp>.<Part+>>              {left}
+  Exp.MCallImpl                 = <<Part+>>                    {left}
+//  Exp.MCallPrefixOp             = <<OperatorCF> <CallArgs>>    {left}
+  Exp.MCallPrefixOpExp          = <<OperatorCF> <Exp>>         {left, prefer}
   
   Exp.LineupExp                 = <<Lineup>>
   Exp.Ellipsis                  = "..."
   Exp.BlockExp                  = <<Block>>
   
-  Exp.Return                    = <return <Exp>>
-
+  Exp.Return                    = <return <Exp>>               {right}
+  
+  Exp.MatchCase                 = <
+                                   match (<Exp>)
+                                       <{Case "\n"}+>
+                                  > {prefer} // over methodcall
+  Case.Case                     = [case { [CaseExp] [Arrow] [{Statement "\n"}*] }]
+  Case.CaseParen                = [case ({ [CaseExp] [Arrow] [{Statement "\n"}*] })]
+  CaseExp.CaseExp               = <<CaseLiteral>>
+  CaseExp.CaseExpMulti          = <<CaseLiteral> <BoolOp> <CaseLiteral>>
+  CaseExp.ExpParens             = <(<Exp>)>
+  CaseExp.Identifier            = <<Identifier>>
+  CaseExp.ExpTyped              = <<Identifier> : <CaseType>>
+  BoolOp.Or                     = "|"
+  BoolOp.And                    = "&"
+  CaseType.Type                 = <<Identifier>>
+  CaseLiteral.Number            = <<NUM>>
+  CaseLiteral.String            = <<STRING>>
+  CaseLiteral.Boolean           = <<Boolean>>
+  
+  Arrow.Ascii                   = "->"
+  Arrow.Unicode                 = "→"
+  
+  
 context-free syntax
   
   Part.Part                     = <<Identifier><CallArgs>>
   
-  CallArgs.ArgsParen            = < (<{Exp ", "}+>)> {left}
+  CallArgs.ArgsParen            = < (<{Exp ", "}+>)>           {left}
   CallArgs.NoArgs               = <>
 
   CallArgs.ArgBlock             = < <Block>>
@@ -115,14 +145,15 @@ context-free syntax
   OperatorCF.OperatorCF         = <<Operator>>
   
   Inherit.Inherit               = <
-                                    inherit <Exp><Alias><Exclude>;
-									
-  								  >
+                                   inherit <Exp> <Modifier*>;
+                  
+                                  >
   Inherit.NoInherit             = <>
-  Alias.Alias                   = < alias <ID> = <ID>>
-  Alias.NoAlias                 = <>
-  Exclude.Exclude               = < exclude <{ID ", "}*>>
-  Exclude.NoExclude             = <>
+                                  
+  Modifier.Alias                = <<Alias>>
+  Modifier.Exclude              = <<Exclude>>
+  Alias.Alias                   = < alias <MethodNames> = <MethodNames>>
+  Exclude.Exclude               = < exclude <MethodNames>>
   
   Boolean.True                  = "true"
   Boolean.False                 = "false"
@@ -130,3 +161,9 @@ context-free syntax
   Block.Block                   = <{ <{Statement "\n"}*> }>
   Block.BlockWParams            = <{ <BlockParams> <{Statement "\n"}*> }>    {prefer}
   BlockParams.BlockParams       = [[{Param ", "}*] ->]
+  
+context-free priorities
+
+  Exp.MCallWDot > Exp.Return
+  ,
+  Exp.MCallWDot > Exp.MCallOpEx > Exp.MCallOpExAssign

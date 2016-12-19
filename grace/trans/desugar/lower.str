@@ -21,7 +21,8 @@ rules
           lower-objectdecl <+
           lower-constant <+
           lower-variable <+
-          lower-assignment <+
+          lower-block <+
+//          lower-assignment <+
           lower-trait <+
           lower-fail
   
@@ -39,64 +40,74 @@ rules
   
   lower-methodcallwdot:
     MCallWDot(recv, [Part(idf, args)]) ->
-      MCallRecvL(recv, <name-to-string> idf, as)
+      MCallRecvL(recv, <name-to-id> idf, as)
         with
           as := <flatten-list> <lower-arguments> args
 
   lower-mcallopex:
     MCallOpEx(recv, name, arg) ->
-      MCallRecvL(recv, <name-to-string> name, [arg])
+      MCallRecvL(recv, <name-to-id> name, [arg])
   
   lower-mcallimpl: 
-    MCallImpl([Part(ID(name),args)]) -> MCallL(name, as)
+    MCallImpl([Part(name , args)]) -> MCallL(name, as)
       with
         as := <flatten-list> <lower-arguments> args
   
   lower-mdecl:
-    MethodDecl(_, [MethodID(mName, ps)], annotations, MethodBody(cs)) ->
+    MethodDecl(Multiple([MethodID(mName, ps)]), annotations, MethodBody(cs)) ->
       MethodL(name,annotations, paramNames, cs)
       with
         paramNames := <lower-params> ps;
-        name := <name-to-string> mName 
+        name := <name-to-id> mName 
 
   lower-mdecl:
-    MethodDecl(prfx, [MethodOp(mName, ps)], annotations, MethodBody(cs)) ->
+    MethodDecl(Multiple([MethodOp(mName, ps)]), annotations, MethodBody(cs)) ->
       MethodL(name,annotations, params, cs)
       with
-        name := <name-to-string> mName; 
+        name := <name-to-id> mName; 
         params := <lower-params> ps
+        
+  lower-mdecl:
+    MethodDecl(Single(MethodID(mName)), annotations, MethodBody(cs)) ->
+      MethodL(<name-to-id> mName, annotations, [], cs)
+  
+//  lower-mdecl:
+//    MethodDecl(Single(PrefixOp(mName)), annotations, MethodBody(cs)) ->
+//      MethodL(ID(mName), annotations, [], cs)
   
   lower-mcallwdot: 
     MCallWDot(recv, [Part(ID(name), args)]) ->
       MCallRecvL(recv, name, <lower-arguments> args)
-      
+  
+  lower-block:
+    BlockWParams(BlockParams(ps), cs) -> BlockL(params, cs)
+      with
+        params := <lower-params> ps
+  
   lower-objectdecl: ObjectDecl(a, b, c) -> ObjectL(a,b,c)
 
   lower-constant: Constant(a, b, c) -> ConstantL(a, b, c)
     
   lower-variable: Variable(a, b, NoVarInit()) -> VariableL(a,b)
-  lower-variable: Variable(a, b, VarInit(exp)) -> [VariableL(a,b), AssignmentL(a,exp)]
+  lower-variable: Variable(a, b, VarInit(exp)) ->
+    [VariableL(a, b), MCallRecvL( MCallL(a, []), ID(":=(_)"), [ exp ] )]
   
-  lower-assignment: Assignment(a,b) -> AssignmentL(a, b)
+//  lower-assignment: Assignment(a,b) -> AssignmentL(a, b)
 
   lower-trait: TraitDecl([MethodID(tName, ps)], MethodBody(code)) -> 
     TraitL(name, params, code)
     where
-      name := <name-to-string> tName;
+      name := <name-to-id> tName;
       params := <lower-params> ps
   
-  flatten-statements-declaration: Declaration([a,b]) -> [Declaration(a),Assignment(b)]
+  flatten-statements-declaration: Declaration([a,b]) -> [Declaration(a),Expression(b)]      
   
-  flatten-statements: ObjectL(a,b,code) -> ObjectL(a,b, flattened)
-    where
-      flattened := <flatten-list> code
+  flatten-statements: ObjectL(a,b,code) -> ObjectL(a,b, <flatten-list> code)
+  flatten-statements: MethodL(a,b,c,code) -> MethodL(a,b,c, <flatten-list> code)
+  flatten-statements: BlockL(p,code) -> BlockL(p, <flatten-list> code)
   
-  flatten-statements: MethodL(a,b,c,code) -> MethodL(a,b,c, flattened)
-    where
-      flattened := <flatten-list> code
-  
-  lower-params: NoParams() -> []
   lower-params: Params(ps) -> <lower-params> ps
+  lower-params: [] -> []
   lower-params: [Param(n)] -> [n]
   lower-params: [Param(n) | bs] -> [n | <lower-params> bs ]
   

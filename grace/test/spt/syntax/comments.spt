@@ -6,8 +6,8 @@ start symbol Program
 
 test just a single comment [[
     //comment
-]] parse succeeds
+]] 0 warnings 0 errors
 
 test a print with comment [[
     print "Hello World"; //comment
-]] parse succeeds
+]] 0 warnings 0 errors

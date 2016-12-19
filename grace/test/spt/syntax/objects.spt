@@ -4,7 +4,7 @@ language grace
 
 start symbol Program
 
-test object [[object {};]] parse succeeds
-test object with content [[object { def a = 1; };]] parse succeeds
+test object [[object {};]] 0 warnings 0 errors
+test object with content [[object { def a = 1; };]] 0 warnings 0 errors
 test hopper object missing close [[object { ;]] parse fails
 test hopper object missing close with content [[object { def a = 1; ;]] parse fails

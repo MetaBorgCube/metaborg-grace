@@ -12,4 +12,33 @@ method a(v) {
   b := 3;
   +4;
 };
-]] parse succeeds
+]] 0 warnings 0 errors
+
+test operator and method call with receiver [[
+5 + a . b;
+]] 0 warnings 0 errors
+
+test operator and method call with receiver no spaces [[
+5 + a.b;
+]] 0 warnings 0 errors
+
+test return with method with dot [[
+  return a.b;
+]] 0 warnings 0 errors
+
+test print string plus number [[
+print("m.map = " + m.map);
+]] 0 warnings 0 errors
+
+test assignmentmethod [[
+var a := object {
+  method field:=(val) {
+    print("assigned " ++ val ++ " to field");
+  };
+};
+a.field := 13;
+]] 0 warnings 0 errors
+
+test hard assignment [[
+self.val := self.val + 1;
+]] 0 warnings 0 errors

@@ -33,10 +33,13 @@ rules
   pp-debug :
     ast -> result
     with
-       result := <pp-grace-string> ast
+       result := <pp-grace-string> <alltd(remove-parens)> <alltd(String(quote(!'"')))> ast
     <+ <bottomup(try(not(is-string); not(is-list); not(pp-grace-string); debug(!"cannot pp ")))> ast
     ;  result := ""
 
+  remove-parens: ID(str) -> ID(res)
+    where
+      res := <string-replace(|"(", "")> <string-replace(|")", "")> <string-replace(|",", "")> str
 rules
   
   construct-textual-change = construct-textual-change(pp-partial-grace-string, parenthesize, override-reconstruction, resugar)

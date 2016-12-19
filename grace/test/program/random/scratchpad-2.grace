@@ -1,10 +1,2 @@
-def a = 3;
-f;
-
-object {
-  ...;
-};
-
-name.f;
-f(23);
-base_print "hello";
+var a;
+a := 4.3;

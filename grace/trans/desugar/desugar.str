@@ -7,6 +7,7 @@ imports
     src-gen/signatures/general-sig
     
     trans/desugar/desugar-common
+    trans/desugar/desugar-matchcase
     trans/desugar/lower
 
 rules
@@ -17,11 +18,15 @@ rules
   
   desugar =
     desugar-class-declaration
+    <+ desugar-match-case
     <+ desugar-flatten-methodID
     <+ desugar-flatten-methodPart
+    <+ desugar-mcallopexp
+    <+ desugar-mcallopexpassign
+    <+ desugar-mcallprefixopexp
     <+ desugar-blockExp 
     <+ desugar-block
-    <+ desugar-block-to-object
+//    <+ desugar-block-to-object
     <+ desugar-arg-noargs
     <+ desugar-arg-argsparen
     <+ desugar-argBlock
@@ -34,26 +39,79 @@ rules
   desugar-program: Program(a, b) -> Program([Expression(ObjectDecl(NoInherit(), [], a))], b)
   
   desugar-class-declaration:
-    ClassDecl(mIDs, inh, use, code) ->
+    ClassDecl(MethodName(mIDs), inh, use, code) ->
       MethodDecl(
-        NoPrefix(), mIDs, NoAnnotations(),
+        mIDs,
+        NoAnnotations(),
         MethodBody([
           Expression(ObjectDecl(inh,use,code))
         ])
       )
+  desugar-class-declaration:
+    ClassDecl(FullStop(iden, mIDs), inh, use, code) ->      
+      Constant(iden , NoAnnotations(), Expression (
+        ObjectDecl(NoInherit(), [], [
+          MethodDecl(
+            mIDs,
+            NoAnnotations(),
+            MethodBody([
+              Expression(ObjectDecl(inh,use,code))
+            ])
+          )
+        ])
+      ))
   
+  desugar-flatten-methodID: [ MethodID(ID(n), Params(ps)) ] -> 
+      [ MethodID(ID(name), Params(ps)) ]
+    where
+      name := <concat-strings> [n, <param-string> ps];
+      <not-substring(!"(")> n
   desugar-flatten-methodID: [ MethodID(ID(n1), Params(p1)), MethodID(ID(n2), Params(p2)) | mids ] ->
       [MethodID(ID(name), Params(ps)) | mids ]
     with
-      name := <concat-strings> [n1, "_", n2];
+      name := <concat-strings> [n1, <param-string> p1, n2, <param-string> p2];
       ps   := <concat> [p1,p2]
-    
+  
+  not-substring(s) = is-substring(s) < fail + id
+  
+  desugar-flatten-methodPart: [Part(ID(n), NoArgs())] -> <fail>
+  desugar-flatten-methodPart: [Part(ID(n), a@_)] -> [Part(ID(name), a)]
+    where
+      name := <concat-strings> [n, <param-string> a];
+      <is-argument> a;
+      // only if n does not contain (
+      <not-substring(!"(")> n
   desugar-flatten-methodPart: [Part(ID(n1), args1), Part(ID(n2), args2) | ps ] ->
       [Part(ID(name), ArgsParen(args)) | ps]
     with
-      name := <concat-strings> [n1, "_", n2];
+      name := <concat-strings> [n1, <param-string> args1, n2, <param-string> args2];
       args := <flatten-list> <map(desugar-arg)> [args1, args2]
+  
+  param-string: ps -> <concat-strings> <flatten-list> <concat> [ ["("] , <commas> <map(!"_")> ps , [")"]]
+    where
+      <is-list> ps
+  param-string: ArgsParen(ps) -> <param-string> ps
+  param-string: p -> "(_)"
 
+  commas: [] -> []
+  commas: [ a | [] ] -> [ a ]
+  commas: [ a | as ] -> [ a , "," | <commas> as]
+
+  neq(|a,b) = equal(|a, b) < fail + id
+  
+  is-argument: a -> a
+    where
+       <neq(|a, NoArgs())> a
+
+  desugar-mcallopexp: MCallOpEx(receiver, OperatorCF(name), arg)->
+    MCallWDot(receiver, [Part(ID(name), ArgsParen([arg]))])
+  
+  desugar-mcallopexpassign: MCallOpExAssign(receiver, arg)->
+    MCallWDot(receiver, [Part(ID(":="), ArgsParen([arg]))])
+    
+  desugar-mcallprefixopexp: MCallPrefixOpExp(OperatorCF( op ), arg )->
+    MCallWDot(arg, [Part(ID(<concat-strings> ["prefix", op]), NoArgs())])
+  
   desugar-flatten-objectdecl: ObjectDecl(a, b, xs) -> ObjectDecl(a, b, ys)
     where
       ys := <flatten-list> xs;
@@ -64,6 +122,8 @@ rules
 
   desugar-arg:  ArgNumber(a) -> Number(a)
   desugar-arg: ArgBoolean(a) -> Boolean(a)
+  desugar-arg:  ArgString(a) -> String(a)
+  desugar-arg:  ArgLineup(a) -> LineupExp(a)
   desugar-arg:  ArgsParen(a) -> a
   desugar-arg:             a -> a
 
@@ -88,36 +148,37 @@ rules
     Block(BlockWParams(a, b)) -> BlockWParams(a, b)
    
   desugar-block:
-    Block(a) -> BlockWParams(BlockParams(NoParams()), a) 
+    Block(a) -> BlockWParams(BlockParams([]), a) 
 
-  desugar-block-to-object:
-    BlockWParams(BlockParams(NoParams()), code)-> 
-      ObjectDecl(
-        NoInherit(),
-        [],
-        [ Declaration(
-            MethodDecl(
-              NoPrefix()
-            , [MethodID(ID("apply"), NoParams())]
-            , NoAnnotations()
-            , MethodBody(code)
-            )
-          )
-        ]
-      )
-      
-  desugar-block-to-object:
-    BlockWParams(BlockParams(params), code) -> 
-      ObjectDecl(NoInherit(), [], [Declaration(
-        MethodDecl(
-          NoPrefix()
-        , [MethodID(ID("apply"), Params(params))]
-        , NoAnnotations()
-        , MethodBody(code)
-        )
-      )])
+//  desugar-block-to-object:
+//    BlockWParams(BlockParams([]), code)-> 
+//      ObjectDecl(
+//        NoInherit(),
+//        [],
+//        [ Declaration(
+//            MethodDecl(
+//              Single(MethodID(ID("apply")))
+//            , NoAnnotations()
+//            , MethodBody(code)
+//            )
+//          )
+//        ]
+//      )
+//      
+//  desugar-block-to-object:
+//    BlockWParams(BlockParams(params), code) -> 
+//      ObjectDecl(NoInherit(), [], [Declaration(
+//        MethodDecl(
+//          Multiple([MethodID(ID("apply"), Params(params))])
+//        , NoAnnotations()
+//        , MethodBody(code)
+//        )
+//      )])
 
   desugar-unquote-strings:
     String(s) -> String(<unquote(?'"')> s)
 
+  desugar-unquote-strings:
+    ArgString(s) -> ArgString(<unquote(?'"')> s)
+    
   desugar-fail: a -> <fail>

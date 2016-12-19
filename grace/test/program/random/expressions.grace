@@ -90,7 +90,7 @@ true || false || true || false || true;
 
 5 + a.b;
 
-5 + a . b;
+5 + a . b; 
 
 5;
 
@@ -132,3 +132,8 @@ true || true  || false || true || false || true || false || true || false || tru
 true && false || true;
 
 5 + 5 > 3;
+
+print("m.map = " + m.map);
+
+outer.do(5 + 24);
+outer.outer.do(5 + 13);

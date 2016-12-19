@@ -1,5 +1,5 @@
 method t129_foo(x : type { bar -> String }) {
-    print(x.bar)
+    print(x.bar);
 };
 
 def y = object {

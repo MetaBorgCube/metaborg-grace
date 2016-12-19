@@ -1,0 +1,97 @@
+module trans/desugar/desugar-matchcase
+
+imports
+    
+    src-gen/signatures/grace-sig
+    src-gen/signatures/grace-lowered-sig
+    src-gen/signatures/general-sig
+    
+    trans/desugar/desugar-common
+
+rules
+
+desugar-case(|liftedname): 
+          Case(
+            ExpParens(
+              caseExpression
+            )
+          , _
+          , body
+          ) ->
+          ID("???")
+
+desugar-case(|liftedname):
+          Case(
+            CaseExp(caseExpression)
+          , _
+          , body
+          ) ->
+          ID("???")
+          
+desugar-case(|liftedname):
+  Case(ExpTyped(iden, Type(typeId)), _, body) ->
+     [ Part(
+          ID("if")
+        , ArgsParen(
+            [ MCallWDot(
+                BlockExp(
+                  BlockWParams(
+                    BlockParams([Param( iden )])
+                  , [ Expression(
+                        MCallWDot(
+                          MCallImpl([Part(ID( typeId ), NoArgs())])
+                        , [ Part(
+                              ID("match")
+                            , ArgsParen([MCallImpl([Part( iden , NoArgs())])])
+                            )
+                          ]
+                        )
+                      )
+                    ]
+                  )
+                )
+              , [ Part(
+                    ID("apply")
+                  , ArgsParen([MCallImpl([Part(ID( liftedname ), NoArgs())])])
+                  )
+                ]
+              )
+            ]
+          )
+        )
+      , Part(ID("then"), ArgBlock(Block( body )))
+      ]
+    where
+      <debug(!"match on typecase")> iden
+
+desugar-case(|liftedname): a -> <fail>
+ where
+   <debug(!"error: unkown case type")> a
+
+desugar-caseparen-to-case: CaseParen(a,b,c) -> Case(a,b,c)
+desugar-caseparen-to-case: Case(a,b,c) -> Case(a,b,c)
+
+desugar-match-case:
+  MatchCase(matchExpression, cases) -> 
+    MCallWDot(
+      BlockExp(
+        BlockWParams(
+          BlockParams([Param(ID(liftedname))])
+        , [ Expression(
+              MCallImpl(
+                cases''
+              )
+            )
+          ]
+        )
+      )
+    , [Part(ID("apply"), ArgsParen([matchExpression]))]
+    )
+      where
+        <debug(!"match on matchcase expression")> matchExpression;
+        liftedname := <concat-strings> ["m_lifted_", <newname>];
+        <debug(!"new name: ")> liftedname;
+        cases' := <map(desugar-caseparen-to-case)> cases;
+        <debug(!"removed caseparen: ")> cases';
+        cases'' := <map(desugar-case(|liftedname))> cases';
+        <debug(!"desugared cases: ")> cases''

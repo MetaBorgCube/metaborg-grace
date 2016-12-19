@@ -11,4 +11,5 @@ trait emptiness {
     method ifEmptyDo_nonEmptyDo (eAction, nAction) {
         if_then_else (isEmpty, { eAction.apply; }, { do(nAction); } ); 
     };
-};]] parse succeeds
+};
+]] 0 warnings 0 errors
