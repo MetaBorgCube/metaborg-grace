@@ -88,9 +88,8 @@ rules
 
   lower-constant: Constant(a, b, c) -> ConstantL(a, b, c)
     
-  lower-variable: Variable(a, b, NoVarInit()) -> VariableL(a,b)
-  lower-variable: Variable(a, b, VarInit(exp)) ->
-    [VariableL(a, b), MCallRecvL( MCallL(a, []), ID(":=(_)"), [ exp ] )]
+  lower-variable: Variable(a, b, NoVarInit()) -> VariableL(a, b, Ellipsis()) // "no-op" expression
+  lower-variable: Variable(a, b, VarInit(exp)) -> VariableL(a, b, exp)
   
 //  lower-assignment: Assignment(a,b) -> AssignmentL(a, b)
 

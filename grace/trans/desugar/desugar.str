@@ -26,7 +26,6 @@ rules
     <+ desugar-mcallprefixopexp
     <+ desugar-blockExp 
     <+ desugar-block
-//    <+ desugar-block-to-object
     <+ desugar-arg-noargs
     <+ desugar-arg-argsparen
     <+ desugar-argBlock
@@ -103,13 +102,18 @@ rules
     where
        <neq(|a, NoArgs())> a
 
-  desugar-mcallopexp: MCallOpEx(receiver, OperatorCF(name), arg)->
-    MCallWDot(receiver, [Part(ID(name), ArgsParen([arg]))])
+  desugar-mcallopexp: MCallOpEx(recv, OperatorCF(name), arg)->
+    MCallWDot(recv, [Part(ID(name), ArgsParen([arg]))])
   
-  desugar-mcallopexpassign: MCallOpExAssign(receiver, arg)->
-    MCallWDot(receiver, [Part(ID(":="), ArgsParen([arg]))])
+  desugar-mcallopexpassign: MCallOpExAssign(MCallWDot(recv, [Part(ID(name), NoArgs())]), arg) ->
+    MCallWDot(recv, [Part(ID(<concat-strings> [name, ":=(_)"]), 
+      ArgsParen([arg])
+    )])
     
-  desugar-mcallprefixopexp: MCallPrefixOpExp(OperatorCF( op ), arg )->
+  desugar-mcallopexpassign: MCallOpExAssign(MCallImpl([Part(ID(name), NoArgs())]), arg) ->
+    MCallImpl([Part(ID(<concat-strings> [name, ":="]), ArgsParen([arg]))])
+
+  desugar-mcallprefixopexp: MCallPrefixOpExp(OperatorCF( op ), arg ) ->
     MCallWDot(arg, [Part(ID(<concat-strings> ["prefix", op]), NoArgs())])
   
   desugar-flatten-objectdecl: ObjectDecl(a, b, xs) -> ObjectDecl(a, b, ys)
@@ -149,31 +153,6 @@ rules
    
   desugar-block:
     Block(a) -> BlockWParams(BlockParams([]), a) 
-
-//  desugar-block-to-object:
-//    BlockWParams(BlockParams([]), code)-> 
-//      ObjectDecl(
-//        NoInherit(),
-//        [],
-//        [ Declaration(
-//            MethodDecl(
-//              Single(MethodID(ID("apply")))
-//            , NoAnnotations()
-//            , MethodBody(code)
-//            )
-//          )
-//        ]
-//      )
-//      
-//  desugar-block-to-object:
-//    BlockWParams(BlockParams(params), code) -> 
-//      ObjectDecl(NoInherit(), [], [Declaration(
-//        MethodDecl(
-//          Multiple([MethodID(ID("apply"), Params(params))])
-//        , NoAnnotations()
-//        , MethodBody(code)
-//        )
-//      )])
 
   desugar-unquote-strings:
     String(s) -> String(<unquote(?'"')> s)

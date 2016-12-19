@@ -116,14 +116,14 @@ context-free syntax
   CaseExp.CaseExp               = <<CaseLiteral>>
   CaseExp.CaseExpMulti          = <<CaseLiteral> <BoolOp> <CaseLiteral>>
   CaseExp.ExpParens             = <(<Exp>)>
-  CaseExp.Identifier            = <<Identifier>>
+  CaseExp.CIdentifier            = <<Identifier>>
   CaseExp.ExpTyped              = <<Identifier> : <CaseType>>
   BoolOp.Or                     = "|"
   BoolOp.And                    = "&"
   CaseType.Type                 = <<Identifier>>
-  CaseLiteral.Number            = <<NUM>>
-  CaseLiteral.String            = <<STRING>>
-  CaseLiteral.Boolean           = <<Boolean>>
+  CaseLiteral.CNumber          = <<NUM>>
+  CaseLiteral.CString          = <<STRING>>
+  CaseLiteral.CBoolean         = <<Boolean>>
   
   Arrow.Ascii                   = "->"
   Arrow.Unicode                 = "→"
