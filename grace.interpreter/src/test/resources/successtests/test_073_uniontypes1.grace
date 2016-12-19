@@ -3,5 +3,5 @@ print(x);
 x := 5;
 print(x);
 
-var s : Strring | Boolean | Number := x;
+var s : String | Boolean | Number := x;
 print(s);
