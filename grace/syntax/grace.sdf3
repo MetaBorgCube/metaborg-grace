@@ -28,9 +28,9 @@ context-free syntax
 //  Assignment.Assignment         = <<ID> := <Exp>>
   VarInit.VarInit               = < := <Exp>>
   VarInit.NoVarInit             = <>
-  Declaration.Constant          = <def <Identifier><Annotations> = <Exp>>
-  Declaration.Variable          = <var <Identifier><Annotations><VarInit>>
-  Declaration.MethodDecl        = <method <MethodNames><Annotations> <MethodBody>>
+  Declaration.Constant          = <def <Identifier><TypeAnn><Annotations> = <Exp>>
+  Declaration.Variable          = <var <Identifier><TypeAnn><Annotations><VarInit>>
+  Declaration.MethodDecl        = <method <MethodNames> <Annotations> <TypeRuleRightHand> <MethodBody>>
   Declaration.ClassDecl         = <
                                    class <ClassName>{
                                        <Inherit><Use*><{Statement "\n"}*>
@@ -41,22 +41,44 @@ context-free syntax
                                        use <Exp> <Modifier*>;
 
                                   >
+  
   ClassName.FullStop            = <<ID>.<MethodNames>>
   ClassName.MethodName          = <<MethodNames>>
                                   
   MethodNames.Single            = <<MethodNameNoParam>>
   MethodNames.Multiple          = <<MethodName+>>
                                   
-  MethodNameNoParam.MethodID    = <<Identifier>>
-  MethodNameNoParam.MethodOp    = <<OperatorCF>>
-//  MethodNameNoParam.PrefixOp    = <<PrefixOperator>>
+  MethodNameNoParam.MethodID    = <<Identifier><ArgType>>
+  MethodNameNoParam.MethodOp    = <<OperatorCF><ArgType>>
   
-  MethodName.MethodID           = <<Identifier> <Params>>
-  MethodName.MethodOp           = <<OperatorCF> <Params>>
-//  MethodName.PrefixOp           = <<PrefixOperator> <Params>>
+  MethodName.MethodID           = <<Identifier><ArgType> <Params>>
+  MethodName.MethodOp           = <<OperatorCF><ArgType> <Params>>
+
+  Declaration.TypeDecl          = <type <Identifier><ArgType> <Annotations> = <TypeDeclBody>>
   
-//  Prefix.Prefix                 = "prefix"
-//  Prefix.NoPrefix               = <>
+  TypeDeclBody.TypeDeclBlock    = <<TypeBlock>>
+  TypeDeclBody.TypeDeclExp      = <<TypeExp>>
+  
+  TypeBlock.TypeBlock           = <{ <{TypeRule "\n"}*> }>
+  
+  TypeRule.TypeRule             = <<MethodNames> <TypeRuleRightHand>;>
+  TypeRuleRightHand.RH          = [-> [TypeExp][ArgType]]
+  TypeRuleRightHand.NoRH        = <>
+  
+//  TypeConf.TypeConf             = [[TypeExp] <: [TypeExp]]
+  TypeExp.Union                 = <<TypeExp> + <TypeExp>>
+  TypeExp.Subtract              = <<TypeExp> - <TypeExp>>
+  TypeExp.Intersect             = <<TypeExp> & <TypeExp>>
+  TypeExp.Variant               = <<TypeExp> | <TypeExp>>
+  TypeExp.TypeID                = <<Identifier> <ArgType>>
+  
+  TypeExp.AnonType              = <type <TypeBlock>>
+  
+  ArgType.ArgType               = <[[ <{TypeExp ","}*> ]]>
+  ArgType.NoArgType             = <>
+  
+  TypeAnn.TypeAnn               = <: <TypeExp>>
+  TypeAnn.NoTypeAnn             = <>
   
   Identifier.ID                 = <<ID>>
   Identifier.WildCard           = "_"
@@ -72,7 +94,8 @@ context-free syntax
   Annotation.Overrides          = "override"
   
   Params.Params                 = <(<{Param ", "}+>)>
-  Param.Param                   = <<Identifier>>
+//  Param.Param                   = <<Identifier>>
+  Param.ParamWType              = <<Identifier><TypeAnn>>
 
   MethodBody.MethodBody         = <
                                    {

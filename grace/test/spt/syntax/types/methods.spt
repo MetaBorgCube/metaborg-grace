@@ -1,0 +1,37 @@
+module syntax-types-methods
+
+language grace
+
+start symbol Program
+
+test type method annotation [[
+method f -> Boolean { };
+]] 0 warnings 0 errors
+
+test type method annotation ad hoc [[
+method f -> type { foo -> Boolean; } { };
+]] 0 warnings 0 errors
+
+test type method annotation typeexpr [[
+method f -> Boolean | Number { };
+]] 0 warnings 0 errors
+
+test method typed parameter [[
+method f (p: String) -> Boolean { };
+]] 0 warnings 0 errors
+
+test method typed parameters [[
+method f (p: String, q: Number) -> Boolean { };
+]] 0 warnings 0 errors
+
+test method typed parameters ad hoc [[
+method f (p: type { Foo -> Boolean; }, q: Number) -> Boolean { };
+]] 0 warnings 0 errors
+
+test method typed parameters ad hoc and untyped [[
+method f (p: type { Foo -> Boolean; }, q) -> Boolean { };
+]] 0 warnings 0 errors
+
+test method typed parameters ad hoc and untyped multipart[[
+method f (p: type { Foo -> Boolean; }, q) g (b: Number) -> Boolean { };
+]] 0 warnings 0 errors

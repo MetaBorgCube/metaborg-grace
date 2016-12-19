@@ -36,7 +36,7 @@ desugar-case(|liftedname):
             [ MCallWDot(
                 BlockExp(
                   BlockWParams(
-                    BlockParams([Param( iden )])
+                    BlockParams([ParamWType( iden, WildCard() )]) //TODO type
                   , [ Expression(
                         MCallWDot(
                           MCallImpl([Part(ID( typeId ), NoArgs())])
@@ -76,7 +76,7 @@ desugar-match-case:
     MCallWDot(
       BlockExp(
         BlockWParams(
-          BlockParams([Param(ID(liftedname))])
+          BlockParams([ParamWType(ID(liftedname), WildCard())]) //TODO type
         , [ Expression(
               MCallImpl(
                 cases''

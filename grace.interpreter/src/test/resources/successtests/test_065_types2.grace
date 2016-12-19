@@ -1,6 +1,6 @@
 type X = {
     foo(s : String) -> String
-}
+};
             
 var x := object {
     method foo(s) {

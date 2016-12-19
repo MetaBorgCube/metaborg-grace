@@ -54,21 +54,21 @@ rules
         as := <flatten-list> <lower-arguments> args
   
   lower-mdecl:
-    MethodDecl(Multiple([MethodID(mName, ps)]), annotations, MethodBody(cs)) ->
+    MethodDecl(Multiple([MethodID(mName, ps)]), annotations, typeAnn, MethodBody(cs)) -> //TODO Type
       MethodL(name,annotations, paramNames, cs)
       with
         paramNames := <lower-params> ps;
         name := <name-to-id> mName 
 
   lower-mdecl:
-    MethodDecl(Multiple([MethodOp(mName, ps)]), annotations, MethodBody(cs)) ->
+    MethodDecl(Multiple([MethodOp(mName, ps)]), annotations, typeAnn, MethodBody(cs)) -> //TODO Type
       MethodL(name,annotations, params, cs)
       with
         name := <name-to-id> mName; 
         params := <lower-params> ps
         
   lower-mdecl:
-    MethodDecl(Single(MethodID(mName)), annotations, MethodBody(cs)) ->
+    MethodDecl(Single(MethodID(mName, typeArg)), annotations, typeAnn, MethodBody(cs)) ->  //TODO Type
       MethodL(<name-to-id> mName, annotations, [], cs)
   
 //  lower-mdecl:
@@ -86,10 +86,10 @@ rules
   
   lower-objectdecl: ObjectDecl(a, b, c) -> ObjectL(a,b,c)
 
-  lower-constant: Constant(a, b, c) -> ConstantL(a, b, c)
+  lower-constant: Constant(a, t, b, c) -> ConstantL(a, b, c) //TODO type
     
-  lower-variable: Variable(a, b, NoVarInit()) -> VariableL(a,b)
-  lower-variable: Variable(a, b, VarInit(exp)) ->
+  lower-variable: Variable(a, t, b, NoVarInit()) -> VariableL(a,b) //TODO type
+  lower-variable: Variable(a, t, b, VarInit(exp)) -> //TODO type
     [VariableL(a, b), MCallRecvL( MCallL(a, []), ID(":=(_)"), [ exp ] )]
   
 //  lower-assignment: Assignment(a,b) -> AssignmentL(a, b)
@@ -108,8 +108,8 @@ rules
   
   lower-params: Params(ps) -> <lower-params> ps
   lower-params: [] -> []
-  lower-params: [Param(n)] -> [n]
-  lower-params: [Param(n) | bs] -> [n | <lower-params> bs ]
+  lower-params: [ParamWType(n, _)] -> [n] //TODO type
+  lower-params: [ParamWType(n, _) | bs] -> [n | <lower-params> bs ] //TODO type
   
   lower-arguments: ArgNumber(a) -> [Number(a)]
   lower-arguments: ArgString(a) -> [String(a)]

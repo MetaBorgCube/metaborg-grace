@@ -4,15 +4,21 @@ language grace
 
 start symbol Program
 
+test simple type decl [[
+type Boolean = type {
+    ifTrue(b);
+    ifFalse(b) -> Done;
+};]] 0 warnings 0 errors
+
 test type boolean [[type Boolean = {
     not -> Boolean;
-    prefix ! -> Boolean;
+    prefix! -> Boolean;
     // the negation of self
     && (other: BlockOrBoolean) -> Boolean;
     // return true when self and other are both true
     || (other: BlockOrBoolean) -> Boolean;
     // return true when either self or other (or both) are true
-};]] parse fails
+};]] 0 warnings 0 errors
 
 test type number [[type Number = {
     + (other: Number) -> Number;
@@ -37,7 +43,7 @@ test type number [[type Number = {
     // true iff self is greater than other
     >= (other: Number) -> Boolean;
     // true iff self is greater than or equal to other
-    prefix - -> Number;
+    prefix- -> Number;
     // negation of self
     compare (other:Number) -> Number;
     // a three-way comparison: -1 if (self < other), 0 if (self == other), and +1 if (self > other).
@@ -56,7 +62,7 @@ test type number [[type Number = {
     // the absolute value of self
     isNan -> Boolean;
     // true if this Number is a NaN
-};]] parse fails
+};]] 0 warnings 0 errors
 
 test type string [[type String = {
     * (n: Number) -> String;
@@ -167,17 +173,17 @@ test type string [[type String = {
     quoted -> String;
     // returns a quoted version of self, with internal characters like " and \ and newline escaped,
     // but without surrounding quotes.
-};]] parse fails
+};]] 0 warnings 0 errors
 
 test type object [[type Object = {
-    == (other: Object) -> Boolean;
-    != (other: Object) -> Boolean; // the inverse of ==;
-    hash -> Number;
-    match (other: Object) -> MatchResult;
-    asString -> String;
-    asDebugString -> String;
-    :: (other:Object) -> Binding;
-};]] parse fails
+    == (other: Object) -> Boolean
+    != (other: Object) -> Boolean // the inverse of ==
+    hash -> Number
+    match (other: Object) -> MatchResult
+    asString -> String
+    asDebugString -> String
+    :: (other:Object) -> Binding
+};]] 0 warnings 0 errors
 
 //test parametric type [[type MyParametricType[[A, B]] =
 //    type {
@@ -204,31 +210,31 @@ test type object [[type Object = {
 
 test type simple string [[
 type String = type {
-    asString -> String;
-    ++(o : String) -> String;
+    asString -> String
+    ++(o : String) -> String
 };
-]] parse fails
+]] 0 warnings 0 errors
 
 test type simple number [[
 type Number = type {
-    asString -> String;
-    +(o : Number) -> Number;
-    *(o : Number) -> Number;
-    -(o : Number) -> Number;
-    /(o : Number) -> Number;
-    ^(o : Number) -> Number;
-    %(o : Number) -> Number;
+    asString -> String
+    +(o : Number) -> Number
+    *(o : Number) -> Number
+    -(o : Number) -> Number
+    /(o : Number) -> Number
+    ^(o : Number) -> Number
+    %(o : Number) -> Number
 };
-]] parse fails
+]] 0 warnings 0 errors
 
 test type boolean [[
 type Boolean = type {
-    ifTrue(b) -> Done;
-    ifFalse(b) -> Done;
-    ifTrue(b1) ifFalse(b2);
-    &&(o : Boolean) -> Boolean;
-    ||(o : Boolean) -> Boolean;
-    andAlso(b);
-    orElse(b);
+    ifTrue(b) -> Done
+    ifFalse(b) -> Done
+    ifTrue(b1) ifFalse(b2)
+    &&(o : Boolean) -> Boolean
+    ||(o : Boolean) -> Boolean
+    andAlso(b)
+    orElse(b)
 };
-]] parse fails
+]] 0 warnings 0 errors

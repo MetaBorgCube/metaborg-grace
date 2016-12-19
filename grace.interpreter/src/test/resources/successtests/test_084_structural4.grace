@@ -1,9 +1,9 @@
 type A = {
     test(a:A) -> A
-}
+};
 type B = {
     test(b:B) -> B
-}
+};
 
 var a := object {
     method test(x) { x; };

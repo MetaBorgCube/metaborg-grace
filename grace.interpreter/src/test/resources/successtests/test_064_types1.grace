@@ -1,11 +1,11 @@
-var x := "Hello";
-var y;
+var x : String := "Hello";
+var y : String ;
 y := x;
 y := x ++ " world";
-var a := 3;
+var a : Number := 3;
 a := 5;
 a := a * a;
-var b := true;
+var b : Boolean := true;
 b := !b;
 print(y);
 print(a);

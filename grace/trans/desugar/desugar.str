@@ -43,17 +43,19 @@ rules
       MethodDecl(
         mIDs,
         NoAnnotations(),
+        WildCard(), //TODO type
         MethodBody([
           Expression(ObjectDecl(inh,use,code))
         ])
       )
   desugar-class-declaration:
     ClassDecl(FullStop(iden, mIDs), inh, use, code) ->      
-      Constant(iden , NoAnnotations(), Expression (
+      Constant(iden, WildCard(), NoAnnotations(), Expression ( //TODO type
         ObjectDecl(NoInherit(), [], [
           MethodDecl(
             mIDs,
             NoAnnotations(),
+            WildCard(), //TODO type
             MethodBody([
               Expression(ObjectDecl(inh,use,code))
             ])
@@ -61,13 +63,13 @@ rules
         ])
       ))
   
-  desugar-flatten-methodID: [ MethodID(ID(n), Params(ps)) ] -> 
+  desugar-flatten-methodID: [ MethodID(ID(n), typeArg, Params(ps)) ] -> //TODO type 
       [ MethodID(ID(name), Params(ps)) ]
     where
       name := <concat-strings> [n, <param-string> ps];
       <not-substring(!"(")> n
-  desugar-flatten-methodID: [ MethodID(ID(n1), Params(p1)), MethodID(ID(n2), Params(p2)) | mids ] ->
-      [MethodID(ID(name), Params(ps)) | mids ]
+  desugar-flatten-methodID: [ MethodID(ID(n1), typeArg, Params(p1)), MethodID(ID(n2), typeArg, Params(p2)) | mids ] ->
+      [MethodID(ID(name), WildCard(), Params(ps)) | mids ] //TODO types
     with
       name := <concat-strings> [n1, <param-string> p1, n2, <param-string> p2];
       ps   := <concat> [p1,p2]

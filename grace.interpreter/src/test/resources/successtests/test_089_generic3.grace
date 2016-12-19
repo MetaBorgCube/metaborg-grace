@@ -1,7 +1,7 @@
 type A[[T]] = {
     foo(_ : T) -> Number
     bar(_ : Number) -> T
-}
+};
 
 var a := object {
     method foo(x) { x.size; };

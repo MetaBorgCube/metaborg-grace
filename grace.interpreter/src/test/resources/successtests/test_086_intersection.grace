@@ -1,10 +1,10 @@
 type A = {
     foo(arg:String) -> String
-}
+};
 
 type B = {
     bar(arg : Number) -> Number
-}
+};
 
 def ab = object {
     method foo(s) {

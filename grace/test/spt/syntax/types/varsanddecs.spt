@@ -1,0 +1,15 @@
+module syntax-types-varsanddecs
+
+language grace
+
+start symbol Program
+
+test type def annotation [[def a : String = 5;]] 0 warnings 0 errors
+test type var annotation [[var a : String := 5;]] 0 warnings 0 errors
+test type def annotation expr [[def a : String | Number = 5;]] 0 warnings 0 errors
+test type def annotation ad hoc [[def a : type { } = 5;]] 0 warnings 0 errors
+test type def annotation ad hoc rule [[def a : type { foo } = 5;]] 0 warnings 0 errors
+test type def annotation ad hoc rule 2 [[def a : type { foo -> Boolean } = 5;]] 0 warnings 0 errors
+test type def annotation ad hoc rule 2 [[def a : type { foo -> Boolean } = 5;]] 0 warnings 0 errors
+
+test type def parametric [[def a : String[[T]] = 5;]] 0 warnings 0 errors

@@ -1,10 +1,10 @@
 type A = {
     bar -> String
-}
+};
 
 type B = A & type {
     quux -> Number
-}
+};
 def t131_context = object {
     method btaker(b) {
         out "{b.bar}{b.quux}";

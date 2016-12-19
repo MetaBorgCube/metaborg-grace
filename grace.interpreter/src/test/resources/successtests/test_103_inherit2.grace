@@ -20,7 +20,7 @@ class d_103 {
 type T_103 = {
     foo -> String
     quux -> String
-}
+};
 
 def x = b_103;
 print (x.bar);
