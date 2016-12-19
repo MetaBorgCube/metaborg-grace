@@ -1,17 +1,19 @@
 object {
   method base {
       object {
-          def param is public = 100;
-          def x1 is public = self.param;
+          def overriddenfield is public = 100;
+          
+          // this initializer should see the local value of the overriddenfield
+          def otherfield is public = self.overriddenfield;
       };
   };
   
   def myobj = object {
       inherit outer.base;
       
-      def param is public = 500;
+      def overriddenfield is public = 500;
   };
   
-  print(self.myobj.param);
-  print(self.myobj.x1);
+  print(self.myobj.overriddenfield);
+  print(self.myobj.otherfield);
 };
