@@ -192,7 +192,7 @@ rules
 
   S, P Flatten() |- ObjectL(inherit, [], code) --> FlatObject(concatClosures(closures-inherited, [Closure(S, code)])) //FlatObject(closures-inherited ++ [Closure(O, code)])
   where
-    P Flatten() |- inherit --> FlatObject(closures-inherited).
+    O S, P Flatten() |- inherit --> FlatObject(closures-inherited).
 
   P Flatten() |- MCallRecvL(e, x, es) --> v
   where
