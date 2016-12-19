@@ -22,6 +22,6 @@ context-free syntax
 							}
 							> {prefer}
   Declaration.ConstantL   = <_def <Identifier> <Annotations> = <Exp>> {prefer}
-  Declaration.VariableL   = <_var <Identifier> <Annotations>> {prefer}
+  Declaration.VariableL   = <_var <Identifier> <Annotations> := <Exp>> {prefer}
   Declaration.TraitL      = <_trait <Identifier> (<{Identifier ", "}*>) <{Statement "\n"}*>> {prefer}
 
