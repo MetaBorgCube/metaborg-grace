@@ -28,12 +28,16 @@
 //    };
 //}.apply("foo");
 
-match("str") case { x : Num -> print (x); };
+//a && b;
+
+//match("str") case { x : Num -> print (x); };
+
+match("str") case { "hello" -> print("It matches"); };
 
 { lifted_ ->
     
-    if ({ x -> Num.match(x);  }.apply(lifted_)) then {
-        print (x);
+    if { String.match(lifted_) && (lifted_ == "hello"); } then {
+        print("It matches 2");
     };
     
 }.apply("str");

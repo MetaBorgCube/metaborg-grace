@@ -163,7 +163,7 @@ rules
   
   strip-argsparen: ArgsParen(a) -> a
   
-  desugar-argBlock: ArgBlock(o) -> ArgsParen([o])
+  desugar-argBlock: ArgBlock(o) -> ArgsParen([BlockExp(o)])
 //  desugar-blockExp: BlockExp(e) -> e
   
   desugar-block:
@@ -177,5 +177,8 @@ rules
 
   desugar-unquote-strings:
     ArgString(s) -> ArgString(<unquote(?'"')> s)
+    
+  desugar-unquote-strings:
+    CString(s) -> CString(<unquote(?'"')> s)
     
   desugar-fail: a -> <fail>
