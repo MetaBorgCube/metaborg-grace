@@ -54,22 +54,29 @@ rules
         as := <flatten-list> <lower-arguments> args
   
   lower-mdecl:
-    MethodDecl(Multiple([MethodID(mName, ps)]), annotations, typeAnn, MethodBody(cs)) -> //TODO Type
-      MethodL(name,annotations, paramNames, cs)
+    MethodDecl(Multiple([MethodID(mName, typeArgs, ps)]), annotations, RH(te), MethodBody(cs)) ->
+      MethodL(name, ta, annotations, paramNames, te, cs)
       with
+        ta := <lower-get-typeargs> typeArgs;
         paramNames := <lower-params> ps;
         name := <name-to-id> mName 
 
   lower-mdecl:
-    MethodDecl(Multiple([MethodOp(mName, ps)]), annotations, typeAnn, MethodBody(cs)) -> //TODO Type
-      MethodL(name,annotations, params, cs)
+    MethodDecl(Multiple([MethodOp(mName, typeArgs, ps)]), annotations, RH(te), MethodBody(cs)) ->
+      MethodL(name, ta, annotations, params, te, cs)
       with
+        ta := <lower-get-typeargs> typeArgs;
         name := <name-to-id> mName; 
         params := <lower-params> ps
         
   lower-mdecl:
-    MethodDecl(Single(MethodID(mName, typeArg)), annotations, typeAnn, MethodBody(cs)) ->  //TODO Type
-      MethodL(<name-to-id> mName, annotations, [], cs)
+    MethodDecl(Single(MethodID(mName, typeArgs)), annotations, RH(te), MethodBody(cs)) ->
+      MethodL(<name-to-id> mName, ta, annotations, [], te, cs)
+      with
+        ta := <lower-get-typeargs> typeArgs
+  
+  lower-get-typeargs: TypeArg(tas) -> tas
+  lower-get-typeargs: NoTypeArg() -> []
   
 //  lower-mdecl:
 //    MethodDecl(Single(PrefixOp(mName)), annotations, MethodBody(cs)) ->
@@ -79,10 +86,11 @@ rules
     MCallWDot(recv, [Part(ID(name), args)]) ->
       MCallRecvL(recv, name, <lower-arguments> args)
   
-  lower-block:
-    BlockExp(BlockWParams(BlockParams(ps), cs)) -> BlockL(params, cs)
+  lower-block: BlockExp(blk) -> blk
+  lower-block: BlockWParams(BlockParams(ps), cs) -> BlockL(params, types, cs)
       with
-        params := <lower-params> ps
+        params := <lower-params> ps;
+        types := <lower-params-types> ps
   
   lower-objectdecl: ObjectDecl(a, b, c) -> ObjectL(a,b,c)
 
@@ -102,14 +110,20 @@ rules
   
   flatten-statements-declaration: Declaration([a,b]) -> [Declaration(a),Expression(b)]      
   
-  flatten-statements: ObjectL(a,b,code) -> ObjectL(a,b, <flatten-list> code)
-  flatten-statements: MethodL(a,b,c,code) -> MethodL(a,b,c, <flatten-list> code)
-  flatten-statements: BlockL(p,code) -> BlockL(p, <flatten-list> code)
+  flatten-statements: ObjectL(a, b, code) -> ObjectL(a,b, <flatten-list> code)
+  flatten-statements: MethodL(n, ta, a, p, t, code) -> MethodL(n, ta, a, p, t, <flatten-list> code)
+  flatten-statements: BlockL(p, t, code) -> BlockL(p, t, <flatten-list> code)
   
   lower-params: Params(ps) -> <lower-params> ps
   lower-params: [] -> []
-  lower-params: [ParamWType(n, _)] -> [n] //TODO type
-  lower-params: [ParamWType(n, _) | bs] -> [n | <lower-params> bs ] //TODO type
+  lower-params: [ParamWType(n, _)] -> [n]
+  lower-params: [ParamWType(n, _) | bs] -> [n | <lower-params> bs ]
+  
+  lower-params-types: Params(ps) -> <lower-params-types> ps
+  lower-params-types: [] -> []
+  lower-params-types: [ParamWType(_, TypeAnn(te))] -> [te]
+  lower-params-types: [ParamWType(_, TypeAnn(te)) | ps] ->
+    [te | <lower-params-types> ps ]
   
   lower-arguments: ArgNumber(a) -> [Number(a)]
   lower-arguments: ArgString(a) -> [String(a)]

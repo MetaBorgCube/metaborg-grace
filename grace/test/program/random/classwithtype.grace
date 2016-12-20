@@ -15,11 +15,6 @@
 //
 //method a -> Unknown { };
 
-def a = 5;
-def a : Unknown = 5;
-var a := 5;
-var a;
-var a : Unknown;
-var a : Unknown := 5;
-var a : type { bla; };
-var a : type { bla -> Foo; } := 13;
+//method ++[[T]] (other: T) -> T { };
+
+{};

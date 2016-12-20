@@ -30,7 +30,7 @@ context-free syntax
   VarInit.NoVarInit             = <>
   Declaration.Constant          = <def <Identifier><TypeAnn><Annotations>=<Exp>>
   Declaration.Variable          = <var <Identifier><TypeAnn><Annotations><VarInit>>
-  Declaration.MethodDecl        = <method <MethodNames><Annotations><TypeRuleRightHand><MethodBody>>
+  Declaration.MethodDecl        = <method <MethodNames><Annotations><TypeRuleRightHand> <MethodBody>>
   Declaration.ClassDecl         = <
                                    class <ClassName> <TypeRuleRightHand> {
                                        <Inherit><Use*><{Statement "\n"}*>
@@ -62,7 +62,7 @@ context-free syntax
   TypeBlock.TypeBlock           = <{<{TypeRule "\n"}*>}>
   
   TypeRule.TypeRule             = <<MethodNames> <TypeRuleRightHand>;>
-  TypeRuleRightHand.RH          = [-> [TypeExp]]
+  TypeRuleRightHand.RH          = [ -> [TypeExp]]
   TypeRuleRightHand.NoRH        = <>
   
 //  TypeConf.TypeConf             = [[TypeExp] <: [TypeExp]]
