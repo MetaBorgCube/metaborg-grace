@@ -7,104 +7,104 @@ imports
     src-gen/signatures/general-sig
 
 rules
-
-  inject-all: Program([c | cs ], b) -> Program([Expression(ObjectL(NoInherit(),[],[
-          Declaration(
-            MethodL(
-              "print"
-            , NoAnnotations()
-            , ["obj"]
-            , [ Expression(
-                  MCallL(
-                    "base_print"
-                  , [MCallRecvL(MCallL("obj", []), "asString", [])]
-                  )
-                )
-              ]
-            )
-          )
-        ,   
-          Declaration(
-            ConstantL(
-              "true"
-            , NoAnnotations()
-            , ObjectL(
-                NoInherit()
-              , []
-              , [ Declaration(
-                    MethodL(
-                      "ifTrue"
-                    , NoAnnotations()
-                    , ["blk"]
-                    , [Expression(MCallRecvL(MCallL("blk", []), "apply", []))]
-                    )
-                  )
-                , Declaration(MethodL("ifFalse", NoAnnotations(), ["blk"], []))
-                , Declaration(
-                    MethodL(
-                      "ifTrue_ifFalse"
-                    , NoAnnotations()
-                    , ["blk1", "blk2"]
-                    , [Expression(MCallRecvL(MCallL("blk1", []), "apply", []))]
-                    )
-                  )
-                , Declaration(
-                    MethodL("||", NoAnnotations(), ["other"], [Expression(Self())])
-                  )
-                , Declaration(
-                    MethodL(
-                      "&&"
-                    , NoAnnotations()
-                    , ["other"]
-                    , [Expression(MCallL("other", []))]
-                    )
-                  )
-                , Declaration(
-                    MethodL("asString", NoAnnotations(), [], [Expression(String("\"true\""))])
-                  )
-                ]
-              )
-            )
-          )
-        , Declaration(
-            ConstantL(
-              "false"
-            , NoAnnotations()
-            , ObjectL(
-                NoInherit()
-              , []
-              , [ Declaration(MethodL("ifTrue", NoAnnotations(), ["blk"], []))
-                , Declaration(
-                    MethodL(
-                      "ifFalse"
-                    , NoAnnotations()
-                    , ["blk"]
-                    , [Expression(MCallRecvL(MCallL("blk", []), "apply", []))]
-                    )
-                  )
-                , Declaration(
-                    MethodL(
-                      "ifTrue_ifFalse"
-                    , NoAnnotations()
-                    , ["blk1", "blk2"]
-                    , [Expression(MCallRecvL(MCallL("blk2", []), "apply", []))]
-                    )
-                  )
-                , Declaration(
-                    MethodL(
-                      "||"
-                    , NoAnnotations()
-                    , ["other"]
-                    , [Expression(MCallL("other", []))]
-                    )
-                  )
-                , Declaration(
-                    MethodL("&&", NoAnnotations(), ["other"], [Expression(Self())])
-                  )
-                , Declaration(
-                    MethodL("asString", NoAnnotations(), [], [Expression(String("\"false\""))])
-                  )
-                ]
-              )
-            )
-          ), c | cs]))], b)
+    inject-all = fail
+//  inject-all: Program([c | cs ], b) -> Program([Expression(ObjectL(NoInherit(),[],[
+//          Declaration(
+//            MethodL(
+//              "print"
+//            , NoAnnotations()
+//            , ["obj"]
+//            , [ Expression(
+//                  MCallL(
+//                    "base_print"
+//                  , [MCallRecvL(MCallL("obj", []), "asString", [])]
+//                  )
+//                )
+//              ]
+//            )
+//          )
+//        ,   
+//          Declaration(
+//            ConstantL(
+//              "true"
+//            , NoAnnotations()
+//            , ObjectL(
+//                NoInherit()
+//              , []
+//              , [ Declaration(
+//                    MethodL(
+//                      "ifTrue"
+//                    , NoAnnotations()
+//                    , ["blk"]
+//                    , [Expression(MCallRecvL(MCallL("blk", []), "apply", []))]
+//                    )
+//                  )
+//                , Declaration(MethodL("ifFalse", NoAnnotations(), ["blk"], []))
+//                , Declaration(
+//                    MethodL(
+//                      "ifTrue_ifFalse"
+//                    , NoAnnotations()
+//                    , ["blk1", "blk2"]
+//                    , [Expression(MCallRecvL(MCallL("blk1", []), "apply", []))]
+//                    )
+//                  )
+//                , Declaration(
+//                    MethodL("||", NoAnnotations(), ["other"], [Expression(Self())])
+//                  )
+//                , Declaration(
+//                    MethodL(
+//                      "&&"
+//                    , NoAnnotations()
+//                    , ["other"]
+//                    , [Expression(MCallL("other", []))]
+//                    )
+//                  )
+//                , Declaration(
+//                    MethodL("asString", NoAnnotations(), [], [Expression(String("\"true\""))])
+//                  )
+//                ]
+//              )
+//            )
+//          )
+//        , Declaration(
+//            ConstantL(
+//              "false"
+//            , NoAnnotations()
+//            , ObjectL(
+//                NoInherit()
+//              , []
+//              , [ Declaration(MethodL("ifTrue", NoAnnotations(), ["blk"], []))
+//                , Declaration(
+//                    MethodL(
+//                      "ifFalse"
+//                    , NoAnnotations()
+//                    , ["blk"]
+//                    , [Expression(MCallRecvL(MCallL("blk", []), "apply", []))]
+//                    )
+//                  )
+//                , Declaration(
+//                    MethodL(
+//                      "ifTrue_ifFalse"
+//                    , NoAnnotations()
+//                    , ["blk1", "blk2"]
+//                    , [Expression(MCallRecvL(MCallL("blk2", []), "apply", []))]
+//                    )
+//                  )
+//                , Declaration(
+//                    MethodL(
+//                      "||"
+//                    , NoAnnotations()
+//                    , ["other"]
+//                    , [Expression(MCallL("other", []))]
+//                    )
+//                  )
+//                , Declaration(
+//                    MethodL("&&", NoAnnotations(), ["other"], [Expression(Self())])
+//                  )
+//                , Declaration(
+//                    MethodL("asString", NoAnnotations(), [], [Expression(String("\"false\""))])
+//                  )
+//                ]
+//              )
+//            )
+//          ), c | cs]))], b)

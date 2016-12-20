@@ -2,5 +2,5 @@
 { a: Number -> };
 { a, b -> };
 { a: Number, b : Koekie -> };
-{ _: Unknown -> };
+{ _: type { moeilijk; } -> };
 { _ -> };

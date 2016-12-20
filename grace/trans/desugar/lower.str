@@ -86,11 +86,12 @@ rules
   
   lower-objectdecl: ObjectDecl(a, b, c) -> ObjectL(a,b,c)
 
-  lower-constant: Constant(a, t, b, c) -> ConstantL(a, b, c) //TODO type
+  lower-constant: Constant(a, t, b, c) -> ConstantL(a, <lower-typeann> t, b, c) //TODO type
 
-  lower-variable: Variable(a, t, b, NoVarInit()) -> VariableL(a, b, Uninitialized()) // TODO types
-  lower-variable: Variable(a, t, b, VarInit(exp)) -> VariableL(a, b, exp) // TODO types
+  lower-variable: Variable(a, t, b, NoVarInit()) -> VariableL(a, <lower-typeann> t, b, Uninitialized()) // TODO types
+  lower-variable: Variable(a, t, b, VarInit(exp)) -> VariableL(a, <lower-typeann> t, b, exp) // TODO types
   
+  lower-typeann: TypeAnn(t) -> t
 //  lower-assignment: Assignment(a,b) -> AssignmentL(a, b)
 
   lower-trait: TraitDecl([MethodID(tName, ps)], MethodBody(code)) -> 

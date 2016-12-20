@@ -128,7 +128,6 @@ context-free syntax
   Exp.MCallPrefixOpExp          = <<OperatorCF> <Exp>>         {left, prefer}
   
   Exp.Ellipsis                  = "..."
-  Exp.Uninitialized             = "_uninit"
   Exp.LineupExp                 = <<Lineup>>
   Exp.BlockExp                  = <<Block>>
   

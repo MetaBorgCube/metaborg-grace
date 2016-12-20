@@ -16,12 +16,13 @@ context-free syntax
 							}
 							> {prefer}
   Exp.BlockL              = [_block { [Identifier*] -> [{Statement "\n"}*] }] {prefer}
+  Exp.Uninitialized       = "_uninit" {prefer}
   Declaration.MethodL     = <
 							_method <Identifier><Annotations> (<{Identifier ", "}*>) {
 							  <{Statement "\n"}*>
 							}
 							> {prefer}
-  Declaration.ConstantL   = <_def <Identifier> <Annotations> = <Exp>> {prefer}
-  Declaration.VariableL   = <_var <Identifier> <Annotations> := <Exp>> {prefer}
+  Declaration.ConstantL   = <_def <Identifier> <TypeExp><Annotations> = <Exp>> {prefer}
+  Declaration.VariableL   = <_var <Identifier> <TypeExp><Annotations> := <Exp>> {prefer}
   Declaration.TraitL      = <_trait <Identifier> (<{Identifier ", "}*>) <{Statement "\n"}*>> {prefer}
 
