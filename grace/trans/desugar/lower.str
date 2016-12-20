@@ -80,7 +80,7 @@ rules
       MCallRecvL(recv, name, <lower-arguments> args)
   
   lower-block:
-    BlockWParams(BlockParams(ps), cs) -> BlockL(params, cs)
+    BlockExp(BlockWParams(BlockParams(ps), cs)) -> BlockL(params, cs)
       with
         params := <lower-params> ps
   
@@ -88,7 +88,7 @@ rules
 
   lower-constant: Constant(a, t, b, c) -> ConstantL(a, b, c) //TODO type
     
-  lower-variable: Variable(a, t, b, NoVarInit()) -> VariableL(a,b) //TODO type
+  lower-variable: Variable(a, t, b, NoVarInit()) -> VariableL(a, b) //TODO type
   lower-variable: Variable(a, t, b, VarInit(exp)) -> //TODO type
     [VariableL(a, b), MCallRecvL( MCallL(a, []), ID(":=(_)"), [ exp ] )]
   

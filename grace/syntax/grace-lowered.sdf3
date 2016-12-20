@@ -7,7 +7,7 @@ imports
   grace
 
 context-free syntax
-
+  
   Exp.MCallL			  = <_impl (<Identifier>(<{Exp ", "}*>))> {prefer}
   Exp.MCallRecvL		  = <_recv (<Exp>).<Identifier>(<{Exp ", "}*>)> {prefer}
   Exp.ObjectL             = <

@@ -28,9 +28,9 @@ context-free syntax
 //  Assignment.Assignment         = <<ID> := <Exp>>
   VarInit.VarInit               = < := <Exp>>
   VarInit.NoVarInit             = <>
-  Declaration.Constant          = <def <Identifier><TypeAnn><Annotations> = <Exp>>
+  Declaration.Constant          = <def <Identifier><TypeAnn><Annotations>=<Exp>>
   Declaration.Variable          = <var <Identifier><TypeAnn><Annotations><VarInit>>
-  Declaration.MethodDecl        = <method <MethodNames> <Annotations> <TypeRuleRightHand> <MethodBody>>
+  Declaration.MethodDecl        = <method <MethodNames><Annotations><TypeRuleRightHand><MethodBody>>
   Declaration.ClassDecl         = <
                                    class <ClassName> <TypeRuleRightHand> {
                                        <Inherit><Use*><{Statement "\n"}*>
@@ -48,18 +48,18 @@ context-free syntax
   MethodNames.Single            = <<MethodNameNoParam>>
   MethodNames.Multiple          = <<MethodName+>>
                                   
-  MethodNameNoParam.MethodID    = <<Identifier><ArgType>>
-  MethodNameNoParam.MethodOp    = <<OperatorCF><ArgType>>
+  MethodNameNoParam.MethodID    = <<Identifier><TypeArg>>
+  MethodNameNoParam.MethodOp    = <<OperatorCF><TypeArg>>
   
-  MethodName.MethodID           = <<Identifier><ArgType> <Params>>
-  MethodName.MethodOp           = <<OperatorCF><ArgType> <Params>>
+  MethodName.MethodID           = <<Identifier><TypeArg> <Params>>
+  MethodName.MethodOp           = <<OperatorCF><TypeArg> <Params>>
 
-  Declaration.TypeDecl          = <type <Identifier><ArgType> <Annotations> = <TypeDeclBody>>
+  Declaration.TypeDecl          = <type <Identifier><TypeArg> <Annotations> = <TypeDeclBody>>
   
   TypeDeclBody.TypeDeclBlock    = <<TypeBlock>>
   TypeDeclBody.TypeDeclExp      = <<TypeExp>>
   
-  TypeBlock.TypeBlock           = <{ <{TypeRule "\n"}*> }>
+  TypeBlock.TypeBlock           = <{<{TypeRule "\n"}*>}>
   
   TypeRule.TypeRule             = <<MethodNames> <TypeRuleRightHand>;>
   TypeRuleRightHand.RH          = [-> [TypeExp]]
@@ -70,12 +70,13 @@ context-free syntax
   TypeExp.Subtract              = <<TypeExp> - <TypeExp>> {left}
   TypeExp.Intersect             = <<TypeExp> & <TypeExp>> {left}
   TypeExp.Variant               = <<TypeExp> | <TypeExp>> {left}
-  TypeExp.TypeID                = <<Identifier> <ArgType>>
+  TypeExp.TypeID                = <<Identifier><TypeArg>>
   
   TypeExp.AnonType              = <type <TypeBlock>>
+  TypeExp.Interface             = <interface <TypeBlock>>
   
-  ArgType.ArgType               = <[[ <{TypeExp ","}*> ]]>
-  ArgType.NoArgType             = <>
+  TypeArg.TypeArg               = <[[<{Identifier ","}*>]]>
+  TypeArg.NoTypeArg             = <>
   
   TypeAnn.TypeAnn               = <: <TypeExp>>
   TypeAnn.NoTypeAnn             = <>
@@ -126,8 +127,9 @@ context-free syntax
 //  Exp.MCallPrefixOp             = <<OperatorCF> <CallArgs>>    {left}
   Exp.MCallPrefixOpExp          = <<OperatorCF> <Exp>>         {left, prefer}
   
-  Exp.LineupExp                 = <<Lineup>>
   Exp.Ellipsis                  = "..."
+  Exp.Uninitialized             = "_uninit"
+  Exp.LineupExp                 = <<Lineup>>
   Exp.BlockExp                  = <<Block>>
   
   Exp.Return                    = <return <Exp>>               {right}
@@ -151,7 +153,6 @@ context-free syntax
   CaseLiteral.Boolean           = <<Boolean>>
   
   Arrow.Ascii                   = "->"
-  Arrow.Unicode                 = "→"
   
   
 context-free syntax

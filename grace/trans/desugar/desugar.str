@@ -18,13 +18,15 @@ rules
   
   desugar =
     desugar-class-declaration
+    <+ desugar-missing-return-types
+    <+ desugar-missing-annotated-types
     <+ desugar-match-case
     <+ desugar-flatten-methodID
     <+ desugar-flatten-methodPart
     <+ desugar-mcallopexp
     <+ desugar-mcallopexpassign
     <+ desugar-mcallprefixopexp
-    <+ desugar-blockExp 
+//    <+ desugar-blockExp
     <+ desugar-block
     <+ desugar-arg-noargs
     <+ desugar-arg-argsparen
@@ -35,7 +37,13 @@ rules
   
   desugar-all-post: ast -> <lower-post-all> <lower-all> ast
 
-  desugar-program: Program(a, b) -> Program([Expression(ObjectDecl(NoInherit(), [], a))], b)
+  desugar-program: Program(a, b) ->
+    Program([Expression(ObjectDecl(NoInherit(), [], a))], b)
+  
+  desugar-missing-return-types: NoRH() -> RH(TypeID(ID("Unknown"), NoTypeArg()))
+  
+  desugar-missing-annotated-types: NoTypeAnn() ->
+    TypeAnn(TypeID(ID("Unknown"), NoTypeArg()))
   
   desugar-class-declaration:
     ClassDecl(MethodName(mIDs), type, inh, use, code) ->
@@ -49,7 +57,7 @@ rules
       )
   desugar-class-declaration:
     ClassDecl(FullStop(iden, mIDs), type, inh, use, code) ->      
-      Constant(iden, WildCard(), NoAnnotations(), Expression ( //TODO type
+      Constant(iden, NoTypeAnn(), NoAnnotations(), Expression ( //TODO type
         ObjectDecl(NoInherit(), [], [
           MethodDecl(
             mIDs,
@@ -67,17 +75,18 @@ rules
     where
       name := <concat-strings> [n, <param-string> ps];
       <not-substring(!"(")> n
-  desugar-flatten-methodID: [ MethodID(ID(n1), typeArg1, Params(p1)), MethodID(ID(n2), typeArg2, Params(p2)) | mids ] ->
+  desugar-flatten-methodID: [ MethodID(ID(n1), typeArg1, Params(p1)),
+                              MethodID(ID(n2), typeArg2, Params(p2)) | mids ] ->
       [MethodID(ID(name), types, Params(ps)) | mids ]
     with
       types := <merge-typeargs> [typeArg1, typeArg2];
       name := <concat-strings> [n1, <param-string> p1, n2, <param-string> p2];
       ps   := <concat> [p1,p2]
   
-  merge-typeargs: [ ArgType(ls) , ArgType(ls2) ] -> ArgType(<concat> [ls,ls2])
-  merge-typeargs: [ NoArgType() , ArgType(ls2) ] -> ArgType([ls2])
-  merge-typeargs: [ ArgType(ls) , NoArgType()  ] -> ArgType([ls])
-  merge-typeargs: [ NoArgType() , NoArgType()  ] -> NoArgType()
+  merge-typeargs: [ TypeArg(ls) , TypeArg(ls2) ] -> TypeArg(<concat> [ls,ls2])
+  merge-typeargs: [ NoTypeArg() , TypeArg(ls2) ] -> TypeArg(ls2)
+  merge-typeargs: [ TypeArg(ls) , NoTypeArg()  ] -> TypeArg(ls)
+  merge-typeargs: [ NoTypeArg() , NoTypeArg()  ] -> NoTypeArg()
    
   not-substring(s) = is-substring(s) < fail + id
   
@@ -94,9 +103,10 @@ rules
       name := <concat-strings> [n1, <param-string> args1, n2, <param-string> args2];
       args := <flatten-list> <map(desugar-arg)> [args1, args2]
   
-  param-string: ps -> <concat-strings> <flatten-list> <concat> [ ["("] , <commas> <map(!"_")> ps , [")"]]
-    where
-      <is-list> ps
+  param-string: ps ->
+    <concat-strings> <flatten-list> <concat> [ ["("] , <commas> <map(!"_")> ps , [")"]]
+      where
+        <is-list> ps
   param-string: ArgsParen(ps) -> <param-string> ps
   param-string: p -> "(_)"
 
@@ -149,7 +159,7 @@ rules
   strip-argsparen: ArgsParen(a) -> a
   
   desugar-argBlock: ArgBlock(o) -> ArgsParen([o])
-  desugar-blockExp: BlockExp(e) -> e
+//  desugar-blockExp: BlockExp(e) -> e
   
   desugar-block:
     Block(BlockWParams(a, b)) -> BlockWParams(a, b)
