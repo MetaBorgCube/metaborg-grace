@@ -87,10 +87,9 @@ rules
   lower-objectdecl: ObjectDecl(a, b, c) -> ObjectL(a,b,c)
 
   lower-constant: Constant(a, t, b, c) -> ConstantL(a, b, c) //TODO type
-    
-  lower-variable: Variable(a, t, b, NoVarInit()) -> VariableL(a, b) //TODO type
-  lower-variable: Variable(a, t, b, VarInit(exp)) -> //TODO type
-    [VariableL(a, b), MCallRecvL( MCallL(a, []), ID(":=(_)"), [ exp ] )]
+
+  lower-variable: Variable(a, t, b, NoVarInit()) -> VariableL(a, b, Uninitialized()) // TODO types
+  lower-variable: Variable(a, t, b, VarInit(exp)) -> VariableL(a, b, exp) // TODO types
   
 //  lower-assignment: Assignment(a,b) -> AssignmentL(a, b)
 

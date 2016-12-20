@@ -120,13 +120,18 @@ rules
     where
        <neq(|a, NoArgs())> a
 
-  desugar-mcallopexp: MCallOpEx(receiver, OperatorCF(name), arg)->
-    MCallWDot(receiver, [Part(ID(name), ArgsParen([arg]))])
+  desugar-mcallopexp: MCallOpEx(recv, OperatorCF(name), arg)->
+    MCallWDot(recv, [Part(ID(name), ArgsParen([arg]))])
   
-  desugar-mcallopexpassign: MCallOpExAssign(receiver, arg)->
-    MCallWDot(receiver, [Part(ID(":="), ArgsParen([arg]))])
+  desugar-mcallopexpassign: MCallOpExAssign(MCallWDot(recv, [Part(ID(name), NoArgs())]), arg) ->
+    MCallWDot(recv, [Part(ID(<concat-strings> [name, ":=(_)"]), 
+      ArgsParen([arg])
+    )])
     
-  desugar-mcallprefixopexp: MCallPrefixOpExp(OperatorCF( op ), arg )->
+  desugar-mcallopexpassign: MCallOpExAssign(MCallImpl([Part(ID(name), NoArgs())]), arg) ->
+    MCallImpl([Part(ID(<concat-strings> [name, ":="]), ArgsParen([arg]))])
+
+  desugar-mcallprefixopexp: MCallPrefixOpExp(OperatorCF( op ), arg ) ->
     MCallWDot(arg, [Part(ID(<concat-strings> ["prefix", op]), NoArgs())])
   
   desugar-flatten-objectdecl: ObjectDecl(a, b, xs) -> ObjectDecl(a, b, ys)
