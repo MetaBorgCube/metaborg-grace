@@ -24,6 +24,7 @@ rules
           lower-block <+
 //          lower-assignment <+
           lower-trait <+
+          lower-type-unknown <+
           lower-fail
   
   lower-post-all: ast -> <topdown(try(lower-post-2))> <topdown(try(lower-post-1))> ast
@@ -55,26 +56,28 @@ rules
   
   lower-mdecl:
     MethodDecl(Multiple([MethodID(mName, typeArgs, ps)]), annotations, RH(te), MethodBody(cs)) ->
-      MethodL(name, ta, annotations, paramNames, te, cs)
+      MethodL(name, ta, annotations, params, pt, te, cs)
       with
+        pt := <lower-get-param-types> ps;
         ta := <lower-get-typeargs> typeArgs;
-        paramNames := <lower-params> ps;
+        params := <lower-get-param-names> ps;
         name := <name-to-id> mName 
 
   lower-mdecl:
     MethodDecl(Multiple([MethodOp(mName, typeArgs, ps)]), annotations, RH(te), MethodBody(cs)) ->
-      MethodL(name, ta, annotations, params, te, cs)
+      MethodL(name, ta, annotations, params, pt, te, cs)
       with
+        pt := <lower-get-param-types> ps;
         ta := <lower-get-typeargs> typeArgs;
         name := <name-to-id> mName; 
-        params := <lower-params> ps
+        params := <lower-get-param-names> ps
         
   lower-mdecl:
     MethodDecl(Single(MethodID(mName, typeArgs)), annotations, RH(te), MethodBody(cs)) ->
-      MethodL(<name-to-id> mName, ta, annotations, [], te, cs)
+      MethodL(<name-to-id> mName, ta, annotations, [], [], te, cs)
       with
         ta := <lower-get-typeargs> typeArgs
-  
+        
   lower-get-typeargs: TypeArg(tas) -> tas
   lower-get-typeargs: NoTypeArg() -> []
   
@@ -89,15 +92,17 @@ rules
   lower-block: BlockExp(blk) -> blk
   lower-block: BlockWParams(BlockParams(ps), cs) -> BlockL(params, types, cs)
       with
-        params := <lower-params> ps;
-        types := <lower-params-types> ps
+        params := <lower-get-param-names> ps;
+        types := <lower-get-param-types> ps
   
   lower-objectdecl: ObjectDecl(a, b, c) -> ObjectL(a,b,c)
 
-  lower-constant: Constant(a, t, b, c) -> ConstantL(a, <lower-typeann> t, b, c) //TODO type
+  lower-constant: Constant(a, t, b, c) -> ConstantL(a, <lower-typeann> t, b, c)
 
-  lower-variable: Variable(a, t, b, NoVarInit()) -> VariableL(a, <lower-typeann> t, b, Uninitialized()) // TODO types
-  lower-variable: Variable(a, t, b, VarInit(exp)) -> VariableL(a, <lower-typeann> t, b, exp) // TODO types
+  lower-variable: Variable(a, t, b, NoVarInit()) ->
+    VariableL(a, <lower-typeann> t, b, Uninitialized())
+  lower-variable: Variable(a, t, b, VarInit(exp)) ->
+    VariableL(a, <lower-typeann> t, b, exp)
   
   lower-typeann: TypeAnn(t) -> t
 //  lower-assignment: Assignment(a,b) -> AssignmentL(a, b)
@@ -106,24 +111,27 @@ rules
     TraitL(name, params, code)
     where
       name := <name-to-id> tName;
-      params := <lower-params> ps
+      params := <lower-get-param-names> ps
+      
+  lower-type-unknown: TypeID(ID("Unknown"), NoTypeArg()) -> Unkwn()
   
   flatten-statements-declaration: Declaration([a,b]) -> [Declaration(a),Expression(b)]      
   
   flatten-statements: ObjectL(a, b, code) -> ObjectL(a,b, <flatten-list> code)
-  flatten-statements: MethodL(n, ta, a, p, t, code) -> MethodL(n, ta, a, p, t, <flatten-list> code)
+  flatten-statements: MethodL(n, ta, a, p, pt, t, code) ->
+    MethodL(n, ta, a, p, pt, t, <flatten-list> code)
   flatten-statements: BlockL(p, t, code) -> BlockL(p, t, <flatten-list> code)
   
-  lower-params: Params(ps) -> <lower-params> ps
-  lower-params: [] -> []
-  lower-params: [ParamWType(n, _)] -> [n]
-  lower-params: [ParamWType(n, _) | bs] -> [n | <lower-params> bs ]
+  lower-get-param-names: Params(ps) -> <lower-get-param-names> ps
+  lower-get-param-names: [] -> []
+  lower-get-param-names: [ParamWType(n, _)] -> [n]
+  lower-get-param-names: [ParamWType(n, _) | bs] -> [n | <lower-get-param-names> bs ]
   
-  lower-params-types: Params(ps) -> <lower-params-types> ps
-  lower-params-types: [] -> []
-  lower-params-types: [ParamWType(_, TypeAnn(te))] -> [te]
-  lower-params-types: [ParamWType(_, TypeAnn(te)) | ps] ->
-    [te | <lower-params-types> ps ]
+  lower-get-param-types: Params(ps) -> <lower-get-param-types> ps
+  lower-get-param-types: [] -> []
+  lower-get-param-types: [ParamWType(_, TypeAnn(te))] -> [te]
+  lower-get-param-types: [ParamWType(_, TypeAnn(te)) | ps] ->
+    [te | <lower-get-param-types> ps ]
   
   lower-arguments: ArgNumber(a) -> [Number(a)]
   lower-arguments: ArgString(a) -> [String(a)]
