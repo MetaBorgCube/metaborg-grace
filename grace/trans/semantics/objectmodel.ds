@@ -38,16 +38,17 @@ signature
   components
     S : Addr
     O : Addr
-    
+  
 rules
 
   S, P Exec() |- ObjectL(inherit, [], code) --> S'
   where
     new-object(S) --> S';
     S S', O S, P Flatten() |- inherit --> FlatObject(closures-inherited);
-    concatClosures(closures-inherited, [Closure(S, code)]) => closures;
+    closures-inherited ++ [Closure(S, code)] => closures;
     S' |- install-members(closures) --> closures';
-    S' |- init-object(closures') --> U().
+    S' |- init-object(closures') --> U();
+    log-object-creation(S') --> _.
   
   SlotRead(i) --> read-slot(i).
   
@@ -189,15 +190,12 @@ signature
     Closure: Addr * Code -> Closure    
     FlatObject: List(Closure) -> V
 
-  native operators
-    concatClosures : Closures * Closures -> Closures
-
   arrows
     Inherit --> V
 
 rules
 
-  S, P Flatten() |- ObjectL(inherit, [], code) --> FlatObject(concatClosures(closures-inherited, [Closure(S, code)])) //FlatObject(closures-inherited ++ [Closure(O, code)])
+  S, P Flatten() |- ObjectL(inherit, [], code) --> FlatObject(closures-inherited ++ [Closure(S, code)]) //FlatObject(closures-inherited ++ [Closure(O, code)])
   where
     O S, P Flatten() |- inherit --> FlatObject(closures-inherited).
 
@@ -230,7 +228,10 @@ signature
     
     current-self() --> V
     current-outer() --> V
-  
+    
+    outer(Addr) --> V
+    self(Addr) --> V
+    
   components
     NS : Int // NextSlot
     GS : Map(String, Int) // GivenSlots
@@ -240,7 +241,13 @@ rules
   S |- current-self() --> S.
   
   O |- current-outer() --> O.
-
+  
+  self(S) --> S.
+  
+  outer(S) --> O
+  where
+    read(S) --> Obj(O, _, _).
+  
   new-object(O) --> S
   where
     allocate(Obj(O, {}, {})) --> S.
@@ -267,12 +274,12 @@ rules
   S |- add-method(x, v) --> U()
   where
     read(S) --> Obj(O, slots, methods);
+    log("S: " ++ str(S) ++ " O " ++ str(O) ++ " new method: " ++ x ++ " -> " ++ str(v)) --> _;
     update(S, Obj(O, slots, {x |--> v, methods})) --> _.
   
   S, O |- lookup-method(S', x) --> v
   where
     S == S';
-    x != "outer";
     read(S') --> Obj(O', _, methods);
     case methods[x?] of {
       true =>
@@ -284,7 +291,6 @@ rules
   S |- lookup-method(S', x) --> v
   where
     S != S';
-    x != "outer";
     read(S') --> Obj(_, _, methods);
     case methods[x?] of {
       true =>
@@ -293,4 +299,16 @@ rules
         halt-error("No method: ", x) --> _;
         DoneV() => v
     }.
-    
+
+signature
+  arrows
+     log-object-creation(Addr) --> Addr
+
+rules
+
+  log-object-creation(S) --> S
+  where
+    read(S) --> Obj(O, _, methods);
+    concat(separate-by(allkeys(methods), ", ")) --> method-names;
+    log("S: " ++ str(S) ++ " O " ++ str(O) ++ " methods: " ++ method-names) --> _.
+  

@@ -35,23 +35,17 @@ rules
   where
     e --> v.
 
-  MCallL(ID(x), []) --> read-local(x)
-  where
-    x != "outer".
-  
-  MCallL(ID("outer"), []) --> current-outer().
-  
-  P Exec() |- MCallRecvL(e, ID("outer"), []) --> v
-  where
-    e --> RefV(S);
-    S |- current-outer() --> v.
+  MCallL(ID(x), []) --> read-local(x).
   
   P Exec() |- MCallRecvL(e, ID(x), es) --> resolve-call(v, x, vs)
   where
-    x != "outer";
     e --> v;
     es --> vs.
-
+  
+  MQCallOuter(e) --> outer(S)
+  where
+    e --> RefV(S).
+  
 rules
 
   O |- method-closure(MethodL(_, _, _, params, _, code)) --> ClosV(O, params, code, {}).
