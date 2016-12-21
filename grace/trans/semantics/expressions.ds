@@ -1,0 +1,33 @@
+module trans/semantics/expressions
+
+imports
+  src-gen/ds-signatures/grace-sig
+  trans/semantics/values
+  trans/semantics/statements
+  trans/semantics/objectmodel
+  trans/semantics/functions
+  
+signature
+  arrows
+    Exp --> V
+    List(Exp) --> List(V)
+    
+    resolve-call(V, String, List(V)) --> V
+
+rules
+
+  Self() --> current-self().
+  
+  [] : List(Exp) --> [].
+  
+  [e | es] : List(Exp) --> [ v | vs ]
+  where
+    e --> v;
+    es --> vs.
+
+rules
+  
+    
+     
+
+    

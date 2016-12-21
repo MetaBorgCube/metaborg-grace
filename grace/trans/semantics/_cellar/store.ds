@@ -1,0 +1,107 @@
+module trans/semantics/store
+
+imports
+  trans/semantics/values
+
+signature
+  
+  constructors
+    WrappedL: Locals -> V
+    WrappedOHeap: OHeap -> V
+    WrappedMHeap: MHeap -> V
+    WrappedVHeap: VHeap -> V
+    
+  arrows
+
+    readObject(Ref) --> O
+    allocateObject(O) --> Ref
+    writeObject(Ref, O) --> O
+    
+    readMethod(Ref) --> M
+    allocateMethod(M) --> Ref
+    writeMethod(Ref, M) --> M
+    
+//    writeTrait(String, List(Statement)) --> List(Statement)
+//    readTrait(String) --> List(Statement)
+    
+    writeLocalValue(String, V) --> V
+    readLocalValue(String) --> V
+    
+    writeLocal(String , Ref) --> Ref
+    readLocal(String) --> Ref
+    
+    readV(Ref) --> V
+    allocateV(V) --> Ref
+    writeV(Ref, V) --> V
+
+rules
+
+  /*
+   * Objects
+   */
+  readObject(addr) :: OH1 --> OH1[addr].
+  
+  allocateObject(o) --> addr
+  where
+    fresh => addr;
+    writeObject(addr, o) --> _.
+
+  writeObject(addr, o) :: OH1 --> o :: OH {addr |--> o, OH1}.
+  
+  /*
+   * Methods
+   */
+  readMethod(addr) :: MH --> MH[addr].
+  
+  allocateMethod(m) --> addr
+  where
+    fresh => addr;
+    writeMethod(addr, m) --> _.
+
+  writeMethod(addr, m) :: MH1 --> m :: MH {addr |--> m, MH1}.
+  
+  /*
+   * Locals
+   */
+  writeLocal(name, r) :: L1 --> r :: L {name |--> r, L1}.
+  
+  readLocal(name) :: L --> L[name].
+  
+  /*
+   * Values
+   */
+  readV(addr) :: VH1 --> VH1[addr].
+  
+  allocateV(v) --> addr
+  where
+    fresh => addr;
+    writeV(addr, v) --> _.
+
+  writeV(addr, v) :: VH1 --> v :: VH {addr |--> v, VH1}.
+  
+  /*
+   * Local Values
+   */
+  writeLocalValue(name, v) :: L --> v
+    where
+//      debug("writing local value of: '", name, "'") => _;
+      case L[name?] of {
+        true => 
+//          debug("name already existed in local, overwriting") => _;
+          writeV(L[name], v) --> _
+        otherwise =>
+//          debug("allocating new address to store in local") => _;
+          allocateV(v) --> newAddr;
+          writeLocal(name, newAddr) --> _
+      }.
+  
+  readLocalValue(name) --> V
+    where
+      readV(readLocal(name)) --> V.
+  
+  /*
+   * Traits
+   */
+//  writeTrait(name, sts) :: TH1 --> sts :: TH {name |--> sts, TH1}.
+
+//  readTrait(name) :: TH --> TH[name].

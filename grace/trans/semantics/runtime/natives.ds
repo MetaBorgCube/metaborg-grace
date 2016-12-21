@@ -1,0 +1,18 @@
+module trans/semantics/runtime/natives
+
+signature
+  native operators
+    parseI : String -> Int
+    nativeIBinOp: String * Int * Int -> Int
+    error: String * String -> String
+    addI: Int * Int -> Int
+    
+  arrows
+    string2int(String) --> Int
+    halt-error(String, String) --> String
+
+rules
+  
+  string2int(s) --> parseI(s).
+  
+  halt-error(s1, s2) --> error(s1, s2).

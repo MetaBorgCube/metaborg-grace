@@ -116,7 +116,7 @@ context-free syntax
   Exp.Number                    = <<NUM>>
   Exp.String                    = <<STRING>>
   Exp.Boolean                   = <<Boolean>>
-  Exp.Self                      = "self"
+
   
   Exp                           = <(<Exp>)>                    {bracket}
   
@@ -124,6 +124,12 @@ context-free syntax
   Exp.MCallOpExAssign           = <<Exp> := <Exp>>             {left, prefer}
   Exp.MCallWDot                 = <<Exp>.<Part+>>              {left}
   Exp.MCallImpl                 = <<Part+>>                    {left}
+  
+  Exp.Self                      = <self>
+  Exp.Outer                     = <outer>
+  Exp.MQCallOuter               = <<Exp>.outer>                {left}
+  Exp.MQCallSelf                = <<Exp>.self>                 {left}      
+  
 //  Exp.MCallPrefixOp             = <<OperatorCF> <CallArgs>>    {left}
   Exp.MCallPrefixOpExp          = <<OperatorCF> <Exp>>         {left, prefer}
   
