@@ -1,0 +1,73 @@
+module trans/semantics/values
+
+imports
+  src-gen/ds-signatures/grace-sig
+//  trans/semantics/context
+
+signature
+
+  sort aliases
+//    OHeap = Map(Ref, O)
+//    MHeap = Map(Ref, M)
+//    Locals = Map(String, Ref)
+
+//  components
+//    OH : OHeap
+//    MH : MHeap
+//    TH : THeap
+//    VH : VHeap
+    
+  // ^^ move to components.ds after import fix
+
+  sort aliases
+//    Ref = Int
+//    Members = Map(String, Int)
+
+
+  sorts
+    V // value
+    U
+
+  constructors
+    U: U
+    NumV: Int -> V
+    StringV: String -> V
+    BoolV: Bool -> V
+    Done: V
+    Error: V
+    Uninitialized: V
+
+  variables
+    v : V
+    vs : List(V)
+    
+  constructors
+  
+
+    //      enclosing object ref (outer)
+    //            members (methods)
+//    Object: Ref * Members -> O
+//    NoObject: O
+    
+//    //           params         code              self  closure
+//    Method:      List(String) * List(Statement) * Ref * Map(String, Ref) -> M
+//    ValueMethod: V -> M
+//    NoMethod:    String -> M
+
+    // for turning values back into executable code
+    Code: V -> Statement
+    
+    // for internal use
+    
+    
+//  native operators
+//    parseNumber: String -> Int
+//    print: V -> V
+//    
+//    error: String -> String
+//    error: String * String -> String
+//    error: String * String * String -> String
+//    
+//    debug: String -> String
+//    debug: String * String -> String
+//    debug: String * String * String -> String

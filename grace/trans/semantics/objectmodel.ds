@@ -1,0 +1,296 @@
+module trans/semantics/objectmodel
+
+imports
+  src-gen/ds-signatures/grace-sig
+
+imports
+  trans/semantics/values
+  trans/semantics/store
+  trans/semantics/runtime/natives
+  
+  trans/semantics/strings
+  trans/semantics/numbers
+  trans/semantics/functions
+  trans/semantics/statements
+
+signature
+  sorts
+    Addr
+
+  sorts
+    Object
+    Member
+    
+  sort aliases
+    Self = Addr
+    HeapData = Object
+    Slots = Map(Int, V)
+    Methods = Map(String, V)
+
+  constructors // extra instructions
+    SlotRead : Int -> Statement
+    SlotWrite : Int * Exp -> Statement 
+
+  constructors
+    Obj: Addr * Slots * Methods -> Object
+    RefV: Addr -> V {implicit}
+  
+  components
+    S : Addr
+    O : Addr
+    
+rules
+
+  S, P Exec() |- ObjectL(inherit, [], code) --> S'
+  where
+    new-object(S) --> S';
+    S S', O S, P Flatten() |- inherit --> FlatObject(closures-inherited);
+    concatClosures(closures-inherited, [Closure(S, code)]) => closures;
+    S' |- install-members(closures) --> closures';
+    S' |- init-object(closures') --> U().
+  
+  SlotRead(i) --> read-slot(i).
+  
+  SlotWrite(i, e) --> DoneV()
+  where
+    e --> v;
+    write-slot(i, v) --> _.
+
+/* ========== INIT METHODS =========== */
+
+signature
+  arrows
+    install-members(Closures) --> Closures
+    install-members-aux(Closures) --> Closures
+    
+    Closure -member-> Closure
+    Code -member-> Code
+    
+    install-method(Declaration) --> U
+    
+rules
+
+  install-members(closures) --> closures'
+  where
+    install-members-aux(closures) :: NS 0, GS {} --> closures' :: NS _, GS _.
+
+  install-members-aux([]) --> [].
+  
+  install-members-aux([clos | closs]) --> [clos' | install-members-aux(closs)]
+  where
+    clos -member-> clos'.
+  
+  Closure(O, code) -member-> Closure(O, code')
+  where
+    O |- code -member-> code'.
+    
+  [] : Code -member-> [].
+  
+  [Declaration(m@MethodL(_, _, _, _)) | cs] : Code -member-> cs'
+  where
+    install-method(m) --> _;
+    cs -member-> cs'.
+  
+  [Declaration(VariableL(ID(x), _, e)) | cs] : Code -member-> [SlotWrite(i, e) | cs']
+  where
+    add-slot(x) --> i;
+    install-method(field-getter(x, i)) --> _;
+    install-method(field-setter(x, i)) --> _;
+    cs -member-> cs'.
+
+  [Declaration(VariableL(WildCard(), _, e)) | cs] : Code -member-> [Expression(e) | cs']
+  where
+    cs -member-> cs'.
+  
+  [Declaration(ConstantL(ID(x), _, e)) | cs] : Code -member-> [SlotWrite(i, e) | cs']
+  where
+    add-slot(x) --> i;
+    install-method(field-getter(x, i)) --> _;
+    cs -member-> cs'.
+    
+  [Declaration(ConstantL(WildCard(), _, e)) | cs] : Code -member-> [Expression(e) | cs']
+  where
+    cs -member-> cs'.
+  
+  [c | cs] : Code -member-> [c | cs']
+  where
+    cs -member-> cs'.
+  
+  install-method(m@MethodL(ID(name), _, _, _)) --> U()
+  where
+    add-method(name, method-closure(m)) --> _.
+
+/* ========== OBJECT INIT ======== */
+signature
+  arrows
+    init-object(Closures) --> U
+    
+    Closure -obji-> U
+    Code -obji-> U
+    Statement -obji -> U
+    
+rules
+  
+  init-object([]) --> U().
+  
+  init-object([clos | closs]) --> init-object(closs)
+  where
+    clos -obji-> _.
+  
+  Closure(O, code) -obji-> U()
+  where
+    O |- code -obji-> _.
+    
+  [] : Code -obji-> U().
+  
+  [c | cs] : Code -obji-> U()
+  where
+    c -obji-> _;
+    cs -obji-> _.
+
+  s : Statement -obji-> U()
+  where
+    s --> _.
+
+/* ========== FIELD METHOD GENERATION ======= */
+signature
+  arrows
+    field-getter(String, Int) --> Declaration
+    field-setter(String, Int) --> Declaration
+  
+  native operators
+    mksettername: String -> String
+  
+rules
+  
+  field-getter(x, i) --> MethodL(ID(x), NoAnnotations(), [], [SlotRead(i)]).
+  
+  field-setter(x, i) --> MethodL(ID(mksettername(x)), NoAnnotations(), [ID("p")], [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))]).
+
+/* ========== OBJECT FLATTENING =========== */
+signature
+  sorts
+    Phase
+  
+  constructors
+    Exec    : Phase
+    Flatten : Phase
+    
+  components
+    P : Phase
+    
+  sorts
+    Closure
+    
+  sort aliases
+    Closures = List(Closure)
+
+  constructors
+    Closure: Addr * Code -> Closure    
+    FlatObject: List(Closure) -> V
+
+  native operators
+    concatClosures : Closures * Closures -> Closures
+
+  arrows
+    Inherit --> V
+
+rules
+
+  S, P Flatten() |- ObjectL(inherit, [], code) --> FlatObject(concatClosures(closures-inherited, [Closure(S, code)])) //FlatObject(closures-inherited ++ [Closure(O, code)])
+  where
+    O S, P Flatten() |- inherit --> FlatObject(closures-inherited).
+
+  P Flatten() |- MCallRecvL(e, ID(x), es) --> v
+  where
+    P Exec() |- e --> recv;
+    P Exec() |- es --> vs;
+    P Flatten() |- resolve-call(recv, x, vs) --> v.
+
+  NoInherit() --> FlatObject([]).
+  
+  Inherit(e, _) --> v // TODO this is where to check whether the inherit expression actually returns a fresh object
+  where
+    e --> v.
+
+/* ======== OBJECT META-FUNCTIONS ========= */
+
+signature
+  arrows
+    new-object(Addr) --> Addr
+
+    add-slot(String) --> Int
+    
+    read-slot(Int) --> V
+    write-slot(Int, V) --> U
+    
+    add-method(String, V) --> U
+    
+    lookup-method(V, String) --> V
+    
+    current-self() --> V
+    current-outer() --> V
+  
+  components
+    NS : Int // NextSlot
+    GS : Map(String, Int) // GivenSlots
+
+rules
+
+  S |- current-self() --> S.
+  
+  O |- current-outer() --> O.
+
+  new-object(O) --> S
+  where
+    allocate(Obj(O, {}, {})) --> S.
+
+  add-slot(x) :: GS --> GS[x] :: GS
+  where
+    GS[x?] == true.
+  
+  S |- add-slot(x) :: NS, GS --> NS :: NS addI(NS, 1), GS {x |--> NS, GS}
+  where
+    GS[x?] == false;
+    read(S) --> Obj(O, slots, methods);
+    update(S, Obj(O, {NS |--> Uninitialized(), slots}, methods)) --> _.
+    
+  S |- read-slot(i) --> slots[i]
+  where
+    read(S) --> Obj(_, slots, _).
+  
+  S |- write-slot(i, v) --> U()
+  where
+    read(S) --> Obj(O, slots, methods);
+    update(S, Obj(O, {i |--> v, slots}, methods)) --> _.
+
+  S |- add-method(x, v) --> U()
+  where
+    read(S) --> Obj(O, slots, methods);
+    update(S, Obj(O, slots, {x |--> v, methods})) --> _.
+  
+  S, O |- lookup-method(S', x) --> v
+  where
+    S == S';
+    x != "outer";
+    read(S') --> Obj(O', _, methods);
+    case methods[x?] of {
+      true =>
+        methods[x] => v
+      false =>
+        S O, O O' |- lookup-method(O, x) --> v
+    }.
+
+  S |- lookup-method(S', x) --> v
+  where
+    S != S';
+    x != "outer";
+    read(S') --> Obj(_, _, methods);
+    case methods[x?] of {
+      true =>
+        methods[x] => v
+      false =>
+        halt-error("No method: ", x) --> _;
+        DoneV() => v
+    }.
+    

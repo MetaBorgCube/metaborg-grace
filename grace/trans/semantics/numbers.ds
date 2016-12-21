@@ -1,38 +1,37 @@
 module trans/semantics/numbers
 
 imports
-  src-gen/ds-signatures/grace-sig
   src-gen/ds-signatures/grace-lowered-sig
-
+  trans/semantics/expressions
   trans/semantics/values
-  trans/semantics/store
-  trans/semantics/lookup
-  trans/semantics/semantics
+  trans/semantics/runtime/natives
+  trans/semantics/booleans
 
 signature
-
-  rules
-    
-    // take a number and make it a value
-    Number(a) --> NumV(parseNumber(a)).
-    
-    MCallRecvL(NumV(a), "==", [NumV(b)]) --> BoolV(true)
-      where
-        a == b.
-    
-    MCallRecvL(NumV(a), "==", [NumV(b)]) --> BoolV(false)
-      where
-        a != b.
-        
-    MCallRecvL(NumV(a), "!=", [NumV(b)]) --> BoolV(false)
-      where
-        a == b.
-        
-    MCallRecvL(NumV(a), "!=", [NumV(b)]) --> BoolV(true)
-      where
-        a != b.
-    
-    MCallRecvL(NumV(a), op, [NumV(b)]) -->
-        NumV(nativeIBinOp(op, a, b)).
+  constructors
+    NumV : Int -> V
+  
+rules
+  
+  Number(a) --> NumV(string2int(a)).
+  
+  MCallRecvL(NumV(a), ID("=="), [NumV(b)]) --> BoolV(true)
+    where
+      a == b.
+  
+  MCallRecvL(NumV(a), ID("=="), [NumV(b)]) --> BoolV(false)
+    where
+      a != b.
+      
+  MCallRecvL(NumV(a), ID("!="), [NumV(b)]) --> BoolV(false)
+    where
+      a == b.
+      
+  MCallRecvL(NumV(a), ID("!="), [NumV(b)]) --> BoolV(true)
+    where
+      a != b.
+  
+  MCallRecvL(NumV(a), ID(op), [NumV(b)]) -->
+      NumV(nativeIBinOp(op, a, b)).
         
     

@@ -1,0 +1,16 @@
+INIT myA >>>>>>>>
+A.g - init
+A.f - apply
+<<<<<< INIT myA
+INIT myB >>>>>>>>
+A.g - init
+B.g - apply
+B.f - init
+B.g - apply
+<<<<<< INIT myB
+A.f - apply
+11
+13
+17
+B.g - apply
+23

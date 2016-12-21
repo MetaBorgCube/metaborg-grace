@@ -20,13 +20,13 @@ public abstract class nativeIBinOp_3 extends TermBuild {
 		// System.out.println("Executing native operator: " + op + " with type:
 		// " + op.getClass());
 		switch (op) {
-		case "+":
+		case "+(_)":
 			return v1 + v2;
-		case "-":
+		case "-(_)":
 			return v1 - v2;
-		case "*":
+		case "*(_)":
 			return v1 * v2;
-		case "/":
+		case "/(_)":
 			return v1 / v2;
 		default:
 			throw new IllegalArgumentException("operator: '" + op + "' not recognised as a native operator.");

@@ -1,0 +1,80 @@
+module trans/semantics/functions
+
+imports
+  trans/semantics/values
+  trans/semantics/statements
+  trans/semantics/objectmodel
+  
+signature
+  sorts
+    Addr
+
+  constructors
+    ClosV: Addr * List(Identifier) * Code * Env -> V
+
+  arrows
+    method-closure(Declaration) --> V
+    call(V, V, List(V)) --> V
+    
+    read-local(String) --> V
+    bind-local(Identifier, V) --> U
+    bind-locals(List(Identifier), List(V)) --> U
+    
+  sort aliases
+    Env = Map(String, V)
+  
+  components
+    L : Env
+    
+  native operators
+    nativePrint: V -> V
+
+rules
+
+  MCallL(ID("print(_)"), [e]) --> nativePrint(v)
+  where
+    e --> v.
+
+  MCallL(ID(x), []) --> read-local(x)
+  where
+    x != "outer".
+  
+  MCallL(ID("outer"), []) --> current-outer().
+  
+  P Exec() |- MCallRecvL(e, ID("outer"), []) --> v
+  where
+    e --> RefV(S);
+    S |- current-outer() --> v.
+  
+  P Exec() |- MCallRecvL(e, ID(x), es) --> resolve-call(v, x, vs)
+  where
+    x != "outer";
+    e --> v;
+    es --> vs.
+
+rules
+
+  O |- method-closure(MethodL(_, _, params, code)) --> ClosV(O, params, code, {}).
+  
+  resolve-call(recv, x, vs) --> v
+  where
+    lookup-method(recv, x) --> mv;
+    call(recv, mv, vs) --> v.
+  
+  call(S, ClosV(O, params, code, env), vs) --> v
+  where
+    bind-locals(params, vs) :: L env --> _ :: L;
+    S, O |- code :: L --> v :: L _.
+  
+  read-local(x) :: L --> L[x] :: L.
+  
+  bind-local(ID(x), v) :: L --> U() :: L {x |--> v, L}.
+  
+  bind-local(WildCard(), _) :: L --> U() :: L.
+  
+  bind-locals([], []) --> U().
+  
+  bind-locals([x | xs], [v | vs]) --> U()
+  where
+    bind-local(x, v) --> _;
+    bind-locals(xs, vs) --> _.
