@@ -3,11 +3,11 @@
 //match(expr) case { _ -> };
 //
 //
-match("foo") case { x : MyType -> print(x); }
-    case  { "hello" -> print("It matches 2"); }
-    case { y : OtherType -> print(y); }
-    case { ( y.apply ) -> print("It matches 1"); }
-    case ( { _ : Unknown -> print("Last resort"); });
+//match("foo") case { x : MyType -> print(x); }
+//    case  { "hello" -> print("It matches 2"); }
+//    case { y : OtherType -> print(y); }
+//    case { ( y.apply ) -> print("It matches 1"); }
+//    case ( { _ : Unknown -> print("Last resort"); });
 //
 //{m_lifted ->
 //    if ( {
@@ -31,12 +31,27 @@ match("foo") case { x : MyType -> print(x); }
 
 //match("str") case { x : Num -> print (x); };
 
-match("str") case { "hello" -> print("It matches"); };
+//match("str") case { "hello" -> print("It matches"); };
+//
+//{ lifted_ ->
+//    
+//    if { String.match(lifted_) && (lifted_ == "hello"); } then {
+//        print("It matches 2");
+//    };
+//    
+//}.apply("str");
+
+
+match(5)
+  case { 3 -> print("It matches"); }
+  case { _ -> print("other"); };
 
 { lifted_ ->
     
-    if { String.match(lifted_) && (lifted_ == "hello"); } then {
+    if { Number.match(lifted_) && (lifted_ == 3); } then {
         print("It matches 2");
+    } elseif { Unknown.match(m_lifted); } then {
+        print("Last resort");
     };
     
-}.apply("str");
+}.apply(5);
