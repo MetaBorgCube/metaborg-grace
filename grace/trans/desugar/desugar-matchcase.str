@@ -44,6 +44,8 @@ desugar-case(|liftedname):
   Case(CIdentifier(iden), a, body) -> 
     <desugar-case(|liftedname)>
       Case(ExpTyped(iden, TypeID(ID("Unknown"), NoTypeArg())), a, body)
+      where
+        <debug(!"this is the one right?")> a
 
 desugar-case(|liftedname):
   Case(ExpTyped(iden, TypeID(typeId, NoTypeArg())), _, body) ->
@@ -70,14 +72,23 @@ desugar-case(|liftedname):
           )
         ]
       )
-    , BlockExp(Block( body ))
+    , BlockExp(
+        Block( [
+          Expression(
+            MCallWDot(
+              BlockExp(BlockWParams( BlockParams([ParamWType( iden, NoTypeAnn() )]), body )),
+              [Part(ID("apply"), ArgsParen([MCallImpl([Part( liftedname , NoArgs())])]))]
+            )
+          )
+         ] )
+      )
     ]
 
 desugar-case(|liftedname, matchExpr):
   Case(ExpTyped(iden, TypeID(typeId, NoTypeArg())), _, body) ->
     [ BlockExp(
         BlockWParams(
-          BlockParams([])
+          BlockParams([ParamWType( iden, NoTypeAnn() )])
         , [ Expression(
               MCallWDot(
                 MCallWDot(
@@ -104,7 +115,16 @@ desugar-case(|liftedname, matchExpr):
           ]
         )
       )    
-    , BlockExp(Block( body ))
+    , BlockExp(
+        Block( [
+          Expression(
+            MCallWDot(
+              BlockExp(BlockWParams( BlockParams([ParamWType( iden, NoTypeAnn() )]), body )),
+              [Part(ID("apply"), ArgsParen([MCallImpl([Part( liftedname , NoArgs())])]))]
+            )
+          )
+         ] )
+      )
     ]
 
 desugar-case(|liftedname): a -> <fail>

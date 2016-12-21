@@ -43,8 +43,8 @@
 
 
 match(5)
-  case { 3 -> print("It matches"); }
-  case { _ -> print("other"); };
+  case { y -> print(y); }
+  case { y : Type -> print(y); };
 
 { lifted_ ->
     
