@@ -7,7 +7,7 @@ signature
     U
 
   constructors
-    Uninitialized: V
+    UninitializedV: V
     U : U
 
   variables
