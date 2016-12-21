@@ -16,7 +16,8 @@ context-free syntax
 							}
 							> {prefer}
   Exp.BlockL              = [_block { [Identifier*] | [TypeExp*] -> [{Statement "\n"}*] }] {prefer}
-  Exp.Uninitialized       = "_uninit" {prefer}
+  Exp.Uninitialized       = <_uninit> {prefer}
+  TypeExp.Unkwn           = <_Unkwn> {prefer}
   Declaration.MethodL     = [
 							_method [Identifier] ||[Identifier*]|| [Annotations] ([{Identifier ", "}*]) -> [TypeExp] {
 							  [{Statement "\n"}*]
