@@ -3,12 +3,11 @@
 //match(expr) case { _ -> };
 //
 //
-//match("foo")
-//    case { ( y.apply ) -> print("It matches 1"); }
-//    case( { "hello" -> print("It matches 2"); })
-//    case { x : MyType -> print(x); }
-//    case { y : OtherType -> print(y); }
-//    case( { _ : Unknown -> print("Last resort"); });
+match("foo") case { x : MyType -> print(x); }
+    case  { "hello" -> print("It matches 2"); }
+    case { y : OtherType -> print(y); }
+    case { ( y.apply ) -> print("It matches 1"); }
+    case ( { _ : Unknown -> print("Last resort"); });
 //
 //{m_lifted ->
 //    if ( {

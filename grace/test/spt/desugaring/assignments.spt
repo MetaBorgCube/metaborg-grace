@@ -23,6 +23,6 @@ Program([Expression(ObjectL(_,_,[Expression(MCallRecvL(Self(), ID("f:=(_)"), [
 ]))]))],_)
 
 test assign with outer [[outer.f := 14;]] run desugar-complete to
-Program([Expression(ObjectL(_,_,[Expression(
-  MCallRecvL( MCallL(ID("outer"), []) , ID("f:=(_)"), [Number("14")])
-)]))],_)
+Program([Expression(ObjectL(_,_,[
+  Expression(MCallRecvL(Outer(),ID("f:=(_)"),[Number("14")]))
+]))],_)

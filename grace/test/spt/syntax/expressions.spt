@@ -149,7 +149,8 @@ test long outerchain [[outer.outer.outer.outer.do "something";]] 0 warnings 0 er
 
 test self [[self;]] 0 warnings 0 errors
 test self with call [[self.do "some";]] 0 warnings 0 errors
-test selfchain is not allowed [[self.self.do "some";]] parse fails
+// is allowed syntactically but makes no sense since you cannot define a self on self
+test selfchain is not allowed [[self.self.do "some";]] 0 warnings 0 errors
 
 // tests from https://github.com/zmthy/hopper/tree/master/test/parse-fail
 //test hopper angle operators backwards [[name > name < name;]] parse fails
