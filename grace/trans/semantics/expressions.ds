@@ -12,8 +12,6 @@ signature
     Exp --> V
     List(Exp) --> List(V)
     
-    resolve-call(V, String, List(V)) --> V
-
 rules
 
   Self() --> current-self().
@@ -28,8 +26,8 @@ rules
     es --> vs.
 
 rules
-  
     
+
      
 
     

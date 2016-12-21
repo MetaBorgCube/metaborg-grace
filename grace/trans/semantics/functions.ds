@@ -1,9 +1,11 @@
 module trans/semantics/functions
 
 imports
+  src-gen/ds-signatures/grace-sig
   trans/semantics/values
   trans/semantics/statements
   trans/semantics/objectmodel
+  trans/semantics/types
   
 signature
   sorts
@@ -14,6 +16,8 @@ signature
 
   arrows
     method-closure(Declaration) --> V
+    
+    resolve-call(V, String, List(V)) --> V
     call(V, V, List(V)) --> V
     
     read-local(String) --> V
@@ -45,10 +49,18 @@ rules
   MQCallOuter(e) --> outer(S)
   where
     e --> RefV(S).
+
+rules
+  
+  BlockL(params, ty, body) --> method-closure(MethodL(ID("anonymous"), [], NoAnnotations(), params, no-type(), body)).
   
 rules
 
   O |- method-closure(MethodL(_, _, _, params, _, code)) --> ClosV(O, params, code, {}).
+  
+//  resolve-call(cv@ClosV(_, _, _, _), "apply", vs) --> v
+//  where
+//    call(recv, mv, vs) --> v.
   
   resolve-call(recv, x, vs) --> v
   where

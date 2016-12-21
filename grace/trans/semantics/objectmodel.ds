@@ -164,9 +164,9 @@ signature
   
 rules
 
-  field-getter(x, i) --> MethodL(ID(x), [], NoAnnotations(), [], TypeID(ID("Unknown"), NoTypeArg()), [SlotRead(i)]).
+  field-getter(x, i) --> MethodL(ID(x), [], NoAnnotations(), [], no-type(), [SlotRead(i)]).
   
-  field-setter(x, i) --> MethodL(ID(mksettername(x)), [], NoAnnotations(), [ID("p")], TypeID(ID("Unknown"), NoTypeArg()), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))]).
+  field-setter(x, i) --> MethodL(ID(mksettername(x)), [], NoAnnotations(), [ID("p")], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))]).
 
 /* ========== OBJECT FLATTENING =========== */
 signature
