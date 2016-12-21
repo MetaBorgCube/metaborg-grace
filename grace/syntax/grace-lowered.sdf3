@@ -8,23 +8,23 @@ imports
 
 context-free syntax
   
-  Exp.MCallL			  = <_impl (<Identifier>(<{Exp ", "}*>))> {prefer}
-  Exp.MCallRecvL		  = <_recv (<Exp>).<Identifier>(<{Exp ", "}*>)> {prefer}
-  Exp.ObjectL             = <
-							_object {
-							  <Inherit><Use*><{Statement "\n"}*>
-							}
-							> {prefer}
-  Exp.BlockL              = [_block { [Identifier*] | [{TypeExp ", "}*] -> [{Statement "\n"}*] }] {prefer}
-  Exp.Uninitialized       = <_uninit> {prefer}
-  TypeExp.Unkwn           = <_Unkwn> {prefer}
-                                 // methodname     typearguments   annotations    formal argument names    formal argument types returntype
-  Declaration.MethodL     = [
-							_method [Identifier] ||[Identifier*]|| [Annotations] ([{Identifier ", "}*]) : ([{TypeExp ", "}*]) -> [TypeExp] {
-							  [{Statement "\n"}*]
-							}
-							] {prefer}
-  Declaration.ConstantL   = <_def <Identifier> <TypeExp><Annotations> = <Exp>> {prefer}
-  Declaration.VariableL   = <_var <Identifier> <TypeExp><Annotations> := <Exp>> {prefer}
-  Declaration.TraitL      = <_trait <Identifier> (<{Identifier ", "}*>) <{Statement "\n"}*>> {prefer}
+  Exp.MCallL            = <_impl (<Identifier>(<{Exp ", "}*>))> {prefer}
+  Exp.MCallRecvL        = <_recv (<Exp>).<Identifier>(<{Exp ", "}*>)> {prefer}
+  Exp.ObjectL           = <
+                          _object {
+                            <Inherit><Use*><{Statement "\n"}*>
+                          }
+                          > {prefer}
+  Exp.BlockL            = [_block { [Identifier*] | [{TypeExp ", "}*] -> [{Statement "\n"}*] }] {prefer}
+  Exp.Uninitialized     = <_uninit> {prefer}
+  TypeExp.Unkwn         = <_Unkwn> {prefer}
+                                // methodname     typearguments   annotations    formal argument names    formal argument types returntype
+  Declaration.MethodL   = [
+                          _method [Identifier] ||[Identifier*]|| [Annotations] ([{Identifier ", "}*]) : ([{TypeExp ", "}*]) -> [TypeExp] {
+                            [{Statement "\n"}*]
+                          }
+                          ] {prefer}
+  Declaration.ConstantL = <_def <Identifier> <TypeExp><Annotations> = <Exp>> {prefer}
+  Declaration.VariableL = <_var <Identifier> <TypeExp><Annotations> := <Exp>> {prefer}
+  Declaration.TraitL    = <_trait <Identifier> (<{Identifier ", "}*>) <{Statement "\n"}*>> {prefer}
 
