@@ -54,7 +54,7 @@ rules
 
 rules
 
-  O |- method-closure(MethodL(_, _, _, params, _, code)) --> ClosV(O, params, code, {}).
+  O |- method-closure(MethodL(_, _, _, params, _, _, code)) --> ClosV(O, params, code, {}).
   
   resolve-call(recv, x, vs) --> v
   where
