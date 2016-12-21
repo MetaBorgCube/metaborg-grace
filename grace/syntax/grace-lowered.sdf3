@@ -15,11 +15,12 @@ context-free syntax
 							  <Inherit><Use*><{Statement "\n"}*>
 							}
 							> {prefer}
-  Exp.BlockL              = [_block { [Identifier*] | [TypeExp*] -> [{Statement "\n"}*] }] {prefer}
+  Exp.BlockL              = [_block { [Identifier*] | [{TypeExp ", "}*] -> [{Statement "\n"}*] }] {prefer}
   Exp.Uninitialized       = <_uninit> {prefer}
   TypeExp.Unkwn           = <_Unkwn> {prefer}
+                                 // methodname     typearguments   annotations    formal argument names    formal argument types returntype
   Declaration.MethodL     = [
-							_method [Identifier] ||[Identifier*]|| [Annotations] ([{Identifier ", "}*]) -> [TypeExp] {
+							_method [Identifier] ||[Identifier*]|| [Annotations] ([{Identifier ", "}*]) : ([{TypeExp ", "}*]) -> [TypeExp] {
 							  [{Statement "\n"}*]
 							}
 							] {prefer}
