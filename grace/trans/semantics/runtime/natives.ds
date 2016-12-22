@@ -7,12 +7,54 @@ signature
     error: String * String -> String
     addI: Int * Int -> Int
     
+    str: AST -> String
+    
   arrows
     string2int(String) --> Int
+    
     halt-error(String, String) --> String
-
+    
+    
+    
 rules
   
   string2int(s) --> parseI(s).
   
   halt-error(s1, s2) --> error(s1, s2).
+
+
+/* string ops */
+
+signature
+  native operators
+    logdebug: String -> String
+    str_starts_with : String * String -> Bool
+    
+  arrows
+    concat(List(String)) --> String
+    separate-by(List(String), String) --> List(String)
+    log(String) --> String
+    str-starts-with(String, String) --> Bool
+        
+rules
+
+  concat([]) --> "".
+  
+  concat([s | ss]) --> s ++ ss'
+  where
+    concat(ss) --> ss'.
+
+  separate-by([], _) --> [].
+  
+  separate-by([s], _) --> [s].
+  
+  separate-by([s1| xs@[_ | _]], sep) --> [s1, sep | xs']
+  where
+    separate-by(xs, sep) --> xs'.
+
+  str-starts-with(s, prefix) --> str_starts_with(s, prefix).
+  
+  log(s) --> s
+  where
+    logdebug(s) => _.
+

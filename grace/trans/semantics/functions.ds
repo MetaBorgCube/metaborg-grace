@@ -1,20 +1,26 @@
 module trans/semantics/functions
 
 imports
+  src-gen/ds-signatures/grace-sig
   trans/semantics/values
   trans/semantics/statements
   trans/semantics/objectmodel
+  trans/semantics/types
   
 signature
   sorts
     Addr
 
   constructors
-    ClosV: Addr * List(Identifier) * Code * Env -> V
+    ClosV: Addr * Addr * List(Identifier) * Code * Env -> V
 
   arrows
     method-closure(Declaration) --> V
+    
+    resolve-call(V, String, List(V)) --> V
     call(V, V, List(V)) --> V
+    
+    call(V, List(V)) --> V
     
     read-local(String) --> V
     bind-local(Identifier, V) --> U
@@ -35,36 +41,39 @@ rules
   where
     e --> v.
 
-  MCallL(ID(x), []) --> read-local(x)
-  where
-    x != "outer".
-  
-  MCallL(ID("outer"), []) --> current-outer().
-  
-  P Exec() |- MCallRecvL(e, ID("outer"), []) --> v
-  where
-    e --> RefV(S);
-    S |- current-outer() --> v.
+  MCallL(ID(x), []) --> read-local(x).
   
   P Exec() |- MCallRecvL(e, ID(x), es) --> resolve-call(v, x, vs)
   where
-    x != "outer";
     e --> v;
     es --> vs.
+  
+  MQCallOuter(e) --> outer(S)
+  where
+    e --> RefV(S).
 
+  BlockL(params, _, code) --> method-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
+  
 rules
 
-  O |- method-closure(MethodL(_, _, _, params, _, _, code)) --> ClosV(O, params, code, {}).
-  
-  resolve-call(recv, x, vs) --> v
+  method-closure(MethodL(_, _, _, params, _, _, code)) --> ClosV(S, O, params, code, {})
   where
-    lookup-method(recv, x) --> mv;
-    call(recv, mv, vs) --> v.
+    current-self() --> S;
+    current-outer() --> O.
   
-  call(S, ClosV(O, params, code, env), vs) --> v
+  resolve-call(clos@ClosV(_, _, _, _, _), x, vs) --> call(clos, vs)
+  where
+    str-starts-with(x, "apply") == true.
+  
+  resolve-call(recv, x, vs) --> call(clos, vs)
+  where
+    recv =!=> ClosV(_, _, _, _, _);
+    lookup-method(recv, x) --> clos.
+
+  call(ClosV(S, O, params, code, env), vs) --> v
   where
     bind-locals(params, vs) :: L env --> _ :: L;
-    S, O |- code :: L --> v :: L _.
+    S, O |- code :: L --> v :: L _. 
   
   read-local(x) :: L --> L[x] :: L.
   

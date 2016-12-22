@@ -12,11 +12,11 @@ signature
     Exp --> V
     List(Exp) --> List(V)
     
-    resolve-call(V, String, List(V)) --> V
-
 rules
 
   Self() --> current-self().
+  
+  Outer() --> current-outer().
   
   [] : List(Exp) --> [].
   
@@ -26,8 +26,8 @@ rules
     es --> vs.
 
 rules
-  
     
+
      
 
     
