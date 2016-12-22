@@ -120,7 +120,7 @@ context-free syntax
   
   Exp                           = <(<Exp>)>                    {bracket}
   
-  Exp.MCallOpEx                 = <<Exp> <OperatorCF> <Exp>>   {left, prefer}
+  Exp.MCallOpEx                 = <<Exp> <OperatorCF> <Exp>>   {left}
   Exp.MCallOpExAssign           = <<Exp> := <Exp>>             {left, prefer}
   Exp.MCallWDot                 = <<Exp>.<Part+>>              {left}
   Exp.MCallImpl                 = <<Part+>>                    {left}
