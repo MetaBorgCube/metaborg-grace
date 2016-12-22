@@ -12,7 +12,8 @@ rules
 
 desugar-case(|liftedname): 
   Case(ExpParens(caseExpression), a, body) ->
-  <desugar-case(|liftedname)> Case(CaseExp(caseExpression), a, body)
+    <desugar-case(|liftedname, caseExpression)>
+      Case(ExpTyped(<new>, TypeID(ID("Unknown"), NoTypeArg())), a, body)
 
 desugar-case(|liftedname):
   Case(CaseExp(CString(str)), a, body) ->
@@ -48,30 +49,36 @@ desugar-case(|liftedname):
         <debug(!"this is the one right?")> a
 
 desugar-case(|liftedname):
+  Case(ExpTyped(WildCard(), type), a, body) ->
+    <desugar-case(|liftedname)> Case(ExpTyped(ID(<new>), type), a, body)
+
+desugar-case(|liftedname):
   Case(ExpTyped(iden, TypeID(typeId, NoTypeArg())), _, body) ->
-    [ MCallWDot(
-        BlockExp(
-          BlockWParams(
-            BlockParams([ParamWType( iden, NoTypeAnn() )])
-          , [ Expression(
-                MCallWDot(
-                  MCallImpl([Part( typeId , NoArgs())])
-                , [ Part(
-                      ID("match")
-                    , ArgsParen([MCallImpl([Part( iden , NoArgs())])])
+    [ BlockExp( Block ( [ Expression (
+          MCallWDot(
+            BlockExp(
+              BlockWParams(
+                BlockParams([ParamWType( iden, NoTypeAnn() )])
+              , [ Expression(
+                    MCallWDot(
+                      MCallImpl([Part( typeId , NoArgs())])
+                    , [ Part(
+                          ID("match")
+                        , ArgsParen([MCallImpl([Part( iden , NoArgs())])])
+                        )
+                      ]
                     )
-                  ]
-                )
+                  )
+                ]
+              )
+            )
+          , [ Part(
+                ID("apply")
+              , ArgsParen([MCallImpl([Part(ID( liftedname ), NoArgs())])])
               )
             ]
           )
-        )
-      , [ Part(
-            ID("apply")
-          , ArgsParen([MCallImpl([Part(ID( liftedname ), NoArgs())])])
-          )
-        ]
-      )
+      )]))
     , BlockExp(
         Block( [
           Expression(
@@ -86,35 +93,37 @@ desugar-case(|liftedname):
 
 desugar-case(|liftedname, matchExpr):
   Case(ExpTyped(iden, TypeID(typeId, NoTypeArg())), _, body) ->
-    [ BlockExp(
-        BlockWParams(
-          BlockParams([ParamWType( iden, NoTypeAnn() )])
-        , [ Expression(
-              MCallWDot(
-                MCallWDot(
-                  MCallImpl([Part( typeId , NoArgs())])
-                , [ Part(
-                      ID("match(_)")
-                    , ArgsParen([MCallImpl([Part(ID( liftedname ), NoArgs())])])
-                    )
-                  ]
-                )
-              , [ Part(
-                    ID("&&(_)")
-                  , ArgsParen(
-                      [ MCallWDot(
-                          MCallImpl([Part(ID( liftedname ), NoArgs())])
-                        , [Part(ID("==(_)"), ArgsParen([ matchExpr ]))]
+    [ BlockExp( Block( [ Expression(
+//          BlockExp(
+//            BlockWParams(
+//              BlockParams([ParamWType( iden, NoTypeAnn() )])
+//            , [ Expression(
+                  MCallWDot(
+                    MCallWDot(
+                      MCallImpl([Part( typeId , NoArgs())])
+                    , [ Part(
+                          ID("match(_)")
+                        , ArgsParen([MCallImpl([Part(ID( liftedname ), NoArgs())])])
                         )
                       ]
                     )
+                  , [ Part(
+                        ID("&&(_)")
+                      , ArgsParen(
+                          [ MCallWDot(
+                              MCallImpl([Part(ID( liftedname ), NoArgs())])
+                            , [Part(ID("==(_)"), ArgsParen([ matchExpr ]))]
+                            )
+                          ]
+                        )
+                      )
+                    ]
                   )
-                ]
-              )
-            )
-          ]
-        )
-      )    
+//                )
+//              ]
+//            )
+//          )
+      ) ] ) )
     , BlockExp(
         Block( [
           Expression(
@@ -156,16 +165,10 @@ desugar-match-case:
     , [Part(ID("apply"), ArgsParen([matchExpression]))]
     )
       where
-        <debug(!"match on matchcase expression: ")> matchExpression;
         liftedname := <concat-strings> ["m_", <new>];
-        <debug(!"new name: ")> liftedname;
         cases' := <map(desugar-caseparen-to-case)> cases;
-        <debug(!"removed caseparen: ")> cases';
         cases'' := <flatten-list> <map(desugar-case(|liftedname))> cases';
-        <debug(!"desugared cases: ")> cases'';
         numParts := <length> cases'';
-        list := <range> <int-dec> <int-dec> numParts;
-        <debug(!"list so far: ")> list;
+        list := <range(|2)> <int-dec> <int-dec> numParts;
         listNames := <map(!"elseif(_)then(_)")> list;
-        methodName := <concat-strings> ["if(_)then(_)" | listNames];
-        <debug(!"method name: ")> methodName
+        methodName := <concat-strings> ["if(_)then(_)" | listNames]
