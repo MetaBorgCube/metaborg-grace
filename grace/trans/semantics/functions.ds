@@ -12,14 +12,15 @@ signature
     Addr
 
   constructors
-    ClosV: Addr * List(Identifier) * Code * Env -> V
-    BlockV : Addr * Addr * List(Identifier) * Code * Env -> V
+    ClosV: Addr * Addr * List(Identifier) * Code * Env -> V
 
   arrows
     method-closure(Declaration) --> V
     
     resolve-call(V, String, List(V)) --> V
     call(V, V, List(V)) --> V
+    
+    call(V, List(V)) --> V
     
     read-local(String) --> V
     bind-local(Identifier, V) --> U
@@ -51,35 +52,28 @@ rules
   where
     e --> RefV(S).
 
-  BlockL(params, _, body) --> BlockV(S, O, params, body, {})
+  BlockL(params, _, code) --> method-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, no-type(), code)).
+  
+rules
+
+  method-closure(MethodL(_, _, _, params, _, code)) --> ClosV(S, O, params, code, {})
   where
     current-self() --> S;
     current-outer() --> O.
   
-rules
+  resolve-call(clos@ClosV(_, _, _, _, _), x, vs) --> call(clos, vs)
+  where
+    str-starts-with(x, "apply") == true.
+  
+  resolve-call(recv, x, vs) --> call(clos, vs)
+  where
+    recv =!=> ClosV(_, _, _, _, _);
+    lookup-method(recv, x) --> clos.
 
-  O |- method-closure(MethodL(_, _, _, params, _, code)) --> ClosV(O, params, code, {}).
-  
-  resolve-call(mv@BlockV(S, _, _, _, _), x, vs) --> v
-  where
-    str-starts-with(x, "apply") == true;
-    call(S, mv, vs) --> v.
-  
-  resolve-call(recv, x, vs) --> v
-  where
-    recv =!=> BlockV(_, _, _, _, _);
-    lookup-method(recv, x) --> mv;
-    call(recv, mv, vs) --> v.
-  
-  call(S, BlockV(_, O, params, code, env), vs) --> v
+  call(ClosV(S, O, params, code, env), vs) --> v
   where
     bind-locals(params, vs) :: L env --> _ :: L;
-    S, O |- code :: L --> v :: L _.
-  
-  call(S, ClosV(O, params, code, env), vs) --> v
-  where
-    bind-locals(params, vs) :: L env --> _ :: L;
-    S, O |- code :: L --> v :: L _.
+    S, O |- code :: L --> v :: L _. 
   
   read-local(x) :: L --> L[x] :: L.
   
