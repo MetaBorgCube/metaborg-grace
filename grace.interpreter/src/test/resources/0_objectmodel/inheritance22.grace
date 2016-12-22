@@ -1,7 +1,7 @@
 object {
   method A {
       object {
-          { print("Call f"); outer.f; }.apply;
+          { print("Call f"); self.f; }.apply;
           
           method f {
               print("A.f");

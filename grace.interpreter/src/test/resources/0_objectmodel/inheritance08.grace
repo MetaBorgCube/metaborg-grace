@@ -27,6 +27,6 @@ class B {
 
 def myB = self.B;
 
-def result = self.myB.f({ x -> outer.myB.increase(x); });
+def result = self.myB.f({ x -> self.myB.increase(x); });
 
 print(self.result);
