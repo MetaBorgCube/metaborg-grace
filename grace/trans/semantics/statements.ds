@@ -21,3 +21,22 @@ rules
 
   // unwrap expression
   Expression(e) --> e.
+  
+  Declaration(VariableL(x, _, _, e)) --> v
+  where
+    e --> v;
+    case x of {
+      ID(_) =>
+        bind-local(x, v) --> _
+      WildCard() => 
+    }.
+    
+  Declaration(ConstantL(x, _, _, e)) --> v
+  where
+    e --> v;
+    case x of {
+      ID(_) =>
+        bind-local(x, v) --> _
+      WildCard() => 
+    }.
+  

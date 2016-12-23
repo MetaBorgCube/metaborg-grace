@@ -26,6 +26,8 @@ signature
     bind-local(Identifier, V) --> U
     bind-locals(List(Identifier), List(V)) --> U
     
+    alloc-locals(Code) --> U
+    
   sort aliases
     Env = Map(String, V)
   
@@ -41,6 +43,13 @@ rules
   where
     e --> v.
 
+  MCallL(ID(x), [e]) --> DoneV()
+  where
+    ":=(_)" => bind_suffix;
+    str-ends-with(x, bind_suffix) --> true;
+    e --> v;
+    bind-local(ID(str-rm-suffix(x, bind_suffix)), v) --> _.
+
   MCallL(ID(x), []) --> read-local(x).
   
   P Exec() |- MCallRecvL(e, ID(x), es) --> resolve-call(v, x, vs)
@@ -54,12 +63,15 @@ rules
 
   BlockL(params, _, code) --> method-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, no-type(), code)).
   
-rules
+rules /* closure construction */
 
-  method-closure(MethodL(_, _, _, params, _, code)) --> ClosV(S, O, params, code, {})
+  method-closure(MethodL(_, _, _, params, _, code)) :: L --> ClosV(S, O, params, code, L') :: L
   where
     current-self() --> S;
-    current-outer() --> O.
+    current-outer() --> O;
+    alloc-locals(code) :: L --> _ :: L L'.
+
+rules /* method resulution and dispatch */
   
   resolve-call(clos@ClosV(_, _, _, _, _), x, vs) --> call(clos, vs)
   where
@@ -75,6 +87,21 @@ rules
     bind-locals(params, vs) :: L env --> _ :: L;
     S, O |- code :: L --> v :: L _. 
   
+
+rules /* local environment operations */
+  
+  alloc-locals([]) --> U().
+  
+  alloc-locals([Declaration(VariableL(id, _, _, _)) | xs]) --> alloc-locals(xs)
+  where
+    bind-local(id, UninitializedV()) --> _.
+  
+  alloc-locals([Declaration(ConstantL(id, _, _, _)) | xs]) --> alloc-locals(xs)
+  where
+    bind-local(id, UninitializedV()) --> _.
+
+  alloc-locals([_ | xs]) --> alloc-locals(xs).
+  
   read-local(x) :: L --> L[x] :: L.
   
   bind-local(ID(x), v) :: L --> U() :: L {x |--> v, L}.
@@ -83,7 +110,6 @@ rules
   
   bind-locals([], []) --> U().
   
-  bind-locals([x | xs], [v | vs]) --> U()
+  bind-locals([x | xs], [v | vs]) --> bind-locals(xs, vs)
   where
-    bind-local(x, v) --> _;
-    bind-locals(xs, vs) --> _.
+    bind-local(x, v) --> _.

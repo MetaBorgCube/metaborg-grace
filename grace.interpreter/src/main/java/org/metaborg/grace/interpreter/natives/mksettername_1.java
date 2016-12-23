@@ -2,6 +2,7 @@ package org.metaborg.grace.interpreter.natives;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.source.SourceSection;
@@ -13,7 +14,9 @@ public abstract class mksettername_1 extends TermBuild {
 		super(source);
 	}
 
+	// FIXME: add caching
 	@Specialization
+	@TruffleBoundary
 	public String doInt(String x) {
 		return x + ":=(_)";
 	}

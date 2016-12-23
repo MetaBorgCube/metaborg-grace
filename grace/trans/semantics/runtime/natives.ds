@@ -29,13 +29,17 @@ signature
   native operators
     logdebug: String -> String
     str_starts_with : String * String -> Bool
+    str_ends_with : String * String -> Bool
+    str_remove_suffix : String * String -> String
     
   arrows
     concat(List(String)) --> String
     separate-by(List(String), String) --> List(String)
     log(String) --> String
     str-starts-with(String, String) --> Bool
-        
+    str-ends-with(String, String) --> Bool
+    str-rm-suffix(String, String) --> String
+    
 rules
 
   concat([]) --> "".
@@ -53,6 +57,10 @@ rules
     separate-by(xs, sep) --> xs'.
 
   str-starts-with(s, prefix) --> str_starts_with(s, prefix).
+  
+  str-ends-with(s, suffix) --> str_ends_with(s, suffix).
+  
+  str-rm-suffix(s, suffix) --> str_remove_suffix(s, suffix).
   
   log(s) --> s
   where
