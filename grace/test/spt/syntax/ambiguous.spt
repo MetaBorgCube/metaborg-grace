@@ -42,3 +42,18 @@ a.field := 13;
 test hard assignment [[
 self.val := self.val + 1;
 ]] 0 warnings 0 errors
+test double outer addition [[outer.outer.a + 1;]] 0 warnings 0 errors
+test double outer assignment [[f := outer.outer;]] 0 warnings 0 errors
+test double self assignment [[f := self.self;]] 0 warnings 0 errors
+test assignment double outer field [[f := outer.outer.a + 1;]] 0 warnings 0 errors
+
+test assignment double self field [[f := self.self.a + 1;]] 0 warnings 0 errors
+
+test assignment self outer field [[f := self.outer.a + 1;]] 0 warnings 0 errors
+
+test assignment double outer [[f := outer.outer + 1;]] 0 warnings 0 errors
+
+test assignment double self [[f := self.self + 1;]] 0 warnings 0 errors
+
+test var assign with escape string [[var x := "test\"quotes\"hello\"\"world";]] 0 warnings 0 errors
+

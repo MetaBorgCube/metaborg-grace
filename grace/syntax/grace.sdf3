@@ -82,17 +82,17 @@ context-free syntax
   TypeAnn.NoTypeAnn             = <>
   
   Identifier.ID                 = <<ID>>
-  Identifier.WildCard           = "_"
+  Identifier.WildCard           = <_>
   
   Annotations.Annotations       = < is <{Annotation ", "}+>>
   Annotations.NoAnnotations     = <>
   
-  Annotation.Public             = "public"
-  Annotation.Readable           = "readable"
-  Annotation.Writeable          = "writable"
-  Annotation.Confidential       = "confidential"
-  Annotation.Manifest           = "manifest"
-  Annotation.Overrides          = "override"
+  Annotation.Public             = <public>
+  Annotation.Readable           = <readable>
+  Annotation.Writeable          = <writable>
+  Annotation.Confidential       = <confidential>
+  Annotation.Manifest           = <manifest>
+  Annotation.Overrides          = <override>
   
   Params.Params                 = <(<{Param ", "}+>)>
 //  Param.Param                   = <<Identifier>>
@@ -114,14 +114,14 @@ context-free syntax
   
   Exp.TypeExp                   = <<TypeExp>> {avoid}
   Exp.Number                    = <<NUM>>
-  Exp.String                    = <<STRING>>
+  Exp.String                    = <<STRING>> {prefer}
   Exp.Boolean                   = <<Boolean>>
 
   
   Exp                           = <(<Exp>)>                    {bracket}
   
-  Exp.MCallOpEx                 = <<Exp> <OperatorCF> <Exp>>   {left, prefer}
-  Exp.MCallOpExAssign           = <<Exp> := <Exp>>             {left, prefer}
+  Exp.MCallOpEx                 = <<Exp> <OperatorCF> <Exp>>   {left}
+  Exp.MCallOpExAssign           = <<Exp> := <Exp>>             {left} // prefer
   Exp.MCallWDot                 = <<Exp>.<Part+>>              {left}
   Exp.MCallImpl                 = <<Part+>>                    {left}
   
@@ -131,9 +131,9 @@ context-free syntax
   Exp.MQCallSelf                = <<Exp>.self>                 {left}      
   
 //  Exp.MCallPrefixOp             = <<OperatorCF> <CallArgs>>    {left}
-  Exp.MCallPrefixOpExp          = <<OperatorCF> <Exp>>         {left, prefer}
+  Exp.MCallPrefixOpExp          = <<OperatorCF> <Exp>>         {right}
   
-  Exp.Ellipsis                  = "..."
+  Exp.Ellipsis                  = <...>
   Exp.LineupExp                 = <<Lineup>>
   Exp.BlockExp                  = <<Block>>
   
@@ -143,21 +143,21 @@ context-free syntax
                                    match (<Exp>)
                                        <{Case "\n"}+>
                                   > {prefer} // over methodcall
-  Case.Case                     = [case { [CaseExp] [Arrow] [{Statement "\n"}*] }]
-  Case.CaseParen                = [case ({ [CaseExp] [Arrow] [{Statement "\n"}*] })]
+  Case.Case                     = [case {[CaseExp] [Arrow] [{Statement "\n"}*]}]
+  Case.CaseParen                = [case ( {[CaseExp] [Arrow] [{Statement "\n"}*]} )]
   CaseExp.CaseExp               = <<CaseLiteral>>
   CaseExp.CaseExpMulti          = <<CaseLiteral> <BoolOp> <CaseLiteral>>
   CaseExp.ExpParens             = <(<Exp>)>
-  CaseExp.CIdentifier            = <<Identifier>>
-  CaseExp.ExpTyped              = <<Identifier> : <CaseType>>
-  BoolOp.Or                     = "|"
-  BoolOp.And                    = "&"
-  CaseType.Type                 = <<Identifier>>
-  CaseLiteral.CNumber          = <<NUM>>
-  CaseLiteral.CString          = <<STRING>>
-  CaseLiteral.CBoolean         = <<Boolean>>
+  CaseExp.CIdentifier           = <<Identifier>>
+  CaseExp.ExpTyped              = <<Identifier> : <TypeExp>>
+  BoolOp.Or                     = <|>
+  BoolOp.And                    = <&>
+//  CaseType.Type                 = <<Identifier>>
+  CaseLiteral.CNumber           = <<NUM>>
+  CaseLiteral.CString           = <<STRING>>
+  CaseLiteral.CBoolean          = <<Boolean>>
   
-  Arrow.Ascii                   = "->"
+  Arrow.Ascii                   = [->]
   
   
 context-free syntax
@@ -186,15 +186,33 @@ context-free syntax
   Alias.Alias                   = < alias <MethodNames> = <MethodNames>>
   Exclude.Exclude               = < exclude <MethodNames>>
   
-  Boolean.True                  = "true"
-  Boolean.False                 = "false"
-  Lineup.Lineup                 = <[ <{Exp ", "}*> ]>
-  Block.Block                   = <{ <{Statement "\n"}*> }>
-  Block.BlockWParams            = <{ <BlockParams> <{Statement "\n"}*> }>    {prefer}
+  Boolean.True                  = <true>
+  Boolean.False                 = <false>
+  Lineup.Lineup                 = <[<{Exp ", "}*>]>
+  Block.Block                   = <{<{Statement "\n"}*>}>
+  Block.BlockWParams            = <{<BlockParams> <{Statement "\n"}*>}> {prefer}
   BlockParams.BlockParams       = [[{Param ", "}*] ->]
   
 context-free priorities
 
   Exp.MCallWDot > Exp.Return
   ,
-  Exp.MCallWDot > Exp.MCallOpEx > Exp.MCallOpExAssign > Exp.TypeExp
+  Exp.MCallWDot >
+  Exp.MCallPrefixOpExp >
+  Exp.MCallOpEx >
+  Exp.MCallOpExAssign >
+  Exp.TypeExp
+  ,
+  Exp.MQCallOuter >
+  Exp.MCallOpExAssign
+  ,
+  Exp.MQCallSelf >
+  Exp.MCallOpExAssign
+  
+template options
+
+  tokenize : "."
+  tokenize : "("
+  tokenize : ")"
+  tokenize : "{"
+  tokenize : "}"

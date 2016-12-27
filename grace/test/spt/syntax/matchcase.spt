@@ -7,6 +7,7 @@ start symbol Program
 test match case 1 [[
 match("foo")
     case { ( y.apply ) -> print("It matches 1"); }
+    case { "hello" -> print("It matches 1"); }
     case( { "hello" -> print("It matches 2"); })
     case( { _ : Unknown -> print("Last resort"); });
 ]] 0 warnings 0 errors
@@ -18,3 +19,5 @@ test match case 4b [[match (5) case { _, _ -> do; };]] 0 warnings 0 errors // th
 test match case 4c [[match (5) case { _, 5 -> do; };]] parse fails
 test match case 5 [[match (5) case { x -> do; };]] 0 warnings 0 errors
 test match case 6 [[match (5) case { 5 -> do; };]] 0 warnings 0 errors
+
+test match case no arg [[match (5) case { do; };]] 0 warnings 0 errors // this is method 

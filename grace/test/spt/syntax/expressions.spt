@@ -66,8 +66,9 @@ test plus three parens [[(5 + 5 + 5);]] 0 warnings 0 errors
 test plus identifiers [[a + a;]] 0 warnings 0 errors
 test plus id and lit [[a + 5;]] 0 warnings 0 errors
 test plus lit and id [[5 + a;]] 0 warnings 0 errors
-test greater then [[5 > 5;]] 0 warnings 0 errors
-test less then [[5 < 5;]] 0 warnings 0 errors
+test greater than [[5 > 5;]] 0 warnings 0 errors
+test less than [[5 < 5;]] 0 warnings 0 errors
+test less than negatives [[-1001 < -1002;]] 0 warnings 0 errors
 test greater or equal [[5 >= 5;]] 0 warnings 0 errors
 test less or equal [[5 <= 5;]] 0 warnings 0 errors
 test boolean or [[5 || 5;]] 0 warnings 0 errors
@@ -141,15 +142,22 @@ test true or int subt int and false [[true || 5 - 3 && false;]] 0 warnings 0 err
 
 test outer [[outer;]] 0 warnings 0 errors
 test outerchain [[outer.outer;]] 0 warnings 0 errors
-test outerchain with call in the middle [[other.do.outer;]] 0 warnings 0 errors
-test outerchain with calls in the middle [[other.a.b.outer.a.b;]] 0 warnings 0 errors
+test outer with iden [[outer.do;]] 0 warnings 0 errors
+test outer with iden with self [[outer.do.self;]] 0 warnings 0 errors
+test self with iden with outer [[self.do.outer;]] 0 warnings 0 errors
+test id with outer [[x.outer;]] 0 warnings 0 errors
+test id with self [[y.self;]] 0 warnings 0 errors
+test outerchain with call in the middle [[outer.do.outer;]] 0 warnings 0 errors
+test outerchain with call in the middle and end [[outer.do.outer.do;]] 0 warnings 0 errors
+test outerchain with calls in the middle [[outer.a.b.outer.a.b;]] 0 warnings 0 errors
 
 test outerchain with call [[outer.outer.do("hey");]] 0 warnings 0 errors
 test long outerchain [[outer.outer.outer.outer.do "something";]] 0 warnings 0 errors
 
 test self [[self;]] 0 warnings 0 errors
 test self with call [[self.do "some";]] 0 warnings 0 errors
-test selfchain is not allowed [[self.self.do "some";]] parse fails
+// is allowed syntactically but makes no sense since you cannot define a self on self
+test selfchain is not allowed [[self.self.do "some";]] 0 warnings 0 errors
 
 // tests from https://github.com/zmthy/hopper/tree/master/test/parse-fail
 //test hopper angle operators backwards [[name > name < name;]] parse fails

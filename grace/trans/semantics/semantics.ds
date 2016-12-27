@@ -31,4 +31,3 @@ rules
   where
     c --> _;
     cs --> v.
-  

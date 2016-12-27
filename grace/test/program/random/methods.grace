@@ -43,13 +43,13 @@ method add (a, b, c) { (a / b) / c; };
 method add (a, b, c) { a / (b / c); };
 
 method add (a, b) -> Number { a + b; };
-method prefix - -> Number { 0 - a; };
-method prefix - is confidential -> Number { 0 - a; };
-method prefix - { 0 - a; };
-method prefix - is confidential, public (a: Number) -> Number { 0 - a; };
-method prefix - is confidential (a) { 0 - a; };
-method prefix -- (a) -> Number { a - 1; };
-method prefix -- (a) { a - 1; };
+method prefix- -> Number { 0 - a; };
+method prefix- is confidential -> Number { 0 - a; };
+method prefix- { 0 - a; };
+method prefix- (a: Number) is confidential, public -> Number { 0 - a; };
+method prefix- (a) is confidential { 0 - a; };
+method prefix-- (a) -> Number { a - 1; };
+method prefix-- (a) { a - 1; };
 
 
 method if(cond) then (blk) {
@@ -121,18 +121,15 @@ method +(x) -> T {a; b; c;};
 method +(x : T) -> T {a; b; c;};
 
 method prefix+ { a; b; c;};
-method prefix + {a; b; c;};
+method prefix+ {a; b; c;};
 method prefix++***&%& {a; b; c;};
-method prefix ! {a; b; c;};
+method prefix! {a; b; c;};
 
 method foo:=(a) {a; b; c;};
 //method bar :=(a) {a; b; c;};
 method foo:=(a : T) {a; b; c;};
 //method foo :=(a : T) -> T {a; b; c;};
 method foo:=(a) -> T {a; b; c;};
-
-{ [[T]] -> foo;};
-{ [[T]] x : A -> foo;};
 
 { x : A, y:B -> foo;};
 { x:A, y:B -> foo;};
@@ -141,7 +138,6 @@ method foo:=(a) -> T {a; b; c;};
 { x -> foo;};
 { x:A,y:B->foo;};
 
-{ [[T]] x : A, y:B -> foo;};
 
 method foo:= [[T]] (x : T) { x; };
 method foo:= [[T,U]] (x : T) { x; };
@@ -156,7 +152,7 @@ method prefix- [[T]] { x; };
 
 [[[1,2],[3,4]],[[5,6],[7,8]]];
 
-method sumSq[[T]](a : T, b : T) -> T where T <: Numeric {
+method sumSq[[T]](a : T, b : T) -> T {
     (a * a) + (b * b);
 };
 

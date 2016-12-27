@@ -1,0 +1,53 @@
+module syntax-precedence
+
+language grace
+
+start symbol Program
+
+test call with unary [[a + !b;]] parse to [[a + (!b);]]
+test call with unary reverse [[!a + b;]] parse to [[(!a) + b;]]
+
+test call unary with receiver [[!a.b;]] parse to [[!(a.b);]]
+
+test call with receiver plus something [[a.b + 1;]] parse to [[(a.b) + 1;]]
+test call with receiver plus call with receiver [[a.b + a.b;]] parse to [[(a.b) + (a.b);]]
+test something plus call with receiver [[1 + a.b;]] parse to [[1 + (a.b);]]
+
+test less than one negative [[-1001 < 1002;]] parse to [[(-1001) < 1002;]]
+test less than one negative reverse [[1001 < -1002;]] parse to [[1001 < (-1002);]]
+test less than negatives precedence [[-1001 < -1002;]] parse to [[(-1001) < (-1002);]]
+
+test assign call with receiver [[a := b.c;]] parse to [[a := (b.c);]]
+test assign call with receiver reverse [[a.b := c;]] parse to [[(a.b) := c;]]
+test assign calls with receivers [[a.b := c.d;]] parse to [[(a.b) := (c.d);]]
+
+test assign call plus something [[a := b + 1;]] parse to [[a := (b + 1);]]
+test assign call plus something reverse [[a := 1 + b;]] parse to [[a := (1 + b);]]
+test assign call with receiver plus something [[a.b := b + 1;]] parse to [[(a.b) := (b + 1);]]
+test assign call with receiver plus something reverse [[a.b := 1 + b;]] parse to [[(a.b) := (1 + b);]]
+
+test assign call on outer plus something [[outer.b := b + 1;]] parse to [[(outer.b) := (b + 1);]]
+test assign call on outer plus something reverse [[outer.b := 1 + b;]] parse to [[(outer.b) := (1 + b);]]
+
+test assign call on self plus something [[self.b := b + 1;]] parse to [[(self.b) := (b + 1);]]
+test assign call on self plus something [[self.b := 1 + b;]] parse to [[(self.b) := (1 + b);]]
+
+test assign double outer plus something [[f := outer.outer.a + 1;]] parse to [[f := (outer.outer.a) + 1;]]
+test assign double outer plus something [[f := outer.outer.a + 1;]] parse to [[f := ((outer.outer).a) + 1;]]
+test assign double outer plus something [[f := outer.outer.a + 1;]] parse to [[f := (((outer).outer).a) + 1;]]
+test assign double outer plus something [[f := outer.outer.a + 1;]] parse to [[f := ((((outer).outer).a) + 1);]]
+
+test assign double self plus something [[f := self.self.a + 1;]] parse to [[f := (self.self.a) + 1;]]
+test assign double self plus something [[f := self.self.a + 1;]] parse to [[f := ((self.self).a) + 1;]]
+test assign double self plus something [[f := self.self.a + 1;]] parse to [[f := (((self).self).a) + 1;]]
+test assign double self plus something [[f := self.self.a + 1;]] parse to [[f := ((((self).self).a) + 1);]]
+
+test double outer addition [[outer.outer.a + 1;]] parse to [[(outer.outer.a) + 1;]]
+test double outer addition [[outer.outer.a + 1;]] parse to [[((outer.outer).a) + 1;]]
+
+test double outer assignment [[f := outer.outer.a;]] parse to [[f := (outer.outer.a);]]
+test double outer assignment [[f := outer.outer.a;]] parse to [[f := ((outer.outer).a);]]
+test double outer assignment [[f := outer.outer;]] parse to [[f := (outer.outer);]]
+
+test basic addition left to right [[1 + 2 + 3;]] parse to [[((1 + 2) + 3);]]
+

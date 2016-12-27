@@ -1,5 +1,8 @@
 module trans/semantics/runtime/natives
 
+imports
+  trans/semantics/values
+
 signature
   native operators
     parseI : String -> Int
@@ -30,7 +33,7 @@ signature
     str_starts_with : String * String -> Bool
     str_ends_with : String * String -> Bool
     str_remove_suffix : String * String -> String
-    
+
   arrows
     concat(List(String)) --> String
     separate-by(List(String), String) --> List(String)

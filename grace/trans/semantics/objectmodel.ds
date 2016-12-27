@@ -87,7 +87,7 @@ rules
     
   [] : Code -member-> [].
   
-  [Declaration(m@MethodL(_, _, _, _, _, _)) | cs] : Code -member-> cs'
+  [Declaration(m@MethodL(_, _, _, _, _, _, _)) | cs] : Code -member-> cs'
   where
     install-method(m) --> _;
     cs -member-> cs'.
@@ -117,7 +117,7 @@ rules
   where
     cs -member-> cs'.
   
-  install-method(m@MethodL(ID(name), _, _, _, _, _)) --> U()
+  install-method(m@MethodL(ID(name), _, _, _, _, _, _)) --> U()
   where
     add-method(name, method-closure(m)) --> _.
 
@@ -164,9 +164,9 @@ signature
   
 rules
 
-  field-getter(x, i) --> MethodL(ID(x), [], NoAnnotations(), [], no-type(), [SlotRead(i)]).
+  field-getter(x, i) --> MethodL(ID(x), [], NoAnnotations(), [], [], no-type(), [SlotRead(i)]).
   
-  field-setter(x, i) --> MethodL(ID(mksettername(x)), [], NoAnnotations(), [ID("p")], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))]).
+  field-setter(x, i) --> MethodL(ID(mksettername(x)), [], NoAnnotations(), [ID("p")], [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))]).
 
 /* ========== OBJECT FLATTENING =========== */
 signature

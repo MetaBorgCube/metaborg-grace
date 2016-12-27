@@ -99,16 +99,25 @@ rules
       <not-substring(!"(")> n
   desugar-flatten-methodPart: [Part(ID(n1), args1), Part(ID(n2), args2) | ps ] ->
       [Part(ID(name), ArgsParen(args)) | ps]
-    with
+    where
       name := <concat-strings> [n1, <param-string> args1, n2, <param-string> args2];
+      args := <flatten-list> <map(desugar-arg)> [args1, args2];
+      // make sure to process first list only once.
+      <not-substring(!"(")> n1
+      
+  desugar-flatten-methodPart: [Part(ID(n1), args1), Part(ID(n2), args2) | ps ] ->
+      [Part(ID(name), ArgsParen(args)) | ps]
+    with
+      name := <concat-strings> [n1, n2, <param-string> args2];
       args := <flatten-list> <map(desugar-arg)> [args1, args2]
-  
+      
   param-string: ps ->
     <concat-strings> <flatten-list> <concat> [ ["("] , <commas> <map(!"_")> ps , [")"]]
       where
         <is-list> ps
-  param-string: ArgsParen(ps) -> <param-string> ps
-  param-string: p -> "(_)"
+  
+  param-string: a@ArgsParen(ps) -> <param-string> ps
+  param-string: a@p -> "(_)"
 
   commas: [] -> []
   commas: [ a | [] ] -> [ a ]
