@@ -17,17 +17,8 @@ signature
   arrows
     method-closure(Declaration) --> V
     
-    resolve-call(V, String, List(V)) --> V
-    call(V, V, List(V)) --> V
-    
-    call(V, List(V)) --> V
-    
-    read-local(String) --> V
-    bind-local(Identifier, V) --> U
-    bind-locals(List(Identifier), List(V)) --> U
-    
   sort aliases
-    Env = Map(String, V)
+    Env = Map(String, Addr)
   
   components
     L : Env
@@ -40,6 +31,13 @@ rules
   MCallL(ID("print(_)"), [e]) --> nativePrint(v)
   where
     e --> v.
+
+  MCallL(ID(x), [e]) --> DoneV()
+  where
+    ":=(_)" => bind_suffix;
+    str-ends-with(x, bind_suffix) --> true;
+    e --> v;
+    update-local(ID(str-rm-suffix(x, bind_suffix)), v) --> _.
 
   MCallL(ID(x), []) --> read-local(x).
   
@@ -54,12 +52,23 @@ rules
 
   BlockL(params, _, code) --> method-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
   
-rules
+rules /* closure construction */
 
-  method-closure(MethodL(_, _, _, params, _, _, code)) --> ClosV(S, O, params, code, {})
+  method-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L') :: L
   where
     current-self() --> S;
-    current-outer() --> O.
+    current-outer() --> O;
+    alloc-locals(code) :: L --> _ :: L L'.
+
+/* =========== call resolution and dispatch =========== */
+
+signature
+  arrows
+    resolve-call(V, String, List(V)) --> V
+    call(V, V, List(V)) --> V
+    call(V, List(V)) --> V
+
+rules
   
   resolve-call(clos@ClosV(_, _, _, _, _), x, vs) --> call(clos, vs)
   where
@@ -72,18 +81,88 @@ rules
 
   call(ClosV(S, O, params, code, env), vs) --> v
   where
-    bind-locals(params, vs) :: L env --> _ :: L;
+    add-locals(params, vs) :: L env --> _ :: L;
     S, O |- code :: L --> v :: L _. 
+
+/* ========== local variables ============= */
+signature
+  arrows
+    alloc-locals(Code) --> U
+    Statement -alloc-> U
+
+rules
   
-  read-local(x) :: L --> L[x] :: L.
+  alloc-locals([]) --> U().
   
-  bind-local(ID(x), v) :: L --> U() :: L {x |--> v, L}.
-  
-  bind-local(WildCard(), _) :: L --> U() :: L.
-  
-  bind-locals([], []) --> U().
-  
-  bind-locals([x | xs], [v | vs]) --> U()
+  alloc-locals([s | xs]) --> alloc-locals(xs)
   where
-    bind-local(x, v) --> _;
-    bind-locals(xs, vs) --> _.
+    s -alloc-> _.
+  
+  Declaration(VariableL(id, _, _, _)) -alloc-> U()
+  where
+    add-local(id, UninitializedV()) --> _.
+  
+  Declaration(ConstantL(id, _, _, _)) -alloc-> U()
+  where
+    add-local(id, UninitializedV()) --> _.
+  
+  _ : Statement -alloc-> U().
+
+/* ======== local environment operations ========== */
+signature
+  arrows
+    add-local(Identifier, V) --> U
+    update-local(Identifier, V) --> U
+    read-local(String) --> V
+    add-locals(List(Identifier), List(V)) --> U
+    
+rules
+
+  add-local(ID(x), v) :: L --> U() :: L {x |--> addr, L}
+  where
+    v-allocate(v) --> addr.
+  
+  add-local(WildCard(), _) --> U().
+  
+  update-local(ID(x), v) :: L --> U() :: L
+  where
+    v-update(L[x], v) --> _.
+  
+  update-local(WildCard(), _) --> U().
+  
+  read-local(x) :: L --> v-read(L[x]) :: L.  
+
+  add-locals([], []) --> U().
+
+  add-locals([x | xs], [v | vs]) --> add-locals(xs, vs)
+  where
+    add-local(x, v) --> _.
+
+/* ============ variable heap operations ======== */
+
+signature
+  sort aliases
+    Addr = Int
+    VHeap = Map(Addr, V)
+  
+  components
+    VH : VHeap
+  
+  arrows
+    v-allocate(V) :: H --> Addr :: H
+    v-update(Addr, V) :: H --> Addr :: H
+    v-read(Addr) :: H --> V :: H
+    v-next() --> Addr
+    
+rules
+
+  v-allocate(v) :: VH --> addr :: VH {addr |--> v, VH}
+  where
+    v-next() --> addr.
+  
+  v-read(addr) :: VH --> VH[addr] :: VH.
+
+  v-update(addr, v) :: VH --> addr :: VH {addr |--> v, VH}.
+  
+  v-next() --> fresh.
+  

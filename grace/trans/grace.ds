@@ -12,5 +12,5 @@ rules
   p@Program(_, _) -init-> (v, H)
     where
       next() --> base;
-      O base, S base, P Exec() |- p :: H {}, L {} --> v :: H, L.
+      O base, S base, P Exec() |- p :: H {}, L {}, VH {} --> v :: H, L, VH.
   
