@@ -11,27 +11,33 @@ signature
   constructors
     NumV : Int -> V
   
+  native operators
+    num_call: V * String * V -> V
+  
 rules
   
   Number(a) --> NumV(string2int(a)).
   
-  MCallRecvL(NumV(a), ID("=="), [NumV(b)]) --> BoolV(true)
-    where
-      a == b.
-  
-  MCallRecvL(NumV(a), ID("=="), [NumV(b)]) --> BoolV(false)
-    where
-      a != b.
-      
-  MCallRecvL(NumV(a), ID("!="), [NumV(b)]) --> BoolV(false)
-    where
-      a == b.
-      
-  MCallRecvL(NumV(a), ID("!="), [NumV(b)]) --> BoolV(true)
-    where
-      a != b.
-  
-  MCallRecvL(NumV(a), ID(op), [NumV(b)]) -->
-      NumV(nativeIBinOp(op, a, b)).
+  resolve-call(l@NumV(_), x, [v]) --> num_call(l, x, v).
+     
+//  
+//  MCallRecvL(NumV(a), ID("=="), [NumV(b)]) --> BoolV(true)
+//    where
+//      a == b.
+//  
+//  MCallRecvL(NumV(a), ID("=="), [NumV(b)]) --> BoolV(false)
+//    where
+//      a != b.
+//      
+//  MCallRecvL(NumV(a), ID("!="), [NumV(b)]) --> BoolV(false)
+//    where
+//      a == b.
+//      
+//  MCallRecvL(NumV(a), ID("!="), [NumV(b)]) --> BoolV(true)
+//    where
+//      a != b.
+//  
+//  MCallRecvL(NumV(a), ID(op), [NumV(b)]) -->
+//      NumV(nativeIBinOp(op, a, b)).
         
     

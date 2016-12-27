@@ -6,7 +6,6 @@ imports
 signature
   native operators
     parseI : String -> Int
-    nativeIBinOp: String * Int * Int -> Int
     error: String * String -> String
     addI: Int * Int -> Int
     int2string: Int -> String
@@ -14,11 +13,13 @@ signature
     
   arrows
     string2int(String) --> Int
+    int2str(Int) --> String
     halt-error(String, String) --> String
     
 rules
   
   string2int(s) --> parseI(s).
+  int2str(i) --> int2string(i).
   
   halt-error(s1, s2) --> error(s1, s2).
 

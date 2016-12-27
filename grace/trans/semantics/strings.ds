@@ -15,5 +15,12 @@ rules
   String(s) --> StringV(s).
 
   MCallRecvL(StringV(s1), ID("++(_)"), [StringV(s2)]) --> StringV(s1 ++ s2).
-  MCallRecvL(NumV(i), ID("++(_)"), [StringV(s)]) --> StringV(int2string(i) ++ s).
-  MCallRecvL(StringV(s), ID("++(_)"), [NumV(i)]) --> StringV(s ++ int2string(i)).
+  
+  MCallRecvL(NumV(i), ID("++(_)"), [StringV(s)]) --> StringV(s1 ++ s)
+  where
+    int2str(i) --> s1.
+  
+  MCallRecvL(StringV(s), ID("++(_)"), [NumV(i)]) --> StringV(s ++ s2)
+  where
+    int2str(i) --> s2.
+  
