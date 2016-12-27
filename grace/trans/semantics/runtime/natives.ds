@@ -10,9 +10,11 @@ signature
     addI: Int * Int -> Int
     
     str: AST -> String
+    int2string: Int -> String
     
   arrows
     string2int(String) --> Int
+    int2str(Int) --> String
     
     halt-error(String, String) --> String
     
@@ -21,6 +23,7 @@ signature
 rules
   
   string2int(s) --> parseI(s).
+  int2str(i) --> int2string(i).
   
   halt-error(s1, s2) --> error(s1, s2).
 
