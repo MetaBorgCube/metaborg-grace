@@ -57,7 +57,7 @@ rules
       )
   desugar-class-declaration:
     ClassDecl(FullStop(iden, mIDs), type, inh, use, code) ->      
-      Constant(iden, NoTypeAnn(), NoAnnotations(), Expression ( //TODO type
+      Constant(iden, NoTypeAnn(), NoAnnotations(), Expression (
         ObjectDecl(NoInherit(), [], [
           MethodDecl(
             mIDs,
@@ -74,14 +74,26 @@ rules
       [ MethodID(ID(name), typeArg, Params(ps)) ]
     where
       name := <concat-strings> [n, <param-string> ps];
-      <not-substring(!"(")> n
+      <not-substring(!"(")> n;
+      <debug(!"did the not-substring thing")> name
+      
   desugar-flatten-methodID: [ MethodID(ID(n1), typeArg1, Params(p1)),
                               MethodID(ID(n2), typeArg2, Params(p2)) | mids ] ->
       [MethodID(ID(name), types, Params(ps)) | mids ]
-    with
+    where
       types := <merge-typeargs> [typeArg1, typeArg2];
       name := <concat-strings> [n1, <param-string> p1, n2, <param-string> p2];
+      ps   := <concat> [p1,p2];
+      <not-substring(!"(")> n1
+
+  desugar-flatten-methodID: [ MethodID(ID(n1), typeArg1, Params(p1)),
+                              MethodID(ID(n2), typeArg2, Params(p2)) | mids ] ->
+      [MethodID(ID(name), types, Params(ps)) | mids ]
+    where
+      types := <merge-typeargs> [typeArg1, typeArg2];
+      name := <concat-strings> [n1, n2, <param-string> p2];
       ps   := <concat> [p1,p2]
+
   
   merge-typeargs: [ TypeArg(ls) , TypeArg(ls2) ] -> TypeArg(<concat> [ls,ls2])
   merge-typeargs: [ NoTypeArg() , TypeArg(ls2) ] -> TypeArg(ls2)
