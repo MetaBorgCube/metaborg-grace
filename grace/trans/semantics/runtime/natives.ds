@@ -1,5 +1,8 @@
 module trans/semantics/runtime/natives
 
+imports
+  trans/semantics/values
+
 signature
   native operators
     parseI : String -> Int
@@ -29,6 +32,7 @@ signature
   native operators
     logdebug: String -> String
     str_starts_with : String * String -> Bool
+    int2string: Int -> String
     
   arrows
     concat(List(String)) --> String

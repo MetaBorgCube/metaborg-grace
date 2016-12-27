@@ -1,12 +1,14 @@
-class foo {
-  method f { 4; };
-  base_print "hello";
+method foo {
+  object{
+    method f { 4; };
+    print "hello";
+  };
 };
 
 object {
   def f = 5;
   object {
-    inherit foo;
-    base_print(f);
+    inherit outer.outer.foo;
+    print(self.f);
   };
 };
