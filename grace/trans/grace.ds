@@ -13,4 +13,3 @@ rules
     where
       next() --> base;
       O base, S base, P Exec() |- p :: H {}, L {}, VH {} --> v :: H, L, VH.
-  

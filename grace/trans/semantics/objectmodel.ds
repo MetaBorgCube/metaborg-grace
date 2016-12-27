@@ -10,6 +10,7 @@ imports
   
   trans/semantics/strings
   trans/semantics/numbers
+  trans/semantics/lineups
   trans/semantics/functions
   trans/semantics/statements
 
