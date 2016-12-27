@@ -114,14 +114,14 @@ context-free syntax
   
   Exp.TypeExp                   = <<TypeExp>> {avoid}
   Exp.Number                    = <<NUM>>
-  Exp.String                    = <<STRING>>
+  Exp.String                    = <<STRING>> {prefer}
   Exp.Boolean                   = <<Boolean>>
 
   
   Exp                           = <(<Exp>)>                    {bracket}
   
   Exp.MCallOpEx                 = <<Exp> <OperatorCF> <Exp>>   {left}
-  Exp.MCallOpExAssign           = <<Exp> := <Exp>>             {left, prefer}
+  Exp.MCallOpExAssign           = <<Exp> := <Exp>>             {left} // prefer
   Exp.MCallWDot                 = <<Exp>.<Part+>>              {left}
   Exp.MCallImpl                 = <<Part+>>                    {left}
   
@@ -131,7 +131,7 @@ context-free syntax
   Exp.MQCallSelf                = <<Exp>.self>                 {left}      
   
 //  Exp.MCallPrefixOp             = <<OperatorCF> <CallArgs>>    {left}
-  Exp.MCallPrefixOpExp          = <<OperatorCF> <Exp>>         {left, prefer}
+  Exp.MCallPrefixOpExp          = <<OperatorCF> <Exp>>         {right}
   
   Exp.Ellipsis                  = <...>
   Exp.LineupExp                 = <<Lineup>>
@@ -197,7 +197,17 @@ context-free priorities
 
   Exp.MCallWDot > Exp.Return
   ,
-  Exp.MCallWDot > Exp.MCallOpEx > Exp.MCallOpExAssign > Exp.TypeExp
+  Exp.MCallWDot >
+  Exp.MCallPrefixOpExp >
+  Exp.MCallOpEx >
+  Exp.MCallOpExAssign >
+  Exp.TypeExp
+  ,
+  Exp.MQCallOuter >
+  Exp.MCallOpExAssign
+  ,
+  Exp.MQCallSelf >
+  Exp.MCallOpExAssign
   
 template options
 
