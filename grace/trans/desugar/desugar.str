@@ -202,4 +202,7 @@ rules
   desugar-unquote-strings:
     CString(s) -> CString(<unquote(?'"')> s)
     
+  desugar-unquote-strings:
+    Dialect(s) -> Dialect(<unquote(?'"')> s)
+    
   desugar-fail: a -> <fail>

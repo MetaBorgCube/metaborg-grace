@@ -1,15 +1,14 @@
 module trans/semantics/strings
 
 imports
-//  src-gen/ds-signatures/grace-lowered-sig
-  trans/semantics/expressions
+  src-gen/ds-signatures/grace-sig
 //  trans/semantics/values
-//  trans/semantics/runtime/natives
+  trans/semantics/expressions
 
 signature
   constructors
     LineupV : List(V) -> V
-
+    
 rules
 
    LineupExp(Lineup(es: List(Exp))) --> LineupV(vs)

@@ -21,7 +21,21 @@ rules
 
   Program(code, _) --> v
   where
-    code --> v.
+   // dialect: Create an extra object scope around the program and execute dialect in there.
+   log("initial term") --> _;
+   case code of {
+     [Expression(ObjectL(_,_,[ Dialect(dialectName) | _ ])) | _] =>
+     otherwise => "standardGrace" => dialectName 
+   };
+   log("dialect choosen") --> _;
+   code => [Expression(ObjectL(_,_,[ Dialect(dialectName) | _ ])) | _];
+   log("Reading dialect") --> _;
+   read-dialect(dialectName) --> dialectcode;
+   log("Read dialect") --> _;
+   ObjectL(NoInherit(), [], [] ++ code) => dialectObj;
+   // new code
+   [Expression(dialectObj)] --> v.
+//    code --> v.
 
   [] : Code --> DoneV().
 

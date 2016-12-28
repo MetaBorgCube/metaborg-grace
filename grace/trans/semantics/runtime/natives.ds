@@ -32,8 +32,10 @@ signature
     str_starts_with : String * String -> Bool
     str_ends_with : String * String -> Bool
     str_remove_suffix : String * String -> String
+    read_dialect: String -> AST
 
   arrows
+    read-dialect(String) --> AST
     concat(List(String)) --> String
     separate-by(List(String), String) --> List(String)
     log(String) --> String
