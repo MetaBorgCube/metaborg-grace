@@ -13,12 +13,21 @@ signature
 
   native operators
     num_call: V * String * V -> V
+    num_call: V * String -> V
 
 rules
 
   Number(a) --> NumV(string2int(a)).
 
+  MCallRecvL(NumV(_), ID("==(_)"), [StringV(_)]) --> BoolV(false).
+
+  MCallRecvL(l@NumV(_), ID(op), [StringV(s)]) --> num_call(l, op, NumV(i))
+    where
+      log("check??") --> _;
+      string2int(s) --> i.
+
   resolve-call(l@NumV(_), x, [v]) --> num_call(l, x, v).
+  resolve-call(l@NumV(_), x, []) --> num_call(l, x).
 
 //  
 //  MCallRecvL(NumV(a), ID("=="), [NumV(b)]) --> BoolV(true)

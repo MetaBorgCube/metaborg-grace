@@ -10,13 +10,17 @@ signature
   constructors
     StringV : String -> V
 
+  native operators
+  
+    string_call: V * String * V -> V
+
 rules
 
   String(s) --> StringV(s')
     where
       interpolate-string(s) --> s'.
 
-  MCallRecvL(StringV(s1), ID("++(_)"), [StringV(s2)]) --> StringV(s1 ++ s2).
+  resolve-call(l@StringV(_), x, [v]) --> string_call(l, x, v).
 
   MCallRecvL(NumV(i), ID("++(_)"), [StringV(s)]) --> StringV(s1 ++ s)
     where
@@ -25,6 +29,13 @@ rules
   MCallRecvL(StringV(s), ID("++(_)"), [NumV(i)]) --> StringV(s ++ s2)
     where
       int2str(i) --> s2.
+
+  MCallRecvL(l@StringV(_), ID(op), [NumV(i)]) --> string_call(l, op, StringV(s2))
+    where
+      int2str(i) --> s2.
+
+  // weird but minigrace does it
+  MCallRecvL(StringV(_), ID("==(_)"), [NumV(_)]) --> BoolV(false).
 
 signature
   native operators
