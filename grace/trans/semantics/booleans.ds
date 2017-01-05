@@ -8,86 +8,53 @@ imports
 signature
   constructors
     BoolV : Bool -> V
-    
+
+  native operators
+    bool_call: V * String * V -> V
+    bool_call: V * String -> V
+
   rules
-    
+
     Boolean(True()) --> BoolV(true).
-    
     Boolean(False()) --> BoolV(false).
-    
-    MCallRecvL(BoolV(a), ID("not"), []) --> BoolV(false)
+
+    resolve-call(l@BoolV(_), x, []) --> bool_call(l, x).
+    resolve-call(l@BoolV(_), x, [v]) --> bool_call(l, x, v).
+
+    call@MCallL(ID("while(_)do(_)"), [e1, e2]) --> call
       where
-        a == true.
-        
-    MCallRecvL(BoolV(a), ID("not"), []) --> BoolV(true)
+        e1 --> v1@ClosV(_,_,_,_,_);
+        e2 --> v2@ClosV(_,_,_,_,_);
+        resolve-call(v1, "apply", []) --> BoolV(true);
+        resolve-call(v2, "apply", []) --> _.
+
+    MCallL(ID("while(_)do(_)"), [e1, e2]) --> DoneV()
       where
-        a == false.
-    
-    MCallRecvL(BoolV(a), ID("||(_)"), [BoolV(b)]) --> BoolV(a)
+        e1 --> v1@ClosV(_,_,_,_,_);
+        resolve-call(v1, "apply", []) --> BoolV(false).
+
+    MCallRecvL(BoolV(true), ID("ifTrue(_)ifFalse(_)"), [v1, v2]) --> v
       where
-        a == b.
-        
-    MCallRecvL(BoolV(a), ID("||(_)"), [BoolV(b)]) --> BoolV(true)
+        resolve-call(v1, "apply", []) --> v.
+
+    MCallRecvL(BoolV(false), ID("ifTrue(_)ifFalse(_)"), [v1, v2]) --> v
       where
-        a != b.
-            
-    MCallRecvL(BoolV(a), ID("&&(_)"), [BoolV(b)]) --> BoolV(a)
+        resolve-call(v2, "apply", []) --> v.
+
+    MCallRecvL(BoolV(b), ID("ifTrue(_)"), [v1]) --> v
       where
-        a == b.
-        
-    MCallRecvL(BoolV(a), ID("&&(_)"), [BoolV(b)]) --> BoolV(false)
+        case b of {
+          true =>
+            resolve-call(v1, "apply", []) --> v
+          otherwise =>
+            DoneV() => v
+        }.
+
+    MCallRecvL(BoolV(b), ID("ifFalse(_)"), [v1]) --> v
       where
-        a != b.
-    
-    
-    
-    
-//    MCallRecvL(BoolV(true), "ifTrue_ifFalse", [e1, e2]) --> v
-//      where
-//        e1 --> ve1;
-//        e2 --> ve2;
-////        a == true;
-//        ve1 => ObjectRef(r);
-//        S r |- lookup("apply") --> m;
-//        call(m, []) --> v.
-//        
-//    MCallRecvL(BoolV(false), "ifTrue_ifFalse", [e1, e2]) --> v
-//      where
-//        e1 --> ve1;
-//        e2 --> ve2;
-////        a == false;
-//        ve2 => ObjectRef(r);
-//        S r |- lookup("apply") --> m;
-//        call(m, []) --> v.
-//        
-//    MCallRecvL(BoolV(a), "ifTrue_ifFalse", [e1, e2]) --> Error()
-//      where
-//        error("Must give two blocks as arguments to this method") => _.
-//    
-//    
-//    MCallRecvL(BoolV(a), "ifTrue", [e1]) --> v
-//      where
-//        e1 --> ve1;
-//        a == true;
-//        ve1 => ObjectRef(r);
-//        S r |- lookup("apply") --> m;
-//        call(m, []) --> v.
-//        
-//    MCallRecvL(BoolV(a), "ifTrue", [e1]) --> Done()
-//      where
-//        e1 --> ve1;
-//        a == false. 
-//    
-//    MCallRecvL(BoolV(a), "ifFalse", [e1]) --> v
-//      where
-//        e1 --> ve1;
-//        a == false;
-//        ve1 => ObjectRef(r);
-//        S r |- lookup("apply") --> m;
-//        call(m, []) --> v.
-//        
-//    MCallRecvL(BoolV(a), "ifFalse", [e1]) --> Done()
-//      where
-//        e1 --> ve1;
-//        a == true.
-    
+        case b of {
+          true =>
+            DoneV() => v
+          otherwise =>
+            resolve-call(v1, "apply", []) --> v
+        }.
