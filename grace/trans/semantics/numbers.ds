@@ -10,16 +10,16 @@ imports
 signature
   constructors
     NumV : Int -> V
-  
+
   native operators
     num_call: V * String * V -> V
-  
+
 rules
-  
+
   Number(a) --> NumV(string2int(a)).
-  
+
   resolve-call(l@NumV(_), x, [v]) --> num_call(l, x, v).
-     
+
 //  
 //  MCallRecvL(NumV(a), ID("=="), [NumV(b)]) --> BoolV(true)
 //    where

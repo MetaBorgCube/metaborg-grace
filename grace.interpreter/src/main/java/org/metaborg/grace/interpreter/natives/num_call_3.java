@@ -37,10 +37,22 @@ public class num_call_3 extends TermBuild {
 			return doMinus(left, right);
 		case "*(_)":
 			return doTimes(left, right);
+		case "%(_)":
+			return doMod(left, right);
+		case "^(_)":
+			return doPow(left, right);
 		case "==(_)":
 			return doEq(left, right);
 		case "!=(_)":
 			return doNeq(left, right);
+		case ">(_)":
+			return doGreater(left, right);
+		case "<(_)":
+			return doLess(left, right);
+		case ">=(_)":
+			return doGreaterEq(left, right);
+		case "<=(_)":
+			return doLessEq(left, right);
 		default:
 			throw new IllegalArgumentException("operator: '" + op + "' not recognised as operator on number.");
 		}
@@ -57,6 +69,14 @@ public class num_call_3 extends TermBuild {
 	private IVTerm doTimes(NumV_1_Term left, NumV_1_Term right) {
 		return new NumV_1_Term(left.get_1() * right.get_1());
 	}
+	
+	private IVTerm doMod(NumV_1_Term left, NumV_1_Term right) {
+		return new NumV_1_Term(left.get_1() % right.get_1());
+	}
+
+	private IVTerm doPow(NumV_1_Term left, NumV_1_Term right) {
+		return new NumV_1_Term((int) Math.pow(left.get_1(), right.get_1()));
+	}
 
 	private IVTerm doEq(NumV_1_Term left, NumV_1_Term right) {
 		return new BoolV_1_Term(left.get_1() == right.get_1());
@@ -66,6 +86,22 @@ public class num_call_3 extends TermBuild {
 		return new BoolV_1_Term(left.get_1() != right.get_1());
 	}
 
+	private IVTerm doGreater(NumV_1_Term left, NumV_1_Term right) {
+		return new BoolV_1_Term(left.get_1() > right.get_1());
+	}
+
+	private IVTerm doLess(NumV_1_Term left, NumV_1_Term right) {
+		return new BoolV_1_Term(left.get_1() < right.get_1());
+	}
+
+	private IVTerm doGreaterEq(NumV_1_Term left, NumV_1_Term right) {
+		return new BoolV_1_Term(left.get_1() >= right.get_1());
+	}
+
+	private IVTerm doLessEq(NumV_1_Term left, NumV_1_Term right) {
+		return new BoolV_1_Term(left.get_1() <= right.get_1());
+	}
+	
 	public static TermBuild create(SourceSection source, TermBuild left, TermBuild op, TermBuild right) {
 		return new num_call_3(source, left, op, right);
 	}
