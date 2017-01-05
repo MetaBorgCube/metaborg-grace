@@ -69,3 +69,4 @@ rules
   where
     logdebug(s) => _.
 
+  read-dialect(s) --> read_dialect(s).

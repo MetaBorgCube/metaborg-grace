@@ -2,6 +2,7 @@ package org.metaborg.grace.interpreter.natives;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.metaborg.grace.interpreter.generated.graceEntryPoint;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
@@ -24,20 +25,20 @@ public abstract class read_dialect_1 extends TermBuild {
 	@Specialization
 	@TruffleBoundary
 	public ITerm readDialect(String s) {
+//		System.out.println("reading dialect file: " + s);
 		IStrategoTerm term;
+		File dialectFile = new File(new File(new File(new File(new File("src"), "main"), "resources"), "dialects"), s + ".grace");
+		if (dialectFile.exists()) {
+//			System.out.println("file exists!");
+		} else {
+			throw new RuntimeException("Dialect file: '" + s +  "' does not exist.");
+		}
+		
 		try {
-			File fileLocation = new File(".");
-			System.out.println(fileLocation.getCanonicalPath());
-			if (fileLocation.isDirectory()) {
-				for (File f : fileLocation.listFiles()) {
-					System.out.println(f.getCanonicalPath());
-				}
-			}
-
 			term = graceEntryPoint.createTransformer().transform(getContext().getParser().parse(
-				Source.newBuilder(new File(s)).name("Dialect import").mimeType(graceEntryPoint.MIME_TYPE).build()));
+				Source.newBuilder(dialectFile).name("Dialect import").mimeType(graceEntryPoint.MIME_TYPE).build()));
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException("Cannot read dialect file: '" + s + "'.");
 		}
 		ITerm programTerm = getContext().getTermRegistry().parseProgramTerm(term);
 		return programTerm;

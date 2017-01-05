@@ -1,5 +1,11 @@
-dialect "standardGrace"
+method program { } ;
 
-print "5";
+print "executing method from dialect";
 
-//if (true) then { print "foo"; } else { print "bar"; };
+outer.if true then {print "true";} else {print "false";};
+
+print(5 < 5);
+print(5 <= 5);
+print(5 > 5);
+print(5 <= 5);
+print(5 == 5);
