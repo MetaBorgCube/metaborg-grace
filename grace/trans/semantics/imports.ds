@@ -1,0 +1,76 @@
+module trans/semantics/imports
+
+imports
+  trans/semantics/semantics
+  trans/semantics/statements
+  
+signature
+
+  sorts
+    Import
+    
+  sort aliases
+    I = Map(String, Addr)
+  
+  components
+    I : I
+  
+  arrows
+    get-dialect-object(List(Statement)) --> Addr
+    
+rules
+  
+  S S |- get-dialect-object([Dialect(name) | _] : List(Statement)) :: I --> objectAddr :: I'
+    where
+      read-dialect(name) --> Program(code,_);
+      fresh => no-object;
+      case I[name?] of {
+        true =>
+          case I[name] of {
+            1 => // currently evaluating, ignore!
+              // what is the dialect of the outermost dialect? empty.
+              new-object(S) --> objectAddr;
+              I => I'
+            otherwise =>
+              I[name] => objectAddr; //v@FlatObject(_);
+              I => I'
+          }
+        otherwise =>
+          // set dialect as 'currently evaluating'
+          {name |--> 1 : Addr, I} => I'';
+          // actually execute the dialect
+          Program(code, "") :: I'' --> v@RefV(objectAddr);
+          // set dialect name as already read
+          {name |--> objectAddr, I} => I';
+          // remove outerchain from dialect
+          read(objectAddr) --> Obj(_, b, c);
+          update(objectAddr, Obj(no-object : Addr, b, c)) --> _
+        }.
+  
+  get-dialect-object([Expression(ObjectL(_,_,code)) | b] : List(Statement)) -->
+    get-dialect-object(code ++ b). 
+    
+  get-dialect-object([ a | b ] : List(Statement)) --> get-dialect-object(b)
+    where
+      a =!=> Dialect(_). 
+  
+  get-dialect-object([] : List(Statement)) --> addr
+    where
+      get-dialect-object([Dialect("standardGrace")]) --> addr.
+      
+  Import(name, id) :: I --> v :: I'
+    where
+      log("Handling import: " ++ name ++ "'...") --> _;
+      DoneV() => v;
+      I => I'.
+//      read-dialect(name) --> Program(code,_);
+//      case I[name] of {
+//        StoredImport(v@FlatObject(_)) =>
+//          // add slot -> name to v like a constant
+//          DoneV() => v;
+//          I => I'
+//        otherwise =>
+//          code --> v@FlatObject(_);
+//          StoredImport(v) => sd;
+//          {name |--> sd, I} => I'       
+//      }.
