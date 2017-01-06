@@ -1,12 +1,12 @@
 class s {
   def y = 1;
-  method f { y; };
+  method f { self.y; };
 };
 
 def a = object {
-  inherit s;
+  inherit self.s;
   def y = 3;
-  print(f);
+  print(self.f);
 };
 
 // 3

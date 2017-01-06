@@ -21,6 +21,11 @@ rules
 
   MCallRecvL(NumV(_), ID("==(_)"), [StringV(_)]) --> BoolV(false).
 
+  MCallRecvL(NumV(i), ID("++(_)"), [StringV(s)]) --> StringV(s1 ++ s)
+    where
+      log("num ++ string") --> _;
+      int2str(i) --> s1.
+      
   MCallRecvL(l@NumV(_), ID(op), [StringV(s)]) --> num_call(l, op, NumV(i))
     where
       log("check??") --> _;

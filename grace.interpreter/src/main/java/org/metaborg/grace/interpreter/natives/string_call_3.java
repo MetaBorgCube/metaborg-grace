@@ -30,7 +30,6 @@ public class string_call_3 extends TermBuild {
         final StringV_1_Term left = TypesGen.asStringV_1_Term(leftNode.executeGeneric(frame));
         final StringV_1_Term right = TypesGen.asStringV_1_Term(rightNode.executeGeneric(frame));
         final String op = TypesGen.asString(opNode.executeGeneric(frame));
-        System.out.println("string call op: " + op);
         switch (op) {
         case "==(_)":
             return doEq(left, right);
@@ -60,11 +59,9 @@ public class string_call_3 extends TermBuild {
 
     private IVTerm doCmp(final StringV_1_Term left, final StringV_1_Term right, final String op) {
         try {
-        	int leftInt = Integer.parseInt(left.get_1());
+        	Integer.parseInt(left.get_1());
         	try {
-            	int rightInt = Integer.parseInt(right.get_1());
-            	// both can be parsed
-            	return new BoolV_1_Term(doCmpOp(leftInt, rightInt, op));
+            	Integer.parseInt(right.get_1());
             } catch (NumberFormatException fme) {
             	return new BoolV_1_Term(false);
             }
@@ -87,20 +84,6 @@ public class string_call_3 extends TermBuild {
         return new BoolV_1_Term(res);
     }
     
-    private boolean doCmpOp(final int left, final int right, final String op) {
-		switch(op) {
-		case "<(_)":
-			return left < right;
-		case ">(_)":
-			return left < right;
-		case "<=(_)":
-			return left <= right;
-		case ">=(_)":
-			return left >= right;
-		default:
-			throw new RuntimeException("unknown string (parsed ints) compare op");
-		}
-	}
 
     public static TermBuild create(SourceSection source, TermBuild left, TermBuild op, TermBuild right) {
         return new string_call_3(source, left, op, right);

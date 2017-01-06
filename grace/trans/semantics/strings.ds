@@ -16,7 +16,7 @@ signature
 
 rules
 
-  String(s) --> StringV(s')
+  String(s) --> StringV(s)
     where
       interpolate-string(s) --> s'.
 

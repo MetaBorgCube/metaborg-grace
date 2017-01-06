@@ -44,10 +44,8 @@ desugar-case(|liftedname):
 desugar-case(|liftedname):
   Case(CIdentifier(iden), a, body) -> 
     <desugar-case(|liftedname)>
-      Case(ExpTyped(iden, TypeID(ID("Unknown"), NoTypeArg())), a, body)
-      where
-        <debug(!"this is the one right?")> a
-
+      Case(ExpTyped(iden, TypeID(ID("Unknown"), NoTypeArg())), a, body).
+      
 desugar-case(|liftedname):
   Case(ExpTyped(WildCard(), type), a, body) ->
     <desugar-case(|liftedname)> Case(ExpTyped(ID(<new>), type), a, body)
