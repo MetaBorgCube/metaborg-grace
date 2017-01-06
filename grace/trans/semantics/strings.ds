@@ -20,19 +20,15 @@ rules
     where
       interpolate-string(s) --> s'.
 
-  resolve-call(l@StringV(_), x, [v]) --> string_call(l, x, v).
-
-  MCallRecvL(NumV(i), ID("++(_)"), [StringV(s)]) --> StringV(s1 ++ s)
+  resolve-call(NumV(i), op@"++(_)", [s2@StringV(_)]) --> string_call(StringV(s1), op, s2)
     where
       int2str(i) --> s1.
 
-  MCallRecvL(StringV(s), ID("++(_)"), [NumV(i)]) --> StringV(s ++ s2)
+  resolve-call(s1@StringV(_), op, [NumV(i)]) --> string_call(s1, op, StringV(s2))
     where
       int2str(i) --> s2.
 
-  MCallRecvL(l@StringV(_), ID(op), [NumV(i)]) --> string_call(l, op, StringV(s2))
-    where
-      int2str(i) --> s2.
+  resolve-call(l@StringV(_), x, [v]) --> string_call(l, x, v).
 
   // weird but minigrace does it
   MCallRecvL(StringV(_), ID("==(_)"), [NumV(_)]) --> BoolV(false).
