@@ -77,6 +77,7 @@ rules
           I => I'
         otherwise =>
           read-import(name) --> Program(code,_);
-          Program(code, "") :: H {}, L {}, VH {} --> v@RefV(objectAddr);
-          {name |--> objectAddr, I} => I'
+          next() --> base;
+          S base , O base |- Program(code, "") :: I --> RefV(objectAddr) :: I'';
+          {name |--> objectAddr, I''} => I'
       }.

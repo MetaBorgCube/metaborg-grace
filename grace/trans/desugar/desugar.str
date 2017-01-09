@@ -203,5 +203,8 @@ rules
     
   desugar-unquote-strings:
     Dialect(s) -> Dialect(<unquote(?'"')> s)
+
+  desugar-unquote-strings:
+    Import(s, b) -> Import(<unquote(?'"')> s, b)
     
   desugar-fail: a -> <fail>

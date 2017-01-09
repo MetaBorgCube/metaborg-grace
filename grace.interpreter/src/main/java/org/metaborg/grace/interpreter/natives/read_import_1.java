@@ -23,8 +23,9 @@ public abstract class read_import_1 extends TermBuild {
 
 	@Specialization
 	@TruffleBoundary
-	public ITerm readDialect(String s) {
+	public ITerm readImport(String s) {
 		IStrategoTerm term;
+		// TODO actually check for current working directory of current grace file.
 		File importFile = new File(s + ".grace");
 		if (!importFile.exists()) {
 			throw new RuntimeException("Import file: '" + s +  "' does not exist.");
@@ -41,6 +42,6 @@ public abstract class read_import_1 extends TermBuild {
 	}
 	
 	public static TermBuild create(SourceSection source, TermBuild tb) {
-		return read_dialect_1NodeGen.create(source, tb);
+		return read_import_1NodeGen.create(source, tb);
 	}
 }
