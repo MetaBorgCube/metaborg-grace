@@ -6,42 +6,43 @@ imports
   
 signature
 
-  sorts
-    Import
-    
+//  sorts
+//    Import
+//    
   sort aliases
-    I = Map(String, Addr)
+    Import = Map(String, Addr)
   
   components
-    I : I
+    D : Import
+    I : Import
   
   arrows
     get-dialect-object(List(Statement)) --> Addr
     
 rules
   
-  S S |- get-dialect-object([Dialect(name) | _] : List(Statement)) :: I --> objectAddr :: I'
+  S S |- get-dialect-object([Dialect(name) | _] : List(Statement)) :: D --> objectAddr :: D'
     where
       read-dialect(name) --> Program(code,_);
       fresh => no-object;
-      case I[name?] of {
+      case D[name?] of {
         true =>
-          case I[name] of {
+          case D[name] of {
             1 => // currently evaluating, ignore!
               // what is the dialect of the outermost dialect? empty.
               new-object(S) --> objectAddr;
-              I => I'
+              D => D'
             otherwise =>
-              I[name] => objectAddr; //v@FlatObject(_);
-              I => I'
+              D[name] => objectAddr; //v@FlatObject(_);
+              D => D'
           }
         otherwise =>
           // set dialect as 'currently evaluating'
-          {name |--> 1 : Addr, I} => I'';
+          {name |--> 1 : Addr, D} => D'';
           // actually execute the dialect
-          Program(code, "") :: I'' --> v@RefV(objectAddr);
+          Program(code, "") :: D'' --> v@RefV(objectAddr);
           // set dialect name as already read
-          {name |--> objectAddr, I} => I';
+          {name |--> objectAddr, D} => D';
           // remove outerchain from dialect
           read(objectAddr) --> Obj(_, b, c);
           update(objectAddr, Obj(no-object : Addr, b, c)) --> _
