@@ -6,11 +6,13 @@ import java.util.regex.Pattern;
 import org.metaborg.grace.interpreter.generated.TypesGen;
 import org.metaborg.grace.interpreter.generated.graceEntryPoint;
 import org.metaborg.grace.interpreter.generated.graceLanguage;
+import org.metaborg.grace.interpreter.generated.graceTermRegistry;
 import org.metaborg.grace.interpreter.generated.terms.IProgramTerm;
 import org.metaborg.grace.interpreter.generated.terms.IVTerm;
 import org.metaborg.grace.interpreter.generated.terms.build.Program_2_TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -64,12 +66,18 @@ public class interpolate_string_1 extends TermBuild {
 		IStrategoTerm term;
 		term = graceEntryPoint.createTransformer().transform(getContext().getParser().parse(
 				Source.newBuilder(s).name("string interpolation code execution").mimeType(graceEntryPoint.MIME_TYPE).build()));
-//		IProgramTerm programTerm = (IProgramTerm) getContext().getTermRegistry().parseProgramTerm(term);
-        TermBuild tb = Program_2_TermBuild.create((IStrategoAppl) term, f.getFrameDescriptor());
+		ITerm iterm = getContext().getTermRegistry().parseProgramTerm(term);
 		
+		IStrategoAppl isa = (IStrategoAppl) iterm.getStrategoTerm();
+
+		//		IProgramTerm programTerm = (IProgramTerm) getContext().getTermRegistry().parseProgramTerm(term);
+		
+		System.out.println(Tools.constructorName(term));
+		
+		TermBuild tb = TermBuild.create(isa, f.getFrameDescriptor());
+        
         //TODO how to execute programterm in current frame
-		ITerm it = getContext().getTermRegistry().parseProgramTerm(term);
-		
+//		ITerm it = getContext().getTermRegistry().parseProgramTerm(term);
 //		TypesGen.expectIProgramTerm(tb.executeGeneric(f));
 		IVTerm ivterm = TypesGen.asIVTerm(tb.executeGeneric(f));
 		return ivterm.toString();

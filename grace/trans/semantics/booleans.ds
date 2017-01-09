@@ -20,6 +20,10 @@ signature
 
     resolve-and-call(l@BoolV(_), x, []) --> bool_call(l, x).
     resolve-and-call(l@BoolV(_), x, [v]) --> bool_call(l, x, v).
+    
+    MCallRecvL(v1@BoolV(_), ID(op), [BlockL([], _, [Expression(e2)])]) --> bool_call(v1, op, v2)
+      where
+        e2 --> v2@BoolV(_).
 
     call@MCallL(ID("while(_)do(_)"), [e1, e2]) --> call
       where
@@ -30,7 +34,7 @@ signature
 
     MCallL(ID("while(_)do(_)"), [e1, e2]) --> DoneV()
       where
-        e1 --> v1@ClosV(_,_,_,_,_, _);
+        e1 --> v1@ClosV(_,_,_,_,_,_);
         resolve-and-call(v1, "apply", []) --> BoolV(false).
 
     MCallRecvL(BoolV(true), ID("ifTrue(_)ifFalse(_)"), [v1, v2]) --> v

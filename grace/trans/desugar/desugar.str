@@ -9,6 +9,7 @@ imports
     trans/desugar/desugar-common
     trans/desugar/desugar-matchcase
     trans/desugar/lower
+    trans/desugar/unquote
 
 rules
   
@@ -74,9 +75,8 @@ rules
       [ MethodID(ID(name), typeArg, Params(ps)) ]
     where
       name := <concat-strings> [n, <param-string> ps];
-      <not-substring(!"(")> n;
-      <debug(!"did the not-substring thing")> name
-      
+      <not-substring(!"(")> n
+
   desugar-flatten-methodID: [ MethodID(ID(n1), typeArg1, Params(p1)),
                               MethodID(ID(n2), typeArg2, Params(p2)) | mids ] ->
       [MethodID(ID(name), types, Params(ps)) | mids ]
@@ -192,17 +192,5 @@ rules
    
   desugar-block:
     Block(a) -> BlockWParams(BlockParams([]), a) 
-
-  desugar-unquote-strings:
-    String(s) -> String(<unquote(?'"')> s)
-
-  desugar-unquote-strings:
-    ArgString(s) -> ArgString(<unquote(?'"')> s)
-    
-  desugar-unquote-strings:
-    CString(s) -> CString(<unquote(?'"')> s)
-    
-  desugar-unquote-strings:
-    Dialect(s) -> Dialect(<unquote(?'"')> s)
     
   desugar-fail: a -> <fail>

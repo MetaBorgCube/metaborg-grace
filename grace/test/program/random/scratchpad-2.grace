@@ -1,4 +1,2 @@
-a;
-//-1001 < -1000; 
--a;
-outer.do.outer;
+def interpolation = 124;
+"string { interpolation; } dus.";

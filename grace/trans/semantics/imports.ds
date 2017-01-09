@@ -6,42 +6,53 @@ imports
   
 signature
 
-  sorts
-    Import
-    
+//  sorts
+//    Import
+//    
   sort aliases
-    I = Map(String, Addr)
+    Import = Map(String, Addr)
   
   components
-    I : I
+    D : Import
+    I : Import
   
   arrows
     get-dialect-object(List(Statement)) --> Addr
+    get-import-object(String) --> Addr
+    read-dialect(String) --> AST
+    read-import(String) --> AST
+    
+  native operators
+    read_dialect: String -> AST
+    read_import: String -> AST
     
 rules
+
+  read-dialect(s) --> read_dialect(s).
+  read-import(s) --> read_import(s).
   
-  S S |- get-dialect-object([Dialect(name) | _] : List(Statement)) :: I --> objectAddr :: I'
+  S S |- get-dialect-object([Dialect(name) | _] : List(Statement)) :: D --> objectAddr :: D'
     where
       read-dialect(name) --> Program(code,_);
       fresh => no-object;
-      case I[name?] of {
+      case D[name?] of {
         true =>
-          case I[name] of {
-            1 => // currently evaluating, ignore!
+          case D[name] of {
+            1 => // currently evaluating, ignore! TODO make this more elegant
               // what is the dialect of the outermost dialect? empty.
               new-object(S) --> objectAddr;
-              I => I'
+              D => D'
             otherwise =>
-              I[name] => objectAddr; //v@FlatObject(_);
-              I => I'
+              D[name] => objectAddr; //v@FlatObject(_);
+              D => D'
           }
         otherwise =>
           // set dialect as 'currently evaluating'
-          {name |--> 1 : Addr, I} => I'';
+          {name |--> 1 : Addr, D} => D'';
           // actually execute the dialect
-          Program(code, "") :: I'' --> v@RefV(objectAddr);
+          Program(code, "") :: D'' --> v@RefV(objectAddr);
           // set dialect name as already read
-          {name |--> objectAddr, I} => I';
+          {name |--> objectAddr, D} => D';
           // remove outerchain from dialect
           read(objectAddr) --> Obj(_, b, c);
           update(objectAddr, Obj(no-object : Addr, b, c)) --> _
@@ -57,20 +68,16 @@ rules
   get-dialect-object([] : List(Statement)) --> addr
     where
       get-dialect-object([Dialect("standardGrace")]) --> addr.
-      
-  Import(name, id) :: I --> v :: I'
+  
+  get-import-object(name) :: I --> objectAddr :: I'
     where
-      log("Handling import: " ++ name ++ "'...") --> _;
-      DoneV() => v;
-      I => I'.
-//      read-dialect(name) --> Program(code,_);
-//      case I[name] of {
-//        StoredImport(v@FlatObject(_)) =>
-//          // add slot -> name to v like a constant
-//          DoneV() => v;
-//          I => I'
-//        otherwise =>
-//          code --> v@FlatObject(_);
-//          StoredImport(v) => sd;
-//          {name |--> sd, I} => I'       
-//      }.
+      case I[name?] of {
+        true =>
+          I[name] => objectAddr;
+          I => I'
+        otherwise =>
+          read-import(name) --> Program(code,_);
+          next() --> base;
+          S base , O base |- Program(code, "") :: I --> RefV(objectAddr) :: I'';
+          {name |--> objectAddr, I''} => I'
+      }.

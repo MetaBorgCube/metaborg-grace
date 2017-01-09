@@ -15,35 +15,33 @@ import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChild(value = "tb", type = TermBuild.class)
-public abstract class read_dialect_1 extends TermBuild {
+public abstract class read_import_1 extends TermBuild {
 
-	public read_dialect_1(SourceSection source) {
+	public read_import_1(SourceSection source) {
 		super(source);
 	}
 
 	@Specialization
 	@TruffleBoundary
-	public ITerm readDialect(String s) {
+	public ITerm readImport(String s) {
 		IStrategoTerm term;
-		File dialectFile = new File(new File(new File(new File(new File("src"), "main"), "resources"), "dialects"), s + ".grace");
-		if (!dialectFile.exists()) {
-			dialectFile = new File(s + ".grace");
-			if (!dialectFile.exists()) {
-				throw new RuntimeException("Dialect file: '" + s +  "' does not exist.");
-			}
+		// TODO actually check for current working directory of current grace file.
+		File importFile = new File(s + ".grace");
+		if (!importFile.exists()) {
+			throw new RuntimeException("Import file: '" + s +  "' does not exist.");
 		}
 		
 		try {
 			term = graceEntryPoint.createTransformer().transform(getContext().getParser().parse(
-				Source.newBuilder(dialectFile).name("Dialect import: '" + s + "'").mimeType(graceEntryPoint.MIME_TYPE).build()));
+				Source.newBuilder(importFile).name("File import: '" + s + "'").mimeType(graceEntryPoint.MIME_TYPE).build()));
 		} catch (IOException e) {
-			throw new RuntimeException("Cannot read dialect file: '" + s + "'.");
+			throw new RuntimeException("Cannot read import file: '" + s + "'.");
 		}
 		ITerm programTerm = getContext().getTermRegistry().parseProgramTerm(term);
 		return programTerm;
 	}
 	
 	public static TermBuild create(SourceSection source, TermBuild tb) {
-		return read_dialect_1NodeGen.create(source, tb);
+		return read_import_1NodeGen.create(source, tb);
 	}
 }

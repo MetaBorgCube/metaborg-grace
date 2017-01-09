@@ -13,6 +13,7 @@ imports
   trans/semantics/lineups
   trans/semantics/functions
   trans/semantics/statements
+  trans/semantics/imports
 
 signature
   sorts
@@ -103,6 +104,14 @@ rules
   [Declaration(VariableL(WildCard(), _, _, e)) | cs] : Code -member-> [Expression(e) | cs']
   where
     cs -member-> cs'.
+  
+  [Import(name, ID(x), _) | cs] : Code -member-> cs'
+    where
+      add-slot(x) --> i;
+      get-import-object(name) --> iAddr;
+      write-slot(i, RefV(iAddr)) --> _;
+      install-method(field-getter(x, i)) --> _;
+      cs -member-> cs'.
   
   [Declaration(ConstantL(ID(x), _, _, e)) | cs] : Code -member-> [SlotWrite(i, e) | cs']
   where
