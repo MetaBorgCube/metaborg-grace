@@ -51,7 +51,7 @@ rules
     e --> RefV(S).
 
   BlockL(params, _, code) --> method-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
-  
+
 rules /* closure construction */
 
   method-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L') :: L

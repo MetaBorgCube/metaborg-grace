@@ -18,6 +18,7 @@ signature
   
   arrows
     get-dialect-object(List(Statement)) --> Addr
+    get-import-object(String) --> Addr
     read-dialect(String) --> AST
     read-import(String) --> AST
     
@@ -28,6 +29,7 @@ signature
 rules
 
   read-dialect(s) --> read_dialect(s).
+  read-import(s) --> read_import(s).
   
   S S |- get-dialect-object([Dialect(name) | _] : List(Statement)) :: D --> objectAddr :: D'
     where
@@ -66,20 +68,15 @@ rules
   get-dialect-object([] : List(Statement)) --> addr
     where
       get-dialect-object([Dialect("standardGrace")]) --> addr.
-      
-  Import(name, id) :: I --> v :: I'
+  
+  get-import-object(name) :: I --> objectAddr :: I'
     where
-      log("Handling import: " ++ name ++ "'...") --> _;
-      DoneV() => v;
-      I => I'.
-//      read-dialect(name) --> Program(code,_);
-//      case I[name] of {
-//        StoredImport(v@FlatObject(_)) =>
-//          // add slot -> name to v like a constant
-//          DoneV() => v;
-//          I => I'
-//        otherwise =>
-//          code --> v@FlatObject(_);
-//          StoredImport(v) => sd;
-//          {name |--> sd, I} => I'       
-//      }.
+      case I[name?] of {
+        true =>
+          I[name] => objectAddr;
+          I => I'
+        otherwise =>
+          read-import(name) --> Program(code,_);
+          Program(code, "") :: H {}, L {}, VH {} --> v@RefV(objectAddr);
+          {name |--> objectAddr, I} => I'
+      }.
