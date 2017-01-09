@@ -18,7 +18,7 @@ rules
 
   Number(a) --> NumV(string2int(a)).
 
-  resolve-call(l@NumV(_), x, [v]) --> num_call(l, x, v).
+  resolve-and-call(l@NumV(_), x, [v]) --> num_call(l, x, v).
 
 //  
 //  MCallRecvL(NumV(a), ID("=="), [NumV(b)]) --> BoolV(true)

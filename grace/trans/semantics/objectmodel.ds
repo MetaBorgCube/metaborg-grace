@@ -82,7 +82,7 @@ rules
   where
     clos -member-> clos'.
   
-  Closure(O, code) -member-> Closure(O, code')
+  Closure(O, code) -member-> Closure(O, current-method-names(), code')
   where
     O |- code -member-> code'.
     
@@ -139,9 +139,9 @@ rules
   where
     clos -obji-> _.
   
-  Closure(O, code) -obji-> U()
+  Closure(O, M, code) -obji-> U()
   where
-    O |- code -obji-> _.
+    M, O |- code -obji-> _.
     
   [] : Code -obji-> U().
   
@@ -188,7 +188,8 @@ signature
     Closures = List(Closure)
 
   constructors
-    Closure: Addr * Code -> Closure    
+    Closure: Addr * Code -> Closure
+    Closure: Addr * List(String) * Code -> Closure
     FlatObject: List(Closure) -> V
 
   arrows
@@ -196,7 +197,7 @@ signature
 
 rules
 
-  S, P Flatten() |- ObjectL(inherit, [], code) --> FlatObject(closures-inherited ++ [Closure(S, code)]) //FlatObject(closures-inherited ++ [Closure(O, code)])
+  S, P Flatten() |- ObjectL(inherit, [], code) --> FlatObject(closures-inherited ++ [Closure(S, code)])
   where
     O S, P Flatten() |- inherit --> FlatObject(closures-inherited).
 
@@ -204,13 +205,13 @@ rules
   where
     P Exec() |- e --> recv;
     P Exec() |- es --> vs;
-    P Flatten() |- resolve-call(recv, x, vs) --> v.
+    P Flatten() |- resolve-and-call(recv, x, vs) --> v.
 
   NoInherit() --> FlatObject([]).
   
-  Inherit(e, _) --> v // TODO this is where to check whether the inherit expression actually returns a fresh object
+  Inherit(e, _) --> v
   where
-    e --> v.
+    e --> v@FlatObject(_).  // TODO this is where to check whether the inherit expression actually returns a fresh object
 
 /* ======== OBJECT META-FUNCTIONS ========= */
 
@@ -229,6 +230,7 @@ signature
     
     current-self() --> V
     current-outer() --> V
+    current-method-names() --> List(String)
     
     outer(Addr) --> V
     self(Addr) --> V
@@ -277,6 +279,10 @@ rules
     read(S) --> Obj(O, slots, methods);
     log("S: " ++ str(S) ++ " O " ++ str(O) ++ " new method: " ++ x ++ " -> " ++ str(v)) --> _;
     update(S, Obj(O, slots, {x |--> v, methods})) --> _.
+  
+  S |- current-method-names() --> allkeys(methods)
+  where
+    read(S) --> Obj(_, _, methods).
   
   S, O |- lookup-method(S', x) --> v
   where
