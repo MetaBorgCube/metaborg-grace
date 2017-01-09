@@ -19,39 +19,18 @@ rules
 
   Number(a) --> NumV(string2int(a)).
 
-  MCallRecvL(NumV(_), ID("==(_)"), [StringV(_)]) --> BoolV(false).
+  resolve-and-call(NumV(_), "==(_)", [StringV(_)]) --> BoolV(false).
+  
+  resolve-and-call(NumV(i), "++(_)", [StringV(s)]) --> StringV(s1 ++ s)
+  where
+    int2str(i) --> s1.
 
-  MCallRecvL(NumV(i), ID("++(_)"), [StringV(s)]) --> StringV(s1 ++ s)
-    where
-      log("num ++ string") --> _;
-      int2str(i) --> s1.
-      
-  MCallRecvL(l@NumV(_), ID(op), [StringV(s)]) --> num_call(l, op, NumV(i))
-    where
-      log("check??") --> _;
-      string2int(s) --> i.
+  resolve-and-call(l@NumV(_), op, [StringV(s)]) --> num_call(l, op, NumV(i))
+  where
+    log("check??") --> _;
+    string2int(s) --> i.
 
   resolve-and-call(l@NumV(_), x, [v]) --> num_call(l, x, v).
+  
   resolve-and-call(l@NumV(_), x, []) --> num_call(l, x).
 
-//  
-//  MCallRecvL(NumV(a), ID("=="), [NumV(b)]) --> BoolV(true)
-//    where
-//      a == b.
-//  
-//  MCallRecvL(NumV(a), ID("=="), [NumV(b)]) --> BoolV(false)
-//    where
-//      a != b.
-//      
-//  MCallRecvL(NumV(a), ID("!="), [NumV(b)]) --> BoolV(false)
-//    where
-//      a == b.
-//      
-//  MCallRecvL(NumV(a), ID("!="), [NumV(b)]) --> BoolV(true)
-//    where
-//      a != b.
-//  
-//  MCallRecvL(NumV(a), ID(op), [NumV(b)]) -->
-//      NumV(nativeIBinOp(op, a, b)).
-        
-    

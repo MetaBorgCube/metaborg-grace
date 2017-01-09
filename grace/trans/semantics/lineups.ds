@@ -10,5 +10,4 @@ signature
     
 rules
 
-   LineupExp(Lineup(es: List(Exp))) --> LineupV(vs)
-     where es --> vs.
+   LineupExp(Lineup(vs)) --> LineupV(vs).
