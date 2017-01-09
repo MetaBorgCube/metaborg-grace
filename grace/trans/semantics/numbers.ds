@@ -19,19 +19,18 @@ rules
 
   Number(a) --> NumV(string2int(a)).
 
-  MCallRecvL(NumV(_), ID("==(_)"), [StringV(_)]) --> BoolV(false).
+  resolve-call(NumV(_), "==(_)", [StringV(_)]) --> BoolV(false).
 
-  MCallRecvL(NumV(i), ID("++(_)"), [StringV(s)]) --> StringV(s1 ++ s)
+  resolve-call(NumV(i), "++(_)", [StringV(s)]) --> StringV(s1 ++ s)
     where
-      log("num ++ string") --> _;
       int2str(i) --> s1.
+
+  resolve-call(l@NumV(_), x, [v@NumV(_)]) --> num_call(l, x, v).
       
-  MCallRecvL(l@NumV(_), ID(op), [StringV(s)]) --> num_call(l, op, NumV(i))
+  resolve-call(l@NumV(_), op, [StringV(s)]) --> num_call(l, op, NumV(i))
     where
-      log("check??") --> _;
       string2int(s) --> i.
 
-  resolve-call(l@NumV(_), x, [v]) --> num_call(l, x, v).
   resolve-call(l@NumV(_), x, []) --> num_call(l, x).
 
 //  
