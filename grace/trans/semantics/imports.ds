@@ -18,8 +18,16 @@ signature
   
   arrows
     get-dialect-object(List(Statement)) --> Addr
+    read-dialect(String) --> AST
+    read-import(String) --> AST
+    
+  native operators
+    read_dialect: String -> AST
+    read_import: String -> AST
     
 rules
+
+  read-dialect(s) --> read_dialect(s).
   
   S S |- get-dialect-object([Dialect(name) | _] : List(Statement)) :: D --> objectAddr :: D'
     where
@@ -28,7 +36,7 @@ rules
       case D[name?] of {
         true =>
           case D[name] of {
-            1 => // currently evaluating, ignore!
+            1 => // currently evaluating, ignore! TODO make this more elegant
               // what is the dialect of the outermost dialect? empty.
               new-object(S) --> objectAddr;
               D => D'
