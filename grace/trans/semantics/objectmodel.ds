@@ -105,7 +105,7 @@ rules
   where
     cs -member-> cs'.
   
-  [Import(name, ID(x)) | cs] : Code -member-> cs'
+  [Import(name, ID(x), _) | cs] : Code -member-> cs'
     where
       add-slot(x) --> i;
       get-import-object(name) --> iAddr;

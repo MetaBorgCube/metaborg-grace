@@ -9,6 +9,7 @@ imports
     trans/desugar/desugar-common
     trans/desugar/desugar-matchcase
     trans/desugar/lower
+    trans/desugar/unquote
 
 rules
   
@@ -191,20 +192,5 @@ rules
    
   desugar-block:
     Block(a) -> BlockWParams(BlockParams([]), a) 
-
-  desugar-unquote-strings:
-    String(s) -> String(<unquote(?'"')> s)
-
-  desugar-unquote-strings:
-    ArgString(s) -> ArgString(<unquote(?'"')> s)
-    
-  desugar-unquote-strings:
-    CString(s) -> CString(<unquote(?'"')> s)
-    
-  desugar-unquote-strings:
-    Dialect(s) -> Dialect(<unquote(?'"')> s)
-
-  desugar-unquote-strings:
-    Import(s, b) -> Import(<unquote(?'"')> s, b)
     
   desugar-fail: a -> <fail>
