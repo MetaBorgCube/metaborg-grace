@@ -1,0 +1,52 @@
+module trans/semantics/qualify/implicits
+
+imports
+  src-gen/ds-signatures/grace-lowered-sig
+  src-gen/ds-signatures/grace-sig
+
+imports
+  trans/semantics/runtime/natives
+  trans/semantics/qualify/qualify
+
+signature
+  arrows
+    make-qualified-call(Exp, Level, Level) --> AST
+    
+rules
+
+  m@MCallL(ID(n), _) :: QOM, QLM -q-> m
+    where
+      QOM[n?] == true;
+      QLM[n?] == true;
+      log("implicit: '" ++ n ++ "'.") --> _;
+      halt-error("Declared as both local and field: ", n) --> _.
+  
+  QOL |- MCallL(id@ID(n), es) :: QOM, QLM -q-> m : Exp
+    where
+      QOM[n?] == true;
+      QLM[n?] == false;
+      log("implicit: '" ++ n ++ "'.") --> _;
+      log("found: '" ++ n ++ "' in object, level: " ++ int2string(QOM[n]) ++ " own level: " ++ int2string(QOL)) --> _;
+      es -q-> es';
+      make-qualified-call(MCallL(id, es'), QOL, QOM[n]) --> m;
+      log("done handling implicit: " ++ n ++ " gen: " ++ str(m)) --> _.
+  
+  QOL |- m@MCallL(id@ID(n), es) :: QOM, QLM -q-> m
+    where
+      QOM[n?] == false;
+      QLM[n?] == true;
+      log("implicit: '" ++ n ++ "'.") --> _;
+      log("found: '" ++ n ++ "' in local, level: " ++ int2string(QOL)) --> _;
+      es -q-> es';
+      MCallL(id, es') => m;
+      log("done handling implicit: " ++ n ++ " gen: " ++ str(m)) --> _.
+  
+  MCallL(id@ID(n), es) :: QOM, QLM -q-> m'
+    where
+      QOM[n?] == false;
+      QLM[n?] == false;
+      log("implicit: '" ++ n ++ "'.") --> _;
+      log("Cannot qualify method: " ++ n) --> _;
+      es -q-> es';
+      MCallL(id, es') => m';
+      log("done handling implicit: " ++ n ++ " gen: " ++ str(m')) --> _.

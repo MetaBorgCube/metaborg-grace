@@ -1,0 +1,92 @@
+module trans/semantics/qualify/qualify
+
+imports
+  src-gen/ds-signatures/grace-lowered-sig
+  src-gen/ds-signatures/grace-sig
+
+imports
+  trans/semantics/runtime/natives
+  trans/semantics/qualify/implicits
+  trans/semantics/qualify/generate
+  trans/semantics/qualify/declarations
+  
+signature
+  sorts
+    QualifyContext
+    
+  sort aliases
+    Level = Int
+    NameMap = Map(String, Int)
+    LocalMap = Map(String, Int)
+  
+  components
+    QC  : QualifyContext
+    QOL : Level // object level
+    QOM : NameMap // object name map
+    QLM : LocalMap // locals name list
+
+  constructors
+    ProgramQC : QualifyContext
+    MethodQC : QualifyContext
+    ObjectQC : QualifyContext
+
+  arrows
+    Program -qualify-> Program
+    
+    List(Statement) -q-> List(Statement)
+    List(Exp) -q-> List(Exp)
+    List(Use) -q-> List(Use)
+    Declaration -q-> Declaration
+    Statement -q-> Statement
+    Exp -q-> Exp
+    Inherit -q-> Inherit
+    Use -q-> Use
+
+rules
+
+  Program(code, b) -qualify-> Program(code', b)
+    where
+      log("program, level: " ++ int2string(0) ++ ".") --> _;
+      QC ProgramQC(), QOL 0 |- code :: QOM {}, QLM {} -q-> code'.
+  
+  [] : List(Statement) -q-> [] : List(Statement).
+  [c | cs] : List(Statement) -q-> [c' | cs'] : List(Statement)
+  where
+    c -q-> c';
+    cs -q-> cs'.
+    
+  [] : List(Exp) -q-> [] : List(Exp).
+  [e | es] : List(Exp) -q-> [e' | es'] : List(Exp)
+  where
+    e -q-> e';
+    es -q-> es'.
+    
+  [] : List(Use) -q-> [] : List(Use).
+  [u | us] : List(Use) -q-> [u' | us'] : List(Use)
+  where
+    u -q-> u';
+    us -q-> us'.
+  
+  Expression(e) -q-> Expression(e')
+    where
+      e -q-> e'.
+  Declaration(d) -q-> Declaration(d')
+    where
+      d -q-> d'.
+  
+  MCallL(id@ID("print(_)"), [e]) -q-> MCallL(id, [e'])
+    where
+      e -q-> e'.
+  
+  MCallRecvL(e, id, es) -q-> MCallRecvL(e', id, es')
+    where
+      e -q-> e';
+      es -q-> es'.
+  
+  ni@NoInherit() -q-> ni.
+  
+  Inherit(e, anns) -q-> Inherit(e', anns)
+    where
+      e -q-> e'.
+  
+  e : Exp -q-> e.

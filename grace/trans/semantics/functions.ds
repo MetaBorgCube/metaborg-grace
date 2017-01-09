@@ -39,7 +39,9 @@ rules
     e --> v;
     update-local(ID(str-rm-suffix(x, bind_suffix)), v) --> _.
 
-  MCallL(ID(x), []) --> read-local(x).
+  MCallL(ID(x), []) --> read-local(x)
+    where
+      log("reading local: " ++ x) --> _.
   
   P Exec() |- MCallRecvL(e, ID(x), es) --> resolve-call(v, x, vs)
   where

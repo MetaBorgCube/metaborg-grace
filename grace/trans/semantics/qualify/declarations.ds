@@ -1,0 +1,52 @@
+module trans/semantics/qualify/declarations
+
+imports
+  src-gen/ds-signatures/grace-lowered-sig
+  src-gen/ds-signatures/grace-sig
+
+imports
+  trans/semantics/runtime/natives
+  trans/semantics/qualify/qualify
+  
+signature
+  arrows
+    add-names(NameMap, List(Identifier), Level) --> NameMap
+  
+rules
+  /* Constants */
+  QC ObjectQC(), QOL |- ConstantL(id@ID(n), type, anns, e) :: QOM -q->
+      ConstantL(id, type, anns, e') :: QOM {n |--> QOL, QOM}
+    where
+      e -q-> e'.   
+  QC MethodQC(), QOL |- ConstantL(id@ID(n), type, anns, e) :: QLM -q->
+      ConstantL(id, type, anns, e') :: QLM { n |--> QOL, QLM}
+    where
+      e -q-> e'.
+      
+  /* Variables */ 
+  QC ObjectQC(), QOL |- VariableL(id@ID(n), type, anns, e) :: QOM -q->
+      ConstantL(id, type, anns, e') :: QOM {n |--> QOL, QOM}
+    where
+      e -q-> e'.   
+  QC MethodQC(), QOL |- VariableL(id@ID(n), type, anns, e) :: QLM -q->
+      ConstantL(id, type, anns, e') :: QLM { n |--> QOL, QLM}
+    where
+      e -q-> e'. 
+  
+  /* Methods */
+  QC ObjectQC(), QOL |- MethodL(id@ID(n), targs, anns, args, atypes, type, cs) :: QOM, QLM -q->
+      MethodL(id, targs, anns, args, atypes, type, cs') :: QOM {n |--> QOL, QOM}
+    where
+      log("method, level: " ++ int2string(QOL) ++ ".") --> _;
+      QC MethodQC() |- cs :: QLM add-names(QLM, args, QOL) -q-> cs'.
+  
+  /* Objects */
+  ObjectL(inh, tr, cs) :: QOL i -q-> ObjectL(inh', tr', cs')
+    where
+      log("object, level: " ++ int2string(i) ++ ".") --> _;
+      inh -q-> inh';
+      tr -q-> tr';
+      QC ObjectQC(), QOL addI(i, 1) |- cs -q-> cs'.
+
+  add-names(nm, [], _) --> nm.
+  add-names(nm, [ID(a) | as], i) --> add-names({a |--> i, nm}, as, i).
