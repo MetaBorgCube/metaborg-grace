@@ -1,23 +1,5 @@
-def a = 24;
-print(a);
-object {
-    print(a);
-    object {
-        print(a);
-        object{
-            method f(b) {
-               print(a);
-               print(b);
-               object {
-                 method g(c) {
-                     print(a);
-                     print(b);
-                     print(c);
-                 };
-                 g(85);
-               };
-            };
-            f(235);
-        };
-    };
-};
+
+var x := 5;
+
+
+while { x > 0; } do { x := x -1; print "hey";};

@@ -26,7 +26,7 @@ rules
   S S |- p@Program(code, _) --> v
     where
       get-dialect-object(code) --> s';
-      p -qualify-> Program(code', _);
+      p -qualify-> p@Program(code', _);
       S s', O S |- code' --> v.
 
   [] : Code --> DoneV().
