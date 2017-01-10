@@ -25,11 +25,11 @@ rules
       
   /* Variables */ 
   QC ObjectQC(), QOL |- VariableL(id@ID(n), type, anns, e) :: QOM -q->
-      ConstantL(id, type, anns, e') :: QOM {n |--> QOL, QOM}
+      VariableL(id, type, anns, e') :: QOM {n |--> QOL, QOM}
     where
       e -q-> e'.   
   QC MethodQC(), QOL |- VariableL(id@ID(n), type, anns, e) :: QLM -q->
-      ConstantL(id, type, anns, e') :: QLM { n |--> QOL, QLM}
+      VariableL(id, type, anns, e') :: QLM { n |--> QOL, QLM}
     where
       e -q-> e'. 
   

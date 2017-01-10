@@ -73,11 +73,7 @@ rules
   Declaration(d) -q-> Declaration(d')
     where
       d -q-> d'.
-  
-  MCallL(id@ID("print(_)"), [e]) -q-> MCallL(id, [e'])
-    where
-      e -q-> e'.
-  
+
   MCallRecvL(e, id, es) -q-> MCallRecvL(e', id, es')
     where
       e -q-> e';

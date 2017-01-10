@@ -7,6 +7,7 @@ imports
 imports
   trans/semantics/runtime/natives
   trans/semantics/qualify/qualify
+  trans/semantics/qualify/generate
 
 signature
   arrows
@@ -14,13 +15,20 @@ signature
     
 rules
 
-  m@MCallL(ID(n), _) :: QOM, QLM -q-> m
+  MCallL(id@ID("print(_)"), [e]) -q-> MCallL(id, [e']) : Exp
     where
-      QOM[n?] == true;
-      QLM[n?] == true;
-      log("implicit: '" ++ n ++ "'.") --> _;
-      halt-error("Declared as both local and field: ", n) --> _.
-  
+      e -q-> e'.
+  MCallL(id@ID("while(_)do(_)"), es) -q-> MCallL(id, es') : Exp
+    where
+      es -q-> es'.
+
+  MCallL(ID(n), args) -q-> MCallRecvL(recv, ID(n), args) : Exp
+    where
+      ":=(_)" => bind_suffix;
+      str-ends-with(n, bind_suffix) --> true;
+      MCallL(ID(str-rm-suffix(n, bind_suffix)), args) -q-> m'@MCallRecvL(recv, _, args);
+      log("implicit setter: '" ++ n ++ "' " ++ str(m')) --> _.
+
   QOL |- MCallL(id@ID(n), es) :: QOM, QLM -q-> m : Exp
     where
       QOM[n?] == true;
@@ -29,9 +37,9 @@ rules
       log("found: '" ++ n ++ "' in object, level: " ++ int2string(QOM[n]) ++ " own level: " ++ int2string(QOL)) --> _;
       es -q-> es';
       make-qualified-call(MCallL(id, es'), QOL, QOM[n]) --> m;
-      log("done handling implicit: " ++ n ++ " gen: " ++ str(m)) --> _.
+      log("done handling object implicit: '" ++ n ++ "' gen: " ++ str(m)) --> _.
   
-  QOL |- m@MCallL(id@ID(n), es) :: QOM, QLM -q-> m
+  QOL |- m@MCallL(id@ID(n), es) :: QOM, QLM -q-> m : Exp
     where
       QOM[n?] == false;
       QLM[n?] == true;
@@ -39,7 +47,14 @@ rules
       log("found: '" ++ n ++ "' in local, level: " ++ int2string(QOL)) --> _;
       es -q-> es';
       MCallL(id, es') => m;
-      log("done handling implicit: " ++ n ++ " gen: " ++ str(m)) --> _.
+      log("done handling local implicit: '" ++ n ++ "' gen: " ++ str(m)) --> _.
+
+  m@MCallL(ID(n), _) :: QOM, QLM -q-> m : Exp
+    where
+      QOM[n?] == true;
+      QLM[n?] == true;
+      log("implicit: '" ++ n ++ "'.") --> _;
+      log("Declared as both local and field: " ++ n) --> _.
   
   MCallL(id@ID(n), es) :: QOM, QLM -q-> m'
     where
