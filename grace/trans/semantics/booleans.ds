@@ -18,8 +18,8 @@ signature
     Boolean(True()) --> BoolV(true).
     Boolean(False()) --> BoolV(false).
 
-    resolve-call(l@BoolV(_), x, []) --> bool_call(l, x).
-    resolve-call(l@BoolV(_), x, [v]) --> bool_call(l, x, v).
+    resolve-and-call(l@BoolV(_), x, []) --> bool_call(l, x).
+    resolve-and-call(l@BoolV(_), x, [v]) --> bool_call(l, x, v).
     
     MCallRecvL(v1@BoolV(_), ID(op), [BlockL([], _, [Expression(e2)])]) --> bool_call(v1, op, v2)
       where
@@ -27,29 +27,29 @@ signature
 
     call@MCallL(ID("while(_)do(_)"), [e1, e2]) --> call
       where
-        e1 --> v1@ClosV(_,_,_,_,_);
-        e2 --> v2@ClosV(_,_,_,_,_);
-        resolve-call(v1, "apply", []) --> BoolV(true);
-        resolve-call(v2, "apply", []) --> _.
+        e1 --> v1@ClosV(_,_,_,_,_, _);
+        e2 --> v2@ClosV(_,_,_,_,_, _);
+        resolve-and-call(v1, "apply", []) --> BoolV(true);
+        resolve-and-call(v2, "apply", []) --> _.
 
     MCallL(ID("while(_)do(_)"), [e1, e2]) --> DoneV()
       where
-        e1 --> v1@ClosV(_,_,_,_,_);
-        resolve-call(v1, "apply", []) --> BoolV(false).
+        e1 --> v1@ClosV(_,_,_,_,_,_);
+        resolve-and-call(v1, "apply", []) --> BoolV(false).
 
     MCallRecvL(BoolV(true), ID("ifTrue(_)ifFalse(_)"), [v1, v2]) --> v
       where
-        resolve-call(v1, "apply", []) --> v.
+        resolve-and-call(v1, "apply", []) --> v.
 
     MCallRecvL(BoolV(false), ID("ifTrue(_)ifFalse(_)"), [v1, v2]) --> v
       where
-        resolve-call(v2, "apply", []) --> v.
+        resolve-and-call(v2, "apply", []) --> v.
 
     MCallRecvL(BoolV(b), ID("ifTrue(_)"), [v1]) --> v
       where
         case b of {
           true =>
-            resolve-call(v1, "apply", []) --> v
+            resolve-and-call(v1, "apply", []) --> v
           otherwise =>
             DoneV() => v
         }.
@@ -60,5 +60,5 @@ signature
           true =>
             DoneV() => v
           otherwise =>
-            resolve-call(v1, "apply", []) --> v
+            resolve-and-call(v1, "apply", []) --> v
         }.

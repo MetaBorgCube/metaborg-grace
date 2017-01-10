@@ -12,7 +12,7 @@ signature
     Addr
 
   constructors
-    ClosV: Addr * Addr * List(Identifier) * Code * Env -> V
+    ClosV: Addr * Addr * List(Identifier) * Code * Env * List(String) -> V
 
   arrows
     method-closure(Declaration) --> V
@@ -22,6 +22,7 @@ signature
   
   components
     L : Env
+    M : List(String)
     
   native operators
     nativePrint: V -> V
@@ -32,22 +33,10 @@ rules
   where
     e --> v.
 
-  MCallL(ID(x), [e]) --> DoneV()
-  where
-    ":=(_)" => bind_suffix;
-    str-ends-with(x, bind_suffix) --> true;
-    e --> v;
-    update-local(ID(str-rm-suffix(x, bind_suffix)), v) --> _.
+  MCallL(ID(x), vs) --> resolve-and-call(x, vs).
+  
+  P Exec() |- MCallRecvL(v, ID(x), vs) --> resolve-and-call(v, x, vs).
 
-  MCallL(ID(x), []) --> read-local(x)
-    where
-      log("reading local: " ++ x) --> _.
-  
-  P Exec() |- MCallRecvL(e, ID(x), es) --> resolve-call(v, x, vs)
-  where
-    e --> v;
-    es --> vs.
-  
   MQCallOuter(e) --> outer(S)
   where
     e --> RefV(S).
@@ -56,35 +45,64 @@ rules
 
 rules /* closure construction */
 
-  method-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L') :: L
+  method-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L', M) :: L
   where
     current-self() --> S;
     current-outer() --> O;
+    current-method-names() --> M;
     alloc-locals(code) :: L --> _ :: L L'.
 
 /* =========== call resolution and dispatch =========== */
 
 signature
   arrows
-    resolve-call(V, String, List(V)) --> V
+    resolve-and-call(String, List(V)) --> V
+    resolve-and-call-local(String, List(V)) --> V
+    resolve-and-call(V, String, List(V)) --> V
+    
     call(V, V, List(V)) --> V
     call(V, List(V)) --> V
 
 rules
   
-  resolve-call(clos@ClosV(_, _, _, _, _), x, vs) --> call(clos, vs)
+  resolve-and-call(x, vs) --> v
+  where
+    is-local(x) --> is-local;
+    case is-local of {
+      true =>
+        resolve-and-call-local(x, vs) --> v
+      false =>
+        is-member(x) --> is-member;
+        case is-member of {
+          true =>
+            lookup-method(current-self(), x) --> clos
+          false =>
+            lookup-method(current-outer(), x) --> clos
+        };
+        call(clos, vs) --> v
+    }.
+
+  resolve-and-call-local(x, [v]) --> DoneV()
+  where
+    ":=(_)" => bind_suffix;
+    str-ends-with(x, bind_suffix) --> true;
+    update-local(ID(str-rm-suffix(x, bind_suffix)), v) --> _.
+  
+  resolve-and-call-local(x, []) --> read-local(x).
+
+  resolve-and-call(clos@ClosV(_, _, _, _, _, _), x, vs) --> call(clos, vs)
   where
     str-starts-with(x, "apply") == true.
   
-  resolve-call(recv, x, vs) --> call(clos, vs)
+  resolve-and-call(recv, x, vs) --> call(clos, vs)
   where
-    recv =!=> ClosV(_, _, _, _, _);
+    recv =!=> ClosV(_, _, _, _, _, _);
     lookup-method(recv, x) --> clos.
 
-  call(ClosV(S, O, params, code, env), vs) --> v
+  call(ClosV(S, O, params, code, env, M), vs) --> v
   where
     add-locals(params, vs) :: L env --> _ :: L;
-    S, O |- code :: L --> v :: L _. 
+    S, O, M |- code :: L --> v :: L _.
 
 /* ========== local variables ============= */
 signature
@@ -115,8 +133,10 @@ signature
   arrows
     add-local(Identifier, V) --> U
     update-local(Identifier, V) --> U
+    is-local(String) --> Bool
     read-local(String) --> V
     add-locals(List(Identifier), List(V)) --> U
+    is-member(String) --> Bool
     
 rules
 
@@ -131,6 +151,18 @@ rules
     v-update(L[x], v) --> _.
   
   update-local(WildCard(), _) --> U().
+
+  is-local(x) :: L --> is-local :: L
+  where
+    ":=(_)" => bind_suffix;
+    str-ends-with(x, bind_suffix) --> is-assign;
+    case is-assign of {
+      true =>
+        str-rm-suffix(x, bind_suffix) --> x';
+        L[x'?] => is-local
+      false =>
+        L[x?] => is-local
+    }.
   
   read-local(x) :: L --> v-read(L[x]) :: L.  
 
@@ -139,6 +171,17 @@ rules
   add-locals([x | xs], [v | vs]) --> add-locals(xs, vs)
   where
     add-local(x, v) --> _.
+  
+  M [] |- is-member(_) --> false.
+  
+  M [m | _] |- is-member(x) --> true
+  where
+    m == x.
+  
+  M [m | mx] |- is-member(x) --> maybe
+  where
+    m != x;
+    M mx |- is-member(x) --> maybe.
 
 /* ============ variable heap operations ======== */
 
