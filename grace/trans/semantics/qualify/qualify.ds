@@ -9,6 +9,7 @@ imports
   trans/semantics/qualify/implicits
   trans/semantics/qualify/generate
   trans/semantics/qualify/declarations
+  trans/semantics/semantics
   
 signature
   sorts
@@ -20,6 +21,7 @@ signature
     LocalMap = Map(String, Int)
   
   components
+    DObj : Object
     QC  : QualifyContext
     QOL : Level // object level
     QOM : NameMap // object name map
@@ -31,7 +33,7 @@ signature
     ObjectQC : QualifyContext
 
   arrows
-    Program -qualify-> Program
+    DObj |- Program -qualify-> Program
     
     List(Statement) -q-> List(Statement)
     List(Exp) -q-> List(Exp)
@@ -42,12 +44,18 @@ signature
     Inherit -q-> Inherit
     Use -q-> Use
 
+    make-initial-QOM(Map(String,V)) --> NameMap
+    add-names(List(String), NameMap) --> NameMap
+
 rules
 
-  Program(code, b) -qualify-> Program(code', b)
+  DObj do |- Program(code, b) -qualify-> Program(code', b)
     where
+      do => Obj(_,_,methods);
+      make-initial-QOM(methods) --> dia;
+      log("method map from dialect: " ++ str(dia)) --> _;
       log("program, level: " ++ int2string(0) ++ ".") --> _;
-      QC ProgramQC(), QOL 0 |- code :: QOM {}, QLM {} -q-> code'.
+      QC ProgramQC(), QOL 0 |- code :: QOM dia, QLM {} -q-> code'.
   
   [] : List(Statement) -q-> [] : List(Statement).
   [c | cs] : List(Statement) -q-> [c' | cs'] : List(Statement)
@@ -81,8 +89,17 @@ rules
   
   ni@NoInherit() -q-> ni.
   
-  Inherit(e, anns) -q-> Inherit(e', anns)
+  QOL |- Inherit(e, anns) -q-> Inherit(e', anns)
     where
-      e -q-> e'.
+      QOL addI(QOL,1) |- e -q-> e'.
   
   e : Exp -q-> e.
+  
+  make-initial-QOM(methods) --> add-names(allkeys(methods), {}).
+
+  add-names([] : List(String), map) --> map.
+  add-names([n | ns] : List(String), map) --> map'
+    where
+      {n |--> 0, map} => map'';
+      add-names(ns, map'') --> map'.
+      
