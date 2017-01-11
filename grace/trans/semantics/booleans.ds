@@ -27,14 +27,14 @@ signature
 
     call@MCallL(ID("while(_)do(_)"), [e1, e2]) --> call
       where
-        e1 --> v1@ClosV(_,_,_,_,_, _);
-        e2 --> v2@ClosV(_,_,_,_,_, _);
+        e1 --> v1@ClosV(_,_,_);
+        e2 --> v2@ClosV(_,_,_);
         resolve-and-call(v1, "apply", []) --> BoolV(true);
         resolve-and-call(v2, "apply", []) --> _.
 
     MCallL(ID("while(_)do(_)"), [e1, e2]) --> DoneV()
       where
-        e1 --> v1@ClosV(_,_,_,_,_,_);
+        e1 --> v1@ClosV(_,_,_);
         resolve-and-call(v1, "apply", []) --> BoolV(false).
 
     MCallRecvL(BoolV(true), ID("ifTrue(_)ifFalse(_)"), [v1, v2]) --> v

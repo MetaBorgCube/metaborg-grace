@@ -2,14 +2,14 @@ module trans/grace
 
 imports
   trans/semantics/semantics
-
+  
 signature
   arrows
     Program -init-> (V * H)
 
 rules
 
-  p@Program(_, _) -init-> (v, H) 
-    where
-      next() --> base;
-      O base, S base, M [] : List(String), P Exec() |- p :: H {}, L {}, VH {}, D {}, I {} --> v :: H, L, VH.
+  p@Program(_, _) -init-> (v, H2)
+  where
+    create-base-object() :: H {} --> RefV(F) :: H1; 
+    BaseF F, F, P Exec() |- p :: H1 --> v :: H2.

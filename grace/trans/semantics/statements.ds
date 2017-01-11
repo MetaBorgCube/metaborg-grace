@@ -6,7 +6,6 @@ imports
   trans/semantics/values
 
 signature
-  sorts V
   constructors
     DoneV : V
   
@@ -24,21 +23,21 @@ rules
   
   Dialect(_) --> DoneV().
   
-  Declaration(VariableL(x, _, _, e)) --> v
-  where
-    e --> v;
-    case x of {
-      ID(_) =>
-        update-local(x, v) --> _
-      WildCard() => 
-    }.
-    
-  Declaration(ConstantL(x, _, _, e)) --> v
-  where
-    e --> v;
-    case x of {
-      ID(_) =>
-        update-local(x, v) --> _
-      WildCard() => 
-    }.
+//  Declaration(VariableL(x, _, _, e)) --> v
+//  where
+//    e --> v;
+//    case x of {
+//      ID(_) =>
+//        update-local(x, v) --> _
+//      WildCard() => 
+//    }.
+//    
+//  Declaration(ConstantL(x, _, _, e)) --> v
+//  where
+//    e --> v;
+//    case x of {
+//      ID(_) =>
+//        update-local(x, v) --> _
+//      WildCard() => 
+//    }.
   

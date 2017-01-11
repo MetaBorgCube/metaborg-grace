@@ -4,7 +4,6 @@ imports
   src-gen/ds-signatures/grace-lowered-sig
 
 imports
-  trans/semantics/store
   trans/semantics/values
   trans/semantics/objectmodel
   trans/semantics/functions
@@ -13,7 +12,6 @@ imports
   trans/semantics/numbers
   trans/semantics/booleans
   trans/semantics/strings
-  trans/semantics/imports
   
 signature
   arrows
@@ -21,10 +19,9 @@ signature
 
 rules
 
-  S S |- Program(code, _) --> v
-    where
-      get-dialect-object(code) --> s';
-      S s', O S |- code --> v.
+  Program(code, _) --> v
+  where
+    code --> v.
 
   [] : Code --> DoneV().
 

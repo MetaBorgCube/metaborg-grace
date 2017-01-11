@@ -1,0 +1,183 @@
+module trans/semantics/frame
+
+imports
+  trans/semantics/store
+  trans/semantics/values
+  trans/semantics/runtime/natives
+  
+signature
+  sorts
+    Frame
+    PathPart
+    
+  sort aliases
+    HeapData = Frame
+    FrameId = Addr
+    F = FrameId
+    Path = List(PathPart)
+      
+  constructors
+    Frame: FrameId * Map(String, V) * Map(Int, V) -> Frame
+    
+    M: String -> PathPart
+    S: Int -> PathPart
+    F: F -> PathPart
+    P: PathPart
+    
+    NP: PathPart
+  
+  components
+    F: FrameId
+  
+  arrows
+  
+    f-new(F) --> F
+    
+    f-clone(F) --> F
+    
+    f-parent-set(F) --> F
+    f-parent-get() --> F
+    
+    f-bind(Path, V) --> V
+    f-read(Path) --> V
+    
+    f-resolve(String) --> Path
+    f-target(Path) --> (F * PathPart)
+    
+    f-slot-new(V) --> Path
+
+    path(PathPart) --> Path
+    path(Path, Path) --> Path
+    path-member(String) --> PathPart
+    path-slot(Int) --> PathPart
+    path-frame(F) --> PathPart
+    
+rules
+  
+  f-new(F) --> F'
+  where
+    allocate(Frame(F, {}, {})) --> F';
+    log-frame("Frame created: ", F') --> _.
+
+  F |- f-parent-set(parent) --> F
+  where
+    read(F) --> Frame(_, mbrs, slts);
+    update(F, Frame(parent, mbrs, slts)) --> _;
+    log-frame("Parent set: ", F) --> _.
+    
+  F |- f-parent-get() --> parent
+  where
+    read(F) --> Frame(parent, _, _).
+  
+  f-bind(path, v) --> v
+  where
+    path2str(path) --> path-str;
+    log("Binding " ++ str(v) ++ " at " ++ path-str) --> _;
+    
+    f-target(path) --> (F, path-part);
+    log-target(path, (F, path-part)) --> _;
+    read(F) --> Frame(parent, mbrs, slts);
+    case path-part of {
+      M(x) =>
+        Frame(parent, {x |--> v, mbrs}, slts) => frame'
+      S(i) =>
+        Frame(parent, mbrs, {i |--> v, slts}) => frame'
+    };
+    update(F, frame') --> _;
+    log-frame("Frame updated: ", F) --> _.
+  
+  f-read(path) --> v
+  where
+    path2str(path) --> path-str;
+    log("Reading from " ++ path-str) --> _;
+    
+    f-target(path) --> (F, path-part);
+    log-target(path, (F, path-part)) --> _;
+    read(F) --> Frame(_, mbrs, slts);
+    case path-part of {
+      M(x) =>
+        mbrs[x] => v
+      S(i) =>
+        slts[i] => v
+    };
+    log-access((F, path-part), v) --> _.
+
+  F |- f-slot-new(v) --> path(path-slot(i))
+  where
+    read(F) --> Frame(parent, mbrs, slts);
+    fresh => i;
+    update(F, Frame(parent, mbrs, {i |--> v, slts})) --> _;
+    log("Create slot " ++ int2string(i) ++ " in " ++ int2string(F)) --> _.
+    
+
+  F |- f-target([M(x)]) --> (F, M(x)).
+  F |- f-target([S(x)]) --> (F, S(x)).
+  
+  f-target([P() | xpath]) --> target
+  where
+    F f-parent-get() |- f-target(xpath) --> target. 
+
+  f-target([F(F) | xpath]) --> target
+  where
+    F |- f-target(xpath) --> target.
+
+  path(path-part) --> [path-part].
+  
+  path-member(x) --> M(x).
+  
+  path-slot(i) --> S(i).
+  
+  path-frame(F) --> F(F).
+
+  F |- f-resolve(x) --> path
+  where
+    log("Resolving " ++ x ++ " in " ++ int2string(F)) --> _;
+    read(F) --> Frame(F', mbrs, _);
+    case mbrs[x?] of {
+      true =>
+        path(path-member(x)) --> path
+      otherwise =>
+        case F' of {
+          -2147483648 =>
+            path(NP()) --> path
+          otherwise =>
+            F' |- f-resolve(x) --> path';
+            [P() | path'] => path
+     }
+    };
+    log-resolve(x, F, path) --> _.
+
+signature
+  arrows
+    log-frame(String, F) --> U
+    log-target(Path, (F * PathPart)) --> U
+    log-access((F * PathPart), V) --> U
+    log-resolve(String, F, Path) --> U 
+    path2str(Path) --> String
+    
+rules
+
+  log-frame(msg, F) --> U()
+  where
+    read(F) --> frame;
+    log(msg ++ int2string(F) ++ ": " ++ str(frame)) --> _.
+  
+  log-target(path, (F, pathpart)) --> U()
+  where
+    path2str(path) --> path-str;
+    log("Path " ++ path-str ++ " targets (" ++ int2string(F) ++ ", " ++ str(pathpart) ++ ")") --> _.
+
+  log-access((F, pathpart), v) --> U()
+  where
+    log("Access: " ++ "(" ++ int2string(F) ++ ", " ++ str(pathpart) ++ ")" ++ " = " ++ str(v)) --> _.
+  
+  log-resolve(x, F, path) --> U()
+  where
+    path2str(path) --> path-str;
+    log("Resolve: " ++ x ++ " from " ++ int2string(F) ++ " to " ++ path-str) --> _.
+  
+  path2str([]) --> "".
+  
+  path2str([p | ps]) --> str(p) ++ ps-str
+  where
+    path2str(ps) --> ps-str.

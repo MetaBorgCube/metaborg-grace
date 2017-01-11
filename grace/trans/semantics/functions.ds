@@ -8,206 +8,256 @@ imports
   trans/semantics/types
   
 signature
-  sorts
-    Addr
-
   constructors
-    ClosV: Addr * Addr * List(Identifier) * Code * Env * List(String) -> V
+    ClosV: List(Identifier) * FrameId * Code -> V
 
   arrows
     method-closure(Declaration) --> V
-    
-  sort aliases
-    Env = Map(String, Addr)
-  
-  components
-    L : Env
-    M : List(String)
     
   native operators
     nativePrint: V -> V
 
 rules
 
-  MCallL(ID("print(_)"), [e]) --> nativePrint(v)
-  where
-    e --> v.
+  MCallL(ID("print(_)"), [v]) --> nativePrint(v).
 
   MCallL(ID(x), vs) --> resolve-and-call(x, vs).
   
   P Exec() |- MCallRecvL(v, ID(x), vs) --> resolve-and-call(v, x, vs).
 
-  MQCallOuter(e) --> outer(S)
+  MQCallOuter(RefV(F)) --> outer
   where
-    e --> RefV(S).
+    F |- current-outer() --> outer.
 
   BlockL(params, _, code) --> method-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
 
 rules /* closure construction */
 
-  method-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L', M) :: L
+  F |- method-closure(MethodL(_, _, _, params, _, _, code)) --> ClosV(params, F', code)
   where
-    current-self() --> S;
-    current-outer() --> O;
-    current-method-names() --> M;
-    alloc-locals(code) :: L --> _ :: L L'.
-
-/* =========== call resolution and dispatch =========== */
+    f-new(F) --> F';
+    F' |- f-bind(path(path-member(outer-name())), current-outer()) --> _;
+    F' |- f-bind(path(path-member(self-name())), current-self()) --> _;
+    F' |- allocate-locals(code) --> _.
 
 signature
   arrows
+    allocate-locals(Code) --> U
+    Statement -allocatelocal-> U
+    
     resolve-and-call(String, List(V)) --> V
-    resolve-and-call-local(String, List(V)) --> V
     resolve-and-call(V, String, List(V)) --> V
     
-    call(V, V, List(V)) --> V
     call(V, List(V)) --> V
-
-rules
-  
-  resolve-and-call(x, vs) --> v
-  where
-    is-local(x) --> is-local;
-    case is-local of {
-      true =>
-        resolve-and-call-local(x, vs) --> v
-      false =>
-        is-member(x) --> is-member;
-        case is-member of {
-          true =>
-            lookup-method(current-self(), x) --> clos
-          false =>
-            lookup-method(current-outer(), x) --> clos
-        };
-        call(clos, vs) --> v
-    }.
-
-  resolve-and-call-local(x, [v]) --> DoneV()
-  where
-    ":=(_)" => bind_suffix;
-    str-ends-with(x, bind_suffix) --> true;
-    update-local(ID(str-rm-suffix(x, bind_suffix)), v) --> _.
-  
-  resolve-and-call-local(x, []) --> read-local(x).
-
-  resolve-and-call(clos@ClosV(_, _, _, _, _, _), x, vs) --> call(clos, vs)
-  where
-    str-starts-with(x, "apply") == true.
-  
-  resolve-and-call(recv, x, vs) --> call(clos, vs)
-  where
-    recv =!=> ClosV(_, _, _, _, _, _);
-    lookup-method(recv, x) --> clos.
-
-  call(ClosV(S, O, params, code, env, M), vs) --> v
-  where
-    add-locals(params, vs) :: L env --> _ :: L;
-    S, O, M |- code :: L --> v :: L _.
-
-/* ========== local variables ============= */
-signature
-  arrows
-    alloc-locals(Code) --> U
-    Statement -alloc-> U
-
-rules
-  
-  alloc-locals([]) --> U().
-  
-  alloc-locals([s | xs]) --> alloc-locals(xs)
-  where
-    s -alloc-> _.
-  
-  Declaration(VariableL(id, _, _, _)) -alloc-> U()
-  where
-    add-local(id, UninitializedV()) --> _.
-  
-  Declaration(ConstantL(id, _, _, _)) -alloc-> U()
-  where
-    add-local(id, UninitializedV()) --> _.
-  
-  _ : Statement -alloc-> U().
-
-/* ======== local environment operations ========== */
-signature
-  arrows
-    add-local(Identifier, V) --> U
-    update-local(Identifier, V) --> U
-    is-local(String) --> Bool
-    read-local(String) --> V
-    add-locals(List(Identifier), List(V)) --> U
-    is-member(String) --> Bool
+    bind-params(List(Identifier), List(V)) --> U
+    bind-param(Identifier, V) --> U
     
 rules
+  
+  resolve-and-call(x, vs) --> call(lookup-method(x), vs).
+  
+  resolve-and-call(clos@ClosV(_, _, _), "apply", vs) --> call(clos, vs). 
 
-  add-local(ID(x), v) :: L --> U() :: L {x |--> addr, L}
-  where
-    v-allocate(v) --> addr.
-  
-  add-local(WildCard(), _) --> U().
-  
-  update-local(ID(x), v) :: L --> U() :: L
-  where
-    v-update(L[x], v) --> _.
-  
-  update-local(WildCard(), _) --> U().
-
-  is-local(x) :: L --> is-local :: L
-  where
-    ":=(_)" => bind_suffix;
-    str-ends-with(x, bind_suffix) --> is-assign;
-    case is-assign of {
-      true =>
-        str-rm-suffix(x, bind_suffix) --> x';
-        L[x'?] => is-local
-      false =>
-        L[x?] => is-local
-    }.
-  
-  read-local(x) :: L --> v-read(L[x]) :: L.  
-
-  add-locals([], []) --> U().
-
-  add-locals([x | xs], [v | vs]) --> add-locals(xs, vs)
-  where
-    add-local(x, v) --> _.
-  
-  M [] |- is-member(_) --> false.
-  
-  M [m | _] |- is-member(x) --> true
-  where
-    m == x.
-  
-  M [m | mx] |- is-member(x) --> maybe
-  where
-    m != x;
-    M mx |- is-member(x) --> maybe.
-
-/* ============ variable heap operations ======== */
-
-signature
-  sort aliases
-    Addr = Int
-    VHeap = Map(Addr, V)
-  
-  components
-    VH : VHeap
-  
-  arrows
-    v-allocate(V) :: H --> Addr :: H
-    v-update(Addr, V) :: H --> Addr :: H
-    v-read(Addr) :: H --> V :: H
-    v-next() --> Addr
+  resolve-and-call(RefV(F), x, vs) --> call(lookup-method(F, x), vs).
     
-rules
-
-  v-allocate(v) :: VH --> addr :: VH {addr |--> v, VH}
+  call(ClosV(params, F_model, code), vs) --> v
   where
-    v-next() --> addr.
+    f-clone(F_model) --> F;
+    F |- bind-params(params, vs) --> _;
+    F |- code --> v.
   
-  v-read(addr) :: VH --> VH[addr] :: VH.
+  bind-params([], []) --> U().
+  
+  bind-params([id|ids], [v|vs]) --> bind-params(ids, vs)
+  where
+    bind-param(id, v) --> _.
 
-  v-update(addr, v) :: VH --> addr :: VH {addr |--> v, VH}.
+  bind-param(ID(x), v) --> U()
+  where
+    f-slot-new(v) --> slot-path;
+    f-bind(path(path-member(getter-name(x))), method-closure(field-getter(x, slot-path))) --> _.
+
+  bind-param(WildCard(), _) --> U().
+
+  allocate-locals([]) --> U().
+
+  allocate-locals([s | xs]) --> allocate-locals(xs)
+  where
+    s -allocatelocal-> _.
+
+  Declaration(VariableL(ID(x), _, _, _)) -allocatelocal-> U()
+  where
+    f-slot-new(UninitializedV()) --> slot-path;
+    f-bind(path(path-member(getter-name(x))), method-closure(field-getter(x, slot-path))) --> _;
+    f-bind(path(path-member(setter-name(x))), method-closure(field-setter(x, slot-path))) --> _.
+
+  Declaration(VariableL(WildCard(), _, _, _)) -allocatelocal-> U().
   
-  v-next() --> fresh.
+  Declaration(ConstantL(ID(x), _, _, _)) -allocatelocal-> U()
+  where
+    f-slot-new(UninitializedV()) --> slot-path;
+    f-bind(path(path-member(getter-name(x))), method-closure(field-getter(x, slot-path))) --> _.
+
+  Declaration(ConstantL(WildCard(), _, _, _)) -allocatelocal-> U().
+  
+  _ : Statement -allocatelocal-> U().
+  
+///* =========== call resolution and dispatch =========== */
+//
+//signature
+//  arrows
+//    resolve-and-call(String, List(V)) --> V
+//    resolve-and-call-local(String, List(V)) --> V
+//    resolve-and-call(V, String, List(V)) --> V
+//    
+//    call(V, V, List(V)) --> V
+//    call(V, List(V)) --> V
+//
+//rules
+//  
+//  resolve-and-call(x, vs) --> v
+//  where
+//    is-local(x) --> is-local;
+//    case is-local of {
+//      true =>
+//        resolve-and-call-local(x, vs) --> v
+//      false =>
+//        is-member(x) --> is-member;
+//        case is-member of {
+//          true =>
+//            lookup-method(current-self(), x) --> clos
+//          false =>
+//            lookup-method(current-outer(), x) --> clos
+//        };
+//        call(clos, vs) --> v
+//    }.
+//
+//  resolve-and-call-local(x, [v]) --> DoneV()
+//  where
+//    ":=(_)" => bind_suffix;
+//    str-ends-with(x, bind_suffix) --> true;
+//    update-local(ID(str-rm-suffix(x, bind_suffix)), v) --> _.
+//  
+//  resolve-and-call-local(x, []) --> read-local(x).
+//
+//  resolve-and-call(clos@ClosV(_, _, _, _, _, _), x, vs) --> call(clos, vs)
+//  where
+//    str-starts-with(x, "apply") == true.
+//  
+//  resolve-and-call(recv, x, vs) --> call(clos, vs)
+//  where
+//    recv =!=> ClosV(_, _, _, _, _, _);
+//    lookup-method(recv, x) --> clos.
+//
+//  call(ClosV(S, O, params, code, env, M), vs) --> v
+//  where
+//    add-locals(params, vs) :: L env --> _ :: L;
+//    S, O, M |- code :: L --> v :: L _.
+//
+///* ========== local variables ============= */
+//signature
+//  arrows
+//    alloc-locals(Code) --> U
+//    Statement -alloc-> U
+//
+//rules
+//  
+//  alloc-locals([]) --> U().
+//  
+//  alloc-locals([s | xs]) --> alloc-locals(xs)
+//  where
+//    s -alloc-> _.
+//  
+//  Declaration(VariableL(id, _, _, _)) -alloc-> U()
+//  where
+//    add-local(id, UninitializedV()) --> _.
+//  
+//  Declaration(ConstantL(id, _, _, _)) -alloc-> U()
+//  where
+//    add-local(id, UninitializedV()) --> _.
+//  
+//  _ : Statement -alloc-> U().
+//
+///* ======== local environment operations ========== */
+//signature
+//  arrows
+//    add-local(Identifier, V) --> U
+//    update-local(Identifier, V) --> U
+//    is-local(String) --> Bool
+//    read-local(String) --> V
+//    add-locals(List(Identifier), List(V)) --> U
+//    is-member(String) --> Bool
+//    
+//rules
+//
+//  add-local(ID(x), v) :: L --> U() :: L {x |--> addr, L}
+//  where
+//    v-allocate(v) --> addr.
+//  
+//  add-local(WildCard(), _) --> U().
+//  
+//  update-local(ID(x), v) :: L --> U() :: L
+//  where
+//    v-update(L[x], v) --> _.
+//  
+//  update-local(WildCard(), _) --> U().
+//
+//  is-local(x) :: L --> is-local :: L
+//  where
+//    ":=(_)" => bind_suffix;
+//    str-ends-with(x, bind_suffix) --> is-assign;
+//    case is-assign of {
+//      true =>
+//        str-rm-suffix(x, bind_suffix) --> x';
+//        L[x'?] => is-local
+//      false =>
+//        L[x?] => is-local
+//    }.
+//  
+//  read-local(x) :: L --> v-read(L[x]) :: L.  
+//
+//  add-locals([], []) --> U().
+//
+//  add-locals([x | xs], [v | vs]) --> add-locals(xs, vs)
+//  where
+//    add-local(x, v) --> _.
+//  
+//  M [] |- is-member(_) --> false.
+//  
+//  M [m | _] |- is-member(x) --> true
+//  where
+//    m == x.
+//  
+//  M [m | mx] |- is-member(x) --> maybe
+//  where
+//    m != x;
+//    M mx |- is-member(x) --> maybe.
+//
+///* ============ variable heap operations ======== */
+//
+//signature
+//  sort aliases
+//    Addr = Int
+//    VHeap = Map(Addr, V)
+//  
+//  components
+//    VH : VHeap
+//  
+//  arrows
+//    v-allocate(V) :: H --> Addr :: H
+//    v-update(Addr, V) :: H --> Addr :: H
+//    v-read(Addr) :: H --> V :: H
+//    v-next() --> Addr
+//    
+//rules
+//
+//  v-allocate(v) :: VH --> addr :: VH {addr |--> v, VH}
+//  where
+//    v-next() --> addr.
+//  
+//  v-read(addr) :: VH --> VH[addr] :: VH.
+//
+//  v-update(addr, v) :: VH --> addr :: VH {addr |--> v, VH}.
+//  
+//  v-next() --> fresh.
   
