@@ -1,3 +1,5 @@
+dialect "none"
+
 method if(cond) then(blk) {
     cond.ifTrue(blk);
 };
