@@ -38,7 +38,8 @@ rules
       MethodL(id, targs, anns, args, atypes, type, cs') :: QOM {n |--> QOL, QOM}
     where
       log("method, level: " ++ int2string(QOL) ++ ".") --> _;
-      QC MethodQC() |- cs :: QLM add-names(QLM, args, QOL) -q-> cs'.
+      QC MethodQC() |- cs :: QLM add-names(QLM, args, QOL) -q-> cs';
+      log("added names from method") --> _.
   
   /* Objects */
   ObjectL(inh, tr, cs) :: QOL i -q-> ObjectL(inh', tr', cs')
@@ -46,7 +47,8 @@ rules
       log("object, level: " ++ int2string(i) ++ ".") --> _;
       inh -q-> inh';
       tr -q-> tr';
-      QC ObjectQC(), QOL addI(i, 1) |- cs -q-> cs'.
+      QC ObjectQC(), QOL addI(i, 1) |- cs -q-> cs';
+      log("done object") --> _.
 
   add-names(nm, [], _) --> nm.
   add-names(nm, [ID(a) | as], i) --> add-names({a |--> i, nm}, as, i).

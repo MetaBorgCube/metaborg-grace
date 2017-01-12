@@ -93,6 +93,9 @@ rules
     where
       QOL addI(QOL,1) |- e -q-> e'.
   
+  d@Dialect(_) -q-> d.
+  i@Import(_,_,_) -q-> i.
+  
   e : Exp -q-> e.
   
   make-initial-QOM(methods) --> add-names(allkeys(methods), {}).
