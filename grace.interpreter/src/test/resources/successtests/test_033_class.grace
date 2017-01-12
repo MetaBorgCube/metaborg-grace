@@ -1,7 +1,7 @@
 class cat(namex) {
     def name = namex;
-    method purr {out("Purr"); };
-    method mew {out("Meow"); };
+    method purr {print("Purr"); };
+    method mew {print("Meow"); };
 };
 
 var c := cat "Macavity";

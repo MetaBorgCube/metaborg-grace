@@ -7,8 +7,8 @@ method t040_assertValue(v) andThen (trueBlock) otherwise (falseBlock) {
 };
 
 t040_assertValue(true)
-    andThen { out "It's true!"; }
-    otherwise { out "It's false!"; };
+    andThen { print "It's true!"; }
+    otherwise { print "It's false!"; };
 t040_assertValue(false)
-    andThen { out "This one's true!"; }
-    otherwise { out "This one's false!"; };
+    andThen { print "This one's true!"; }
+    otherwise { print "This one's false!"; };

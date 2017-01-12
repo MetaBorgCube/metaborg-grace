@@ -1,6 +1,8 @@
 module trans/semantics/imports
 
 imports
+  src-gen/ds-signatures/grace-sig
+  src-gen/ds-signatures/grace-lowered-sig
   trans/semantics/semantics
   trans/semantics/statements
   
@@ -30,27 +32,21 @@ rules
 
   read-dialect(s) --> read_dialect(s).
   read-import(s) --> read_import(s).
-  
-  S S |- get-dialect-object([Dialect(name) | _] : List(Statement)) :: D --> objectAddr :: D'
+
+  S |- get-dialect-object([Dialect("none") | _]) --> new-object(S).
+
+  get-dialect-object([Dialect(name) | _] : List(Statement)) :: D --> objectAddr :: D'
     where
-      read-dialect(name) --> Program(code,_);
       fresh => no-object;
       case D[name?] of {
         true =>
-          case D[name] of {
-            1 => // currently evaluating, ignore! TODO make this more elegant
-              // what is the dialect of the outermost dialect? empty.
-              new-object(S) --> objectAddr;
-              D => D'
-            otherwise =>
-              D[name] => objectAddr; //v@FlatObject(_);
-              D => D'
-          }
+          D[name] => objectAddr; //v@FlatObject(_);
+          D => D'
         otherwise =>
-          // set dialect as 'currently evaluating'
-          {name |--> 1 : Addr, D} => D'';
+          // read the dialect ast
+          read-dialect(name) --> p@Program(_,_);
           // actually execute the dialect
-          Program(code, "") :: D'' --> v@RefV(objectAddr);
+          p : Program :: D --> RefV(objectAddr);
           // set dialect name as already read
           {name |--> objectAddr, D} => D';
           // remove outerchain from dialect
@@ -58,14 +54,14 @@ rules
           update(objectAddr, Obj(no-object : Addr, b, c)) --> _
         }.
   
-  get-dialect-object([Expression(ObjectL(_,_,code)) | b] : List(Statement)) -->
+  get-dialect-object([Expression(ObjectL(_,_,code)) | b]) -->
     get-dialect-object(code ++ b). 
     
-  get-dialect-object([ a | b ] : List(Statement)) --> get-dialect-object(b)
+  get-dialect-object([ a | b ]) --> get-dialect-object(b)
     where
       a =!=> Dialect(_). 
   
-  get-dialect-object([] : List(Statement)) --> addr
+  get-dialect-object([]) --> addr
     where
       get-dialect-object([Dialect("standardGrace")]) --> addr.
   

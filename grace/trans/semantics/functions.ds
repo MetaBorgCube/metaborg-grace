@@ -6,6 +6,7 @@ imports
   trans/semantics/statements
   trans/semantics/objectmodel
   trans/semantics/types
+  trans/semantics/booleans
   
 signature
   sorts
@@ -33,7 +34,10 @@ rules
   where
     e --> v.
 
-  MCallL(ID(x), vs) --> resolve-and-call(x, vs).
+  MCallL(ID(x), vs) --> resolve-and-call(x, vs)
+    where
+      x != "while(_)do(_)"; // TODO way to solve this more elegantly
+      x != "print(_)".
   
   P Exec() |- MCallRecvL(v, ID(x), vs) --> resolve-and-call(v, x, vs).
 

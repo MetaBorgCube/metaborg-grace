@@ -104,8 +104,8 @@ rules
   [Declaration(VariableL(WildCard(), _, _, e)) | cs] : Code -member-> [Expression(e) | cs']
   where
     cs -member-> cs'.
-  
-  [Import(name, ID(x)) | cs] : Code -member-> cs'
+
+  [Import(name, ID(x), _) | cs] : Code -member-> cs'
     where
       add-slot(x) --> i;
       get-import-object(name) --> iAddr;
@@ -175,7 +175,7 @@ signature
 rules
 
   field-getter(x, i) --> MethodL(ID(x), [], NoAnnotations(), [], [], no-type(), [SlotRead(i)]).
-  
+
   field-setter(x, i) --> MethodL(ID(mksettername(x)), [], NoAnnotations(), [ID("p")], [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))]).
 
 /* ========== OBJECT FLATTENING =========== */

@@ -22,6 +22,7 @@ rules
     <+ desugar-missing-return-types
     <+ desugar-missing-annotated-types
     <+ desugar-match-case
+    <+ desugar-methodOp
     <+ desugar-flatten-methodID
     <+ desugar-flatten-methodPart
     <+ desugar-mcallopexp
@@ -70,28 +71,36 @@ rules
           )
         ])
       ))
+      
+      
+  desugar-methodOp: MethodOp(OperatorCF(n), typeArg, params) -> MethodID(ID(n), typeArg, params)
   
-  desugar-flatten-methodID: [ MethodID(ID(n), typeArg, Params(ps)) ] -> 
+  desugar-flatten-methodID: [ MethodID(n, typeArg, Params(ps)) ] -> 
       [ MethodID(ID(name), typeArg, Params(ps)) ]
     where
-      name := <concat-strings> [n, <param-string> ps];
-      <not-substring(!"(")> n
+      n' := <name-to-string> n;
+      name := <concat-strings> [n', <param-string> ps];
+      <not-substring(!"(")> n'
 
-  desugar-flatten-methodID: [ MethodID(ID(n1), typeArg1, Params(p1)),
-                              MethodID(ID(n2), typeArg2, Params(p2)) | mids ] ->
+  desugar-flatten-methodID: [ MethodID(n1, typeArg1, Params(p1)),
+                              MethodID(n2, typeArg2, Params(p2)) | mids ] ->
       [MethodID(ID(name), types, Params(ps)) | mids ]
     where
+      n1' := <name-to-string> n1;
+      n2' := <name-to-string> n2;
       types := <merge-typeargs> [typeArg1, typeArg2];
-      name := <concat-strings> [n1, <param-string> p1, n2, <param-string> p2];
+      name := <concat-strings> [n1', <param-string> p1, n2', <param-string> p2];
       ps   := <concat> [p1,p2];
-      <not-substring(!"(")> n1
+      <not-substring(!"(")> n1'
 
-  desugar-flatten-methodID: [ MethodID(ID(n1), typeArg1, Params(p1)),
-                              MethodID(ID(n2), typeArg2, Params(p2)) | mids ] ->
+  desugar-flatten-methodID: [ MethodID(n1, typeArg1, Params(p1)),
+                              MethodID(n2, typeArg2, Params(p2)) | mids ] ->
       [MethodID(ID(name), types, Params(ps)) | mids ]
     where
+      n1' := <name-to-string> n1;
+      n2' := <name-to-string> n2;
       types := <merge-typeargs> [typeArg1, typeArg2];
-      name := <concat-strings> [n1, n2, <param-string> p2];
+      name := <concat-strings> [n1', n2', <param-string> p2];
       ps   := <concat> [p1,p2]
 
   
@@ -102,25 +111,30 @@ rules
    
   not-substring(s) = is-substring(s) < fail + id
   
-  desugar-flatten-methodPart: [Part(ID(n), NoArgs())] -> <fail>
-  desugar-flatten-methodPart: [Part(ID(n), a@_)] -> [Part(ID(name), a)]
+  desugar-flatten-methodPart: [Part(n, NoArgs())] -> <fail>
+  desugar-flatten-methodPart: [Part(n, a@_)] -> [Part(ID(name), a)]
     where
-      name := <concat-strings> [n, <param-string> a];
+      n' := <name-to-string> n;
+      name := <concat-strings> [n', <param-string> a];
       <is-argument> a;
       // only if n does not contain (
-      <not-substring(!"(")> n
-  desugar-flatten-methodPart: [Part(ID(n1), args1), Part(ID(n2), args2) | ps ] ->
+      <not-substring(!"(")> n'
+  desugar-flatten-methodPart: [Part(n1, args1), Part(n2, args2) | ps ] ->
       [Part(ID(name), ArgsParen(args)) | ps]
     where
-      name := <concat-strings> [n1, <param-string> args1, n2, <param-string> args2];
+      n1' := <name-to-string> n1;
+      n2' := <name-to-string> n2;
+      name := <concat-strings> [n1', <param-string> args1, n2', <param-string> args2];
       args := <flatten-list> <map(desugar-arg)> [args1, args2];
       // make sure to process first list only once.
-      <not-substring(!"(")> n1
+      <not-substring(!"(")> n1'
       
-  desugar-flatten-methodPart: [Part(ID(n1), args1), Part(ID(n2), args2) | ps ] ->
+  desugar-flatten-methodPart: [Part(n1, args1), Part(n2, args2) | ps ] ->
       [Part(ID(name), ArgsParen(args)) | ps]
     with
-      name := <concat-strings> [n1, n2, <param-string> args2];
+      n1' := <name-to-string> n1;
+      n2' := <name-to-string> n2;
+      name := <concat-strings> [n1', n2', <param-string> args2];
       args := <flatten-list> <map(desugar-arg)> [args1, args2]
       
   param-string: ps ->
@@ -142,7 +156,9 @@ rules
        <neq(|a, NoArgs())> a
 
   desugar-mcallopexp: MCallOpEx(recv, OperatorCF(name), arg)->
-    MCallWDot(recv, [Part(ID(name), ArgsParen([arg]))])
+    MCallWDot(recv, [Part(ID(<concat-strings> [name, "(_)"]),
+      ArgsParen([arg])
+    )])
   
   desugar-mcallopexpassign: MCallOpExAssign(MCallWDot(recv, [Part(ID(name), NoArgs())]), arg) ->
     MCallWDot(recv, [Part(ID(<concat-strings> [name, ":=(_)"]), 

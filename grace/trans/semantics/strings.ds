@@ -13,6 +13,7 @@ signature
   native operators
   
     string_call: V * String * V -> V
+    string_call: V * String -> V
 
 rules
 
@@ -29,6 +30,8 @@ rules
   resolve-and-call(l@StringV(_), x, [v]) --> string_call(l, x, v).
 
   resolve-and-call(StringV(_), "==(_)", [NumV(_)]) --> BoolV(false).
+  
+  resolve-and-call(l@StringV(_), x, []) --> string_call(l, x).
 
 signature
   native operators

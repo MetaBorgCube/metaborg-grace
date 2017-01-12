@@ -28,8 +28,8 @@ public class string_call_3 extends TermBuild {
     @Override
     public IVTerm executeGeneric(VirtualFrame frame) {
         final StringV_1_Term left = TypesGen.asStringV_1_Term(leftNode.executeGeneric(frame));
-        final StringV_1_Term right = TypesGen.asStringV_1_Term(rightNode.executeGeneric(frame));
         final String op = TypesGen.asString(opNode.executeGeneric(frame));
+        final StringV_1_Term right = TypesGen.asStringV_1_Term(rightNode.executeGeneric(frame));
         switch (op) {
         case "==(_)":
             return doEq(left, right);
@@ -37,6 +37,8 @@ public class string_call_3 extends TermBuild {
             return doNeq(left, right);
         case "++(_)":
             return doConcat(left, right);
+        case "at(_)":
+            return doAt(left, right);
         case "<(_)":
         case ">(_)":
         case "<=(_)":
@@ -55,6 +57,9 @@ public class string_call_3 extends TermBuild {
     }
     private IVTerm doConcat(final StringV_1_Term left, final StringV_1_Term right) {
         return new StringV_1_Term(left.get_1() + right.get_1());
+    }
+    private IVTerm doAt(final StringV_1_Term left, final StringV_1_Term right) {
+        return new StringV_1_Term(String.valueOf(left.get_1().charAt(Integer.parseInt(right.get_1()))));
     }
 
     private IVTerm doCmp(final StringV_1_Term left, final StringV_1_Term right, final String op) {

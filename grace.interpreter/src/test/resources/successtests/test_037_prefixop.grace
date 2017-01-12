@@ -11,7 +11,7 @@ def a = object {
     };
 };
 
-print (!a) shouldBe (false);
-print (!(t037_identity(a))) shouldBe (false);
-print (!(!a)) shouldBe (true);
-print (!!a) shouldBe "OK";
+print (!a);
+print (!(t037_identity(a)));
+print (!(!a));
+print (!!a);

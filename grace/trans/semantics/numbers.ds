@@ -20,17 +20,15 @@ rules
   Number(a) --> NumV(string2int(a)).
 
   resolve-and-call(NumV(_), "==(_)", [StringV(_)]) --> BoolV(false).
-  
+
   resolve-and-call(NumV(i), "++(_)", [StringV(s)]) --> StringV(s1 ++ s)
-  where
-    int2str(i) --> s1.
+    where
+      int2str(i) --> s1.
+
+  resolve-and-call(l@NumV(_), x, [v@NumV(_)]) --> num_call(l, x, v).
 
   resolve-and-call(l@NumV(_), op, [StringV(s)]) --> num_call(l, op, NumV(i))
-  where
-    log("check??") --> _;
-    string2int(s) --> i.
+    where
+      string2int(s) --> i.
 
-  resolve-and-call(l@NumV(_), x, [v]) --> num_call(l, x, v).
-  
   resolve-and-call(l@NumV(_), x, []) --> num_call(l, x).
-
