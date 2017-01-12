@@ -64,7 +64,6 @@ signature
     resolve-and-call-local(String, List(V)) --> V
     resolve-and-call(V, String, List(V)) --> V
     
-    call(V, V, List(V)) --> V
     call(V, List(V)) --> V
 
 rules
