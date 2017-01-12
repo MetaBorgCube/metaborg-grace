@@ -14,8 +14,13 @@ lexical syntax
   PrefixOperator = "prefix" Operator
   Operator       = [\!\?\@\#\%\^\&\|\~\=\+\-\*\/\\\>\<\:\.\$]+
   STRING         = "\"" StringChar* "\""
-  StringChar     = ~[\"\n] 
-  StringChar     = "\\\"" 
+  STRINGINTSTART = [\"] StringChar* [\{]
+  STRINGINTMID   = [\}] StringChar* [\{]
+  STRINGINTEND   = [\}] StringChar* [\"]
+  StringChar     = ~[\"\n\{\}]
+  StringChar     = "\\\""
+  StringChar     = BackSlashChar [\{]
+  StringChar     = BackSlashChar [\}]
   StringChar     = BackSlashChar 
   BackSlashChar  = "\\" 
   LAYOUT         = [\ \n\r] // tabs are not allowed! 

@@ -17,7 +17,7 @@ signature
 
 rules
 
-  String(s) --> StringV(interpolate-string(s)).
+  String(s) --> StringV(s).
 
   resolve-and-call(NumV(i), op@"++(_)", [s2@StringV(_)]) --> string_call(StringV(s1), op, s2)
   where

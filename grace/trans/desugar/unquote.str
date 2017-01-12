@@ -21,3 +21,6 @@ rules
 
   desugar-unquote-strings:
     Import(s, b, c) -> Import(<unquote(?'"')> s, b, c)
+    
+  desugar-unquote-strings:
+    IntPolEnd(e, s) -> IntPolEnd(e, <unquote(?'"')> s)

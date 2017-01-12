@@ -5,11 +5,12 @@ imports
     src-gen/signatures/grace-sig
     src-gen/signatures/grace-lowered-sig
     src-gen/signatures/general-sig
-    
+
     trans/desugar/desugar-common
     trans/desugar/desugar-matchcase
     trans/desugar/lower
     trans/desugar/unquote
+    trans/desugar/interpolate
 
 rules
   
@@ -36,6 +37,7 @@ rules
     <+ desugar-flatten-objectdecl
     <+ desugar-flatten-declaration
     <+ desugar-unquote-strings
+    <+ desugar-interpolate
   
   desugar-all-post: ast -> <lower-post-all> <lower-all> ast
 

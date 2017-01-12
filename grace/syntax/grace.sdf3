@@ -115,6 +115,9 @@ context-free syntax
   Exp.TypeExp                   = <<TypeExp>> {avoid}
   Exp.Number                    = <<NUM>>
   Exp.String                    = <<STRING>> {prefer}
+  Exp.InterpolatedString        = <<STRINGINTSTART><Interpolated*><InterpolatedEnd>>
+  Interpolated.IntPol           = <<Exp> <STRINGINTMID>>
+  InterpolatedEnd.IntPolEnd     = <<Exp> <STRINGINTEND>>
   Exp.Boolean                   = <<Boolean>>
 
   

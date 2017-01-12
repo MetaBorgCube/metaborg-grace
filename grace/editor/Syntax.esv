@@ -28,4 +28,7 @@ views
 
 colorer
 
-  STRING : blue
+  STRING         : blue
+  STRINGINTSTART : blue
+  STRINGINTMID   : blue
+  STRINGINTEND   : blue
