@@ -6,7 +6,7 @@ imports
     src-gen/signatures/grace-lowered-sig
     src-gen/signatures/general-sig
     
-    trans/desugar/desugar-common
+    trans/desugar/common
     trans/desugar/lower-literals
 
 rules

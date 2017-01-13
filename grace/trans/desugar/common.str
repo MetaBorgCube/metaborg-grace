@@ -1,4 +1,4 @@
-module trans/desugar/desugar-common
+module trans/desugar/common
 
 imports
     src-gen/signatures/grace-sig

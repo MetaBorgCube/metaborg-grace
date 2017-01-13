@@ -1,0 +1,62 @@
+module trans/desugar/annotate
+
+imports
+    
+    src-gen/signatures/grace-sig
+    src-gen/signatures/general-sig
+
+rules
+
+  desugar-annotate-defaults: Constant(nm, typeAnn, NoAnnotations(), exp)
+    -> Constant(nm, typeAnn, Annotations([Confidential()]), exp)
+    
+  desugar-annotate-defaults: Variable(nm, typeAnn, NoAnnotations(), init)
+    -> Variable(nm, typeAnn, Annotations([Confidential()]), init)
+    
+  desugar-annotate-defaults: MethodDecl(nm, NoAnnotations(), rh, body)
+    -> MethodDecl(nm, Annotations([Public()]), rh, body)
+ 
+  desugar-annotate-defaults: ClassDecl(nm, NoAnnotations(), t, inh, use, code)
+    -> ClassDecl(nm, Annotations([Public()]), t, inh, use, code)
+    
+  desugar-annotate-defaults: Import(f, nm, NoAnnotations())
+    -> Import(f, nm, Annotations([Confidential()]))
+    
+  desugar-annotations: Constant(nm, typeAnn, Annotations([Public()]), exp)
+    -> Constant(nm, typeAnn, Annotations([Readable()]), exp)
+    
+  desugar-annotations: Variable(nm, typeAnn, Annotations([Public()]), init)
+    -> Variable(nm, typeAnn, Annotations([Readable(), Writeable()]), init)
+  
+  desugar-annotations: Import(f, nm, Annotations([Public()]))
+    -> Import(f, nm, Annotations([Readable()]))
+  
+  desugar-annotations: MethodDecl(nm, Annotations(anns), rh, body)
+    -> MethodDecl(nm, Annotations([Public()]), rh, body)
+    where
+      <not(elem)> (Confidential(), anns);
+      <not(elem)> (Public(), anns)
+    
+  desugar-optimize-annotations: Annotations(as)
+    -> Annotations(<optimize-annotations> as)
+    with
+     <check-annotations> as
+  
+  optimize-annotations: [] -> []
+
+  optimize-annotations: [anns] -> [anns']
+    where
+      <elem> (Public(), anns);
+      <elem> (Readable(), anns);
+      anns' := <remove-all(?Readable())> anns
+
+  optimize-annotations: [anns] -> [anns']
+    where
+      <elem> (Public(), anns);
+      <elem> (Writeable(), anns);
+      anns' := <remove-all(?Writeable())> anns
+  
+  check-annotations: anns -> anns
+    where
+      <not(<elem> (Public(), anns) ; <elem> (Confidential(), anns))> anns
+  

@@ -6,11 +6,12 @@ imports
     src-gen/signatures/grace-lowered-sig
     src-gen/signatures/general-sig
 
-    trans/desugar/desugar-common
-    trans/desugar/desugar-matchcase
+    trans/desugar/common
+    trans/desugar/matchcase
     trans/desugar/lower
     trans/desugar/unquote
     trans/desugar/interpolate
+    trans/desugar/annotate
 
 rules
   
@@ -20,6 +21,9 @@ rules
   
   desugar =
     desugar-class-declaration
+    <+ desugar-optimize-annotations
+    <+ desugar-annotate-defaults
+    <+ desugar-annotations
     <+ desugar-missing-return-types
     <+ desugar-missing-annotated-types
     <+ desugar-match-case
@@ -50,22 +54,22 @@ rules
     TypeAnn(TypeID(ID("Unknown"), NoTypeArg()))
   
   desugar-class-declaration:
-    ClassDecl(MethodName(mIDs), type, inh, use, code) ->
+    ClassDecl(MethodName(mIDs), annotations, type, inh, use, code) ->
       MethodDecl(
         mIDs,
-        NoAnnotations(),
+        annotations,
         type,
         MethodBody([
           Expression(ObjectDecl(inh,use,code))
         ])
       )
   desugar-class-declaration:
-    ClassDecl(FullStop(iden, mIDs), type, inh, use, code) ->      
-      Constant(iden, NoTypeAnn(), NoAnnotations(), Expression (
+    ClassDecl(FullStop(iden, mIDs), annotations, type, inh, use, code) ->      
+      Constant(iden, NoTypeAnn(), Annotations([Public()]), Expression (
         ObjectDecl(NoInherit(), [], [
           MethodDecl(
             mIDs,
-            NoAnnotations(),
+            annotations,
             type,
             MethodBody([
               Expression(ObjectDecl(inh,use,code))

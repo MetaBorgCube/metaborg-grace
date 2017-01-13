@@ -1,4 +1,4 @@
-module trans/desugar/desugar-matchcase
+module trans/desugar/matchcase
 
 imports
     
@@ -6,7 +6,7 @@ imports
     src-gen/signatures/grace-lowered-sig
     src-gen/signatures/general-sig
     
-    trans/desugar/desugar-common
+    trans/desugar/common
 
 rules
 
