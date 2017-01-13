@@ -286,7 +286,7 @@ rules
   S |- add-method(x, v) --> U()
   where
     read(S) --> Obj(O, slots, methods);
-    log("S: " ++ str(S) ++ " O " ++ str(O) ++ " new method: " ++ x ++ " -> " ++ str(v)) --> _;
+    log("S: " ++ int2string(S : Int) ++ " O " ++ int2string(O : Int) ++ " new method: " ++ x ++ " -> " ++ str(v)) --> _;
     update(S, Obj(O, slots, {x |--> v, methods})) --> _.
   
   S |- current-method-names() --> allkeys(methods)
@@ -326,5 +326,5 @@ rules
   where
     read(S) --> Obj(O, _, methods);
     concat(separate-by(allkeys(methods), ", ")) --> method-names;
-    log("S: " ++ str(S) ++ " O " ++ str(O) ++ " methods: " ++ method-names) --> _.
+    log("S: " ++ int2string(S : Int) ++ " O " ++ int2string(O : Int) ++ " methods: " ++ method-names) --> _.
   
