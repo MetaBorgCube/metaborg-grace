@@ -1,0 +1,44 @@
+module trans/desugar/interpolate
+
+imports
+
+    src-gen/signatures/grace-sig
+    src-gen/signatures/general-sig
+
+
+rules
+  external substring(|begin, end)
+  
+  trim-string(|b,e): a -> <substring(|b, <subti> (<string-length> a, e))> a
+    
+  desugar-interpolate:
+    InterpolatedString(beginStr,[],IntPolEnd(exp,endStr))
+      -> MCallWDot(
+           MCallWDot(
+             String(beginStr')
+           , [Part(ID("++"), ArgsParen([exp]))]
+           )
+         , [Part(ID("++"), ArgsParen([String(endStr')]))]
+         )
+      with
+        beginStr' := <trim-string(|1,1)> beginStr;
+        endStr' := <trim-string(|1,1)> endStr
+  
+  desugar-interpolate:
+    InterpolatedString(bStr, mids@[IntPol(_, _) | _],
+      end@IntPolEnd(eexp,eStr)) ->
+        MCallWDot(
+          MCallWDot(
+            sub
+          , [Part(ID("++"), ArgsParen([eexp]))]
+          )
+        , [Part(ID("++"), ArgsParen([String(endStr')]))]
+        )
+     where
+       IntPol(mExp, mStr) := <last> mids;
+       sub := <desugar-interpolate> InterpolatedString(bStr, <init> mids,
+                                                   IntPolEnd(mExp, mStr)); 
+       endStr' := <trim-string(|1,1)> eStr
+    
+  
+  desugar-interpolate: InterpolatedString(start, middles, end) -> String(start)

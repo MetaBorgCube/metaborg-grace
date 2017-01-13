@@ -32,14 +32,3 @@ rules
   resolve-and-call(StringV(_), "==(_)", [NumV(_)]) --> BoolV(false).
   
   resolve-and-call(l@StringV(_), x, []) --> string_call(l, x).
-
-signature
-  native operators
-    interpolate_string: String -> String
-
-  arrows
-    interpolate-string(String) --> String
-
-rules
-
-  interpolate-string(s) --> interpolate_string(s).
