@@ -60,8 +60,8 @@ rules
   S |- check-visibility(false, addr, name) --> allowed
     where
       S != addr;
-      log("vis check on '" ++ name ++ "', caller != callee, addr: " ++
-        int2string(addr)) --> _;
+      log("vis check on '" ++ name ++ "', caller != callee, S: " ++ int2string(S) ++
+        " addr: " ++ int2string(addr)) --> _;
       read(S) --> Obj(_, outers, _, _);
       log("vis check on '" ++ name ++ "', recurse to check outers.") --> _;
       is-inside(outers, addr, name) --> allowed.

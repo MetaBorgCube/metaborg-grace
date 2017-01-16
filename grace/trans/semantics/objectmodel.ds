@@ -274,7 +274,7 @@ rules
   
   new-object(O) --> S
   where
-    allocate(Obj(O, [], {}, {})) --> S.
+    allocate(Obj(O, [O], {}, {})) --> S.
 
   add-slot(x) :: GS --> GS[x] :: GS
   where

@@ -116,9 +116,9 @@ rules
   S |- call(ClosV(S', O', _, _, _, _, public), _, name) :: H --> DoneV()
   where
     check-visibility(public, S', name) --> false;
-    halt-error("Trying to access confidential method '" ++ name ++
-      "' in: " ++ int2string(S') ++ " from: " ++ int2string(S) ++
-      " Heap: ", str(H : AST)) --> _.
+    halt-error("Requested confidential method '" ++ name ++
+      "' of object: " ++ int2string(S') ++ " from outside (: " ++ int2string(S) ++
+      "), Heap: ", str(H : AST)) --> _.
 
 /* ========== local variables ============= */
 signature
