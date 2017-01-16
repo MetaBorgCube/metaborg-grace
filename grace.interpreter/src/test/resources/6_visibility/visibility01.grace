@@ -1,3 +1,3 @@
 print(object {
-  def a is public = 5;
+  def a = 5;
 }.a);

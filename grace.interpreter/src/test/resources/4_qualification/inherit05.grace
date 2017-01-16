@@ -3,8 +3,8 @@ class A {
 };
 
 def b'' = object {
-    def b' = object {
-        def b = object {
+    def b' is public = object {
+        def b is public = object {
             class B {
                 inherit A;
                 print(f);

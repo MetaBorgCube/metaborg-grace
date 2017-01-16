@@ -7,4 +7,4 @@ class B {
   print(a);
 };
 
-B.a;
+B;

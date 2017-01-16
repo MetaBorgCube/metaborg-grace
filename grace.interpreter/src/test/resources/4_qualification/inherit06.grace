@@ -5,7 +5,7 @@ def a = object {
 };
 
 class B {
-    inherit a.A;
+    inherit a.A; // nope, inherit expr is before B object exists
     print(f);
 };
 
