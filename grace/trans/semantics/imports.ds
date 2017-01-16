@@ -52,8 +52,8 @@ rules
           // set dialect name as already read
           {name |--> objectAddr, D} => D';
           // remove outerchain from dialect
-          read(objectAddr) --> Obj(_, b, c);
-          update(objectAddr, Obj(no-object : Addr, b, c)) --> _
+          read(objectAddr) --> Obj(_, a, b, c);
+          update(objectAddr, Obj(no-object : Addr, a, b, c)) --> _
         }.
   
   get-dialect-object([Expression(ObjectL(_,_,code)) | b]) -->

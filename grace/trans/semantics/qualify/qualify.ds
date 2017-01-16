@@ -51,7 +51,7 @@ rules
 
   DObj do |- Program(code, b) -qualify-> Program(code', b)
     where
-      do => Obj(_,_,methods);
+      do => Obj(_,_,_,methods);
       make-initial-QOM(methods) --> dia;
       log("method map from dialect: " ++ str(dia)) --> _;
       log("program, level: " ++ int2string(0) ++ ".") --> _;

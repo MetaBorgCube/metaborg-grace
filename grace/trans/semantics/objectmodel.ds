@@ -35,12 +35,16 @@ signature
     SlotWrite : Int * Exp -> Statement 
 
   constructors
-    Obj: Addr * Slots * Methods -> Object
+                // outers
+    Obj: Addr * List(Addr) * Slots * Methods -> Object
     RefV: Addr -> V {implicit}
   
   components
     S : Addr
     O : Addr
+    
+  arrows 
+    get-scopes(List(Closure)) --> List(Addr)
   
 rules
 
@@ -49,16 +53,23 @@ rules
     new-object(S) --> S';
     S S', O S, P Flatten() |- inherit --> FlatObject(closures-inherited);
     closures-inherited ++ [Closure(S, code)] => closures;
+    log("total closures from object construction: " ++ str(closures : AST)) --> _;
+    read(S') --> Obj(a,_,c,d);
+    update(S', Obj(a, get-scopes(closures), c, d)) --> _;
     S' |- install-members(closures) --> closures';
+    log("total closures' from object construction: " ++ str(closures' : AST)) --> _;
     S' |- init-object(closures') --> U();
     log-object-creation(S') --> _.
-  
+
   SlotRead(i) --> read-slot(i).
   
   SlotWrite(i, e) --> DoneV()
   where
     e --> v;
     write-slot(i, v) --> _.
+    
+  get-scopes([]) --> [].
+  get-scopes([Closure(addr,_) | cs]) --> [addr | get-scopes(cs)].
 
 /* ========== INIT METHODS =========== */
 
@@ -259,11 +270,11 @@ rules
   
   outer(S) --> O
   where
-    read(S) --> Obj(O, _, _).
+    read(S) --> Obj(O, _, _, _).
   
   new-object(O) --> S
   where
-    allocate(Obj(O, {}, {})) --> S.
+    allocate(Obj(O, [], {}, {})) --> S.
 
   add-slot(x) :: GS --> GS[x] :: GS
   where
@@ -272,32 +283,32 @@ rules
   S |- add-slot(x) :: NS, GS --> NS :: NS addI(NS, 1), GS {x |--> NS, GS}
   where
     GS[x?] == false;
-    read(S) --> Obj(O, slots, methods);
-    update(S, Obj(O, {NS |--> UninitializedV(), slots}, methods)) --> _.
+    read(S) --> Obj(O, outers, slots, methods);
+    update(S, Obj(O, outers, {NS |--> UninitializedV(), slots}, methods)) --> _.
     
   S |- read-slot(i) --> slots[i]
   where
-    read(S) --> Obj(_, slots, _).
+    read(S) --> Obj(_, _, slots, _).
   
   S |- write-slot(i, v) --> U()
   where
-    read(S) --> Obj(O, slots, methods);
-    update(S, Obj(O, {i |--> v, slots}, methods)) --> _.
+    read(S) --> Obj(O, outers, slots, methods);
+    update(S, Obj(O, outers, {i |--> v, slots}, methods)) --> _.
 
   S |- add-method(x, v) --> U()
   where
-    read(S) --> Obj(O, slots, methods);
+    read(S) --> Obj(O, outers, slots, methods);
     log("S: " ++ int2string(S : Int) ++ " O " ++ int2string(O : Int) ++ " new method: " ++ x ++ " -> " ++ str(v)) --> _;
-    update(S, Obj(O, slots, {x |--> v, methods})) --> _.
+    update(S, Obj(O, outers, slots, {x |--> v, methods})) --> _.
   
   S |- current-method-names() --> allkeys(methods)
   where
-    read(S) --> Obj(_, _, methods).
+    read(S) --> Obj(_, _, _, methods).
   
   S, O |- lookup-method(S', x) --> v
   where
     S == S';
-    read(S') --> Obj(O', _, methods);
+    read(S') --> Obj(O', _, _, methods);
     case methods[x?] of {
       true =>
         methods[x] => v
@@ -308,7 +319,7 @@ rules
   S |- lookup-method(S', x) --> v
   where
     S != S';
-    read(S') --> Obj(_, _, methods);
+    read(S') --> Obj(_, _, _, methods);
     case methods[x?] of {
       true =>
         methods[x] => v
@@ -325,7 +336,7 @@ rules
 
   log-object-creation(S) --> S
   where
-    read(S) --> Obj(O, _, methods);
+    read(S) --> Obj(O, outers, _, methods);
     concat(separate-by(allkeys(methods), ", ")) --> method-names;
-    log("S: " ++ int2string(S : Int) ++ " O " ++ int2string(O : Int) ++ " methods: " ++ method-names) --> _.
+    log("S: " ++ int2string(S : Int) ++ " O " ++ int2string(O : Int) ++ " outers: " ++ str(outers : AST) ++  " methods: " ++ method-names) --> _.
   

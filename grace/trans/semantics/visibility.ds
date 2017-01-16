@@ -28,7 +28,9 @@ signature
     is-public(Annotations) --> Bool
     contains-annotation(List(Annotation), Annotation) --> Bool
     to-annotation(Bool) --> Annotations
-    check-visibility(Bool, Addr) --> Bool
+    check-visibility(Bool, Addr, String) --> Bool
+    is-inside(List(Addr), Addr, String) --> Bool
+    is-inside-aux(Addr, Addr) --> Bool
     
 rules
 
@@ -48,29 +50,44 @@ rules
   to-annotation(true) --> Annotations([Public()]).
   to-annotation(false) --> Annotations([Confidential()]).
    
-  check-visibility(true, _) --> true.
+  check-visibility(true, _, _) --> true.
   
   // addr must be the self, or an outer of self
-  S |- check-visibility(false, addr) --> true
+  S |- check-visibility(false, addr, name) --> true
     where
       S == addr;
-      log("vis check, caller == callee, true") --> _.
-  S |- check-visibility(false, addr) --> allowed
+      log("vis check on '" ++ name ++ "', caller == callee, true") --> _.
+  S |- check-visibility(false, addr, name) --> allowed
     where
       S != addr;
-      log("vis check, caller != callee, checking...") --> _;
-      read(S) --> o;
-      case o of {
-        Obj(O, _, _) =>
-          log("vis check, recursing to check outer...") --> _;
-          S O |- check-visibility(false, addr) --> allowed
-        otherwise =>
-          log("vis check, no valid outer, false") --> _;
-          false => allowed
+      log("vis check on '" ++ name ++ "', caller != callee, addr: " ++
+        int2string(addr)) --> _;
+      read(S) --> Obj(_, outers, _, _);
+      log("vis check on '" ++ name ++ "', recurse to check outers.") --> _;
+      is-inside(outers, addr, name) --> allowed.
+
+  is-inside([], _, _) --> false.
+  is-inside([o | os], target, name) --> res
+    where
+      is-inside-aux(o, target) --> found;
+      case found of {
+        true => true => res
+        otherwise => is-inside(os, target, name) --> res
       }.
-  S |- check-visibility(false, addr) --> false
+      
+  // is o == target? does o have an outer that == target?
+  is-inside-aux(o, target) --> true
     where
-      S != addr;
-      read(S) --> o;
-      o =!=> Obj(_,_,_);
-      log("vis check, cannot read to object, false") --> _.
+      o == target;
+      log("o == target, o: " ++ int2string(o) ++ " target: " ++ int2string(target)) --> _.
+  is-inside-aux(o, target) :: H --> res
+    where
+      o != target;
+      log("o != target, o: " ++ int2string(o) ++ " target: " ++ int2string(target)) --> _;
+      case H[o?] of {
+        true =>
+          read(o) --> Obj(newOuter, _,_,_);
+          is-inside-aux(newOuter, target) --> res
+        otherwise =>
+          false => res
+      }.
