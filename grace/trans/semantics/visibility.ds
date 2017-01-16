@@ -1,0 +1,76 @@
+module trans/semantics/visibility
+
+imports
+  src-gen/ds-signatures/grace-sig
+  src-gen/ds-signatures/grace-lowered-sig
+
+imports
+  trans/semantics/values
+  trans/semantics/store
+  trans/semantics/runtime/natives
+  trans/semantics/strings
+  trans/semantics/numbers
+  trans/semantics/lineups
+  trans/semantics/functions
+  trans/semantics/objectmodel
+  trans/semantics/statements
+  trans/semantics/imports
+
+signature
+
+  sort aliases
+    HeapData = Object
+  
+  arrows
+    is-readable(Annotations) --> Bool
+    is-writable(Annotations) --> Bool
+    is-confidential(Annotations) --> Bool
+    is-public(Annotations) --> Bool
+    contains-annotation(List(Annotation), Annotation) --> Bool
+    to-annotation(Bool) --> Annotations
+    check-visibility(Bool, Addr) --> Bool
+    
+rules
+
+  is-readable(Annotations(as)) --> contains-annotation(as, Readable()).
+  is-writable(Annotations(as)) --> contains-annotation(as, Writable()).
+  is-confidential(Annotations(as)) --> contains-annotation(as, Confidential()).
+  is-public(Annotations(as)) --> contains-annotation(as, Public()).
+  
+  contains-annotation([], _) --> false.
+  contains-annotation([a | _], an) --> true
+    where
+      a == an.
+  contains-annotation([a | as], an) --> contains-annotation(as, an)
+    where
+      a != an.
+  
+  to-annotation(true) --> Annotations([Public()]).
+  to-annotation(false) --> Annotations([Confidential()]).
+   
+  check-visibility(true, _) --> true.
+  
+  // addr must be the self, or an outer of self
+  S |- check-visibility(false, addr) --> true
+    where
+      S == addr;
+      log("vis check, caller == callee, true") --> _.
+  S |- check-visibility(false, addr) --> allowed
+    where
+      S != addr;
+      log("vis check, caller != callee, checking...") --> _;
+      read(S) --> o;
+      case o of {
+        Obj(O, _, _) =>
+          log("vis check, recursing to check outer...") --> _;
+          S O |- check-visibility(false, addr) --> allowed
+        otherwise =>
+          log("vis check, no valid outer, false") --> _;
+          false => allowed
+      }.
+  S |- check-visibility(false, addr) --> false
+    where
+      S != addr;
+      read(S) --> o;
+      o =!=> Obj(_,_,_);
+      log("vis check, cannot read to object, false") --> _.

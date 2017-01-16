@@ -26,7 +26,7 @@ rules
     -> Constant(nm, typeAnn, Annotations([Readable()]), exp)
     
   desugar-annotations: Variable(nm, typeAnn, Annotations([Public()]), init)
-    -> Variable(nm, typeAnn, Annotations([Readable(), Writeable()]), init)
+    -> Variable(nm, typeAnn, Annotations([Readable(), Writable()]), init)
   
   desugar-annotations: Import(f, nm, Annotations([Public()]))
     -> Import(f, nm, Annotations([Readable()]))
@@ -53,8 +53,8 @@ rules
   optimize-annotations: [anns] -> [anns']
     where
       <elem> (Public(), anns);
-      <elem> (Writeable(), anns);
-      anns' := <remove-all(?Writeable())> anns
+      <elem> (Writable(), anns);
+      anns' := <remove-all(?Writable())> anns
   
   check-annotations: anns -> anns
     where

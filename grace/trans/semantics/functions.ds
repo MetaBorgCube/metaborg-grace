@@ -7,13 +7,15 @@ imports
   trans/semantics/objectmodel
   trans/semantics/types
   trans/semantics/booleans
+  trans/semantics/visibility
   
 signature
   sorts
     Addr
 
   constructors
-    ClosV: Addr * Addr * List(Identifier) * Code * Env * List(String) -> V
+    //     self   outer  params             body   env   decl. fields   public
+    ClosV: Addr * Addr * List(Identifier) * Code * Env * List(String) * Bool -> V
 
   arrows
     method-closure(Declaration) --> V
@@ -49,12 +51,13 @@ rules
 
 rules /* closure construction */
 
-  method-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L', M) :: L
+  method-closure(MethodL(_, _, ann, params, _, _, code)) :: L --> ClosV(S, O, params, code, L', M, public) :: L
   where
     current-self() --> S;
     current-outer() --> O;
     current-method-names() --> M;
-    alloc-locals(code) :: L --> _ :: L L'.
+    alloc-locals(code) :: L --> _ :: L L';
+    is-public(ann) --> public.
 
 /* =========== call resolution and dispatch =========== */
 
@@ -93,17 +96,18 @@ rules
   
   resolve-and-call-local(x, []) --> read-local(x).
 
-  resolve-and-call(clos@ClosV(_, _, _, _, _, _), x, vs) --> call(clos, vs)
+  resolve-and-call(clos@ClosV(_, _, _, _, _, _, _), x, vs) --> call(clos, vs)
   where
     str-starts-with(x, "apply") == true.
   
   resolve-and-call(recv, x, vs) --> call(clos, vs)
   where
-    recv =!=> ClosV(_, _, _, _, _, _);
+    recv =!=> ClosV(_, _, _, _, _, _, _);
     lookup-method(recv, x) --> clos.
 
-  call(ClosV(S, O, params, code, env, M), vs) --> v
+  call(ClosV(S, O, params, code, env, M, public), vs) --> v
   where
+    check-visibility(public, S) --> true;
     add-locals(params, vs) :: L env --> _ :: L;
     S, O, M |- code :: L --> v :: L _.
 

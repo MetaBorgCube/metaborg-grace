@@ -89,7 +89,7 @@ context-free syntax
   
   Annotation.Public             = <public>
   Annotation.Readable           = <readable>
-  Annotation.Writeable          = <writable>
+  Annotation.Writable           = <writable>
   Annotation.Confidential       = <confidential>
   Annotation.Manifest           = <manifest>
   Annotation.Overrides          = <override>

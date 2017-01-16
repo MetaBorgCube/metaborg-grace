@@ -1,5 +1,4 @@
-
-var x := 5;
-
-
-while { x > 0; } do { x := x -1; print "hey";};
+object {
+  var a := 5;
+  def b is public = 6;
+};

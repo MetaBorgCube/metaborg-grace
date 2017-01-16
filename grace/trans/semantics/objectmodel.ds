@@ -14,7 +14,8 @@ imports
   trans/semantics/functions
   trans/semantics/statements
   trans/semantics/imports
-
+  trans/semantics/visibility
+  
 signature
   sorts
     Addr
@@ -94,29 +95,29 @@ rules
     install-method(m) --> _;
     cs -member-> cs'.
   
-  [Declaration(VariableL(ID(x), _, _, e)) | cs] : Code -member-> [SlotWrite(i, e) | cs']
+  [Declaration(VariableL(ID(x), _, ann, e)) | cs] : Code -member-> [SlotWrite(i, e) | cs']
   where
     add-slot(x) --> i;
-    install-method(field-getter(x, i)) --> _;
-    install-method(field-setter(x, i)) --> _;
+    install-method(field-getter(x, i, is-readable(ann))) --> _;
+    install-method(field-setter(x, i, is-writable(ann))) --> _;
     cs -member-> cs'.
 
   [Declaration(VariableL(WildCard(), _, _, e)) | cs] : Code -member-> [Expression(e) | cs']
   where
     cs -member-> cs'.
 
-  [Import(name, ID(x), _) | cs] : Code -member-> cs'
+  [Import(name, ID(x), ann) | cs] : Code -member-> cs'
     where
       add-slot(x) --> i;
       get-import-object(name) --> iAddr;
       write-slot(i, RefV(iAddr)) --> _;
-      install-method(field-getter(x, i)) --> _;
+      install-method(field-getter(x, i, is-readable(ann))) --> _;
       cs -member-> cs'.
   
-  [Declaration(ConstantL(ID(x), _, _, e)) | cs] : Code -member-> [SlotWrite(i, e) | cs']
+  [Declaration(ConstantL(ID(x), _, ann, e)) | cs] : Code -member-> [SlotWrite(i, e) | cs']
   where
     add-slot(x) --> i;
-    install-method(field-getter(x, i)) --> _;
+    install-method(field-getter(x, i, is-readable(ann))) --> _;
     cs -member-> cs'.
     
   [Declaration(ConstantL(WildCard(), _, _, e)) | cs] : Code -member-> [Expression(e) | cs']
@@ -166,17 +167,17 @@ rules
 /* ========== FIELD METHOD GENERATION ======= */
 signature
   arrows
-    field-getter(String, Int) --> Declaration
-    field-setter(String, Int) --> Declaration
-  
+    field-getter(String, Int, Bool) --> Declaration
+    field-setter(String, Int, Bool) --> Declaration
+
   native operators
     mksettername: String -> String
-  
+
 rules
 
-  field-getter(x, i) --> MethodL(ID(x), [], NoAnnotations(), [], [], no-type(), [SlotRead(i)]).
+  field-getter(x, i, c) --> MethodL(ID(x), [], to-annotation(c), [], [], no-type(), [SlotRead(i)]).
 
-  field-setter(x, i) --> MethodL(ID(mksettername(x)), [], NoAnnotations(), [ID("p")], [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))]).
+  field-setter(x, i, c) --> MethodL(ID(mksettername(x)), [], to-annotation(c), [ID("p")], [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))]).
 
 /* ========== OBJECT FLATTENING =========== */
 signature
