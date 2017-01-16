@@ -189,6 +189,7 @@ rules
   desugar-arg: ArgBoolean(a) -> Boolean(a)
   desugar-arg:  ArgString(a) -> String(a)
   desugar-arg:  ArgLineup(a) -> LineupExp(a)
+  desugar-arg: ArgInterpolatedString(intpolstr) -> InterpolatedString(intpolstr)
   desugar-arg:  ArgsParen(a) -> a
   desugar-arg:             a -> a
 

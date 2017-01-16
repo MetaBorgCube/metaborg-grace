@@ -10,9 +10,12 @@ rules
   external substring(|begin, end)
   
   trim-string(|b,e): a -> <substring(|b, <subti> (<string-length> a, e))> a
-    
+  
+  desugar-interpolate: Part(nm, ArgInterpolatedString(intpolstr))
+    -> Part(nm, ArgsParen([ InterpolatedString(intpolstr)]))
+      
   desugar-interpolate:
-    InterpolatedString(beginStr,[],IntPolEnd(exp,endStr))
+    InterpolatedString(IntPolStr(beginStr,[],IntPolEnd(exp,endStr)))
       -> MCallWDot(
            MCallWDot(
              String(beginStr')
@@ -25,8 +28,8 @@ rules
         endStr' := <trim-string(|1,1)> endStr
   
   desugar-interpolate:
-    InterpolatedString(bStr, mids@[IntPol(_, _) | _],
-      end@IntPolEnd(eexp,eStr)) ->
+    InterpolatedString(IntPolStr(bStr, mids@[IntPol(_, _) | _],
+      end@IntPolEnd(eexp,eStr))) ->
         MCallWDot(
           MCallWDot(
             sub
@@ -36,9 +39,6 @@ rules
         )
      where
        IntPol(mExp, mStr) := <last> mids;
-       sub := <desugar-interpolate> InterpolatedString(bStr, <init> mids,
-                                                   IntPolEnd(mExp, mStr)); 
+       sub := <desugar-interpolate> InterpolatedString(
+                        IntPolStr(bStr, <init> mids, IntPolEnd(mExp, mStr))); 
        endStr' := <trim-string(|1,1)> eStr
-    
-  
-  desugar-interpolate: InterpolatedString(start, middles, end) -> String(start)

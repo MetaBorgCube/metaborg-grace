@@ -115,11 +115,12 @@ context-free syntax
   Exp.TypeExp                   = <<TypeExp>> {avoid}
   Exp.Number                    = <<NUM>>
   Exp.String                    = <<STRING>> {prefer}
-  Exp.InterpolatedString        = <<STRINGINTSTART><Interpolated*><InterpolatedEnd>>
+  Exp.InterpolatedString        = <<InterpolatedString>>
   Interpolated.IntPol           = <<Exp> <STRINGINTMID>>
   InterpolatedEnd.IntPolEnd     = <<Exp> <STRINGINTEND>>
   Exp.Boolean                   = <<Boolean>>
 
+  InterpolatedString.IntPolStr  = <<STRINGINTSTART><Interpolated*><InterpolatedEnd>>
   
   Exp                           = <(<Exp>)>                    {bracket}
   
@@ -173,6 +174,7 @@ context-free syntax
   CallArgs.ArgBlock             = < <Block>>
   CallArgs.ArgNumber            = < <NUM>>
   CallArgs.ArgString            = < <STRING>>
+  CallArgs.ArgInterpolatedString= < <InterpolatedString>>
   CallArgs.ArgLineup            = < <Lineup>>
   CallArgs.ArgBoolean           = < <Boolean>>
     

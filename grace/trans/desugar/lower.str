@@ -137,6 +137,7 @@ rules
   lower-arguments: ArgString(a) -> [String(a)]
   lower-arguments: ArgBoolean(a) -> [Boolean(a)]
   lower-arguments: ArgLineup(a) -> [LineupExp(a)]
+  lower-arguments: ArgInterpolatedString(a) -> [InterpolatedString(a)]
   lower-arguments: NoArgs() -> []
   lower-arguments: ArgsParen(as) -> <lower-arguments> as
   lower-arguments: [ArgsParen(a) | b] -> [a | <lower-arguments> b]
