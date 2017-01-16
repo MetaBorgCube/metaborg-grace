@@ -47,8 +47,8 @@ rules
   where
     e --> RefV(S).
 
-  BlockL(params, _, code) --> method-closure(
-    MethodL(ID("lambda"), [], Annotations([Public()]), params, [], no-type(), code)).
+  BlockL(params, _, code) --> method-closure(MethodL(ID("lambda"),
+    [], Annotations([Public()]), params, [], no-type(), code)).
 
 rules /* closure construction */
 
@@ -113,7 +113,7 @@ rules
     add-locals(params, vs) :: L env --> _ :: L;
     S, O, M |- code :: L --> v :: L _.
 
-  S |- call(ClosV(S', O', _, _, _, _, public), _, name) :: H --> DoneV()
+  S |- call(ClosV(S', _, _, _, _, _, public), _, name) :: H --> DoneV()
   where
     check-visibility(public, S', name) --> false;
     halt-error("Requested confidential method '" ++ name ++
