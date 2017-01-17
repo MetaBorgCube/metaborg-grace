@@ -9,7 +9,7 @@ method t120_bar(n) {
     if (n == 1) then {
         t120_theBlock.apply;
     };
-    "{t120_bar(n - 1);}{n;}";
+    "{t120_bar(n - 1)}{n}";
 };
 
 print(t120_bar(5));
