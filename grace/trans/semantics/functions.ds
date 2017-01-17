@@ -66,7 +66,7 @@ signature
     resolve-and-call(String, List(V)) --> V
     resolve-and-call-local(String, List(V)) --> V
     resolve-and-call(V, String, List(V)) --> V
-    
+    check-method-found(Bool, String) --> U
     call(V, List(V), String) --> V
 
 rules
@@ -82,12 +82,19 @@ rules
         is-member-new(x) --> is-member;
         case is-member of {
           true =>
-            lookup-method(current-self(), x) --> clos
+            lookup-method(current-self(), x) --> (clos, f);
+            check-method-found(f, x) --> _
           false =>
-            lookup-method(current-outer(), x) --> clos
+            lookup-method(current-outer(), x) --> (clos, f);
+            check-method-found(f, x) --> _
         };
         call(clos, vs, x) --> v
     }.
+
+  check-method-found(true, _) --> U().
+  check-method-found(false, x) --> U()
+    where
+      halt-error("No such method: ", x) --> _.
 
   resolve-and-call-local(x, [v]) --> DoneV()
   where
@@ -104,7 +111,8 @@ rules
   resolve-and-call(recv, x, vs) --> call(clos, vs, x)
   where
     recv =!=> ClosV(_, _, _, _, _, _);
-    lookup-method-direct(recv, x) --> clos.
+    lookup-method-direct(recv, x) --> (clos, f);
+    check-method-found(f,x) --> _.
 
   call(ClosV(S, O, params, code, env, public), vs, name) --> v
   where
@@ -147,6 +155,8 @@ rules
 signature
   arrows
     add-local(Identifier, V) --> U
+    check-add-local(String) --> U
+    error-add-local(Bool, Bool, Bool, String) --> U
     update-local(Identifier, V) --> U
     is-local(String) --> Bool
     read-local(String) --> V
@@ -156,12 +166,35 @@ rules
 
   add-local(ID(x), v) :: L --> U() :: L {x |--> addr, L}
   where
+    log("adding local: '" ++ x ++ "'.") --> _;
+    check-add-local(x) --> _;
     v-allocate(v) --> addr.
+    
+  check-add-local(x) --> U()
+    where
+      lookup-method(current-self(), x) --> (_, self);
+      lookup-method(current-outer(), x) --> (_, outer);
+      is-local(x) --> local;
+      error-add-local(self,outer,local,x) --> _.
+  
+  error-add-local(false,false,false, _) --> U().
+  error-add-local(self,outer,local, x) --> U()
+    where
+      case self of {
+        true => halt-error("Local '" ++ x ++ "' may not redefine method from self.", "") --> _
+      };
+      case outer of {
+        true => halt-error("Local '" ++ x ++ "' may not shadow method from an enclosing scope.", "") --> _
+      };
+      case local of {
+        true => halt-error("Local '" ++ x ++ "' may not redefine local method.", "") --> _
+      }.
   
   add-local(WildCard(), _) --> U().
   
   update-local(ID(x), v) :: L --> U() :: L
   where
+    log("updating local: '" ++ x ++ "'") --> _;
     v-update(L[x], v) --> _.
   
   update-local(WildCard(), _) --> U().
@@ -184,6 +217,7 @@ rules
 
   add-locals([x | xs], [v | vs]) --> add-locals(xs, vs)
   where
+    log("adding locals") --> _;
     add-local(x, v) --> _.
   
 /* ============ variable heap operations ======== */

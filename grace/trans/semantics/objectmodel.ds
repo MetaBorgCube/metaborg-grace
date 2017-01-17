@@ -252,9 +252,9 @@ signature
     
     add-method(String, V) --> U
     
-    lookup-method(V, String) --> V
-    lookup-method-direct(V, String) --> V
-    lookup-check(Addr, String) --> U
+    lookup-method(V, String) --> (V * Bool)
+    lookup-method-direct(V, String) --> (V * Bool)
+    object-exists(Addr) --> Bool
     
     current-self() --> V
     current-outer() --> V
@@ -319,33 +319,33 @@ rules
     where
       read(S) --> Obj(_,_,_, methods).
       
-  lookup-method-direct(RefV(recv), x) --> v
+  lookup-method-direct(RefV(recv), x) --> (v, b)
   where
     log("lookup-method-direct: '" ++ x ++ "'") --> _;
     read(recv) --> Obj(_, _, _, methods);
     case methods[x?] of {
       true =>
-        methods[x] => v
+        methods[x] => v; true => b
       false =>
         halt-error("No such method: ", x) --> _;
-        DoneV() => v
+        DoneV() => v; false => b
     }.
   
-  S, O |- lookup-method(S', x) --> v
+  S |- lookup-method(S', x) --> (v, b) // basically lookup in self
   where
     S == S';
     log("lookup-method: '" ++ x ++ "', S == S'") --> _;
-    read(S') --> Obj(O', _, _, methods);
+    read(S') --> Obj(_, _, _, methods);
     case methods[x?] of {
       true =>
-        methods[x] => v
+        log("found method '" ++ x ++ "' in self: " ++ str(methods:AST)) --> _;
+        methods[x] => v; true => b
       false =>
-        log("lookup-method recurse: " ++ x ++ ", S == S' O: " ++
-          str(O) ++ " O': " ++ str(O') ) --> _;
-        S O, O O' |- lookup-method(O, x) --> v
+        log("method '" ++ x ++ "' not found in self: " ++ str(methods:AST)) --> _;
+        DoneV() => v; false => b
     }.
 
-  S |- lookup-method(S', x) --> v
+  S |- lookup-method(S', x) --> (v, b) // lookup in outers
   where
     S != S';
     log("lookup-method: " ++ x ++ ", S != S' S: " ++
@@ -353,23 +353,24 @@ rules
     read(S') --> Obj(O', _, _, methods);
     case methods[x?] of {
       true =>
-        methods[x] => v
+        log("found method '" ++ x ++ "' in outer: " ++ str(methods:AST)) --> _;
+        methods[x] => v;
+        true => b
       false =>
-        lookup-check(O', x) --> _;
-        lookup-method(O', x) --> v // look in outer
-//        halt-error("No method: ", x) --> _;
-//        DoneV() => v
+        object-exists(O') --> outer-exists;
+        case outer-exists of {
+          true =>
+            log("recursing to outer: '" ++ int2string(O':Int) ++
+              "' in search of '" ++ x ++ "'") --> _;
+            lookup-method(O', x) --> (v, b) // look in outer
+          otherwise => DoneV() => v; false => b
+        }
     }.
 
   /*
    * Halts with error if addr is not an existing object on the heap.
    */ 
-  lookup-check(addr, x) :: H --> U()
-    where
-      case H[addr?] of {
-        true =>
-        otherwise => halt-error("No such method: ", x) --> _
-      }.
+  object-exists(addr) :: H --> H[addr?].
 
 signature
   arrows
