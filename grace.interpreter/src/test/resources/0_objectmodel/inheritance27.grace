@@ -9,6 +9,6 @@ method A {
 method B {
   object {
     inherit A;
-    x1;
+    x1; // both inherited and enclosing scope, should error
   };
 };

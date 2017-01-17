@@ -1,6 +1,7 @@
 def a = object {
     method new {
         object {
+            method parent { };
             print(outer.g);
         };
     };
@@ -13,6 +14,7 @@ def context = object {
     object {
         inherit a.new;
         print(outer.g);
+        method child {};
     };
 };
 
