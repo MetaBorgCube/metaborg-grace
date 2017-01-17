@@ -23,7 +23,6 @@ rules
           lower-variable <+
           lower-block <+
 //          lower-assignment <+
-          lower-trait <+
           lower-type-unknown <+
           lower-fail
   
@@ -69,15 +68,15 @@ rules
       with
         pt := <lower-get-param-types> ps;
         ta := <lower-get-typeargs> typeArgs;
-        name := <name-to-id> mName; 
-        params := <lower-get-param-names> ps
+        params := <lower-get-param-names> ps;
+        name := <name-to-id> mName
         
   lower-mdecl:
     MethodDecl(Single(MethodID(mName, typeArgs)), annotations, RH(te), MethodBody(cs)) ->
       MethodL(<name-to-id> mName, ta, annotations, [], [], te, cs)
       with
         ta := <lower-get-typeargs> typeArgs
-        
+
   lower-get-typeargs: TypeArg(tas) -> tas
   lower-get-typeargs: NoTypeArg() -> []
   
@@ -107,12 +106,6 @@ rules
   lower-typeann: TypeAnn(t) -> t
 //  lower-assignment: Assignment(a,b) -> AssignmentL(a, b)
 
-  lower-trait: TraitDecl([MethodID(tName, ps)], MethodBody(code)) -> 
-    TraitL(name, params, code)
-    where
-      name := <name-to-id> tName;
-      params := <lower-get-param-names> ps
-      
   lower-type-unknown: TypeID(ID("Unknown"), NoTypeArg()) -> Unkwn()
   
   flatten-statements-declaration: Declaration([a,b]) -> [Declaration(a),Expression(b)]      

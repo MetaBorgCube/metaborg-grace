@@ -36,7 +36,9 @@ context-free syntax
                                        <Inherit><Use*><{Statement "\n"}*>
                                    }
                                   >
-  Declaration.TraitDecl         = <trait <MethodNames> <MethodBody>>
+  Declaration.TraitDecl         = <trait <MethodNames><Annotations><TypeRuleRightHand> {
+                                       <Use*><{Statement "\n"}*>
+                                   }>
   Use.Use                       = <
                                        use <Exp> <Modifier*>;
 

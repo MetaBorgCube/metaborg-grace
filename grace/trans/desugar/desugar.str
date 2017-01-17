@@ -21,6 +21,7 @@ rules
   
   desugar =
     desugar-class-declaration
+    <+ desugar-trait-declaration
     <+ desugar-optimize-annotations
     <+ desugar-annotate-defaults
     <+ desugar-annotations
@@ -63,6 +64,18 @@ rules
           Expression(ObjectDecl(inh,use,code))
         ])
       )
+
+  desugar-trait-declaration:
+    TraitDecl(mIDs, annotations, type, use, code) ->
+      MethodDecl(
+        mIDs,
+        annotations,
+        type,
+        MethodBody([
+          Expression(ObjectDecl(NoInherit(),use,code))
+        ])
+      )
+
   desugar-class-declaration:
     ClassDecl(FullStop(iden, mIDs), annotations, type, inh, use, code) ->      
       Constant(iden, NoTypeAnn(), Annotations([Public()]), Expression (

@@ -43,19 +43,22 @@ signature
     S : Addr
     O : Addr
     
-  arrows 
+  arrows
     get-scopes(List(Closure)) --> List(Addr)
   
 rules
 
-  S, P Exec() |- ObjectL(inherit, [], code) --> S'
+  S, P Exec() |- ObjectL(inherit, uses, code) --> S'
   where
     new-object(S) --> S';
     S S', O S, P Flatten() |- inherit --> FlatObject(closures-inherited);
-    closures-inherited ++ [Closure(S, code)] => closures;
+    S S', O S, P Flatten() |- uses --> FlatObject(closures-used);
+    closures-inherited ++ closures-used ++ [Closure(S, code)] => closures;
+    
     log("total closures from object construction: " ++ str(closures : AST)) --> _;
     read(S') --> Obj(a,_,c,d);
     update(S', Obj(a, get-scopes(closures), c, d)) --> _;
+    
     S' |- install-members(closures) --> closures';
     log("total closures' from object construction: " ++ str(closures' : AST)) --> _;
     S' |- init-object(closures') --> U();
@@ -218,12 +221,14 @@ signature
 
   arrows
     Inherit --> V
+    List(Use) --> V
 
 rules
 
-  S, P Flatten() |- ObjectL(inherit, [], code) --> FlatObject(closures-inh
-    ++ [Closure(S, code)])
+  S, P Flatten() |- ObjectL(inherit, uses, code) --> FlatObject(closures-inh
+    ++ closures-uses ++ [Closure(S, code)])
   where
+    O S, P Flatten() |- uses --> FlatObject(closures-uses);
     O S, P Flatten() |- inherit --> FlatObject(closures-inh).
 
   P Flatten() |- MCallRecvL(e, ID(x), es) --> v
@@ -236,8 +241,15 @@ rules
   
   Inherit(e, _) --> v
   where
-    e --> v@FlatObject(_).  // TODO this is where to check whether the inherit
+    e --> v@FlatObject(innerflat);
+    log("innerflat: " ++ str(innerflat:AST)) --> _.  // TODO this is where to check whether the inherit
                             // expression actually returns a fresh object
+
+  [] : List(Use) --> FlatObject([]).
+  [Use(e,_) | uses] : List(Use) --> FlatObject(closures ++ closures')
+    where
+      e --> FlatObject(closures);
+      uses --> FlatObject(closures').
 
 /* ======== OBJECT META-FUNCTIONS ========= */
 
