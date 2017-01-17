@@ -15,7 +15,6 @@ imports
   trans/semantics/strings
   trans/semantics/imports
   trans/semantics/store
-  trans/semantics/qualify/qualify
   
 signature
   arrows
@@ -26,7 +25,6 @@ rules
   S S |- p@Program(code, _) --> v
     where
       get-dialect-object(code) --> s';
-//      DObj read(s') |- p -qualify-> p@Program(code', _);
       S s', O S |- code --> v.
 
   [] : Code --> DoneV().

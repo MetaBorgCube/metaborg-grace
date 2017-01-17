@@ -160,9 +160,9 @@ rules
   where
     clos -obji-> _.
   
-  Closure(O, M, code) -obji-> U()
+  Closure(O, _, code) -obji-> U()
   where
-    M, O |- code -obji-> _.
+    O |- code -obji-> _.
     
   [] : Code -obji-> U().
   
@@ -186,9 +186,12 @@ signature
 
 rules
 
-  field-getter(x, i, c) --> MethodL(ID(x), [], to-annotation(c), [], [], no-type(), [SlotRead(i)]).
+  field-getter(x, i, c) -->
+    MethodL(ID(x), [], to-annotation(c), [], [], no-type(), [SlotRead(i)]).
 
-  field-setter(x, i, c) --> MethodL(ID(mksettername(x)), [], to-annotation(c), [ID("p")], [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))]).
+  field-setter(x, i, c) -->
+    MethodL(ID(mksettername(x)), [], to-annotation(c), [ID("p")], [],
+      no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))]).
 
 /* ========== OBJECT FLATTENING =========== */
 signature
@@ -218,9 +221,10 @@ signature
 
 rules
 
-  S, P Flatten() |- ObjectL(inherit, [], code) --> FlatObject(closures-inherited ++ [Closure(S, code)])
+  S, P Flatten() |- ObjectL(inherit, [], code) --> FlatObject(closures-inh
+    ++ [Closure(S, code)])
   where
-    O S, P Flatten() |- inherit --> FlatObject(closures-inherited).
+    O S, P Flatten() |- inherit --> FlatObject(closures-inh).
 
   P Flatten() |- MCallRecvL(e, ID(x), es) --> v
   where
@@ -232,7 +236,8 @@ rules
   
   Inherit(e, _) --> v
   where
-    e --> v@FlatObject(_).  // TODO this is where to check whether the inherit expression actually returns a fresh object
+    e --> v@FlatObject(_).  // TODO this is where to check whether the inherit
+                            // expression actually returns a fresh object
 
 /* ======== OBJECT META-FUNCTIONS ========= */
 
@@ -248,10 +253,14 @@ signature
     add-method(String, V) --> U
     
     lookup-method(V, String) --> V
+    lookup-method-direct(V, String) --> V
+    lookup-check(Addr, String) --> U
     
     current-self() --> V
     current-outer() --> V
     current-method-names() --> List(String)
+    
+    is-member-new(String) --> Bool
     
     outer(Addr) --> V
     self(Addr) --> V
@@ -298,17 +307,34 @@ rules
   S |- add-method(x, v) --> U()
   where
     read(S) --> Obj(O, outers, slots, methods);
-    log("S: " ++ int2string(S : Int) ++ " O " ++ int2string(O : Int) ++ " new method: " ++ x ++ " -> " ++ str(v)) --> _;
+    log("S: " ++ int2string(S : Int) ++ " O " ++ int2string(O : Int) ++
+      " new method: " ++ x ++ " -> " ++ str(v)) --> _;
     update(S, Obj(O, outers, slots, {x |--> v, methods})) --> _.
   
   S |- current-method-names() --> allkeys(methods)
   where
     read(S) --> Obj(_, _, _, methods).
   
+  S |- is-member-new(x) --> methods[x?]
+    where
+      read(S) --> Obj(_,_,_, methods).
+      
+  lookup-method-direct(RefV(recv), x) --> v
+  where
+    log("lookup-method-direct: '" ++ x ++ "'") --> _;
+    read(recv) --> Obj(_, _, _, methods);
+    case methods[x?] of {
+      true =>
+        methods[x] => v
+      false =>
+        halt-error("No such method: ", x) --> _;
+        DoneV() => v
+    }.
+  
   S, O |- lookup-method(S', x) --> v
   where
     S == S';
-    log("lookup-method: " ++ x ++ ", S == S'") --> _;
+    log("lookup-method: '" ++ x ++ "', S == S'") --> _;
     read(S') --> Obj(O', _, _, methods);
     case methods[x?] of {
       true =>
@@ -329,10 +355,21 @@ rules
       true =>
         methods[x] => v
       false =>
+        lookup-check(O', x) --> _;
         lookup-method(O', x) --> v // look in outer
 //        halt-error("No method: ", x) --> _;
 //        DoneV() => v
     }.
+
+  /*
+   * Halts with error if addr is not an existing object on the heap.
+   */ 
+  lookup-check(addr, x) :: H --> U()
+    where
+      case H[addr?] of {
+        true =>
+        otherwise => halt-error("No such method: ", x) --> _
+      }.
 
 signature
   arrows
@@ -344,5 +381,6 @@ rules
   where
     read(S) --> Obj(O, outers, _, methods);
     concat(separate-by(allkeys(methods), ", ")) --> method-names;
-    log("S: " ++ int2string(S : Int) ++ " O " ++ int2string(O : Int) ++ " outers: " ++ str(outers : AST) ++  " methods: " ++ method-names) --> _.
+    log("S: " ++ int2string(S : Int) ++ " O " ++ int2string(O : Int) ++
+      " outers: " ++ str(outers : AST) ++  " methods: " ++ method-names) --> _.
   

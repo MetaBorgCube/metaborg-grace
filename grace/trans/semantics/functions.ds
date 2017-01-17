@@ -15,7 +15,7 @@ signature
 
   constructors
     //     self   outer  params             body   env   decl. fields   public
-    ClosV: Addr * Addr * List(Identifier) * Code * Env * List(String) * Bool -> V
+    ClosV: Addr * Addr * List(Identifier) * Code * Env * Bool -> V
 
   arrows
     method-closure(Declaration) --> V
@@ -25,8 +25,7 @@ signature
   
   components
     L : Env
-    M : List(String)
-    
+
   native operators
     nativePrint: V -> V
 
@@ -53,11 +52,10 @@ rules
 rules /* closure construction */
 
   method-closure(MethodL(_, _, ann, params, _, _, code)) :: L -->
-    ClosV(S, O, params, code, L', M, public) :: L
+    ClosV(S, O, params, code, L', public) :: L
   where
     current-self() --> S;
     current-outer() --> O;
-    current-method-names() --> M;
     alloc-locals(code) :: L --> _ :: L L';
     is-public(ann) --> public.
 
@@ -73,14 +71,15 @@ signature
 
 rules
   
-  resolve-and-call(x, vs) --> v
+  S |- resolve-and-call(x, vs) --> v
   where
     is-local(x) --> is-local;
     case is-local of {
       true =>
         resolve-and-call-local(x, vs) --> v
       false =>
-        is-member(x) --> is-member;
+        log("is '" ++ x ++ "' a member of: '" ++ int2string(S) ++ "'?") --> _;
+        is-member-new(x) --> is-member;
         case is-member of {
           true =>
             lookup-method(current-self(), x) --> clos
@@ -98,22 +97,22 @@ rules
   
   resolve-and-call-local(x, []) --> read-local(x).
 
-  resolve-and-call(clos@ClosV(_, _, _, _, _, _, _), x, vs) --> call(clos, vs, x)
+  resolve-and-call(clos@ClosV(_, _, _, _, _, _), x, vs) --> call(clos, vs, x)
   where
     str-starts-with(x, "apply") == true.
   
   resolve-and-call(recv, x, vs) --> call(clos, vs, x)
   where
-    recv =!=> ClosV(_, _, _, _, _, _, _);
-    lookup-method(recv, x) --> clos.
+    recv =!=> ClosV(_, _, _, _, _, _);
+    lookup-method-direct(recv, x) --> clos.
 
-  call(ClosV(S, O, params, code, env, M, public), vs, name) --> v
+  call(ClosV(S, O, params, code, env, public), vs, name) --> v
   where
     check-visibility(public, S, name) --> true;
     add-locals(params, vs) :: L env --> _ :: L;
-    S, O, M |- code :: L --> v :: L _.
+    S, O |- code :: L --> v :: L _.
 
-  S |- call(ClosV(S', _, _, _, _, _, public), _, name) :: H --> DoneV()
+  S |- call(ClosV(S', _, _, _, _, public), _, name) :: H --> DoneV()
   where
     check-visibility(public, S', name) --> false;
     halt-error("Requested confidential method '" ++ name ++
@@ -152,8 +151,7 @@ signature
     is-local(String) --> Bool
     read-local(String) --> V
     add-locals(List(Identifier), List(V)) --> U
-    is-member(String) --> Bool
-    
+
 rules
 
   add-local(ID(x), v) :: L --> U() :: L {x |--> addr, L}
@@ -188,17 +186,6 @@ rules
   where
     add-local(x, v) --> _.
   
-  M [] |- is-member(_) --> false.
-  
-  M [m | _] |- is-member(x) --> true
-  where
-    m == x.
-  
-  M [m | mx] |- is-member(x) --> maybe
-  where
-    m != x;
-    M mx |- is-member(x) --> maybe.
-
 /* ============ variable heap operations ======== */
 
 signature

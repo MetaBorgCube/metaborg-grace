@@ -5,7 +5,7 @@ imports
   src-gen/ds-signatures/grace-lowered-sig
   trans/semantics/semantics
   trans/semantics/statements
-  
+
 signature
 
 //  sorts
