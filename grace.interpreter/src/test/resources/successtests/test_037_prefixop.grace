@@ -1,5 +1,5 @@
-method t037_identity(a) {
-    a;
+method t037_identity(i) {
+    i;
 };
 
 def a = object {
