@@ -53,7 +53,7 @@ rules
     where
       do => Obj(_,_,_,methods);
       make-initial-QOM(methods) --> dia;
-      log("method map from dialect: " ++ str(dia)) --> _;
+      log("method map from dialect: " ++ str(dia : AST)) --> _;
       log("program, level: " ++ int2string(0) ++ ".") --> _;
       QC ProgramQC(), QOL 0 |- code :: QOM dia, QLM {} -q-> code'.
   

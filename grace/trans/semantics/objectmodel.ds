@@ -308,24 +308,30 @@ rules
   S, O |- lookup-method(S', x) --> v
   where
     S == S';
+    log("lookup-method: " ++ x ++ ", S == S'") --> _;
     read(S') --> Obj(O', _, _, methods);
     case methods[x?] of {
       true =>
         methods[x] => v
       false =>
+        log("lookup-method recurse: " ++ x ++ ", S == S' O: " ++
+          str(O) ++ " O': " ++ str(O') ) --> _;
         S O, O O' |- lookup-method(O, x) --> v
     }.
 
   S |- lookup-method(S', x) --> v
   where
     S != S';
-    read(S') --> Obj(_, _, _, methods);
+    log("lookup-method: " ++ x ++ ", S != S' S: " ++
+          str(S) ++ " O': " ++ str(S') ) --> _;
+    read(S') --> Obj(O', _, _, methods);
     case methods[x?] of {
       true =>
         methods[x] => v
       false =>
-        halt-error("No method: ", x) --> _;
-        DoneV() => v
+        lookup-method(O', x) --> v // look in outer
+//        halt-error("No method: ", x) --> _;
+//        DoneV() => v
     }.
 
 signature
