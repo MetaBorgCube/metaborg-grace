@@ -251,6 +251,9 @@ signature
     write-slot(Int, V) --> U
     
     add-method(String, V) --> U
+    check-add-method(String, V) --> U
+    check-method-name(String) --> U
+    check-method-params(List(Identifier)) --> U
     
     lookup-method(V, String) --> (V * Bool)
     lookup-method-direct(V, String) --> (V * Bool)
@@ -309,7 +312,23 @@ rules
     read(S) --> Obj(O, outers, slots, methods);
     log("S: " ++ int2string(S : Int) ++ " O " ++ int2string(O : Int) ++
       " new method: " ++ x ++ " -> " ++ str(v)) --> _;
+    check-add-method(x, v) --> _;
     update(S, Obj(O, outers, slots, {x |--> v, methods})) --> _.
+
+  check-add-method(_, ClosV(_,_,ps,_,_,_)) --> U()
+    where
+//     check-method-name(x) --> _; // should be static as is bound to scope
+     check-method-params(ps) --> _.
+
+  check-add-method(_, _) --> U()
+    where
+      log("anything else?") --> _.
+
+  check-method-params([]) --> U().
+  check-method-params([WildCard() | ps]) --> check-method-params(ps).
+  check-method-params([ID(p) | ps]) --> check-method-params(ps)
+    where
+      check-add-local(p) --> _.
   
   S |- current-method-names() --> allkeys(methods)
   where
