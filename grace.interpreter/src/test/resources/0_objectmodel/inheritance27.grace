@@ -12,3 +12,4 @@ method B {
     x1; // both inherited and enclosing scope, should error
   };
 };
+B; // minigrace will error without even calling
