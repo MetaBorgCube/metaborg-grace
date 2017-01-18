@@ -1,11 +1,11 @@
 method A {
   def n = 42;
   object {
-    // n needs to be a local here
-    print(n);
+    method f { n; }; // and here
   };
 };
 
 object {
   inherit A;
+  print(f);
 };
