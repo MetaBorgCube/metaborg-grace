@@ -422,5 +422,6 @@ rules
     read(S) --> Obj(O, outers, _, methods);
     concat(separate-by(allkeys(methods), ", ")) --> method-names;
     log("S: " ++ int2string(S : Int) ++ " O " ++ int2string(O : Int) ++
-      " outers: " ++ str(outers : AST) ++  " methods: " ++ method-names) --> _.
+      " outers: " ++ str(outers : AST) ++  ", method-names: " ++ method-names
+      ++ ", methods: " ++ str(methods : AST)) --> _.
   

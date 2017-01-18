@@ -51,13 +51,13 @@ rules
 
 rules /* closure construction */
 
-  Src src |- method-closure(MethodL(_, _, ann, params, _, _, code)) :: L -->
+  Src src |- method-closure(MethodL(ID(name), _, ann, params, _, _, code)) :: L -->
     ClosV(S, O, params, code, L', public, src) :: L
   where
-    log("reported source for method construction: " ++ str(src)) --> _;
     current-self() --> S;
     current-outer() --> O;
     alloc-locals(code) :: L --> _ :: L L';
+    log("constructing method: '" ++ name ++ "', L: " ++ str(L:AST) ++ ", L': " ++ str(L':AST)) --> _;
     is-public(ann) --> public.
 
 /* =========== call resolution and dispatch =========== */
