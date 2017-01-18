@@ -51,16 +51,16 @@ rules
   S, P Exec() |- ObjectL(inherit, uses, code) --> S'
   where
     new-object(S) --> S';
-    S S', O S, P Flatten() |- inherit --> FlatObject(closures-inherited);
-    S S', O S, P Flatten() |- uses --> FlatObject(closures-used);
-    closures-inherited ++ closures-used ++ [Closure(S, code)] => closures;
+    S S', O S, P Flatten(), Src Inherit() |- inherit --> FlatObject(closures-inherited);
+    S S', O S, P Flatten(), Src Trait() |- uses --> FlatObject(closures-used);
+    closures-inherited ++ closures-used ++ [Closure(S, code, Bottom())] => closures;
     
-    log("total closures from object construction: " ++ str(closures : AST)) --> _;
+    log("pre-install closures from object construction: " ++ str(closures : AST)) --> _;
     read(S') --> Obj(a,_,c,d);
     update(S', Obj(a, get-scopes(closures), c, d)) --> _;
     
     S' |- install-members(closures) --> closures';
-    log("total closures' from object construction: " ++ str(closures' : AST)) --> _;
+    log("post-install closures' from object construction: " ++ str(closures' : AST)) --> _;
     S' |- init-object(closures') --> U();
     log-object-creation(S') --> _.
 
@@ -72,7 +72,7 @@ rules
     write-slot(i, v) --> _.
     
   get-scopes([]) --> [].
-  get-scopes([Closure(addr,_) | cs]) --> [addr | get-scopes(cs)].
+  get-scopes([Closure(addr,_,_) | cs]) --> [addr | get-scopes(cs)].
 
 /* ========== INIT METHODS =========== */
 
@@ -96,11 +96,12 @@ rules
   
   install-members-aux([clos | closs]) --> [clos' | install-members-aux(closs)]
   where
-    clos -member-> clos'.
+    clos -member-> clos';
+    log("-member-> " ++ str(clos) ++ " to " ++ str(clos')) --> _.
   
-  Closure(O, code) -member-> Closure(O, current-method-names(), code')
+  Closure(O, code, src) -member-> Closure(O, current-method-names(), code', src)
   where
-    O |- code -member-> code'.
+    O, Src src |- code -member-> code'.
     
   [] : Code -member-> [].
   
@@ -163,7 +164,7 @@ rules
   where
     clos -obji-> _.
   
-  Closure(O, _, code) -obji-> U()
+  Closure(O, _, code, _) -obji-> U()
   where
     O |- code -obji-> _.
     
@@ -204,19 +205,24 @@ signature
   constructors
     Exec    : Phase
     Flatten : Phase
+    Inherit : Source
+    Trait   : Source
+    Bottom  : Source
     
   components
     P : Phase
+    Src : Source
     
   sorts
     Closure
+    Source
     
   sort aliases
     Closures = List(Closure)
 
   constructors
-    Closure: Addr * Code -> Closure
-    Closure: Addr * List(String) * Code -> Closure
+    Closure: Addr * Code * Source -> Closure
+    Closure: Addr * List(String) * Code * Source -> Closure
     FlatObject: List(Closure) -> V
 
   arrows
@@ -225,17 +231,18 @@ signature
 
 rules
 
-  S, P Flatten() |- ObjectL(inherit, uses, code) --> FlatObject(closures-inh
-    ++ closures-uses ++ [Closure(S, code)])
+  S, P Flatten(), Src src |- ObjectL(inherit, uses, code) --> FlatObject(closures-inh
+    ++ closures-uses ++ [Closure(S, code, src)])
   where
-    O S, P Flatten() |- uses --> FlatObject(closures-uses);
-    O S, P Flatten() |- inherit --> FlatObject(closures-inh).
+    log("flattening object, current src: " ++ str(src)) --> _;
+    O S, P Flatten(), Src Inherit() |- inherit --> FlatObject(closures-inh);
+    O S, P Flatten(), Src Trait() |- uses --> FlatObject(closures-uses).
 
   P Flatten() |- MCallRecvL(e, ID(x), es) --> v
   where
     P Exec() |- e --> recv;
     P Exec() |- es --> vs;
-    P Flatten() |- resolve-and-call(recv, x, vs) --> v.
+    P Flatten() |- resolve-and-call-qual(recv, x, vs) --> v.
 
   NoInherit() --> FlatObject([]).
   
@@ -268,14 +275,13 @@ signature
     check-method-params(List(Identifier)) --> U
     
     lookup-method(V, String) --> (V * Bool)
-    lookup-method-direct(V, String) --> (V * Bool)
     object-exists(Addr) --> Bool
     
     current-self() --> V
     current-outer() --> V
     current-method-names() --> List(String)
     
-    is-member-new(String) --> Bool
+    is-member(String) --> Bool
     
     outer(Addr) --> V
     self(Addr) --> V
@@ -327,7 +333,7 @@ rules
     check-add-method(x, v) --> _;
     update(S, Obj(O, outers, slots, {x |--> v, methods})) --> _.
 
-  check-add-method(_, ClosV(_,_,ps,_,_,_)) --> U()
+  check-add-method(_, ClosV(_,_,ps,_,_,_,_)) --> U()
     where
 //     check-method-name(x) --> _; // should be static as is bound to scope
      check-method-params(ps) --> _.
@@ -346,21 +352,21 @@ rules
   where
     read(S) --> Obj(_, _, _, methods).
   
-  S |- is-member-new(x) --> methods[x?]
+  S |- is-member(x) --> methods[x?]
     where
       read(S) --> Obj(_,_,_, methods).
       
-  lookup-method-direct(RefV(recv), x) --> (v, b)
-  where
-    log("lookup-method-direct: '" ++ x ++ "'") --> _;
-    read(recv) --> Obj(_, _, _, methods);
-    case methods[x?] of {
-      true =>
-        methods[x] => v; true => b
-      false =>
-        halt-error("No such method: ", x) --> _;
-        DoneV() => v; false => b
-    }.
+//  lookup-method-direct(RefV(recv), x) --> (v, b)
+//  where
+//    log("lookup-method-direct: '" ++ x ++ "'") --> _;
+//    read(recv) --> Obj(_, _, _, methods);
+//    case methods[x?] of {
+//      true =>
+//        methods[x] => v; true => b
+//      false =>
+//        halt-error("No such method: ", x) --> _;
+//        DoneV() => v; false => b
+//    }.
   
   S |- lookup-method(S', x) --> (v, b) // basically lookup in self
   where
@@ -381,6 +387,8 @@ rules
     S != S';
     log("lookup-method: " ++ x ++ ", S != S' S: " ++
           str(S) ++ " O': " ++ str(S') ) --> _;
+    read(S) --> self;
+    log("initial self: " ++ str(self)) --> _;
     read(S') --> Obj(O', _, _, methods);
     case methods[x?] of {
       true =>

@@ -19,16 +19,16 @@ rules
 
   String(s) --> StringV(s).
 
-  resolve-and-call(NumV(i), op@"++(_)", [s2@StringV(_)]) --> string_call(StringV(s1), op, s2)
+  resolve-and-call-qual(NumV(i), op@"++(_)", [s2@StringV(_)]) --> string_call(StringV(s1), op, s2)
   where
     int2str(i) --> s1.
 
-  resolve-and-call(s1@StringV(_), op, [NumV(i)]) --> string_call(s1, op, StringV(s2))
+  resolve-and-call-qual(s1@StringV(_), op, [NumV(i)]) --> string_call(s1, op, StringV(s2))
   where
     int2str(i) --> s2.
 
-  resolve-and-call(l@StringV(_), x, [v]) --> string_call(l, x, v).
+  resolve-and-call-qual(l@StringV(_), x, [v]) --> string_call(l, x, v).
 
-  resolve-and-call(StringV(_), "==(_)", [NumV(_)]) --> BoolV(false).
+  resolve-and-call-qual(StringV(_), "==(_)", [NumV(_)]) --> BoolV(false).
   
-  resolve-and-call(l@StringV(_), x, []) --> string_call(l, x).
+  resolve-and-call-qual(l@StringV(_), x, []) --> string_call(l, x).
