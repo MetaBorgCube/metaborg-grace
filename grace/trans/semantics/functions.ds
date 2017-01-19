@@ -85,7 +85,7 @@ rules
         case is-member of {
           true =>
             log("is-member true, fetching method from self") --> _;
-            lookup-method(current-self(), x) --> (clos, found-self);
+            lookup-method-direct(current-self(), x) --> (clos, found-self);
             lookup-method(current-outer(), x) --> (_, found-outer);
             check-method-found(found-self, found-outer, x, clos) --> _
           false =>
@@ -125,7 +125,7 @@ rules
   where
     recv =!=> ClosV(_, _, _, _, _, _, _);
     log("resolve-and-call-qual, not a ClosV!") --> _;
-    lookup-method (recv, x) --> (clos, f);
+    lookup-method-direct(recv, x) --> (clos, f);
     check-method-found(f, x) --> _.
 
   call(ClosV(S, O, params, code, env, public, src), vs, name) --> v
@@ -186,7 +186,7 @@ rules
     
   check-add-local(x) --> U()
     where
-      lookup-method(current-self(), x) --> (_, self);
+      lookup-method-direct(current-self(), x) --> (_, self);
       lookup-method(current-outer(), x) --> (_, outer);
       is-local(x) --> local;
       error-add-local(self,outer,local,x) --> _.
