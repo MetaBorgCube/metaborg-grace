@@ -1,5 +1,5 @@
 def outside = 12;
 
-object {
+print(object {
     
-}.outside; // cannot access the outer scope via the object 
+}.outside); // cannot access the outer scope via the object 

@@ -4,7 +4,7 @@ class s {
 };
 
 def a = object {
-  inherit self.s;
+  inherit s;
   def y = 3;
   print(self.f);
 };

@@ -1,7 +1,7 @@
 method A {
   def n = 42;
   object {
-    method f { n; }; // and here
+    method f { n; }; // n should be local here
   };
 };
 

@@ -16,4 +16,4 @@ x' := object {
     };
 };
 
-print("{x'.t';}");
+print("{x'.t'}");
