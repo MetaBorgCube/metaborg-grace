@@ -12,10 +12,14 @@ imports
     trans/desugar/unquote
     trans/desugar/interpolate
     trans/desugar/annotate
+    trans/desugar/analyse
 
 rules
   
-  desugar-pre = desugar-program <+ desugar-fail
+  desugar-pre =
+    topdown(analyse-traits)
+    ; desugar-program
+    <+ desugar-fail
 
   desugar-all = innermost(desugar)
   

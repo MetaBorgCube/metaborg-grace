@@ -1,0 +1,60 @@
+module trans/desugar/analyse
+
+imports
+    
+    src-gen/signatures/grace-sig
+    src-gen/signatures/grace-lowered-sig
+    src-gen/signatures/general-sig
+    
+    trans/desugar/common
+    
+rules
+
+  analyse-traits: a@TraitDecl(_,_,_,_,code) -> a
+    with
+      <only-methods> code
+  analyse-traits: a -> a
+
+  only-methods: [] -> []
+  only-methods: [Declaration(MethodDecl(_,_,_,_)) | code] ->
+    <only-methods> code
+  only-methods: a -> <fail> "Only methods declarations may occur in trait."
+
+  analyse-duplicate-decls: a@ObjectL(_,_,code) -> a
+    with <no-duplicates> (code, [])
+  analyse-duplicate-decls: a@MethodL(_,_,_,ids,_,_,[Expression(ObjectL(_,_,code))]) -> a
+    with
+      <no-duplicates> (code, <map(name-to-string)> ids)
+  analyse-duplicate-decls: a@MethodL(_,_,_,ids,_,_,code) -> a
+    with
+      <no-duplicates> (code, <map(name-to-string)> ids)      
+
+  analyse-duplicate-decls: a@BlockL(_,_,code) -> a
+    with <no-duplicates> (code, [])
+  analyse-duplicate-decls: a -> a
+  
+  no-duplicates: ([],a) -> ([], a)
+  no-duplicates: ([Declaration(d) | code], names) ->
+    <no-duplicates> (code, names')
+    with
+      names' := <check-duplicate-decls> (d, names);
+      <no-dups> names'
+  no-duplicates: a -> a
+  
+  // fail if d declares a name already in names, otherwise add name to names
+  check-duplicate-decls: (MethodL(ID(name),_,_,_,_,_,_), names) -> [name | names]
+    with
+      <not(elem)> (name, names)
+  check-duplicate-decls: (ConstantL(ID(name),_,_,_), names) -> [name | names]
+    with
+      <not(elem)> (name, names)
+  check-duplicate-decls: (VariableL(ID(name),_,_,_), names) -> [name | names]
+    with
+      <not(elem)> (name, names)
+  check-duplicate-decls: (BlockL(ids,_,_), names) -> names
+    with
+      <not(elem)> (<map(name-to-string)> ids, names)
+  check-duplicate-decls: (a, names) -> names
+
+  no-dups: [] -> []
+  no-dups: [x|xs] -> <no-dups> xs with <not(elem)> (x,xs)

@@ -8,6 +8,7 @@ imports
     
     trans/desugar/common
     trans/desugar/lower-literals
+    trans/desugar/analyse
 
 rules
 
@@ -25,19 +26,21 @@ rules
 //          lower-assignment <+
           lower-type-unknown <+
           lower-fail
-  
-  lower-post-all: ast -> <topdown(try(lower-post-2))> <topdown(try(lower-post-1))> ast
-  
+
+  lower-post-all: ast -> <topdown(lower-post-analyse)> <topdown(try(lower-post-2))> <topdown(try(lower-post-1))> ast
+
   lower-post-1 =
           lower-boolean-to-object <+
           lower-number-to-object <+
           flatten-statements-declaration <+
           lower-fail
-  
+
   lower-post-2 =
           flatten-statements <+
           lower-fail
-  
+
+  lower-post-analyse = analyse-duplicate-decls
+
   lower-methodcallwdot:
     MCallWDot(recv, [Part(idf, args)]) ->
       MCallRecvL(recv, <name-to-id> idf, as)
@@ -47,12 +50,12 @@ rules
   lower-mcallopex:
     MCallOpEx(recv, name, arg) ->
       MCallRecvL(recv, <name-to-id> name, [arg])
-  
+
   lower-mcallimpl: 
     MCallImpl([Part(name , args)]) -> MCallL(name, as)
       with
         as := <flatten-list> <lower-arguments> args
-  
+
   lower-mdecl:
     MethodDecl(Multiple([MethodID(mName, typeArgs, ps)]), annotations, RH(te), MethodBody(cs)) ->
       MethodL(name, ta, annotations, params, pt, te, cs)
@@ -60,7 +63,7 @@ rules
         pt := <lower-get-param-types> ps;
         ta := <lower-get-typeargs> typeArgs;
         params := <lower-get-param-names> ps;
-        name := <name-to-id> mName 
+        name := <name-to-id> mName
 
   lower-mdecl:
     MethodDecl(Multiple([MethodOp(mName, typeArgs, ps)]), annotations, RH(te), MethodBody(cs)) ->
@@ -70,7 +73,7 @@ rules
         ta := <lower-get-typeargs> typeArgs;
         params := <lower-get-param-names> ps;
         name := <name-to-id> mName
-        
+
   lower-mdecl:
     MethodDecl(Single(MethodID(mName, typeArgs)), annotations, RH(te), MethodBody(cs)) ->
       MethodL(<name-to-id> mName, ta, annotations, [], [], te, cs)
