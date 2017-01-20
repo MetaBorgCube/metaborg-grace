@@ -2,7 +2,6 @@ class A {
   method f { 5; };
 };
 
-object {
+print(object {
   inherit A alias g = f;
-  print(g);
-};
+}.g); // should error, as g is confidential

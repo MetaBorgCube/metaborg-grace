@@ -2,7 +2,11 @@ class A {
   method f { 5; };
 };
 
+class B {
+  inherit A;
+};
+
 object {
-  inherit A alias g = f;
+  inherit B alias g = f;
   print(g);
 };
