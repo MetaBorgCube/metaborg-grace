@@ -40,9 +40,20 @@ context-free syntax
                                        <Use*><{Statement "\n"}*>
                                    }>
   Use.Use                       = <
-                                       use <Exp> <Modifier*>;
+                                   use <Exp><Modifier*>;
 
                                   >
+
+  Inherit.Inherit               = <
+                                   inherit <Exp><Modifier*>;
+
+                                  >
+  Inherit.NoInherit             = <>
+                                  
+  Modifier.AliasModifier        = <<Alias>>
+  Modifier.ExcludeModifier      = <<Exclude>>
+  Alias.Alias                   = < alias <MethodNames> = <MethodNames>>
+  Exclude.Exclude               = < exclude <MethodNames>>
   
   ClassName.FullStop            = <<ID>.<MethodNames>>
   ClassName.MethodName          = <<MethodNames>>
@@ -165,7 +176,6 @@ context-free syntax
   
   Arrow.Ascii                   = [->]
   
-  
 context-free syntax
   
   Part.Part                     = <<Identifier><CallArgs>>
@@ -181,18 +191,7 @@ context-free syntax
   CallArgs.ArgBoolean           = < <Boolean>>
     
   OperatorCF.OperatorCF         = <<Operator>>
-  
-  Inherit.Inherit               = <
-                                   inherit <Exp> <Modifier*>;
-                  
-                                  >
-  Inherit.NoInherit             = <>
-                                  
-  Modifier.AliasModifier        = <<Alias>>
-  Modifier.ExcludeModifier      = <<Exclude>>
-  Alias.Alias                   = < alias <MethodNames> = <MethodNames>>
-  Exclude.Exclude               = < exclude <MethodNames>>
-  
+
   Boolean.True                  = <true>
   Boolean.False                 = <false>
   Lineup.Lineup                 = <[<{Exp ", "}*>]>
