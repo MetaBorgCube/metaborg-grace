@@ -266,11 +266,12 @@ rules
 
   NoInherit() --> FlatObject([]).
   
-  Inherit(e, _) :: L --> v
-  where
-    log("Inherit(e,_) L: " ++ str(L:AST)) --> _;  // TODO this is where to check whether the inherit
-    e --> v@FlatObject(_) :: L';
-    log("Inherit(e,_) L': " ++ str(L':AST)) --> _.
+  InheritL(e, as, es) --> FlatObject( cls) // aliases ++
+  where // TODO this is where to check whether the inherit
+    e --> v@FlatObject(cls);
+//    make-aliases(cls, as) --> aliases;
+    log("InheritL(e,_,_), cls: " ++ str(cls:AST) ++ " as: " ++ str(as:AST) ++
+      " aliases: " ++ str([]:AST)) --> _.
                             // expression actually returns a fresh object
 
   [] : List(Use) --> FlatObject([]).
@@ -302,6 +303,10 @@ signature
     current-self() --> V
     current-outer() --> V
     current-method-names() --> List(String)
+    
+//    make-aliases(List(Closure), List(Alias)) --> List(Closure)
+//    find-copy-closure(List(Closure), Identifier, Identifier) --> List(Closure)
+//    find-copy-decl(List(Statement), Identifier, Identifier) --> List(Statement)
     
     is-member(String) --> Bool
     
@@ -373,12 +378,48 @@ rules
   S |- current-method-names() --> allkeys(methods)
   where
     read(S) --> Obj(_, _, _, methods).
+
+//  make-aliases(cls, []) --> [] : List(Closure)
+//    where
+//      log("make-aliases, cls: " ++ str(cls:AST)) --> _.
+//  
+//  make-aliases(cls, [AliasL(idTo, idFrom) | as]) --> cls' //[copied | make-aliases(cls, as)]
+//    where
+//      find-copy-closure(cls, idTo, idFrom) --> cls';
+//      log("make-aliases, cls: " ++ str(cls:AST) ++ " as: " ++ str(as:AST)) --> _.
   
+//  find-copy-closure([], _, ID(nameFrom)) --> [Closure(1:Addr, [], Bottom(), {})]
+//    where
+//      halt-error("Cannot alias method: ", nameFrom) --> _.
+//  find-copy-closure(cs@[c | _], idTo, idFrom) --> [clos' | cs]
+//    where
+//      c => Closure(addr,decls, src, env);
+////      find-copy-decl(decls, idTo, idFrom) --> decl;
+//      log("find-copy-closure, c: " ++ str(c:AST) ++ " idFrom: " ++ str(idFrom:AST)) --> _;
+//      Closure(addr,decls, src, env) => clos'.
+//  find-copy-closure([c | cs], idTo, idFrom) --> find-copy-closure(cs ++ [c], idTo, idFrom)
+//    where
+//      log("find-copy-closure =!=>, c: " ++ str(c:AST) ++ " idFrom: " ++ str(idFrom:AST)) --> _.
+  
+//  find-copy-decl([], _, _) --> [] : List(Statement)
+//    where
+//      true == false;
+//      log("find-copy-decl fail") --> _.
+//  find-copy-decl(ds@[decl | _], idTo, ID(nameFrom)) --> [Declaration(MethodL(idTo,b,c,d,e,f,g)) | ds] 
+//    where
+//      decl => Declaration(MethodL(ID(name),b,c,d,e,f,g));
+//      name == nameFrom;
+//      log("find-copy-decl found") --> _.
+//  find-copy-decl([decl | ds], idTo, idFrom@ID(nameFrom)) --> find-copy-decl(ds, idTo, idFrom)
+//    where
+//      decl => Declaration(MethodL(ID(name),_,_,_,_,_,_));
+//      name != nameFrom;
+//      log("find-copy-decl not found yet") --> _.
+      
   S |- is-member(x) --> methods[x?]
     where
       read(S) --> Obj(_,_,_, methods).
 
-  
   lookup-method-direct(S', x) --> (v, b) // basically lookup in self
   where
 //    S == S';
@@ -396,8 +437,8 @@ rules
   S |- lookup-method(S', x) --> (v, b) // lookup in outers
   where
 //    S != S';
-    log("lookup-method: " ++ x ++ ", S != S' S: " ++ str(S) ++ " O': " ++
-      str(S') ) --> _;
+    log("lookup-method: " ++ x ++ ", S != S' S: " ++ int2string(S : Int) ++
+      " O': " ++ int2string(S' : Int) ) --> _;
     read(S) --> self;
     log("initial self: " ++ str(self)) --> _;
     read(S') --> Obj(O', _, _, methods);
