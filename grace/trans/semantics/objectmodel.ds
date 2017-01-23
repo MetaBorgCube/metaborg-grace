@@ -274,7 +274,7 @@ rules
                             // expression actually returns a fresh object
 
   [] : List(Use) --> FlatObject([]).
-  [Use(e,_) | uses] : List(Use) --> FlatObject(closures ++ closures')
+  [UseL(e,_,_) | uses] : List(Use) --> FlatObject(closures ++ closures')
     where
       e --> FlatObject(closures);
       uses --> FlatObject(closures').
