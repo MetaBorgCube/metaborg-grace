@@ -50,10 +50,10 @@ context-free syntax
                                   >
   Inherit.NoInherit             = <>
                                   
-  Modifier.AliasModifier        = <<Alias>>
-  Modifier.ExcludeModifier      = <<Exclude>>
-  Alias.Alias                   = < alias <MethodNames> = <MethodNames>>
-  Exclude.Exclude               = < exclude <MethodNames>>
+  Modifier.AliasModifier        = < alias <MethodNames> = <MethodNames>>
+  Modifier.ExcludeModifier      = < exclude <MethodNames>>
+//  Alias.Alias                   = 
+//  Exclude.Exclude               = 
   
   ClassName.FullStop            = <<ID>.<MethodNames>>
   ClassName.MethodName          = <<MethodNames>>
