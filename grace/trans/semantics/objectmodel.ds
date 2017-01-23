@@ -266,7 +266,7 @@ rules
 
   NoInherit() --> FlatObject([]).
   
-  Inherit(e, _) :: L --> v
+  InheritL(e, _, _) :: L --> v
   where
     log("Inherit(e,_) L: " ++ str(L:AST)) --> _;  // TODO this is where to check whether the inherit
     e --> v@FlatObject(_) :: L';

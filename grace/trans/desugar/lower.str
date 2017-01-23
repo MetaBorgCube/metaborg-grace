@@ -97,7 +97,28 @@ rules
         params := <lower-get-param-names> ps;
         types := <lower-get-param-types> ps
   
-  lower-objectdecl: ObjectDecl(a, b, c) -> ObjectL(a,b,c)
+  lower-objectdecl: ObjectDecl(a, b, c) -> ObjectL(<lower-inherit> a, <map(lower-use)> b, c)
+
+  lower-inherit: Inherit(exp, mods) -> InheritL(exp, alias, exclude)
+    with
+      alias := <get-lowered-alias> mods;
+      exclude := <get-lowered-exclude> mods
+  lower-inherit: noi@NoInherit() -> noi
+   
+  lower-use: Use(exp, mods) -> UseL(exp, alias, exclude)
+    with
+      alias := <get-lowered-alias> mods;
+      exclude := <get-lowered-exclude> mods
+
+  get-lowered-alias: [] -> []
+  get-lowered-alias: [AliasModifier(Single(MethodID(toId, _)),Single(MethodID(fromId, _))) | as]
+    -> [AliasL(toId,fromId) | <get-lowered-alias> as]
+  get-lowered-alias: [a | as] -> <get-lowered-alias> as
+
+  get-lowered-exclude: [] -> []
+  get-lowered-exclude: [e@ExcludeModifier(Single(MethodID(iden, _))) | es]
+    -> [ExcludeL(iden) | <get-lowered-exclude> es]
+  get-lowered-exclude: [e | es] -> <get-lowered-exclude> es
 
   lower-constant: Constant(a, t, b, c) -> ConstantL(a, <lower-typeann> t, b, c)
 
