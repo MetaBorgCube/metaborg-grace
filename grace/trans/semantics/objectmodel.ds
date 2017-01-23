@@ -266,11 +266,11 @@ rules
 
   NoInherit() --> FlatObject([]).
   
-  InheritL(e, _, _) :: L --> v
+  InheritL(e, as, _) --> FlatObject(make-aliases(ls, as))
   where
-    log("Inherit(e,_) L: " ++ str(L:AST)) --> _;  // TODO this is where to check whether the inherit
-    e --> v@FlatObject(_) :: L';
-    log("Inherit(e,_) L': " ++ str(L':AST)) --> _.
+    log("InheritL(e,_,_)") --> _;  // TODO this is where to check whether the inherit
+    e --> v@FlatObject(ls);
+    log("InheritL(e,_,_) done, ls: " ++ str(ls:AST)) --> _.
                             // expression actually returns a fresh object
 
   [] : List(Use) --> FlatObject([]).
@@ -282,6 +282,13 @@ rules
 /* ======== OBJECT META-FUNCTIONS ========= */
 
 signature
+ 
+  sorts
+    StatementResult
+    
+  constructors
+    res: Statement -> StatementResult
+
   arrows
     new-object(Addr) --> Addr
 
@@ -294,6 +301,15 @@ signature
     check-add-method(String, V) --> U
     check-method-name(String) --> U
     check-method-params(List(Identifier)) --> U
+    
+    make-aliases(List(Closure), List(Alias)) --> List(Closure)
+    make-alias(List(Closure), Alias) --> List(Closure)
+    
+    find-closure(List(Closure), List(Closure), Identifier) --> (Closure * List(Closure))
+    copy-method(Closure, Identifier, Identifier) --> Closure
+    copy-method-aux(List(Statement), Identifier, Identifier) --> StatementResult
+    update-closure(List(Closure), Closure) --> List(Closure)
+    closure-contains-method(Closure, Identifier) --> Boolean
     
     lookup-method-direct(V, String) --> (V * Bool)
     lookup-method(V, String) --> (V * Bool)
@@ -370,6 +386,43 @@ rules
     where
       check-add-local(p) --> _.
   
+  make-aliases(closures, []) --> closures.
+  make-aliases(closures, [a | as]) --> make-aliases(closures', as)
+    where
+      make-alias(closures, a) --> closures'.
+  
+  make-alias(closures, AliasL(toId,fromId)) --> closures'
+    where
+      find-closure(closures, [], fromId) --> (clos, rest);
+      copy-method(clos, toId, fromId) --> clos';
+      update-closure(closures, clos') --> closures'.
+  
+  find-closure([], not, ID(name)) --> (U() : Closure, not)
+    where
+      halt-error("Method to alias not found: ", name) --> _.
+  find-closure([clos | closs], not, id) --> (clos, not ++ closs)
+    where
+      closure-contains-method(clos, id) --> res;
+      res == true.
+  find-closure([clos | closs], not, id) --> find-closure(closs, [clos | not], id)
+    where
+      closure-contains-method(clos, id) --> res;
+      res == false.
+
+  copy-method(Closure(a, sts, c, d), toId, fromId) --> Closure(a,[st | sts],c,d)
+    where
+      copy-method-aux(sts, toId, fromId) --> res(st).
+
+  copy-method-aux([st | sts], toId, fromId@ID(fromName)) --> copy-method-aux(sts, toId, fromId)
+    where
+      st => Declaration(MethodL(ID(name), _, _, _, _, _, _));
+      name != fromName.
+  copy-method-aux([st | _], toId, ID(fromName)) -->
+    res(Declaration(MethodL(toId, b, Annotations([Confidential()]),d,e,f,g)))
+    where
+      st => Declaration(MethodL(ID(name), b, _, d, e, f, g));
+      name == fromName.
+
   S |- current-method-names() --> allkeys(methods)
   where
     read(S) --> Obj(_, _, _, methods).
