@@ -15,6 +15,11 @@ context-free syntax
                             <Inherit><Use*><{Statement "\n"}*>
                           }
                           > {prefer}
+  Inherit.InheritL      = <_inherit <Exp><Alias*><Exclude*>;>
+  Use.UseL              = <_use <Exp><Alias*><Exclude*>;>
+  Alias.AliasL          = <_alias <Identifier> = <Identifier>>
+  Exclude.ExcludeL      = <_exclude <Identifier>>
+  
   Exp.BlockL            = [_block { [Identifier*] | [{TypeExp ", "}*] -> [{Statement "\n"}*] }] {prefer}
   Exp.Uninitialized     = <_uninit> {prefer}
   TypeExp.Unkwn         = <_Unkwn> {prefer}
