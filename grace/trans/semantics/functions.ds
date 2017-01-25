@@ -14,7 +14,8 @@ signature
 
   constructors
     ClosV: Addr * Addr * List(Identifier) * Code * Env * List(String) -> V
-
+    Rex: Int * V -> Exn
+    
   arrows
     method-closure(Declaration) --> V
     
@@ -44,6 +45,16 @@ rules
   MQCallOuter(e) --> outer(S)
   where
     e --> RefV(S).
+
+  Return(e) :: EX Ok() --> ??? :: EX
+  where
+    e :: EX Ok() --> v :: EX_r;
+    case EX_r of {
+      Ok() =>
+        Rex(0, v) => EX
+      otherwise =>
+        EX_r => EX
+    }.
 
   BlockL(params, _, code) --> method-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
 
@@ -102,10 +113,21 @@ rules
     recv =!=> ClosV(_, _, _, _, _, _);
     lookup-method(recv, x) --> clos.
 
-  call(ClosV(S, O, params, code, env, M), vs) --> v
+  call(ClosV(S, O, params, code, env, M), vs) :: EX Ok() --> v :: EX
   where
     add-locals(params, vs) :: L env --> _ :: L;
-    S, O, M |- code :: L --> v :: L _.
+    S, O, M |- code :: L, EX Ok() --> v_call :: L _, EX_call;
+    case EX_call of {
+      Ok() =>
+        Ok() => EX;
+        v_call => v
+      Rex(ridx, v_ret) => // TODO match against correct return index
+        Ok() => EX;
+        v_ret => v
+      otherwise =>
+        EX_call => EX;
+        v_call => v
+    }. 
 
 /* ========== local variables ============= */
 signature

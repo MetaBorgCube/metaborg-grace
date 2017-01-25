@@ -8,6 +8,16 @@ imports
   trans/semantics/functions
   
 signature
+  sorts
+    Exn
+  
+  constructors
+    Ok : Exn
+    Exn : String -> Exn
+    
+  components
+    EX : Exn = Ok()
+
   arrows
     Exp --> V
     List(Exp) --> List(V)
