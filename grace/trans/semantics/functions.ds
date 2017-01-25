@@ -11,13 +11,23 @@ imports
 signature
   sorts
     Addr
+    Return-Marker
+  
+  constructors
+    No-Return: Return-Marker
+    Return-To: Int -> Return-Marker
+
+  components
+    R: Return-Marker
 
   constructors
-    ClosV: Addr * Addr * List(Identifier) * Code * Env * List(String) -> V
+    ClosV: Addr * Addr * List(Identifier) * Code * Env * List(String) * Return-Marker -> V
     Rex: Int * V -> Exn
-    
+  
+  
   arrows
     method-closure(Declaration) --> V
+    block-closure(Declaration) --> V
     
   sort aliases
     Env = Map(String, Addr)
@@ -46,27 +56,38 @@ rules
   where
     e --> RefV(S).
 
-  Return(e) :: EX Ok() --> ??? :: EX
+  R Return-To(r-mark) |- Return(e) :: EX Ok() --> ??? :: EX
   where
     e :: EX Ok() --> v :: EX_r;
     case EX_r of {
       Ok() =>
-        Rex(0, v) => EX
+        Rex(r-mark, v) => EX;
+        log("Returning to: " ++ int2string(r-mark)) --> _
       otherwise =>
         EX_r => EX
     }.
 
-  BlockL(params, _, code) --> method-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
+  BlockL(params, _, code) --> block-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
 
 rules /* closure construction */
 
-  method-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L', M) :: L
+  method-closure(MethodL(ID(m), _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L', M, Return-To(r-mark)) :: L
   where
     current-self() --> S;
     current-outer() --> O;
     current-method-names() --> M;
-    alloc-locals(code) :: L --> _ :: L L'.
-
+    alloc-locals(code) :: L --> _ :: L L';
+    fresh => r-mark;
+    log("Closing method " ++ m ++ " returning to " ++ int2string(r-mark)) --> _.
+  
+  block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L', M, No-Return()) :: L
+  where
+    current-self() --> S;
+    current-outer() --> O;
+    current-method-names() --> M;
+    alloc-locals(code) :: L --> _ :: L L';
+    log("Closing block over No-Return()") --> _.
+  
 /* =========== call resolution and dispatch =========== */
 
 signature
@@ -76,7 +97,7 @@ signature
     resolve-and-call(V, String, List(V)) --> V
     
     call(V, List(V)) --> V
-
+    
 rules
   
   resolve-and-call(x, vs) --> v
@@ -104,31 +125,44 @@ rules
   
   resolve-and-call-local(x, []) --> read-local(x).
 
-  resolve-and-call(clos@ClosV(_, _, _, _, _, _), x, vs) --> call(clos, vs)
+  resolve-and-call(clos@ClosV(_, _, _, _, _, _, _), x, vs) --> call(clos, vs)
   where
     str-starts-with(x, "apply") == true.
   
   resolve-and-call(recv, x, vs) --> call(clos, vs)
   where
-    recv =!=> ClosV(_, _, _, _, _, _);
+    recv =!=> ClosV(_, _, _, _, _, _, _);
     lookup-method(recv, x) --> clos.
 
-  call(ClosV(S, O, params, code, env, M), vs) :: EX Ok() --> v :: EX
+  call(ClosV(S, O, params, code, env, M, No-Return()), vs) --> v
   where
-    add-locals(params, vs) :: L env --> _ :: L;
-    S, O, M |- code :: L, EX Ok() --> v_call :: L _, EX_call;
-    case EX_call of {
-      Ok() =>
-        Ok() => EX;
-        v_call => v
-      Rex(ridx, v_ret) => // TODO match against correct return index
-        Ok() => EX;
-        v_ret => v
-      otherwise =>
-        EX_call => EX;
-        v_call => v
-    }. 
+    log("Call to block closure") --> _;
+    add-locals(params, vs) :: L env --> _ :: L1;
+    S, O, M |- code :: L1 --> v.
 
+  call(ClosV(S, O, params, code, env, M, R@Return-To(r-mark)), vs) :: EX Ok() --> v :: EX
+  where
+    log("Call to method closure with return to " ++ int2string(r-mark)) --> _;
+    add-locals(params, vs) :: L env --> _ :: L1;
+    R, S, O, M |- code :: L1, EX Ok() --> v_call :: EX_call;
+    case EX_call of {
+      Rex(r-mark', v_ret) =>
+        case eqI(r-mark', r-mark) of {
+          true =>
+            log("Handling matching return") --> _;
+            v_ret => v;
+            Ok() => EX
+          otherwise =>
+            log("Ignoring non-matching return status") --> _;
+            v_call => v;
+            EX_call => EX
+        }
+      otherwise =>
+        log("Ignoring non-return status") --> _;
+        v_call => v;
+        EX_call => EX
+    }.
+    
 /* ========== local variables ============= */
 signature
   arrows

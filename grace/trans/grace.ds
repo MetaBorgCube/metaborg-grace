@@ -5,17 +5,17 @@ imports
 
 signature
   arrows
-    Program -init-> (V * H * Exn)
+    Program -init-> (V * Exn * H)
 
 rules
 
-  p@Program(_, _) -init-> (v_out, H, EX)
+  p@Program(_, _) -init-> (v_out, EX, H)
     where
       next() --> base;
-      O base, S base, M [] : List(String), P Exec() |- p :: H {}, L {}, VH {}, D {}, I {}, EX Ok() --> v :: H, L, VH, EX;
+      R No-Return(), O base, S base, M [] : List(String), P Exec() |- p :: H {}, L {}, VH {}, D {}, I {}, EX Ok() --> v :: H, L, VH, EX;
       case EX of {
         Ok() =>
           v => v_out
         otherwise =>
-          StringV("No result") => v_out
+          DoneV() => v_out
       }.
