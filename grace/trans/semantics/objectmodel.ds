@@ -266,12 +266,11 @@ rules
 
   NoInherit() --> FlatObject([]).
   
-  InheritL(e, as, _) --> FlatObject(make-aliases(ls, as))
+  InheritL(e, as, ex) --> FlatObject(remove-excludes(make-aliases(ls, as), ex))
   where
-    log("InheritL(e,_,_)") --> _;  // TODO this is where to check whether the inherit
-    e --> v@FlatObject(ls);
+    log("InheritL(e,_,_), excludes: " ++ str(ex:AST)) --> _; // TODO this is where to check whether the inherit
+    e --> FlatObject(ls);                                    // expression actually returns a fresh object
     log("InheritL(e,_,_) done, ls: " ++ str(ls:AST)) --> _.
-                            // expression actually returns a fresh object
 
   [] : List(Use) --> FlatObject([]).
   [UseL(e,_,_) | uses] : List(Use) --> FlatObject(closures ++ closures')
@@ -299,15 +298,20 @@ signature
     
     add-method(String, V) --> U
     check-add-method(String, V) --> U
-    check-method-name(String) --> U
     check-method-params(List(Identifier)) --> U
-    
+
     make-aliases(List(Closure), List(Alias)) --> List(Closure)
     make-alias(List(Closure), Alias) --> List(Closure)
-    
+
+    remove-excludes(List(Closure), List(Exclude)) --> List(Closure)
+    remove-exclude(List(Closure), Exclude) --> List(Closure)
+
     find-closure(List(Closure), List(Closure), Identifier) --> (Closure * List(Closure))
     copy-method(Closure, Identifier, Identifier) --> Closure
     copy-method-aux(List(Statement), Identifier, Identifier) --> StatementResult
+    remove-method(Closure, Identifier) --> Closure
+    remove-method-aux(List(Statement), List(Statement), Identifier) --> (List(Statement) * List(Statement))
+    
     closure-contains-method(Closure, Identifier) --> Bool
     
     lookup-method-direct(V, String) --> (V * Bool)
@@ -330,15 +334,15 @@ signature
 rules
 
   S |- current-self() --> S.
-  
+
   O |- current-outer() --> O.
-  
+
   self(S) --> S.
-  
+
   outer(S) --> O
   where
     read(S) --> Obj(O, _, _, _).
-  
+
   new-object(O) --> S
   where
     allocate(Obj(O, [O], {}, {})) --> S.
@@ -346,17 +350,17 @@ rules
   add-slot(x) :: GS --> GS[x] :: GS
   where
     GS[x?] == true.
-  
+
   S |- add-slot(x) :: NS, GS --> NS :: NS addI(NS, 1), GS {x |--> NS, GS}
   where
     GS[x?] == false;
     read(S) --> Obj(O, outers, slots, methods);
     update(S, Obj(O, outers, {NS |--> UninitializedV(), slots}, methods)) --> _.
-    
+
   S |- read-slot(i) --> slots[i]
   where
     read(S) --> Obj(_, _, slots, _).
-  
+
   S |- write-slot(i, v) --> U()
   where
     read(S) --> Obj(O, outers, slots, methods);
@@ -372,7 +376,6 @@ rules
 
   check-add-method(_, ClosV(_,_,ps,_,_,_,_)) --> U()
     where
-//     check-method-name(x) --> _; // should be static as is bound to scope
      check-method-params(ps) --> _.
 
   check-add-method(_, _) --> U()
@@ -384,7 +387,7 @@ rules
   check-method-params([ID(p) | ps]) --> check-method-params(ps)
     where
       check-add-local(p) --> _.
-  
+
   make-aliases(closures, []) --> closures
     where
       log("make-aliases: no aliases to make") --> _.
@@ -393,15 +396,29 @@ rules
       log("making aliases: closures: " ++ str(closures:AST) ++ " aliases: " ++ str(ass:AST)) --> _;
       make-alias(closures, a) --> closures';
       log("post making alias: closures': " ++ str(closures:AST)) --> _.
-  
+
   make-alias(closures, AliasL(toId,fromId)) --> [clos' | rest]
     where
       find-closure(closures, [], fromId) --> (clos, rest);
       copy-method(clos, toId, fromId) --> clos'.
-  
+
+  remove-excludes(closures, []) --> closures
+    where
+      log("remove-excludes: no exclusions to remove") --> _.
+  remove-excludes(closures, exss@[ex | exs]) --> remove-excludes(closures', exs)
+    where
+      log("removing excludes: closures: " ++ str(closures:AST) ++ " excludes: " ++ str(exss:AST)) --> _;
+      remove-exclude(closures, ex) --> closures';
+      log("post removing excludes: closures': " ++ str(closures:AST)) --> _.
+
+  remove-exclude(closures, ExcludeL(id)) --> [clos' | rest]
+    where
+      find-closure(closures, [], id) --> (clos, rest);
+      remove-method(clos, id) --> clos'.
+
   find-closure([], not, ID(name)) --> (U() : Closure, not)
     where
-      halt-error("Method to alias not found: ", name) --> _.
+      halt-error("Method to alias/exlude not found: ", name) --> _.
   find-closure([clos | closs], not, id) --> (clos, not ++ closs)
     where
       closure-contains-method(clos, id) --> res;
@@ -423,10 +440,23 @@ rules
     where
       log("closure-contains-method Closure(: " ++ str(clos:AST)) --> _;
       mName != name.
-  
+
   copy-method(Closure(a, sts, c, d), toId, fromId) --> Closure(a,[st | sts],c,d)
     where
       copy-method-aux(sts, toId, fromId) --> res(st).
+
+  remove-method(Closure(a, sts, c, d), id) --> Closure(a,sts1 ++ sts2,c,d)
+    where
+      remove-method-aux(sts, [], id) --> (sts1, sts2).
+
+  remove-method-aux([st | sts1], sts2, id@ID(excludeName)) --> remove-method-aux(sts1, [st | sts2], id)
+    where
+      st => Declaration(MethodL(ID(name), _, _, _, _, _, _));
+      name != excludeName.
+  remove-method-aux([st | sts1], sts2, ID(excludeName)) --> (sts1,sts2)
+    where
+      st => Declaration(MethodL(ID(name), _, _, _, _, _, _));
+      name == excludeName.
 
   copy-method-aux([st | sts], toId, fromId@ID(fromName)) --> copy-method-aux(sts, toId, fromId)
     where
