@@ -10,6 +10,7 @@ signature
     addI: Int * Int -> Int
     int2string: Int -> String
     str: AST -> String
+    eqI: Int * Int -> Bool
     
   arrows
     string2int(String) --> Int
@@ -23,7 +24,7 @@ rules
   
   halt-error(s1, s2) --> error(s1, s2).
 
-
+  
 /* string ops */
 
 signature
