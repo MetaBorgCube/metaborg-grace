@@ -52,22 +52,24 @@ rules
   where
     log("starting object construction, L: " ++ str(L:AST)) --> _;
     new-object(S) --> S';
-    S S', O S, P Flatten(), Src Inherit() |- inherit :: L --> FlatObject(closures-inherited) :: L';
+    S S', O S, P Flatten(), Src Inherit() |- inherit --> FlatObject(closures-inherited);
     log("after inherit flatten") --> _;
-    S S', O S, P Flatten(), Src Trait() |- uses :: L' --> FlatObject(closures-used) :: L'';
+    S S', O S, P Flatten(), Src Trait() |- uses --> FlatObject(closures-used);
     log("after use flatten") --> _;
     closures-inherited ++ closures-used ++ [Closure(S, code, Bottom(), L)] => closures;
 
     log("pre-install closures from object construction: " ++
-      str(closures : AST) ++ " L': " ++ str(L'':AST)) --> _;
+      str(closures : AST)) --> _;
     read(S') --> Obj(a,_,c,d);
     log("after reading object") --> _;
+    
     update(S', Obj(a, get-scopes(closures), c, d)) --> _;
+    
     log("after updating object") --> _;
     S' |- install-members(closures) --> closures';
     
     log("post-install closures' from object construction: " ++
-      str(closures' : AST) ++ " L'': " ++ str(L'':AST)) --> _;
+      str(closures' : AST)) --> _;
     S' |- init-object(closures') --> U();
     log-object-creation(S') --> _.
 
@@ -79,6 +81,7 @@ rules
     write-slot(i, v) --> _.
     
   get-scopes([]) --> [].
+
   get-scopes([Closure(addr,_,_,_) | cs]) --> [addr | get-scopes(cs)].
 
 /* ========== INIT METHODS =========== */
@@ -114,8 +117,8 @@ rules
     O, Src src |- code :: L env -member-> code'. // set locals from closure?
     
   [] : Code :: L -member-> []
-    where
-      log("-member-> running code ..., L: " ++ str(L:AST)) --> _.
+  where
+    log("-member-> running code ..., L: " ++ str(L:AST)) --> _.
   
   [Declaration(m@MethodL(_, _, _, _, _, _, _)) | cs] : Code :: L -member-> cs'
   where
@@ -137,12 +140,12 @@ rules
     cs -member-> cs'.
 
   [Import(name, ID(x), ann) | cs] : Code -member-> cs'
-    where
-      add-slot(x) --> i;
-      get-import-object(name) --> iAddr;
-      write-slot(i, RefV(iAddr)) --> _;
-      install-method(field-getter(x, i, is-readable(ann))) --> _;
-      cs -member-> cs'.
+  where
+    add-slot(x) --> i;
+    get-import-object(name) --> iAddr;
+    write-slot(i, RefV(iAddr)) --> _;
+    install-method(field-getter(x, i, is-readable(ann))) --> _;
+    cs -member-> cs'.
   
   [Declaration(ConstantL(ID(x), _, ann, e)) | cs] : Code :: L -member-> [SlotWrite(i, e) | cs']
   where
@@ -275,10 +278,11 @@ rules
                             // expression actually returns a fresh object
 
   [] : List(Use) --> FlatObject([]).
+  
   [Use(e,_) | uses] : List(Use) --> FlatObject(closures ++ closures')
-    where
-      e --> FlatObject(closures);
-      uses --> FlatObject(closures').
+  where
+    e --> FlatObject(closures);
+    uses --> FlatObject(closures').
 
 /* ======== OBJECT META-FUNCTIONS ========= */
 
@@ -361,64 +365,29 @@ rules
     update(S, Obj(O, outers, slots, {x |--> v, methods})) --> _.
 
   check-add-method(_, ClosV(_,_,ps,_,_,_,_)) --> U()
-    where
+  where
 //     check-method-name(x) --> _; // should be static as is bound to scope
-     check-method-params(ps) --> _.
+   check-method-params(ps) --> _.
 
   check-add-method(_, _) --> U()
-    where
-      log("anything else?") --> _.
+  where
+    log("anything else?") --> _.
 
   check-method-params([]) --> U().
+
   check-method-params([WildCard() | ps]) --> check-method-params(ps).
+
   check-method-params([ID(p) | ps]) --> check-method-params(ps)
-    where
-      check-add-local(p) --> _.
+  where
+    check-add-local(p) --> _.
   
   S |- current-method-names() --> allkeys(methods)
   where
     read(S) --> Obj(_, _, _, methods).
 
-//  make-aliases(cls, []) --> [] : List(Closure)
-//    where
-//      log("make-aliases, cls: " ++ str(cls:AST)) --> _.
-//  
-//  make-aliases(cls, [AliasL(idTo, idFrom) | as]) --> cls' //[copied | make-aliases(cls, as)]
-//    where
-//      find-copy-closure(cls, idTo, idFrom) --> cls';
-//      log("make-aliases, cls: " ++ str(cls:AST) ++ " as: " ++ str(as:AST)) --> _.
-  
-//  find-copy-closure([], _, ID(nameFrom)) --> [Closure(1:Addr, [], Bottom(), {})]
-//    where
-//      halt-error("Cannot alias method: ", nameFrom) --> _.
-//  find-copy-closure(cs@[c | _], idTo, idFrom) --> [clos' | cs]
-//    where
-//      c => Closure(addr,decls, src, env);
-////      find-copy-decl(decls, idTo, idFrom) --> decl;
-//      log("find-copy-closure, c: " ++ str(c:AST) ++ " idFrom: " ++ str(idFrom:AST)) --> _;
-//      Closure(addr,decls, src, env) => clos'.
-//  find-copy-closure([c | cs], idTo, idFrom) --> find-copy-closure(cs ++ [c], idTo, idFrom)
-//    where
-//      log("find-copy-closure =!=>, c: " ++ str(c:AST) ++ " idFrom: " ++ str(idFrom:AST)) --> _.
-  
-//  find-copy-decl([], _, _) --> [] : List(Statement)
-//    where
-//      true == false;
-//      log("find-copy-decl fail") --> _.
-//  find-copy-decl(ds@[decl | _], idTo, ID(nameFrom)) --> [Declaration(MethodL(idTo,b,c,d,e,f,g)) | ds] 
-//    where
-//      decl => Declaration(MethodL(ID(name),b,c,d,e,f,g));
-//      name == nameFrom;
-//      log("find-copy-decl found") --> _.
-//  find-copy-decl([decl | ds], idTo, idFrom@ID(nameFrom)) --> find-copy-decl(ds, idTo, idFrom)
-//    where
-//      decl => Declaration(MethodL(ID(name),_,_,_,_,_,_));
-//      name != nameFrom;
-//      log("find-copy-decl not found yet") --> _.
-      
   S |- is-member(x) --> methods[x?]
-    where
-      read(S) --> Obj(_,_,_, methods).
+  where
+    read(S) --> Obj(_,_,_, methods).
 
   lookup-method-direct(S', x) --> (v, b) // basically lookup in self
   where
