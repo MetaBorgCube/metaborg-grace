@@ -21,61 +21,53 @@ signature
   arrows
     get-dialect-object(List(Statement)) --> Addr
     get-import-object(String) --> Addr
-    read-dialect(String) --> AST
-    read-import(String) --> AST
+    parse-file(String) --> AST
     
   native operators
-    read_dialect: String -> AST
-    read_import: String -> AST
+    parse_file: String -> Program
     
 rules
 
-  read-dialect(s) --> read_dialect(s).
-  read-import(s) --> read_import(s).
+//  read-dialect(s) --> read_dialect(s).
+//  read-import(s) --> read_import(s).
 
   S |- get-dialect-object([Dialect("none") | _]) --> new-object(S)
-    where
-      log("file has dialect 'none', giving back empty object") --> _.
+  where
+    log("file has dialect 'none', giving back empty object") --> _.
 
-  get-dialect-object([Dialect(name) | _] : List(Statement)) :: D --> objectAddr :: D'
-    where
-      fresh => no-object;
-      case D[name?] of {
-        true =>
-          D[name] => objectAddr; //v@FlatObject(_);
-          D => D'
-        otherwise =>
-          // read the dialect ast
-          read-dialect(name) --> p@Program(_,_);
-          // actually execute the dialect
-          p : Program :: D --> RefV(objectAddr);
-          // set dialect name as already read
-          {name |--> objectAddr, D} => D';
-          // remove outerchain from dialect
-          read(objectAddr) --> Obj(_, a, b, c);
-          update(objectAddr, Obj(no-object : Addr, a, b, c)) --> _
-        }.
-  
-  get-dialect-object([Expression(ObjectL(_,_,code)) | b]) -->
-    get-dialect-object(code ++ b). 
-    
-  get-dialect-object([ a | b ]) --> get-dialect-object(b)
-    where
-      a =!=> Dialect(_). 
-  
-  get-dialect-object([]) --> addr
-    where
-      get-dialect-object([Dialect("standardGrace")]) --> addr.
-  
-  get-import-object(name) :: I --> objectAddr :: I'
-    where
-      case I[name?] of {
-        true =>
-          I[name] => objectAddr;
-          I => I'
-        otherwise =>
-          read-import(name) --> Program(code,_);
-          next() --> base;
-          S base , O base |- Program(code, "") :: I --> RefV(objectAddr) :: I'';
-          {name |--> objectAddr, I''} => I'
+  get-dialect-object([Expression(ObjectL(_,_,[Dialect(name) | _ ])) | _ ]) :: D --> objectAddr :: D'
+  where
+    fresh => no-object;
+    case D[name?] of {
+      true =>
+        D[name] => objectAddr; //v@FlatObject(_);
+        D => D'
+      otherwise =>
+        // read the dialect ast
+        parse-file(name) --> p@Program(_);
+        // actually execute the dialect
+        p : Program :: D --> RefV(objectAddr);
+        // set dialect name as already read
+        {name |--> objectAddr, D} => D';
+        // remove outerchain from dialect
+        read(objectAddr) --> Obj(_, a, b, c);
+        update(objectAddr, Obj(no-object : Addr, a, b, c)) --> _
       }.
+
+  
+  get-dialect-object(_) --> addr
+  where
+    get-dialect-object([Dialect("standardGrace")]) --> addr.
+
+  get-import-object(name) :: I --> objectAddr :: I'
+  where
+    case I[name?] of {
+      true =>
+        I[name] => objectAddr;
+        I => I'
+      otherwise =>
+        parse-file(name) --> Program(code);
+        next() --> base;
+        S base , O base |- Program(code) :: I --> RefV(objectAddr) :: I'';
+        {name |--> objectAddr, I''} => I'
+    }.
