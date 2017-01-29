@@ -48,9 +48,9 @@ rules
     e --> v.
 
   MCallL(ID(x), vs) --> resolve-and-call-impl(x, vs)
-    where
-      x != "while(_)do(_)"; // TODO way to solve this more elegantly
-      x != "print(_)".
+  where
+    x != "while(_)do(_)"; // TODO way to solve this more elegantly
+    x != "print(_)".
   
   P Exec() |- MCallRecvL(v, ID(x), vs) --> resolve-and-call-qual(v, x, vs).
 
@@ -144,17 +144,19 @@ rules
     }.
 
   check-method-found(true, true, x, clos) --> U()
-    where
-      clos => ClosV(_,_,_,_,_,_,src);
-      src != Bottom();
-      halt-error("Method '" ++ x ++ "' is defined both as an inherited/used" ++
-        "field and in an enclosing scope.", "") --> _.
+  where
+    clos => ClosV(_,_,_,_,_,_,src);
+    src != Bottom();
+    halt-error("Method '" ++ x ++ "' is defined both as an inherited/used" ++
+      "field and in an enclosing scope.", "") --> _.
+ 
   check-method-found(s, _, x, _) --> check-method-found(s, x).
   
   check-method-found(true, _) --> U().
+ 
   check-method-found(false, x) --> U()
-    where
-      halt-error("No such method: ", x) --> _.
+  where
+    halt-error("No such method: ", x) --> _.
 
   resolve-and-call-local(x, [v]) --> DoneV()
   where
@@ -175,29 +177,23 @@ rules
     lookup-method-direct(recv, x) --> (clos, f);
     check-method-found(f, x) --> _.
 
-  call(ClosV(S, O, params, code, env, public, src, _), vs, name) --> v
-  where
-    check-visibility(public, S, name) --> true;
-    add-locals(params, vs) :: L env --> _ :: L;
-    S, O |- code :: L --> v :: L _.
-
   S |- call(ClosV(S', _, _, _, _, public, _, _), _, name) :: H --> DoneV()
   where
     check-visibility(public, S', name) --> false;
     halt-error("Requested confidential method '" ++ name ++
       "' of object: " ++ int2string(S') ++ " from outside (: " ++ int2string(S) ++
       "), Heap: ", str(H : AST)) --> _.
-      
-//    lookup-method(recv, x) --> clos.
 
-  call(ClosV(S, O, params, code, env, _, _, No-Return()), vs, _) --> v
+  call(ClosV(S, O, params, code, env, public, _, No-Return()), vs, name) --> v
   where
+    check-visibility(public, S, name) --> true;
     log("Call to block closure") --> _;
     add-locals(params, vs) :: L env --> _ :: L1;
     S, O |- code :: L1 --> v.
 
-  call(ClosV(S, O, params, code, env, _, _, R@Return-To(r-mark)), vs, _) :: EX Ok() --> v :: EX
+  call(ClosV(S, O, params, code, env, public, _, R@Return-To(r-mark)), vs, name) :: EX Ok() --> v :: EX
   where
+    check-visibility(public, S, name) --> true;
     log("Call to method closure with return to " ++ int2string(r-mark)) --> _;
     add-locals(params, vs) :: L env --> _ :: L1;
     R, S, O |- code :: L1, EX Ok() --> v_call :: EX_call;
@@ -228,19 +224,19 @@ signature
 rules
   
   alloc-locals([]) --> U().
-  
+
   alloc-locals([s | xs]) --> alloc-locals(xs)
   where
     s -alloc-> _.
-  
+
   Declaration(VariableL(id, _, _, _)) -alloc-> U()
   where
     add-local(id, UninitializedV()) --> _.
-  
+
   Declaration(ConstantL(id, _, _, _)) -alloc-> U()
   where
     add-local(id, UninitializedV()) --> _.
-  
+
   _ : Statement -alloc-> U().
 
 /* ======== local environment operations ========== */
@@ -261,29 +257,30 @@ rules
     log("adding local: '" ++ x ++ "'.") --> _;
     check-add-local(x) --> _;
     v-allocate(v) --> addr.
-    
+
   check-add-local(x) --> U()
-    where
-      lookup-method-direct(current-self(), x) --> (_, self);
-      lookup-method(current-outer(), x) --> (_, outer);
-      is-local(x) --> local;
-      error-add-local(self,outer,local,x) --> _.
-  
+  where
+    lookup-method-direct(current-self(), x) --> (_, self);
+    lookup-method(current-outer(), x) --> (_, outer);
+    is-local(x) --> local;
+    error-add-local(self,outer,local,x) --> _.
+
   error-add-local(false,false,false, _) --> U().
+
   error-add-local(self,outer,local, x) --> U()
-    where
-      case self of {
-        true => halt-error("Local '" ++ x ++ "' may not redefine method from self.", "") --> _
-      };
-      case outer of {
-        true => halt-error("Local '" ++ x ++ "' may not shadow method from an enclosing scope.", "") --> _
-      };
-      case local of {
-        true => halt-error("Local '" ++ x ++ "' may not redefine local method.", "") --> _
-      }.
-  
+  where
+    case self of {
+      true => halt-error("Local '" ++ x ++ "' may not redefine method from self.", "") --> _
+    };
+    case outer of {
+      true => halt-error("Local '" ++ x ++ "' may not shadow method from an enclosing scope.", "") --> _
+    };
+    case local of {
+      true => halt-error("Local '" ++ x ++ "' may not redefine local method.", "") --> _
+    }.
+
   add-local(WildCard(), _) --> U().
-  
+
   update-local(ID(x), v) :: L --> U() :: L
   where
     log("updating local: '" ++ x ++ "'") --> _;
@@ -302,7 +299,7 @@ rules
       false =>
         L[x?] => is-local
     }.
-  
+
   read-local(x) :: L --> v-read(L[x]) :: L.  
 
   add-locals([], []) --> U().
@@ -311,7 +308,7 @@ rules
   where
     log("adding locals") --> _;
     add-local(x, v) --> _.
-  
+
 /* ============ variable heap operations ======== */
 
 signature
@@ -333,10 +330,9 @@ rules
   v-allocate(v) :: VH --> addr :: VH {addr |--> v, VH}
   where
     v-next() --> addr.
-  
+
   v-read(addr) :: VH --> VH[addr] :: VH.
 
   v-update(addr, v) :: VH --> addr :: VH {addr |--> v, VH}.
-  
+
   v-next() --> fresh.
-  

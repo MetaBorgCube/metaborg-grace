@@ -22,10 +22,10 @@ signature
 
 rules
 
-  S S |- p@Program(code, _) --> v
-    where
-      get-dialect-object(code) --> s';
-      S s', O S |- code --> v.
+  S S |- Program(code) --> v
+  where
+    get-dialect-object(code) --> s';
+    S s', O S |- code --> v. // code has object decl inside so self becomes outer
 
   [] : Code --> DoneV().
 

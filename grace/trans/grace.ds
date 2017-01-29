@@ -9,13 +9,14 @@ signature
 
 rules
 
-  p@Program(_, _) -init-> (v_out, EX, H)
-    where
-      next() --> base;
-      R No-Return(), O base, S base, P Exec(), Src Bottom() |- p :: H {}, L {}, VH {}, D {}, I {}, EX Ok() --> v :: H, L, VH, EX;
-      case EX of {
-        Ok() =>
-          v => v_out
-        otherwise =>
-          DoneV() => v_out
-      }.
+  p@Program(_) -init-> (v_out, EX, H)
+  where
+    next() --> base;
+    R No-Return(), O base, S base, P Exec(), Src Bottom() |- p :: H {}, L {},
+      VH {}, D {}, I {}, EX Ok() --> v :: H, L, VH, EX;
+    case EX of {
+      Ok() =>
+        v => v_out
+      otherwise =>
+        DoneV() => v_out
+    }.
