@@ -8,5 +8,5 @@ class B {
 
 object {
   inherit B exclude f;
-  print(g); // error
+  print(f); // error
 };
