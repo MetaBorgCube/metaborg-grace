@@ -19,14 +19,10 @@ signature
     ClosV: Addr * Addr * List(Identifier) * Code * Env * Bool * Source * Return-Marker -> V
     No-Return: Return-Marker
     Return-To: Int -> Return-Marker
+    Rex: Int * V -> Exn
 
   components
     R: Return-Marker
-
-  constructors
-    ClosV: Addr * Addr * List(Identifier) * Code * Env * List(String) * Return-Marker -> V
-    Rex: Int * V -> Exn
-  
   
   arrows
     method-closure(Declaration) --> V
@@ -58,8 +54,8 @@ rules
   where
     e --> RefV(S).
 
-  BlockL(params, _, code) --> method-closure(MethodL(ID("lambda"),
-    [], Annotations([Public()]), params, [], no-type(), code)).
+//  BlockL(params, _, code) --> method-closure(MethodL(ID("lambda"),
+//    [], Annotations([Public()]), params, [], no-type(), code)).
 
 rules /* closure construction */
 
@@ -86,22 +82,10 @@ rules /* closure construction */
 
   BlockL(params, _, code) --> block-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
 
-rules /* closure construction */
-
-//  method-closure(MethodL(ID(m), _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L', M, Return-To(r-mark)) :: L
-//  where
-//    current-self() --> S;
-//    current-outer() --> O;
-//    current-method-names() --> M;
-//    alloc-locals(code) :: L --> _ :: L L';
-//    fresh => r-mark;
-//    log("Closing method " ++ m ++ " returning to " ++ int2string(r-mark)) --> _.
-  
-  block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L', M, No-Return()) :: L
+  block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L', true, Bottom(), No-Return()) :: L
   where
     current-self() --> S;
     current-outer() --> O;
-    current-method-names() --> M;
     alloc-locals(code) :: L --> _ :: L L';
     log("Closing block over No-Return()") --> _.
   
@@ -145,10 +129,10 @@ rules
 
   check-method-found(true, true, x, clos) --> U()
   where
-    clos => ClosV(_,_,_,_,_,_,src);
-    src != Bottom();
-    halt-error("Method '" ++ x ++ "' is defined both as an inherited/used" ++
-      "field and in an enclosing scope.", "") --> _.
+    clos => ClosV(_,_,_,_,_,_,_,src);
+    src != Bottom().
+//    halt-error("Method '" ++ x ++ "' is defined both as an inherited/used" ++
+//      "field and in an enclosing scope.", "") --> _.
  
   check-method-found(s, _, x, _) --> check-method-found(s, x).
   
@@ -172,7 +156,7 @@ rules
   
   resolve-and-call-qual(recv, x, vs) --> call(clos, vs, x)
   where
-    recv =!=> ClosV(_, _, _, _, _, _, _);
+    recv =!=> ClosV(_,_,_,_,_,_,_,_);
     log("resolve-and-call-qual, not a ClosV!") --> _;
     lookup-method-direct(recv, x) --> (clos, f);
     check-method-found(f, x) --> _.

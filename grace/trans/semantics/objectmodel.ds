@@ -378,7 +378,7 @@ rules
     check-add-method(x, v) --> _;
     update(S, Obj(O, outers, slots, {x |--> v, methods})) --> _.
 
-  check-add-method(_, ClosV(_,_,ps,_,_,_,_)) --> U()
+  check-add-method(_, ClosV(_,_,ps,_,_,_,_,_)) --> U()
   where
     check-method-params(ps) --> _.
 
