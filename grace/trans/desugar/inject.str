@@ -8,7 +8,7 @@ imports
 
 rules
     inject-all = fail
-//  inject-all: Program([c | cs ], b) -> Program([Expression(ObjectL(NoInherit(),[],[
+//  inject-all: Program([c | cs ]) -> Program([Expression(ObjectL(NoInherit(),[],[
 //          Declaration(
 //            MethodL(
 //              "print"
@@ -107,4 +107,4 @@ rules
 //                ]
 //              )
 //            )
-//          ), c | cs]))], b)
+//          ), c | cs]))])
