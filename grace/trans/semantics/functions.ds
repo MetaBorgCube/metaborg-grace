@@ -201,7 +201,7 @@ rules
       Rex(r-mark', v_ret) =>
         case eqI(r-mark', r-mark) of {
           true =>
-            log("Handling matching return") --> _;
+            log("Handling matching return (" ++ int2string(r-mark) ++ ")") --> _;
             v_ret => v;
             Ok() => EX
           otherwise =>
