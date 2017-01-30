@@ -28,15 +28,16 @@ signature
     
 rules
 
-//  read-dialect(s) --> read_dialect(s).
+  parse-file(s) --> parse_file(s).
 //  read-import(s) --> read_import(s).
 
-  S |- get-dialect-object([Dialect("none") | _]) --> new-object(S)
+  S |- get-dialect-object([Expression(ObjectL(_,_,[Dialect("none") | _ ])) | _ ]) --> new-object(S)
   where
     log("file has dialect 'none', giving back empty object") --> _.
 
   get-dialect-object([Expression(ObjectL(_,_,[Dialect(name) | _ ])) | _ ]) :: D --> objectAddr :: D'
   where
+    log("reading dialect: " ++ name) --> _;
     fresh => no-object;
     case D[name?] of {
       true =>
@@ -57,7 +58,7 @@ rules
   
   get-dialect-object(_) --> addr
   where
-    get-dialect-object([Dialect("standardGrace")]) --> addr.
+    get-dialect-object([Expression(ObjectL(NoInherit(),[] : List(Use),[Dialect("standardGrace")]))]) --> addr.
 
   get-import-object(name) :: I --> objectAddr :: I'
   where
