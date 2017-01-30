@@ -50,8 +50,8 @@ rules
   
   desugar-all-post: ast -> <lower-post-all> <lower-all> ast
 
-  desugar-program: Program(a, b) ->
-    Program([Expression(ObjectDecl(NoInherit(), [], a))], b)
+  desugar-program: Program(code) ->
+    Program([Expression(ObjectDecl(NoInherit(), [], code))])
   
   desugar-missing-return-types: NoRH() -> RH(TypeID(ID("Unknown"), NoTypeArg()))
   
