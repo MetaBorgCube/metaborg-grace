@@ -14,6 +14,7 @@ signature
   arrows
     allocate(HeapData) :: H --> Addr :: H
     update(Addr, HeapData) :: H --> Addr :: H
+    is-stored(Addr) :: H --> Bool :: H
     read(Addr) :: H --> HeapData :: H
     next() --> Addr
         
@@ -22,6 +23,8 @@ rules
   allocate(data) :: H --> addr :: H {addr |--> data, H}
   where
     next() --> addr.
+  
+  is-stored(addr) :: H --> H[addr?] :: H.
   
   read(addr) :: H --> H[addr] :: H.
 

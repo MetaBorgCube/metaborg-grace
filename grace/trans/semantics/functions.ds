@@ -111,53 +111,57 @@ rules /* closure construction */
 signature
   arrows
     resolve-and-call-impl(String, List(V)) --> V
-    resolve-and-call-local(String, List(V)) --> V
     resolve-and-call-qual(V, String, List(V)) --> V
     check-method-found(Bool, String) --> U
     check-method-found(Bool, Bool, String, V) --> U
     call(V, List(V), String) --> V
     resolve-and-call(V, String, List(V)) --> V
 
+
+
+    resolve-and-call-local(String, List(V)) --> V
+    
+    disambiguate-closure(V, String) --> V
+    disambiguate-closure(V, V, String) --> V
+  
 rules
   
-  S |- resolve-and-call-impl(x, vs) --> v
+  resolve-and-call-impl(x, vs) --> resolve-and-call-local(x, vs)
   where
-    is-local(x) --> is-local;
-    case is-local of {
-      true =>
-        resolve-and-call-local(x, vs) --> v
-      false =>
-        log("is '" ++ x ++ "' a member of: '" ++ int2string(S) ++ "'?") --> _;
-        is-member(x) --> is-member;
-        case is-member of {
-          true =>
-            log("is-member true, fetching method from self") --> _;
-            lookup-method-direct(current-self(), x) --> (clos, found-self);
-            lookup-method(current-outer(), x) --> (_, found-outer);
-            check-method-found(found-self, found-outer, x, clos) --> _
-          false =>
-            log("is-member false, fetching method from outer") --> _;
-            lookup-method(current-outer(), x) --> (clos, f);
-            check-method-found(f, x) --> _
-        };
-        call(clos, vs, x) --> v
-    }.
-
-  check-method-found(true, true, x, clos) --> U()
-  where
-    clos => ClosV(_,_,_,_,_,_,_,src);
-    src != Bottom().
-//    halt-error("Method '" ++ x ++ "' is defined both as an inherited/used" ++
-//      "field and in an enclosing scope.", "") --> _.
- 
-  check-method-found(s, _, x, _) --> check-method-found(s, x).
+    is-local(x) --> true.
   
-  check-method-found(true, _) --> U().
- 
-  check-method-found(false, x) --> U()
+  resolve-and-call-impl(x, vs) --> call(clos, vs, x)
+  where
+    is-local(x) --> false;
+    lookup-local-method(current-self(), x) --> local-clos;
+    lookup-outer-method(current-outer(), x) --> outer-clos;
+    disambiguate-closure(local-clos, outer-clos, x) --> clos.
+
+  disambiguate-closure(clos, x) --> disambiguate-closure(clos, DoneV(), x).
+
+  // closure was defined in bottom and found in local
+  disambiguate-closure(clos@ClosV(_, _, _, _, _, _, Bottom(), _), _, _) --> clos.
+
+  // closure was only found in local
+  disambiguate-closure(clos@ClosV(_, _, _, _, _, _, _, _), DoneV(), _) --> clos.
+  
+  // closure was only found in outer
+  disambiguate-closure(DoneV(), clos@ClosV(_, _, _, _, _, _, _, _), _) --> clos.
+
+  // closure found in inherited and in outer
+  disambiguate-closure(ClosV(_, _, _, _, _, _, src, _), ClosV(_, _, _, _, _, _, _, _), x) --> DoneV()
+  where
+    src =!=> Bottom();
+    halt-error("Method '" ++ x ++ "' is defined both as an inherited/used" ++
+      "field and in an enclosing scope.", "") --> _.
+
+  // closure not found
+  disambiguate-closure(DoneV(), DoneV(), x) --> DoneV()
   where
     halt-error("No such method: ", x) --> _.
-
+  
+  
+  
   resolve-and-call-local(x, [v]) --> DoneV()
   where
     ":=(_)" => bind_suffix;
@@ -166,16 +170,23 @@ rules
   
   resolve-and-call-local(x, []) --> read-local(x).
 
+
+
+
   resolve-and-call-qual(clos@ClosV(_, _, _, _, _, _, _, _), x, vs) --> call(clos, vs, x)
   where
     str-starts-with(x, "apply") == true.
+
+
+
+
+
   
   resolve-and-call-qual(recv, x, vs) --> call(clos, vs, x)
   where
     recv =!=> ClosV(_,_,_,_,_,_,_,_);
-    log("resolve-and-call-qual, not a ClosV!") --> _;
-    lookup-method-direct(recv, x) --> (clos, f);
-    check-method-found(f, x) --> _.
+    lookup-local-method(recv, x) --> clos;
+    disambiguate-closure(clos, x) --> _.
 
   S |- call(ClosV(S', _, _, _, _, public, _, _), _, name) :: H --> DoneV()
   where
@@ -250,6 +261,9 @@ signature
     read-local(String) --> V
     add-locals(List(Identifier), List(V)) --> U
 
+  
+    TEMP-error-add-local(V, V, String) --> U
+
 rules
 
   add-local(ID(x), v) :: L --> U() :: L {x |--> addr, L}
@@ -260,10 +274,24 @@ rules
 
   check-add-local(x) --> U()
   where
-    lookup-method-direct(current-self(), x) --> (_, self);
-    lookup-method(current-outer(), x) --> (_, outer);
-    is-local(x) --> local;
-    error-add-local(self,outer,local,x) --> _.
+    lookup-local-method(current-self(), x) --> local-clos;
+    lookup-outer-method(current-outer(), x) --> outer-clos;
+    TEMP-error-add-local(local-clos, outer-clos, x) --> _.
+
+  TEMP-error-add-local(v1, v2, x) --> error-add-local(self, outer, is-local(x), x)
+  where
+    case v1 of {
+      ClosV(_, _, _, _, _, _, _, _) =>
+        true => self
+      otherwise =>
+        false => self
+    };
+    case v2 of {
+      ClosV(_, _, _, _, _, _, _, _) =>
+        true => outer
+      otherwise =>
+        false => outer
+    }.
 
   error-add-local(false,false,false, _) --> U().
 
