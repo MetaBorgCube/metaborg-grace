@@ -2,8 +2,8 @@ module trans/desugar/unquote
 
 imports
     
-    src-gen/signatures/grace-sig
-    src-gen/signatures/general-sig
+  src-gen/signatures/grace-sig
+  src-gen/signatures/general-sig
 
 rules
 
@@ -12,15 +12,15 @@ rules
 
   desugar-unquote-strings:
     ArgString(s) -> ArgString(<unquote(?'"')> s)
-    
+
   desugar-unquote-strings:
     CString(s) -> CString(<unquote(?'"')> s)
-    
+
   desugar-unquote-strings:
     Dialect(s) -> Dialect(<unquote(?'"')> s)
 
   desugar-unquote-strings:
     Import(s, b, c) -> Import(<unquote(?'"')> s, b, c)
-    
+
   desugar-unquote-strings:
     IntPolEnd(e, s) -> IntPolEnd(e, <unquote(?'"')> s)

@@ -2,13 +2,12 @@ module trans/desugar/lower
 
 imports
 
-    src-gen/signatures/grace-sig
-    src-gen/signatures/grace-lowered-sig
-    src-gen/signatures/general-sig
+  src-gen/signatures/grace-sig
+  src-gen/signatures/grace-lowered-sig
+  src-gen/signatures/general-sig
     
-    trans/desugar/common
-    trans/desugar/lower-literals
-    trans/desugar/analyse
+  trans/desugar/common
+  trans/desugar/analyse
 
 rules
 
@@ -30,8 +29,6 @@ rules
   lower-post-all: ast -> <topdown(lower-post-analyse)> <topdown(try(lower-post-2))> <topdown(try(lower-post-1))> ast
 
   lower-post-1 =
-          lower-boolean-to-object <+
-          lower-number-to-object <+
           flatten-statements-declaration <+
           lower-fail
 

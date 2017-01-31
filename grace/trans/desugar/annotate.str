@@ -2,8 +2,8 @@ module trans/desugar/annotate
 
 imports
     
-    src-gen/signatures/grace-sig
-    src-gen/signatures/general-sig
+  src-gen/signatures/grace-sig
+  src-gen/signatures/general-sig
 
 rules
 

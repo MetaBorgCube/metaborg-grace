@@ -2,17 +2,17 @@ module trans/desugar/desugar
 
 imports
     
-    src-gen/signatures/grace-sig
-    src-gen/signatures/grace-lowered-sig
-    src-gen/signatures/general-sig
+  src-gen/signatures/grace-sig
+  src-gen/signatures/grace-lowered-sig
+  src-gen/signatures/general-sig
 
-    trans/desugar/common
-    trans/desugar/matchcase
-    trans/desugar/lower
-    trans/desugar/unquote
-    trans/desugar/interpolate
-    trans/desugar/annotate
-    trans/desugar/analyse
+  trans/desugar/common
+  trans/desugar/matchcase
+  trans/desugar/lower
+  trans/desugar/unquote
+  trans/desugar/interpolate
+  trans/desugar/annotate
+  trans/desugar/analyse
 
 rules
   

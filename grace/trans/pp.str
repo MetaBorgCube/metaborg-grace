@@ -2,8 +2,12 @@ module pp
 
 imports
 
+  signatures/grace-sig
+  
   libstratego-gpp
-  runtime/refactoring/-
+  libspoofax/sdf/pp
+  libspoofax/editor/refactoring/-
+  
   pp/grace-parenthesize
   pp/grace-pp
 

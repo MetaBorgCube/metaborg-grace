@@ -5,7 +5,6 @@ imports
   pp
   src-gen/signatures/grace-sig
   trans/desugar/desugar
-  trans/desugar/inject
 
 rules // Analysis
 
@@ -42,8 +41,7 @@ rules // Debugging
     with
       filename := <guarantee-extension(|"analyzed-pp.grace")> path;
       result   := <pp-debug> ast
-  
-//  desugar-complete: ast -> <inject-all> <desugar-all-post> <desugar-all> <desugar-pre> ast
+
   desugar-complete: ast -> <desugar-all-post> <desugar-all> <desugar-pre> ast
   
   debug-show-desugared:

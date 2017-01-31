@@ -2,11 +2,11 @@ module trans/desugar/analyse
 
 imports
     
-    src-gen/signatures/grace-sig
-    src-gen/signatures/grace-lowered-sig
-    src-gen/signatures/general-sig
+  src-gen/signatures/grace-sig
+  src-gen/signatures/grace-lowered-sig
+  src-gen/signatures/general-sig
     
-    trans/desugar/common
+  trans/desugar/common
     
 rules
 
