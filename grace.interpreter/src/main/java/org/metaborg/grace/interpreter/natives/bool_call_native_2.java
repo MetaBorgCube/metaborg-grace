@@ -8,28 +8,28 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class bool_call_2 extends TermBuild {
+public class bool_call_native_2 extends TermBuild {
 
-	@Child
-	protected TermBuild leftNode;
 	@Child
 	protected TermBuild opNode;
+	@Child
+	protected TermBuild termNode;
 
-	public bool_call_2(SourceSection source, TermBuild l, TermBuild op) {
+	public bool_call_native_2(SourceSection source, TermBuild op, TermBuild term) {
 		super(source);
-		this.leftNode = l;
 		this.opNode = op;
+		this.termNode = term;
 	}
 
 	@Override
 	public IVTerm executeGeneric(VirtualFrame frame) {
-		final BoolV_1_Term left = TypesGen.asBoolV_1_Term(leftNode.executeGeneric(frame));
 		final String op = TypesGen.asString(opNode.executeGeneric(frame));
+		final BoolV_1_Term term = TypesGen.asBoolV_1_Term(termNode.executeGeneric(frame));
 		switch (op) {
 		case "not":
-			return doNot(left);
+			return doNot(term);
 		case "prefix!":
-			return doNot(left);
+			return doNot(term);
 		default:
 			throw new IllegalArgumentException("operator: '" + op + "' not recognised as operator on bool.");
 		}
@@ -39,8 +39,8 @@ public class bool_call_2 extends TermBuild {
 		return new BoolV_1_Term(!left.get_1());
 	}
 
-	public static TermBuild create(SourceSection source, TermBuild left, TermBuild op) {
-		return new bool_call_2(source, left, op);
+	public static TermBuild create(SourceSection source, TermBuild op, TermBuild term) {
+		return new bool_call_native_2(source, op, term);
 	}
 
 }

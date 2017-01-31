@@ -8,6 +8,7 @@ imports
   trans/semantics/types
   trans/semantics/booleans
   trans/semantics/visibility
+  trans/semantics/controlflow
   
 signature
   sorts
@@ -39,23 +40,48 @@ signature
 
 rules
 
-  MCallL(ID("print(_)"), [e]) --> nativePrint(v)
-  where
-    e --> v.
-
-  MCallL(ID(x), vs) --> resolve-and-call-impl(x, vs)
-  where
-    x != "while(_)do(_)"; // TODO way to solve this more elegantly
-    x != "print(_)".
-  
-  P Exec() |- MCallRecvL(v, ID(x), vs) --> resolve-and-call-qual(v, x, vs).
 
   MQCallOuter(e) --> outer(S)
   where
     e --> RefV(S).
 
-//  BlockL(params, _, code) --> method-closure(MethodL(ID("lambda"),
-//    [], Annotations([Public()]), params, [], no-type(), code)).
+  MCallL(ID(x), es) --> v
+  where
+    case x of {
+      "print(_)" =>
+        es => [e];
+        nativePrint(e) => v
+        
+      "while(_)do(_)" =>
+        es => [e1, e2];
+        while-loop(e1, e2) --> v
+        
+      otherwise =>
+        resolve-and-call-impl(x, es) --> v
+    }.
+
+  P Exec() |- MCallRecvL(e, ID(x), es) --> v
+  where
+    e --> recv;
+    case recv of {
+      BoolV(_) =>
+        bool-call(recv, x, es) --> v
+      NumV(_) =>
+        num-call(recv, x, es) --> v
+      otherwise =>
+        resolve-and-call-qual(recv, x, es) --> v  
+    }.
+
+  R Return-To(r-mark) |- Return(e) :: EX Ok() --> ??? :: EX
+  where
+    e :: EX Ok() --> v :: EX_r;
+    case EX_r of {
+      Ok() =>
+        Rex(r-mark, v) => EX;
+        log("Returning to: " ++ int2string(r-mark)) --> _
+      otherwise =>
+        EX_r => EX
+    }.
 
 rules /* closure construction */
 
@@ -69,16 +95,6 @@ rules /* closure construction */
     log("constructing method: '" ++ name ++ "', L: " ++ str(L:AST) ++ ", L': " ++ str(L':AST)) --> _;
     is-public(ann) --> public.
 
-  R Return-To(r-mark) |- Return(e) :: EX Ok() --> ??? :: EX
-  where
-    e :: EX Ok() --> v :: EX_r;
-    case EX_r of {
-      Ok() =>
-        Rex(r-mark, v) => EX;
-        log("Returning to: " ++ int2string(r-mark)) --> _
-      otherwise =>
-        EX_r => EX
-    }.
 
   BlockL(params, _, code) --> block-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
 

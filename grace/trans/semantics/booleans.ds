@@ -9,9 +9,12 @@ signature
   constructors
     BoolV : Bool -> V
 
+  arrows
+    bool-call(V, String, List(Exp)) --> V
+
   native operators
-    bool_call: V * String * V -> V
-    bool_call: V * String -> V
+    bool-call-native: String * V * V -> V
+    bool-call-native: String * V -> V
 
 rules
 
@@ -19,48 +22,20 @@ rules
 
   Boolean(False()) --> BoolV(false).
 
-  resolve-and-call-qual(l@BoolV(_), x, []) --> bool_call(l, x).
+  bool-call(v, x, []) --> bool-call-native(x, v).
+  
+  bool-call(v1, x, [v2@BoolV(_)]) --> bool-call-native(x, v1, v2).
 
-  resolve-and-call-qual(l@BoolV(_), x, [v]) --> bool_call(l, x, v).
+  bool-call(BoolV(true), "ifTrue(_)ifFalse(_)", [e1, _]) --> call(e1, [], "apply").
 
-//  MCallRecvL(v1@BoolV(_), ID(op), [BlockL([], _, [Expression(e2)])]) --> bool_call(v1, op, v2)
-//  where
-//    e2 --> v2@BoolV(_).
+  bool-call(BoolV(false), "ifTrue(_)ifFalse(_)", [_, e2]) --> call(e2, [], "apply").
 
-  call@MCallL(ID("while(_)do(_)"), [e1, e2]) --> call
-  where
-    e1 --> v1@ClosV(_,_,_,_,_,_,_,_);
-    e2 --> v2@ClosV(_,_,_,_,_,_,_,_);
-    resolve-and-call-qual(v1, "apply", []) --> BoolV(true);
-    resolve-and-call-qual(v2, "apply", []) --> _.
 
-  MCallL(ID("while(_)do(_)"), [e1, e2]) --> DoneV()
-  where
-    e1 --> v1@ClosV(_,_,_,_,_,_,_,_);
-    resolve-and-call-qual(v1, "apply", []) --> BoolV(false).
+  bool-call(BoolV(true), "ifTrue(_)", [e]) --> call(e, [], "apply").
+  
+  bool-call(BoolV(false), "ifTrue(_)", [_]) --> DoneV().
+  
+  
+  bool-call(BoolV(true), "ifFalse(_)", [_]) --> DoneV().  
 
-//  MCallRecvL(BoolV(true), ID("ifTrue(_)ifFalse(_)"), [v1, v2]) --> v
-//  where
-//    resolve-and-call-qual(v1, "apply", []) --> v.
-
-//  MCallRecvL(BoolV(false), ID("ifTrue(_)ifFalse(_)"), [v1, v2]) --> v
-//  where
-//    resolve-and-call-qual(v2, "apply", []) --> v.
-
-//  MCallRecvL(BoolV(b), ID("ifTrue(_)"), [v1]) --> v
-//  where
-//    case b of {
-//      true =>
-//        resolve-and-call-qual(v1, "apply", []) --> v
-//      otherwise =>
-//        DoneV() => v
-//    }.
-
-//  MCallRecvL(BoolV(b), ID("ifFalse(_)"), [v1]) --> v
-//  where
-//    case b of {
-//      true =>
-//        DoneV() => v
-//      otherwise =>
-//        resolve-and-call-qual(v1, "apply", []) --> v
-//    }.
+  bool-call(BoolV(false), "ifFalse(_)", [e]) --> call(e, [], "apply").
