@@ -268,19 +268,20 @@ rules
     P Flatten() |- resolve-and-call-qual(recv, x, vs) --> v.
 
   NoInherit() --> FlatObject([]).
-  
-  InheritL(e, as, ex) --> FlatObject(remove-excludes(make-aliases(ls, as), ex))
+
+  InheritL(e, as, ex) --> FlatObject(remove-excludes(make-aliases(cls, as), ex))
   where
-    log("InheritL(e,_,_), excludes: " ++ str(ex:AST)) --> _; // TODO this is where to check whether the inherit
-    e --> FlatObject(ls);                                    // expression actually returns a fresh object
-    log("InheritL(e,_,_) done, ls: " ++ str(ls:AST)) --> _.
+    log("InheritL(e,_,_), excludes: " ++ str(ex:AST)) --> _; // TODO fresh object check
+    e --> FlatObject(cls);
+    log("InheritL(e,_,_) done, ls: " ++ str(cls:AST)) --> _.
 
   [] : List(Use) --> FlatObject([]).
 
-  [UseL(e,_,_) | uses] : List(Use) --> FlatObject(closures ++ closures')
+  [UseL(e, as, ex) | uses] : List(Use) --> FlatObject(cls' ++ closures')
   where
     e --> FlatObject(closures);
-    uses --> FlatObject(closures').
+    uses --> FlatObject(closures');
+    remove-excludes(make-aliases(closures, as), ex) --> cls'.
 
 /* ======== OBJECT META-FUNCTIONS ========= */
 
