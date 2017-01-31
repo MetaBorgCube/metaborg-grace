@@ -11,24 +11,28 @@ signature
   constructors
     NumV : Int -> V
 
+  arrows
+    num-call(V, String, List(Exp)) --> V
+    num-call-evaluated(String, V, V) --> V
+    
   native operators
-    num_call: V * String * V -> V
-    num_call: V * String -> V
-
+    num-call-native: String * V * V -> V
+    num-call-native: String * V -> V  
+  
 rules
 
   Number(a) --> NumV(string2int(a)).
-
-  resolve-and-call-qual(NumV(_), "==(_)", [StringV(_)]) --> BoolV(false).
-
-  resolve-and-call-qual(NumV(i), "++(_)", [StringV(s)]) --> StringV(s1 ++ s)
+  
+  num-call(v1@NumV(_), x, [v2]) --> num-call-evaluated(x, v1, v2).
+  
+  num-call(v1@NumV(_), x, []) --> num-call-native(x, v1).
+  
+  num-call-evaluated("==(_)", _, v2) --> BoolV(false)
   where
-    int2str(i) --> s1.
-
-  resolve-and-call-qual(l@NumV(_), x, [v@NumV(_)]) --> num_call(l, x, v).
-
-  resolve-and-call-qual(l@NumV(_), op, [StringV(s)]) --> num_call(l, op, NumV(i))
+    v2 =!=> NumV(_).
+  
+  num-call-evaluated("++(_)", NumV(i1), StringV(s2)) --> StringV(s1 ++ s2)
   where
-    string2int(s) --> i.
-
-  resolve-and-call-qual(l@NumV(_), x, []) --> num_call(l, x).
+    int2str(i1) --> s1.
+  
+  num-call-evaluated(x, v1, v2) --> num-call-native(x, v1, v2).

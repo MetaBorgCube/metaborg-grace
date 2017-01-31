@@ -9,27 +9,27 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class num_call_3 extends TermBuild {
+public class num_call_native_3 extends TermBuild {
 
-	@Child
-	protected TermBuild leftNode;
 	@Child
 	protected TermBuild opNode;
 	@Child
+	protected TermBuild leftNode;
+	@Child
 	protected TermBuild rightNode;
 
-	public num_call_3(SourceSection source, TermBuild l, TermBuild op, TermBuild r) {
+	public num_call_native_3(SourceSection source, TermBuild op, TermBuild l, TermBuild r) {
 		super(source);
-		this.leftNode = l;
 		this.opNode = op;
+		this.leftNode = l;
 		this.rightNode = r;
 	}
 
 	@Override
 	public IVTerm executeGeneric(VirtualFrame frame) {
+		final String op = TypesGen.asString(opNode.executeGeneric(frame));
 		final NumV_1_Term left = TypesGen.asNumV_1_Term(leftNode.executeGeneric(frame));
 		final NumV_1_Term right = TypesGen.asNumV_1_Term(rightNode.executeGeneric(frame));
-		final String op = TypesGen.asString(opNode.executeGeneric(frame));
 		switch (op) {
 		case "+(_)":
 			return doPlus(left, right);
@@ -78,8 +78,8 @@ public class num_call_3 extends TermBuild {
 		return new NumV_1_Term((int) Math.pow(left.get_1(), right.get_1()));
 	}
 
-	private IVTerm doEq(NumV_1_Term left, NumV_1_Term right) {
-		return new BoolV_1_Term(left.get_1() == right.get_1());
+	private IVTerm doEq(NumV_1_Term left, IVTerm right) {
+		return new BoolV_1_Term(left.equals(right));
 	}
 
 	private IVTerm doNeq(NumV_1_Term left, NumV_1_Term right) {
@@ -102,8 +102,8 @@ public class num_call_3 extends TermBuild {
 		return new BoolV_1_Term(left.get_1() <= right.get_1());
 	}
 	
-	public static TermBuild create(SourceSection source, TermBuild left, TermBuild op, TermBuild right) {
-		return new num_call_3(source, left, op, right);
+	public static TermBuild create(SourceSection source, TermBuild op, TermBuild left, TermBuild right) {
+		return new num_call_native_3(source, op, left, right);
 	}
 
 }
