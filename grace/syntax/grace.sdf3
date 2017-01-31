@@ -143,6 +143,7 @@ context-free syntax
   Exp.MCallImpl                 = <<Part+>>                    {left}
   
   Exp.Self                      = <self>
+  Exp.SelfType                  = <Self>
   Exp.Outer                     = <outer>
   Exp.MQCallOuter               = <<Exp>.outer>                {left}
   Exp.MQCallSelf                = <<Exp>.self>                 {left}      
