@@ -9,26 +9,26 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class string_call_3 extends TermBuild {
+public class string_call_native_3 extends TermBuild {
 
+	@Child
+	protected TermBuild opNode;
     @Child
     protected TermBuild leftNode;
     @Child
-    protected TermBuild opNode;
-    @Child
     protected TermBuild rightNode;
 
-    public string_call_3(SourceSection source, TermBuild l, TermBuild op, TermBuild r) {
+    public string_call_native_3(SourceSection source, TermBuild op, TermBuild l, TermBuild r) {
         super(source);
-        this.leftNode = l;
         this.opNode = op;
+        this.leftNode = l;
         this.rightNode = r;
     }
 
     @Override
     public IVTerm executeGeneric(VirtualFrame frame) {
+    	final String op = TypesGen.asString(opNode.executeGeneric(frame));
         final StringV_1_Term left = TypesGen.asStringV_1_Term(leftNode.executeGeneric(frame));
-        final String op = TypesGen.asString(opNode.executeGeneric(frame));
         final StringV_1_Term right = TypesGen.asStringV_1_Term(rightNode.executeGeneric(frame));
         switch (op) {
         case "==(_)":
@@ -76,7 +76,7 @@ public class string_call_3 extends TermBuild {
             	return new BoolV_1_Term(false);
             } catch (NumberFormatException fme2) { }
         }
-        // if both cannot be parsed, compare lexicograhically
+        // if both cannot be parsed, compare lexicographically
         boolean res;
         int cmpValue = left.get_1().compareTo(right.get_1());
         if(cmpValue < 0) {
@@ -90,8 +90,8 @@ public class string_call_3 extends TermBuild {
     }
     
 
-    public static TermBuild create(SourceSection source, TermBuild left, TermBuild op, TermBuild right) {
-        return new string_call_3(source, left, op, right);
+    public static TermBuild create(SourceSection source, TermBuild op, TermBuild left, TermBuild right) {
+        return new string_call_native_3(source, op, left, right);
     }
 
 }

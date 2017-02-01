@@ -69,6 +69,8 @@ rules
         bool-call(recv, x, es) --> v
       NumV(_) =>
         num-call(recv, x, es) --> v
+      StringV(_)=>
+        str-call(recv, x, es) --> v
       otherwise =>
         resolve-and-call-qual(recv, x, es) --> v  
     }.

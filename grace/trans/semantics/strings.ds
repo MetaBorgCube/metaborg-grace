@@ -10,25 +10,26 @@ signature
   constructors
     StringV : String -> V
 
+  arrows
+    str-call(V, String, List(Exp)) --> V
+    str-call-evaluated(String, V, V) --> V
+    
   native operators
-  
-    string_call: V * String * V -> V
-    string_call: V * String -> V
+    string-call-native: String * V * V -> V
+    string-call-native: String * V -> V
 
 rules
 
   String(s) --> StringV(s).
 
-  resolve-and-call-qual(NumV(i), op@"++(_)", [s2@StringV(_)]) --> string_call(StringV(s1), op, s2)
+  str-call(v1, op, [v2]) --> str-call-evaluated(op, v1, v2).
+
+  str-call(v, op, []) --> string-call-native(op, v).
+
+  str-call-evaluated(op, v1, NumV(i)) --> string-call-native(op, v1, StringV(s))
   where
-    int2str(i) --> s1.
+    int2str(i) --> s.
 
-  resolve-and-call-qual(s1@StringV(_), op, [NumV(i)]) --> string_call(s1, op, StringV(s2))
+  str-call-evaluated("==(_)", _, v2) --> BoolV(false)
   where
-    int2str(i) --> s2.
-
-  resolve-and-call-qual(l@StringV(_), x, [v]) --> string_call(l, x, v).
-
-  resolve-and-call-qual(StringV(_), "==(_)", [NumV(_)]) --> BoolV(false).
-  
-  resolve-and-call-qual(l@StringV(_), x, []) --> string_call(l, x).
+    v2 =!=> StringV(_). 
