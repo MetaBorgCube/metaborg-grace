@@ -171,21 +171,14 @@ rules
   
   access-local(x, []) --> read-local(x).
 
-
-
-
   call-qualified(clos@ClosV(_, _, _, _, _, _, _, _), x, vs) --> call(clos, vs, x)
   where
     str-starts-with(x, "apply") == true.
     
-
   call-qualified(recv, x, vs) --> call(clos, vs, x)
   where
-    recv =!=> ClosV(_,_,_,_,_,_,_,_);
     lookup-local-method(recv, x) --> clos;
     disambiguate-closure(clos, x) --> _.
-
-
 
   call(clos@ClosV(S, O, params, code, env, _, _, R), vs, name) --> v
   where

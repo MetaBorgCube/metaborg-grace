@@ -494,7 +494,7 @@ rules
     read(S) --> Obj(_,_,_, methods).
 
   // Lookup in self
-  lookup-local-method(S', x) --> v
+  lookup-local-method(RefV(S'), x) --> v
   where
     read(S') --> Obj(_, _, _, methods);
     case methods[x?] of {
@@ -504,8 +504,12 @@ rules
         DoneV() => v
     }.
 
+  lookup-local-method(v, _) --> DoneV()
+  where
+    v =!=> RefV(_).
+
   // Lookup in outers
-  lookup-outer-method(S', x) --> v
+  lookup-outer-method(RefV(S'), x) --> v
   where
     read(S') --> Obj(O', _, _, methods);
     case methods[x?] of {
@@ -521,6 +525,9 @@ rules
         }
     }.
 
+  lookup-outer-method(v, _) --> DoneV()
+  where
+    v =!=> RefV(_).
 
 
 signature
