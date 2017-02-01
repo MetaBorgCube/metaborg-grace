@@ -9,6 +9,7 @@ imports
   trans/semantics/booleans
   trans/semantics/visibility
   trans/semantics/controlflow
+  trans/semantics/functions-errorchecking
   
 signature
   sorts
@@ -55,7 +56,7 @@ rules
       "while(_)do(_)" =>
         es => [e1, e2];
         while-loop(e1, e2) --> v
-        
+      
       otherwise =>
         resolve-and-call-impl(x, es) --> v
     }.
@@ -112,8 +113,6 @@ signature
   arrows
     resolve-and-call-impl(String, List(V)) --> V
     resolve-and-call-qual(V, String, List(V)) --> V
-    check-method-found(Bool, String) --> U
-    check-method-found(Bool, Bool, String, V) --> U
     call(V, List(V), String) --> V
     resolve-and-call(V, String, List(V)) --> V
 
@@ -121,14 +120,12 @@ signature
 
     resolve-and-call-local(String, List(V)) --> V
     
-    disambiguate-closure(V, String) --> V
-    disambiguate-closure(V, V, String) --> V
-  
 rules
   
   resolve-and-call-impl(x, vs) --> resolve-and-call-local(x, vs)
   where
     is-local(x) --> true.
+  
   
   resolve-and-call-impl(x, vs) --> call(clos, vs, x)
   where
@@ -137,31 +134,8 @@ rules
     lookup-outer-method(current-outer(), x) --> outer-clos;
     disambiguate-closure(local-clos, outer-clos, x) --> clos.
 
-  disambiguate-closure(clos, x) --> disambiguate-closure(clos, DoneV(), x).
 
-  // closure was defined in bottom and found in local
-  disambiguate-closure(clos@ClosV(_, _, _, _, _, _, Bottom(), _), _, _) --> clos.
 
-  // closure was only found in local
-  disambiguate-closure(clos@ClosV(_, _, _, _, _, _, _, _), DoneV(), _) --> clos.
-  
-  // closure was only found in outer
-  disambiguate-closure(DoneV(), clos@ClosV(_, _, _, _, _, _, _, _), _) --> clos.
-
-  // closure found in inherited and in outer
-  disambiguate-closure(ClosV(_, _, _, _, _, _, src, _), ClosV(_, _, _, _, _, _, _, _), x) --> DoneV()
-  where
-    src =!=> Bottom();
-    halt-error("Method '" ++ x ++ "' is defined both as an inherited/used" ++
-      "field and in an enclosing scope.", "") --> _.
-
-  // closure not found
-  disambiguate-closure(DoneV(), DoneV(), x) --> DoneV()
-  where
-    halt-error("No such method: ", x) --> _.
-  
-  
-  
   resolve-and-call-local(x, [v]) --> DoneV()
   where
     ":=(_)" => bind_suffix;
@@ -254,9 +228,14 @@ rules
 signature
   arrows
     add-local(Identifier, V) --> U
+    
     check-add-local(String) --> U
+    
     error-add-local(Bool, Bool, Bool, String) --> U
+    
     update-local(Identifier, V) --> U
+    
+    
     is-local(String) --> Bool
     read-local(String) --> V
     add-locals(List(Identifier), List(V)) --> U
@@ -268,7 +247,6 @@ rules
 
   add-local(ID(x), v) :: L --> U() :: L {x |--> addr, L}
   where
-    log("adding local: '" ++ x ++ "'.") --> _;
     check-add-local(x) --> _;
     v-allocate(v) --> addr.
 
@@ -306,6 +284,9 @@ rules
     case local of {
       true => halt-error("Local '" ++ x ++ "' may not redefine local method.", "") --> _
     }.
+
+
+
 
   add-local(WildCard(), _) --> U().
 
