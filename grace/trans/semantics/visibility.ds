@@ -26,6 +26,13 @@ signature
     is-writable(Annotations) --> Bool
     is-confidential(Annotations) --> Bool
     is-public(Annotations) --> Bool
+    
+    
+    
+    ensure-access(V, Addr, String) --> V
+    
+    
+    
     check-visibility(Bool, Addr, String) --> Bool
     
     contains-annotation(List(Annotation), Annotation) --> Bool
@@ -58,7 +65,17 @@ rules
   to-annotation(true) --> Annotations([Public()]).
 
   to-annotation(false) --> Annotations([Confidential()]).
-   
+ 
+  ensure-access(clos@ClosV(_, _, _, _, _, public, _, _), addr, name) --> clos
+  where
+    check-visibility(public, addr, name) --> visible;
+    case visible of {
+      false =>
+            halt-error("Requested confidential method '" ++ name ++ "' of object: " ++ int2string(addr) ++ " from outside", "") --> _
+      otherwise =>
+    }.
+ 
+ 
   check-visibility(true, _, _) --> true.
   
   // addr must be the self, or an outer of self

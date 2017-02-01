@@ -86,9 +86,13 @@ rules
 
   R Return-To(r-mark) |- do-return(v) :: EX Ok() --> ??? :: EX Rex(r-mark, v).
   
-  handle-return(code, Return-To(r-mark)) :: EX Ok () --> v :: EX
+  handle-return(code, No-Return()) --> v
   where
-    code :: EX Ok() --> vcode :: EX1;
+    code --> v.
+  
+  handle-return(code, R@Return-To(r-mark)) :: EX Ok() --> v :: EX
+  where
+    R |- code :: EX Ok() --> vcode :: EX1;
     case EX1 of {
       Rex(r-mark', vret) =>
         case eqI(r-mark', r-mark) of {
@@ -128,7 +132,10 @@ signature
   arrows
     resolve-and-call-impl(String, List(V)) --> V
     resolve-and-call-qual(V, String, List(V)) --> V
+    
     call(V, List(V), String) --> V
+    
+    
     resolve-and-call(V, String, List(V)) --> V
 
 
@@ -136,11 +143,13 @@ signature
     resolve-and-call-local(String, List(V)) --> V
     
 rules
+
+
+
   
   resolve-and-call-impl(x, vs) --> resolve-and-call-local(x, vs)
   where
     is-local(x) --> true.
-  
   
   resolve-and-call-impl(x, vs) --> call(clos, vs, x)
   where
@@ -165,36 +174,19 @@ rules
   resolve-and-call-qual(clos@ClosV(_, _, _, _, _, _, _, _), x, vs) --> call(clos, vs, x)
   where
     str-starts-with(x, "apply") == true.
+    
 
-
-
-
-
-  
   resolve-and-call-qual(recv, x, vs) --> call(clos, vs, x)
   where
     recv =!=> ClosV(_,_,_,_,_,_,_,_);
     lookup-local-method(recv, x) --> clos;
     disambiguate-closure(clos, x) --> _.
 
-  S |- call(ClosV(S', _, _, _, _, public, _, _), _, name) :: H --> DoneV()
+  call(clos@ClosV(S, O, params, code, env, _, _, R), vs, name) --> v
   where
-    check-visibility(public, S', name) --> false;
-    halt-error("Requested confidential method '" ++ name ++
-      "' of object: " ++ int2string(S') ++ " from outside (: " ++ int2string(S) ++
-      "), Heap: ", str(H : AST)) --> _.
-
-  call(ClosV(S, O, params, code, env, public, _, No-Return()), vs, name) --> v
-  where
-    check-visibility(public, S, name) --> true;
+    ensure-access(clos, S, name) --> _;
     add-locals(params, vs) :: L env --> _ :: L1;
-    S, O |- code :: L1 --> v.
-
-  call(ClosV(S, O, params, code, env, public, _, R@Return-To(_)), vs, name) --> v
-  where
-    check-visibility(public, S, name) --> true;
-    add-locals(params, vs) :: L env --> _ :: L1;
-    R, S, O |- handle-return(code, R) :: L1 --> v.
+    S, O |- handle-return(code, R) :: L1 --> v.
 
 /* ========== local variables ============= */
 signature
