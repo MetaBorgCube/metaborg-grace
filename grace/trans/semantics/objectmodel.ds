@@ -47,11 +47,12 @@ signature
   
 rules
 
-  S, P Exec() |- ObjectL(inherit, uses, code) :: L --> S'
+  S, P Exec() |- ObjectL(inherit, uses, code) --> S'
   where
     new-object(S) --> S';
-    S S', O S, P Flatten(), Src Inherit() |- inherit --> FlatObject(closures-inherited);
-    S S', O S, P Flatten(), Src Trait() |- uses --> FlatObject(closures-used);
+    S S', O S, P Flatten() |- inherit --> FlatObject(closures-inherited);
+    S S', O S, P Flatten() |- uses --> FlatObject(closures-used);
+    snapshot-locals() --> L;
     closures-inherited ++ closures-used ++ [Closure(S, code, Bottom(), L)] => closures;
     
     read(S') --> Obj(a,_,c,d);
@@ -69,7 +70,7 @@ rules
     
   get-scopes([]) --> [].
 
-  get-scopes([Closure(addr,_,_,_) | cs]) --> [addr | get-scopes(cs)].
+  get-scopes([Closure(addr, _, _, _) | cs]) --> [addr | get-scopes(cs)].
 
 /* ========== INIT METHODS =========== */
 
@@ -120,8 +121,7 @@ rules
   [Import(name, ID(x), anno) | cs] : Code -member-> cs'
   where
     add-slot(x) --> i;
-    get-import-object(name) --> iAddr;
-    write-slot(i, RefV(iAddr)) --> _;
+    write-slot(i, get-import-object(name)) --> _;
     install-method(field-getter(x, i, is-readable(anno))) --> _;
     cs -member-> cs'.
   

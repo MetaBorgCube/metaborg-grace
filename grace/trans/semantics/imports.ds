@@ -20,7 +20,7 @@ signature
   
   arrows
     get-dialect-object(List(Statement)) --> Addr
-    get-import-object(String) --> Addr
+    get-import-object(String) --> V
     parse-file(String) --> AST
     
   native operators
@@ -60,7 +60,7 @@ rules
   where
     get-dialect-object([Expression(ObjectL(NoInherit(),[] : List(Use),[Dialect("standardGrace")]))]) --> addr.
 
-  get-import-object(name) :: I --> objectAddr :: I'
+  get-import-object(name) :: I --> RefV(objectAddr) :: I'
   where
     case I[name?] of {
       true =>
