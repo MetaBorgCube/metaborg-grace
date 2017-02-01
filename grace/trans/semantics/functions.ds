@@ -8,6 +8,8 @@ imports
   trans/semantics/types
   trans/semantics/booleans
   trans/semantics/visibility
+  trans/semantics/controlflow
+  trans/semantics/functions-errorchecking
   
 signature
   sorts
@@ -39,55 +41,85 @@ signature
 
 rules
 
-  MCallL(ID("print(_)"), [e]) --> nativePrint(v)
-  where
-    e --> v.
-
-  MCallL(ID(x), vs) --> resolve-and-call-impl(x, vs)
-  where
-    x != "while(_)do(_)"; // TODO way to solve this more elegantly
-    x != "print(_)".
-  
-  P Exec() |- MCallRecvL(v, ID(x), vs) --> resolve-and-call-qual(v, x, vs).
 
   MQCallOuter(e) --> outer(S)
   where
     e --> RefV(S).
 
-//  BlockL(params, _, code) --> method-closure(MethodL(ID("lambda"),
-//    [], Annotations([Public()]), params, [], no-type(), code)).
+  MCallL(ID(x), es) --> v
+  where
+    case x of {
+      "print(_)" =>
+        es => [e];
+        nativePrint(e) => v
+        
+      "while(_)do(_)" =>
+        es => [e1, e2];
+        while-loop(e1, e2) --> v
+      
+      otherwise =>
+        resolve-and-call-impl(x, es) --> v
+    }.
+
+  P Exec() |- MCallRecvL(e, ID(x), es) --> v
+  where
+    e --> recv;
+    case recv of {
+      BoolV(_) =>
+        bool-call(recv, x, es) --> v
+      NumV(_) =>
+        num-call(recv, x, es) --> v
+      otherwise =>
+        resolve-and-call-qual(recv, x, es) --> v  
+    }.
+
+  BlockL(params, _, code) --> block-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
+
+  Return(e) --> do-return(e).
+
+signature // function return handling
+  arrows
+    do-return(V) --> V
+    handle-return(Code, Return-Marker) --> V
+  
+rules
+
+  R Return-To(r-mark) |- do-return(v) :: EX Ok() --> ??? :: EX Rex(r-mark, v).
+  
+  handle-return(code, Return-To(r-mark)) :: EX Ok () --> v :: EX
+  where
+    code :: EX Ok() --> vcode :: EX1;
+    case EX1 of {
+      Rex(r-mark', vret) =>
+        case eqI(r-mark', r-mark) of {
+          true =>
+            vret => v;
+            Ok() => EX
+          otherwise =>
+            vcode => v;
+            EX1 => EX
+        }
+      otherwise =>
+        EX1 => EX;
+        vcode => v
+    }.
 
 rules /* closure construction */
 
-  Src src |- method-closure(MethodL(ID(name), _, ann, params, _, _, code)) :: L -->
-    ClosV(S, O, params, code, L', public, src, Return-To(r-mark)) :: L
+  Src src |- method-closure(MethodL(_, _, ann, params, _, _, code)) :: L -->
+    ClosV(S, O, params, code, L', public, src, Return-To(fresh)) :: L
   where
     current-self() --> S;
     current-outer() --> O;
     alloc-locals(code) :: L --> _ :: L L';
-    fresh => r-mark;
-    log("constructing method: '" ++ name ++ "', L: " ++ str(L:AST) ++ ", L': " ++ str(L':AST)) --> _;
     is-public(ann) --> public.
 
-  R Return-To(r-mark) |- Return(e) :: EX Ok() --> ??? :: EX
-  where
-    e :: EX Ok() --> v :: EX_r;
-    case EX_r of {
-      Ok() =>
-        Rex(r-mark, v) => EX;
-        log("Returning to: " ++ int2string(r-mark)) --> _
-      otherwise =>
-        EX_r => EX
-    }.
-
-  BlockL(params, _, code) --> block-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
 
   block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L', true, Bottom(), No-Return()) :: L
   where
     current-self() --> S;
     current-outer() --> O;
-    alloc-locals(code) :: L --> _ :: L L';
-    log("Closing block over No-Return()") --> _.
+    alloc-locals(code) :: L --> _ :: L L'.
   
 
 /* =========== call resolution and dispatch =========== */
@@ -95,52 +127,29 @@ rules /* closure construction */
 signature
   arrows
     resolve-and-call-impl(String, List(V)) --> V
-    resolve-and-call-local(String, List(V)) --> V
     resolve-and-call-qual(V, String, List(V)) --> V
-    check-method-found(Bool, String) --> U
-    check-method-found(Bool, Bool, String, V) --> U
     call(V, List(V), String) --> V
     resolve-and-call(V, String, List(V)) --> V
 
+
+
+    resolve-and-call-local(String, List(V)) --> V
+    
 rules
   
-  S |- resolve-and-call-impl(x, vs) --> v
+  resolve-and-call-impl(x, vs) --> resolve-and-call-local(x, vs)
   where
-    is-local(x) --> is-local;
-    case is-local of {
-      true =>
-        resolve-and-call-local(x, vs) --> v
-      false =>
-        log("is '" ++ x ++ "' a member of: '" ++ int2string(S) ++ "'?") --> _;
-        is-member(x) --> is-member;
-        case is-member of {
-          true =>
-            log("is-member true, fetching method from self") --> _;
-            lookup-method-direct(current-self(), x) --> (clos, found-self);
-            lookup-method(current-outer(), x) --> (_, found-outer);
-            check-method-found(found-self, found-outer, x, clos) --> _
-          false =>
-            log("is-member false, fetching method from outer") --> _;
-            lookup-method(current-outer(), x) --> (clos, f);
-            check-method-found(f, x) --> _
-        };
-        call(clos, vs, x) --> v
-    }.
-
-  check-method-found(true, true, x, clos) --> U()
-  where
-    clos => ClosV(_,_,_,_,_,_,_,src);
-    src != Bottom().
-//    halt-error("Method '" ++ x ++ "' is defined both as an inherited/used" ++
-//      "field and in an enclosing scope.", "") --> _.
- 
-  check-method-found(s, _, x, _) --> check-method-found(s, x).
+    is-local(x) --> true.
   
-  check-method-found(true, _) --> U().
- 
-  check-method-found(false, x) --> U()
+  
+  resolve-and-call-impl(x, vs) --> call(clos, vs, x)
   where
-    halt-error("No such method: ", x) --> _.
+    is-local(x) --> false;
+    lookup-local-method(current-self(), x) --> local-clos;
+    lookup-outer-method(current-outer(), x) --> outer-clos;
+    disambiguate-closure(local-clos, outer-clos, x) --> clos.
+
+
 
   resolve-and-call-local(x, [v]) --> DoneV()
   where
@@ -150,16 +159,23 @@ rules
   
   resolve-and-call-local(x, []) --> read-local(x).
 
+
+
+
   resolve-and-call-qual(clos@ClosV(_, _, _, _, _, _, _, _), x, vs) --> call(clos, vs, x)
   where
     str-starts-with(x, "apply") == true.
+
+
+
+
+
   
   resolve-and-call-qual(recv, x, vs) --> call(clos, vs, x)
   where
     recv =!=> ClosV(_,_,_,_,_,_,_,_);
-    log("resolve-and-call-qual, not a ClosV!") --> _;
-    lookup-method-direct(recv, x) --> (clos, f);
-    check-method-found(f, x) --> _.
+    lookup-local-method(recv, x) --> clos;
+    disambiguate-closure(clos, x) --> _.
 
   S |- call(ClosV(S', _, _, _, _, public, _, _), _, name) :: H --> DoneV()
   where
@@ -171,34 +187,15 @@ rules
   call(ClosV(S, O, params, code, env, public, _, No-Return()), vs, name) --> v
   where
     check-visibility(public, S, name) --> true;
-    log("Call to block closure") --> _;
     add-locals(params, vs) :: L env --> _ :: L1;
     S, O |- code :: L1 --> v.
 
-  call(ClosV(S, O, params, code, env, public, _, R@Return-To(r-mark)), vs, name) :: EX Ok() --> v :: EX
+  call(ClosV(S, O, params, code, env, public, _, R@Return-To(_)), vs, name) --> v
   where
     check-visibility(public, S, name) --> true;
-    log("Call to method closure with return to " ++ int2string(r-mark)) --> _;
     add-locals(params, vs) :: L env --> _ :: L1;
-    R, S, O |- code :: L1, EX Ok() --> v_call :: EX_call;
-    case EX_call of {
-      Rex(r-mark', v_ret) =>
-        case eqI(r-mark', r-mark) of {
-          true =>
-            log("Handling matching return (" ++ int2string(r-mark) ++ ")") --> _;
-            v_ret => v;
-            Ok() => EX
-          otherwise =>
-            log("Ignoring non-matching return status") --> _;
-            v_call => v;
-            EX_call => EX
-        }
-      otherwise =>
-        log("Ignoring non-return status") --> _;
-        v_call => v;
-        EX_call => EX
-    }.
-    
+    R, S, O |- handle-return(code, R) :: L1 --> v.
+
 /* ========== local variables ============= */
 signature
   arrows
@@ -227,27 +224,48 @@ rules
 signature
   arrows
     add-local(Identifier, V) --> U
+    
     check-add-local(String) --> U
+    
     error-add-local(Bool, Bool, Bool, String) --> U
+    
     update-local(Identifier, V) --> U
+    
+    
     is-local(String) --> Bool
     read-local(String) --> V
     add-locals(List(Identifier), List(V)) --> U
+
+  
+    TEMP-error-add-local(V, V, String) --> U
 
 rules
 
   add-local(ID(x), v) :: L --> U() :: L {x |--> addr, L}
   where
-    log("adding local: '" ++ x ++ "'.") --> _;
     check-add-local(x) --> _;
     v-allocate(v) --> addr.
 
   check-add-local(x) --> U()
   where
-    lookup-method-direct(current-self(), x) --> (_, self);
-    lookup-method(current-outer(), x) --> (_, outer);
-    is-local(x) --> local;
-    error-add-local(self,outer,local,x) --> _.
+    lookup-local-method(current-self(), x) --> local-clos;
+    lookup-outer-method(current-outer(), x) --> outer-clos;
+    TEMP-error-add-local(local-clos, outer-clos, x) --> _.
+
+  TEMP-error-add-local(v1, v2, x) --> error-add-local(self, outer, is-local(x), x)
+  where
+    case v1 of {
+      ClosV(_, _, _, _, _, _, _, _) =>
+        true => self
+      otherwise =>
+        false => self
+    };
+    case v2 of {
+      ClosV(_, _, _, _, _, _, _, _) =>
+        true => outer
+      otherwise =>
+        false => outer
+    }.
 
   error-add-local(false,false,false, _) --> U().
 
@@ -262,6 +280,9 @@ rules
     case local of {
       true => halt-error("Local '" ++ x ++ "' may not redefine local method.", "") --> _
     }.
+
+
+
 
   add-local(WildCard(), _) --> U().
 

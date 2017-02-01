@@ -319,9 +319,8 @@ signature
     
     closure-contains-method(Closure, Identifier) --> Bool
     
-    lookup-method-direct(V, String) --> (V * Bool)
-    lookup-method(V, String) --> (V * Bool)
-    object-exists(Addr) --> Bool
+    lookup-local-method(V, String) --> V
+    lookup-outer-method(V, String) --> V
     
     current-self() --> V
     current-outer() --> V
@@ -495,48 +494,35 @@ rules
   where
     read(S) --> Obj(_,_,_, methods).
 
-  lookup-method-direct(S', x) --> (v, b) // basically lookup in self
+  // Lookup in self
+  lookup-local-method(S', x) --> v
   where
-//    S == S';
-    log("lookup-method: '" ++ x ++ "', S == S'") --> _;
     read(S') --> Obj(_, _, _, methods);
     case methods[x?] of {
       true =>
-        log("found method '" ++ x ++ "' in self: " ++ str(methods:AST)) --> _;
-        methods[x] => v; true => b
+        methods[x] => v
       false =>
-        log("method '" ++ x ++ "' not found in self: " ++ str(methods:AST)) --> _;
-        DoneV() => v; false => b
+        DoneV() => v
     }.
 
-  S |- lookup-method(S', x) --> (v, b) // lookup in outers
+  // Lookup in outers
+  lookup-outer-method(S', x) --> v
   where
-//    S != S';
-    log("lookup-method: " ++ x ++ ", S != S' S: " ++ str(S) ++ " O': " ++
-      str(S') ) --> _;
-    read(S) --> self;
-    log("initial self: " ++ str(self)) --> _;
     read(S') --> Obj(O', _, _, methods);
     case methods[x?] of {
       true =>
-        log("found method '" ++ x ++ "' in outer: " ++ str(methods:AST)) --> _;
-        methods[x] => v;
-        true => b
+        methods[x] => v
       false =>
-        object-exists(O') --> outer-exists;
+        is-stored(O') --> outer-exists;
         case outer-exists of {
           true =>
-            log("recursing to outer: '" ++ int2string(O':Int) ++
-              "' in search of '" ++ x ++ "'") --> _;
-            lookup-method(O', x) --> (v, b) // look in outer
-          otherwise => DoneV() => v; false => b
+            lookup-outer-method(O', x) --> v
+          otherwise =>
+            DoneV() => v
         }
     }.
 
-  /*
-   * Halts with error if addr is not an existing object on the heap.
-   */ 
-  object-exists(addr) :: H --> H[addr?].
+
 
 signature
   arrows

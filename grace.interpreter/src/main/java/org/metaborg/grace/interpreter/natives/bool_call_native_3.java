@@ -8,27 +8,27 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class bool_call_3 extends TermBuild {
+public class bool_call_native_3 extends TermBuild {
 
-	@Child
-	protected TermBuild leftNode;
 	@Child
 	protected TermBuild opNode;
 	@Child
+	protected TermBuild leftNode;
+	@Child
 	protected TermBuild rightNode;
 
-	public bool_call_3(SourceSection source, TermBuild l, TermBuild op, TermBuild r) {
+	public bool_call_native_3(SourceSection source, TermBuild op, TermBuild l, TermBuild r) {
 		super(source);
-		this.leftNode = l;
 		this.opNode = op;
+		this.leftNode = l;
 		this.rightNode = r;
 	}
 
 	@Override
 	public IVTerm executeGeneric(VirtualFrame frame) {
+		final String op = TypesGen.asString(opNode.executeGeneric(frame));
 		final BoolV_1_Term left = TypesGen.asBoolV_1_Term(leftNode.executeGeneric(frame));
 		final BoolV_1_Term right = TypesGen.asBoolV_1_Term(rightNode.executeGeneric(frame));
-		final String op = TypesGen.asString(opNode.executeGeneric(frame));
 		switch (op) {
 		case "||(_)":
 			return doOr(left, right);
@@ -59,8 +59,8 @@ public class bool_call_3 extends TermBuild {
 		return new BoolV_1_Term(left.get_1() != right.get_1());
 	}
 	
-	public static TermBuild create(SourceSection source, TermBuild left, TermBuild op, TermBuild right) {
-		return new bool_call_3(source, left, op, right);
+	public static TermBuild create(SourceSection source, TermBuild op, TermBuild left, TermBuild right) {
+		return new bool_call_native_3(source, op, left, right);
 	}
 
 }

@@ -1,0 +1,30 @@
+module trans/semantics/controlflow
+
+imports
+  src-gen/ds-signatures/grace-lowered-sig
+  trans/semantics/expressions
+  
+signature
+  arrows
+    while-loop(Exp, Exp) --> V
+    while-loop-evaluated(V, V) --> V
+  
+rules
+  
+  while-loop(e1, e2) --> v
+  where
+    e1 --> v1;
+    e2 --> v2;
+    while-loop-evaluated(v1, v2) --> v.
+  
+  
+  w@while-loop-evaluated(v1, v2) --> DoneV()
+  where
+    call(v1, [], "apply") --> BoolV(cond);
+    case cond of {
+      true =>
+        call(v2, [], "apply") --> _;
+        w --> _
+      otherwise =>
+    }.
+  
