@@ -238,45 +238,6 @@ rules
   
   ensure-valid-local(_) --> U().
   
-//
-//  check-add-local(x) --> U()
-//  where
-//    lookup-local-method(current-self(), x) --> local-clos;
-//    lookup-outer-method(current-outer(), x) --> outer-clos;
-//    TEMP-error-add-local(local-clos, outer-clos, x) --> _.
-//
-//  TEMP-error-add-local(v1, v2, x) --> error-add-local(self, outer, is-local(x), x)
-//  where
-//    case v1 of {
-//      ClosV(_, _, _, _, _, _, _, _) =>
-//        true => self
-//      otherwise =>
-//        false => self
-//    };
-//    case v2 of {
-//      ClosV(_, _, _, _, _, _, _, _) =>
-//        true => outer
-//      otherwise =>
-//        false => outer
-//    }.
-//
-//  error-add-local(false,false,false, _) --> U().
-//
-//  error-add-local(self,outer,local, x) --> U()
-//  where
-//    case self of {
-//      true => halt-error("Local '" ++ x ++ "' may not redefine method from self.", "") --> _
-//    };
-//    case outer of {
-//      true => halt-error("Local '" ++ x ++ "' may not shadow method from an enclosing scope.", "") --> _
-//    };
-//    case local of {
-//      true => halt-error("Local '" ++ x ++ "' may not redefine local method.", "") --> _
-//    }.
-
-
-
-
   add-local(WildCard(), _) --> U().
 
   update-local(ID(x), v) :: L --> U() :: L
