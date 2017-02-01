@@ -391,7 +391,7 @@ rules
 
   check-method-params([ID(p) | ps]) --> check-method-params(ps)
   where
-    check-add-local(p) --> _.
+    ensure-valid-local(p) --> _.
   
   S |- current-method-names() --> allkeys(methods)
   where
