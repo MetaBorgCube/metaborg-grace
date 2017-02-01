@@ -42,9 +42,11 @@ signature
     update-local(Identifier, V) --> U
     is-local(String) --> Bool
     read-local(String) --> V
+    snapshot-locals() --> Env
     
     ensure-valid-local(String) --> U
-
+    
+    
 rules
 
   add-local(ID(x), v) :: L --> U() :: L {x |--> addr, L}
@@ -100,6 +102,8 @@ rules
   where
     log("adding locals") --> _;
     add-local(x, v) --> _.
+
+  snapshot-locals() :: L --> L :: L.
 
 /* ============ variable heap operations ======== */
 

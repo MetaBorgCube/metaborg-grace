@@ -53,8 +53,10 @@ rules
     S S', O S, P Flatten(), Src Inherit() |- inherit --> FlatObject(closures-inherited);
     S S', O S, P Flatten(), Src Trait() |- uses --> FlatObject(closures-used);
     closures-inherited ++ closures-used ++ [Closure(S, code, Bottom(), L)] => closures;
+    
     read(S') --> Obj(a,_,c,d);
     update(S', Obj(a, get-scopes(closures), c, d)) --> _;
+    
     S' |- install-members(closures) --> closures';
     S' |- init-object(closures') --> U().
 
@@ -93,9 +95,9 @@ rules
   where
     clos -member-> clos'.
   
-  Closure(O, code, src, env) -member-> Closure(O, current-method-names(), code', src, env)
+  Closure(O, code, src, env) -member-> Closure(O, code', src, env)
   where
-    O, Src src |- code :: L env -member-> code'. // set locals from closure?
+    O, Src src |- code :: L env -member-> code'.
     
   [] : Code -member-> [].
   
@@ -158,7 +160,7 @@ rules
   where
     clos -obji-> _.
   
-  Closure(O, _, code, _, L) -obji-> U()
+  Closure(O, code, _, L) -obji-> U()
   where
     O |- code :: L -obji-> _.
     
@@ -216,7 +218,6 @@ signature
 
   constructors
     Closure: Addr * Code * Source * Env -> Closure
-    Closure: Addr * List(String) * Code * Source * Env -> Closure
     FlatObject: List(Closure) -> V
 
   arrows
@@ -225,11 +226,12 @@ signature
 
 rules
 
-  S, P Flatten(), Src src |- ObjectL(inherit, uses, code) :: L -->
-    FlatObject(closures-inh ++ closures-uses ++ [Closure(S, code, src, L)]) :: L
+  S, P Flatten(), Src src |- ObjectL(inherit, uses, code) -->
+    FlatObject(inherited ++ used ++ [Closure(S, code, src, L)])
   where
-    O S, P Flatten(), Src Inherit() |- inherit :: L --> FlatObject(closures-inh);
-    O S, P Flatten(), Src Trait() |- uses :: L --> FlatObject(closures-uses).
+    snapshot-locals() --> L;
+    O S, P Flatten() |- inherit --> FlatObject(inherited);
+    O S, P Flatten() |- uses --> FlatObject(used).
 
   P Flatten() |- MCallRecvL(e, ID(x), es) --> v
   where
@@ -241,19 +243,17 @@ rules
   
   InheritL(e, as, ex) --> FlatObject(remove-excludes(make-aliases(ls, as), ex))
   where
-    e --> FlatObject(ls).
+    Src Inherit() |- e --> FlatObject(ls).
 
   [] : List(Use) --> FlatObject([]).
 
-  [UseL(e,_,_) | uses] : List(Use) --> FlatObject(closures ++ closures')
+  [UseL(e, _, _) | uses] : List(Use) --> FlatObject(closures ++ closures')
   where
-    e --> FlatObject(closures);
-    uses --> FlatObject(closures').
+    Src Trait() |- e --> FlatObject(closures);
+    Src Trait() |- uses --> FlatObject(closures').
 
 /* ======== OBJECT META-FUNCTIONS ========= */
-
 signature
- 
   sorts
     StatementResult
     
@@ -342,6 +342,9 @@ rules
     read(S) --> Obj(O, outers, slots, methods);
     check-add-method(x, v) --> _;
     update(S, Obj(O, outers, slots, {x |--> v, methods})) --> _.
+
+
+
 
   check-add-method(_, ClosV(_,_,ps,_,_,_,_,_)) --> U()
   where
