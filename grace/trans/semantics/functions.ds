@@ -73,38 +73,53 @@ rules
         resolve-and-call-qual(recv, x, es) --> v  
     }.
 
-  R Return-To(r-mark) |- Return(e) :: EX Ok() --> ??? :: EX
+  BlockL(params, _, code) --> block-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
+
+  Return(e) --> do-return(e).
+
+signature // function return handling
+  arrows
+    do-return(V) --> V
+    handle-return(Code, Return-Marker) --> V
+  
+rules
+
+  R Return-To(r-mark) |- do-return(v) :: EX Ok() --> ??? :: EX Rex(r-mark, v).
+  
+  handle-return(code, Return-To(r-mark)) :: EX Ok () --> v :: EX
   where
-    e :: EX Ok() --> v :: EX_r;
-    case EX_r of {
-      Ok() =>
-        Rex(r-mark, v) => EX;
-        log("Returning to: " ++ int2string(r-mark)) --> _
+    code :: EX Ok() --> vcode :: EX1;
+    case EX1 of {
+      Rex(r-mark', vret) =>
+        case eqI(r-mark', r-mark) of {
+          true =>
+            vret => v;
+            Ok() => EX
+          otherwise =>
+            vcode => v;
+            EX1 => EX
+        }
       otherwise =>
-        EX_r => EX
+        EX1 => EX;
+        vcode => v
     }.
 
 rules /* closure construction */
 
-  Src src |- method-closure(MethodL(ID(name), _, ann, params, _, _, code)) :: L -->
-    ClosV(S, O, params, code, L', public, src, Return-To(r-mark)) :: L
+  Src src |- method-closure(MethodL(_, _, ann, params, _, _, code)) :: L -->
+    ClosV(S, O, params, code, L', public, src, Return-To(fresh)) :: L
   where
     current-self() --> S;
     current-outer() --> O;
     alloc-locals(code) :: L --> _ :: L L';
-    fresh => r-mark;
-    log("constructing method: '" ++ name ++ "', L: " ++ str(L:AST) ++ ", L': " ++ str(L':AST)) --> _;
     is-public(ann) --> public.
 
-
-  BlockL(params, _, code) --> block-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
 
   block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L', true, Bottom(), No-Return()) :: L
   where
     current-self() --> S;
     current-outer() --> O;
-    alloc-locals(code) :: L --> _ :: L L';
-    log("Closing block over No-Return()") --> _.
+    alloc-locals(code) :: L --> _ :: L L'.
   
 
 /* =========== call resolution and dispatch =========== */
@@ -172,34 +187,15 @@ rules
   call(ClosV(S, O, params, code, env, public, _, No-Return()), vs, name) --> v
   where
     check-visibility(public, S, name) --> true;
-    log("Call to block closure") --> _;
     add-locals(params, vs) :: L env --> _ :: L1;
     S, O |- code :: L1 --> v.
 
-  call(ClosV(S, O, params, code, env, public, _, R@Return-To(r-mark)), vs, name) :: EX Ok() --> v :: EX
+  call(ClosV(S, O, params, code, env, public, _, R@Return-To(_)), vs, name) --> v
   where
     check-visibility(public, S, name) --> true;
-    log("Call to method closure with return to " ++ int2string(r-mark)) --> _;
     add-locals(params, vs) :: L env --> _ :: L1;
-    R, S, O |- code :: L1, EX Ok() --> v_call :: EX_call;
-    case EX_call of {
-      Rex(r-mark', v_ret) =>
-        case eqI(r-mark', r-mark) of {
-          true =>
-            log("Handling matching return (" ++ int2string(r-mark) ++ ")") --> _;
-            v_ret => v;
-            Ok() => EX
-          otherwise =>
-            log("Ignoring non-matching return status") --> _;
-            v_call => v;
-            EX_call => EX
-        }
-      otherwise =>
-        log("Ignoring non-return status") --> _;
-        v_call => v;
-        EX_call => EX
-    }.
-    
+    R, S, O |- handle-return(code, R) :: L1 --> v.
+
 /* ========== local variables ============= */
 signature
   arrows
