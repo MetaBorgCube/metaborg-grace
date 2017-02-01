@@ -19,8 +19,10 @@ signature
   constructors
     //     self   outer  params             body   env   decl. fields   public
     ClosV: Addr * Addr * List(Identifier) * Code * Env * Bool * Source * Return-Marker -> V
+    
     No-Return: Return-Marker
     Return-To: Int -> Return-Marker
+    
     Rex: Int * V -> Exn
 
   components
@@ -58,7 +60,7 @@ rules
         while-loop(e1, e2) --> v
       
       otherwise =>
-        resolve-and-call-impl(x, es) --> v
+        call-implicit(x, es) --> v
     }.
 
   P Exec() |- MCallRecvL(e, ID(x), es) --> v
@@ -72,7 +74,7 @@ rules
       StringV(_)=>
         str-call(recv, x, es) --> v
       otherwise =>
-        resolve-and-call-qual(recv, x, es) --> v  
+        call-qualified(recv, x, es) --> v
     }.
 
   BlockL(params, _, code) --> block-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
@@ -132,8 +134,8 @@ rules /* closure construction */
 
 signature
   arrows
-    resolve-and-call-impl(String, List(V)) --> V
-    resolve-and-call-qual(V, String, List(V)) --> V
+    call-implicit(String, List(V)) --> V
+    call-qualified(V, String, List(V)) --> V
     
     call(V, List(V), String) --> V
     
@@ -142,18 +144,18 @@ signature
 
 
 
-    resolve-and-call-local(String, List(V)) --> V
+    access-local(String, List(V)) --> V
     
 rules
 
 
 
   
-  resolve-and-call-impl(x, vs) --> resolve-and-call-local(x, vs)
+  call-implicit(x, vs) --> access-local(x, vs)
   where
     is-local(x) --> true.
   
-  resolve-and-call-impl(x, vs) --> call(clos, vs, x)
+  call-implicit(x, vs) --> call(clos, vs, x)
   where
     is-local(x) --> false;
     lookup-local-method(current-self(), x) --> local-clos;
@@ -162,27 +164,28 @@ rules
 
 
 
-  resolve-and-call-local(x, [v]) --> DoneV()
+  access-local(x, [v]) --> DoneV()
   where
-    ":=(_)" => bind_suffix;
-    str-ends-with(x, bind_suffix) --> true;
-    update-local(ID(str-rm-suffix(x, bind_suffix)), v) --> _.
+    str-ends-with(x, ":=(_)") --> true;
+    update-local(ID(str-rm-suffix(x, ":=(_)")), v) --> _.
   
-  resolve-and-call-local(x, []) --> read-local(x).
+  access-local(x, []) --> read-local(x).
 
 
 
 
-  resolve-and-call-qual(clos@ClosV(_, _, _, _, _, _, _, _), x, vs) --> call(clos, vs, x)
+  call-qualified(clos@ClosV(_, _, _, _, _, _, _, _), x, vs) --> call(clos, vs, x)
   where
     str-starts-with(x, "apply") == true.
     
 
-  resolve-and-call-qual(recv, x, vs) --> call(clos, vs, x)
+  call-qualified(recv, x, vs) --> call(clos, vs, x)
   where
     recv =!=> ClosV(_,_,_,_,_,_,_,_);
     lookup-local-method(recv, x) --> clos;
     disambiguate-closure(clos, x) --> _.
+
+
 
   call(clos@ClosV(S, O, params, code, env, _, _, R), vs, name) --> v
   where

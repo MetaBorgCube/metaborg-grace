@@ -265,7 +265,7 @@ rules
     log("method call recv during flatten(), L: " ++ str(L:AST)) --> _;
     P Exec() |- e --> recv;
     P Exec() |- es --> vs;
-    P Flatten() |- resolve-and-call-qual(recv, x, vs) --> v.
+    P Flatten() |- call-qualified(recv, x, vs) --> v.
 
   NoInherit() --> FlatObject([]).
   
