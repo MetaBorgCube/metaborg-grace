@@ -13,10 +13,6 @@ imports
   trans/semantics/expressions
   
 signature
-  sorts
-    Addr
-    Return-Marker
-  
   arrows
     method-closure(Declaration) --> V
     block-closure(Declaration) --> V

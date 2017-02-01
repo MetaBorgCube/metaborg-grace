@@ -7,7 +7,6 @@ imports
   
 signature
   sorts
-    Addr
     Return-Marker
   
   constructors
