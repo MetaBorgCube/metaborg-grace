@@ -139,17 +139,9 @@ signature
     
     call(V, List(V), String) --> V
     
-    
-    resolve-and-call(V, String, List(V)) --> V
-
-
-
     access-local(String, List(V)) --> V
     
 rules
-
-
-
   
   call-implicit(x, vs) --> access-local(x, vs)
   where
@@ -161,8 +153,6 @@ rules
     lookup-local-method(current-self(), x) --> local-clos;
     lookup-outer-method(current-outer(), x) --> outer-clos;
     disambiguate-closure(local-clos, outer-clos, x) --> clos.
-
-
 
   access-local(x, [v]) --> DoneV()
   where
