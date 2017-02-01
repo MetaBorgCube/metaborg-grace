@@ -49,28 +49,14 @@ rules
 
   S, P Exec() |- ObjectL(inherit, uses, code) :: L --> S'
   where
-    log("starting object construction, L: " ++ str(L:AST)) --> _;
     new-object(S) --> S';
     S S', O S, P Flatten(), Src Inherit() |- inherit --> FlatObject(closures-inherited);
-    log("after inherit flatten") --> _;
     S S', O S, P Flatten(), Src Trait() |- uses --> FlatObject(closures-used);
-    log("after use flatten") --> _;
     closures-inherited ++ closures-used ++ [Closure(S, code, Bottom(), L)] => closures;
-
-    log("pre-install closures from object construction: " ++
-      str(closures : AST)) --> _;
     read(S') --> Obj(a,_,c,d);
-    log("after reading object") --> _;
-    
     update(S', Obj(a, get-scopes(closures), c, d)) --> _;
-    
-    log("after updating object") --> _;
     S' |- install-members(closures) --> closures';
-    
-    log("post-install closures' from object construction: " ++
-      str(closures' : AST)) --> _;
-    S' |- init-object(closures') --> U();
-    log-object-creation(S') --> _.
+    S' |- init-object(closures') --> U().
 
   SlotRead(i) --> read-slot(i).
   
@@ -99,56 +85,46 @@ rules
 
   install-members(closures) --> closures'
   where
-    log("installing members ...") --> _;
-    install-members-aux(closures) :: NS 0, GS {} --> closures' :: NS _, GS _;
-    log("installed members ...") --> _.
+    install-members-aux(closures) :: NS 0, GS {} --> closures' :: NS _, GS _.
 
   install-members-aux([]) --> [].
   
   install-members-aux([clos | closs]) --> [clos' | install-members-aux(closs)]
   where
-    clos :: L {} -member-> clos' :: L L;
-    log("-member-> ima " ++ str(clos) ++ " to " ++ str(clos') ++ ", L:" ++ str(L:AST)) --> _.
+    clos -member-> clos'.
   
   Closure(O, code, src, env) -member-> Closure(O, current-method-names(), code', src, env)
   where
-    log("-member-> transforming closure? env: " ++ str(env:AST)) --> _;
     O, Src src |- code :: L env -member-> code'. // set locals from closure?
     
-  [] : Code :: L -member-> []
-  where
-    log("-member-> running code ..., L: " ++ str(L:AST)) --> _.
+  [] : Code -member-> [].
   
-  [Declaration(m@MethodL(_, _, _, _, _, _, _)) | cs] : Code :: L -member-> cs'
+  [Declaration(m@MethodL(_, _, _, _, _, _, _)) | cs] : Code -member-> cs'
   where
-    log("-member-> installing method..., L: " ++ str(L:AST)) --> _;
     install-method(m) --> _;
     cs -member-> cs'.
   
-  [Declaration(VariableL(ID(x), _, ann, e)) | cs] : Code :: L -member-> [SlotWrite(i, e) | cs']
+  [Declaration(VariableL(ID(x), _, ann, e)) | cs] : Code -member-> [SlotWrite(i, e) | cs']
   where
-    log("-member-> installing var..., L: " ++ str(L:AST)) --> _;
     add-slot(x) --> i;
     install-method(field-getter(x, i, is-readable(ann))) --> _;
     install-method(field-setter(x, i, is-writable(ann))) --> _;
     cs -member-> cs'.
 
-  [Declaration(VariableL(WildCard(), _, _, e)) | cs] : Code :: L -member-> [Expression(e) | cs']
+  [Declaration(VariableL(WildCard(), _, _, e)) | cs] : Code -member-> [Expression(e) | cs']
   where
-    log("-member-> installing var wldcrd..., L: " ++ str(L:AST)) --> _;
     cs -member-> cs'.
 
-  [Import(name, ID(x), ann) | cs] : Code -member-> cs'
+  [Import(name, ID(x), anno) | cs] : Code -member-> cs'
   where
     add-slot(x) --> i;
     get-import-object(name) --> iAddr;
     write-slot(i, RefV(iAddr)) --> _;
-    install-method(field-getter(x, i, is-readable(ann))) --> _;
+    install-method(field-getter(x, i, is-readable(anno))) --> _;
     cs -member-> cs'.
   
-  [Declaration(ConstantL(ID(x), _, ann, e)) | cs] : Code :: L -member-> [SlotWrite(i, e) | cs']
+  [Declaration(ConstantL(ID(x), _, ann, e)) | cs] : Code -member-> [SlotWrite(i, e) | cs']
   where
-    log("-member-> installing def..., L: " ++ str(L:AST)) --> _;
     add-slot(x) --> i;
     install-method(field-getter(x, i, is-readable(ann))) --> _;
     cs -member-> cs'.
@@ -157,9 +133,8 @@ rules
   where
     cs -member-> cs'.
   
-  [c | cs] : Code :: L -member-> [c | cs']
+  [c | cs] : Code -member-> [c | cs']
   where
-    log("-member-> code [_|_]..., L: " ++ str(L:AST)) --> _;
     cs -member-> cs'.
   
   install-method(m@MethodL(ID(name), _, _, _, _, _, _)) --> U()
@@ -251,17 +226,13 @@ signature
 rules
 
   S, P Flatten(), Src src |- ObjectL(inherit, uses, code) :: L -->
-    FlatObject(closures-inh ++ closures-uses ++ [Closure(S, code, src, L)]) :: L''
+    FlatObject(closures-inh ++ closures-uses ++ [Closure(S, code, src, L)]) :: L
   where
-    log("flattening object, current src: " ++ str(src) ++ " L: " ++ str(L:AST)) --> _;
-    O S, P Flatten(), Src Inherit() |- inherit :: L --> FlatObject(closures-inh) :: L';
-    log("done flattening inherit") --> _;
-    O S, P Flatten(), Src Trait() |- uses :: L' --> FlatObject(closures-uses) :: L'';
-    log("post flattening object, L': " ++ str(L':AST) ++ ", L'': " ++ str(L'':AST)) --> _.
+    O S, P Flatten(), Src Inherit() |- inherit :: L --> FlatObject(closures-inh);
+    O S, P Flatten(), Src Trait() |- uses :: L --> FlatObject(closures-uses).
 
-  P Flatten() |- MCallRecvL(e, ID(x), es) :: L --> v
+  P Flatten() |- MCallRecvL(e, ID(x), es) --> v
   where
-    log("method call recv during flatten(), L: " ++ str(L:AST)) --> _;
     P Exec() |- e --> recv;
     P Exec() |- es --> vs;
     P Flatten() |- call-qualified(recv, x, vs) --> v.
@@ -270,9 +241,7 @@ rules
   
   InheritL(e, as, ex) --> FlatObject(remove-excludes(make-aliases(ls, as), ex))
   where
-    log("InheritL(e,_,_), excludes: " ++ str(ex:AST)) --> _; // TODO this is where to check whether the inherit
-    e --> FlatObject(ls);                                    // expression actually returns a fresh object
-    log("InheritL(e,_,_) done, ls: " ++ str(ls:AST)) --> _.
+    e --> FlatObject(ls).
 
   [] : List(Use) --> FlatObject([]).
 
@@ -371,8 +340,6 @@ rules
   S |- add-method(x, v) --> U()
   where
     read(S) --> Obj(O, outers, slots, methods);
-    log("S: " ++ int2string(S : Int) ++ " O " ++ int2string(O : Int) ++
-      " new method: " ++ x ++ " -> " ++ str(v)) --> _;
     check-add-method(x, v) --> _;
     update(S, Obj(O, outers, slots, {x |--> v, methods})) --> _.
 
@@ -380,9 +347,7 @@ rules
   where
     check-method-params(ps) --> _.
 
-  check-add-method(_, _) --> U()
-  where
-    log("anything else?") --> _.
+  check-add-method(_, _) --> U().
 
   check-method-params([]) --> U().
 
@@ -411,15 +376,11 @@ rules
     find-closure(closures, [], fromId) --> (clos, rest);
     copy-method(clos, toId, fromId) --> clos'.
 
-  remove-excludes(closures, []) --> closures
-  where
-    log("remove-excludes: no exclusions to remove") --> _.
+  remove-excludes(closures, []) --> closures.
 
   remove-excludes(closures, exss@[ex | exs]) --> remove-excludes(closures', exs)
   where
-    log("removing excludes: closures: " ++ str(closures:AST) ++ " excludes: " ++ str(exss:AST)) --> _;
-    remove-exclude(closures, ex) --> closures';
-    log("post removing excludes: closures': " ++ str(closures:AST)) --> _.
+    remove-exclude(closures, ex) --> closures'.
 
   remove-exclude(closures, ExcludeL(id)) --> [clos' | rest]
   where
@@ -440,13 +401,10 @@ rules
     closure-contains-method(clos, id) --> res;
     res == false.
 
-  closure-contains-method(clos@Closure(_,[],_,_), _) --> false
-  where
-    log("closure-contains-method Closure(: " ++ str(clos:AST)) --> _.
+  closure-contains-method(Closure(_,[],_,_), _) --> false.
 
-  closure-contains-method(clos@Closure(_, [Declaration(MethodL(ID(mName),_,_,_,_,_,_)) | _ ],_,_), ID(name)) --> true
+  closure-contains-method(Closure(_, [Declaration(MethodL(ID(mName),_,_,_,_,_,_)) | _ ],_,_), ID(name)) --> true
   where
-    log("closure-contains-method Closure(: " ++ str(clos:AST)) --> _;
     mName == name.
 
   closure-contains-method(clos@Closure(a, [Declaration(MethodL(ID(mName),_,_,_,_,_,_)) | decs ],c,d), id@ID(name))
