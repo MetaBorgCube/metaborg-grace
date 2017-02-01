@@ -1,0 +1,83 @@
+module trans/semantics/functions/functions
+
+imports
+  src-gen/ds-signatures/grace-sig
+  trans/semantics/values
+  trans/semantics/statements
+  trans/semantics/objectmodel
+  trans/semantics/types
+  trans/semantics/booleans
+  trans/semantics/visibility
+  trans/semantics/controlflow
+  trans/semantics/functions/calls
+  trans/semantics/expressions
+  
+signature
+  sorts
+    Addr
+    Return-Marker
+  
+  arrows
+    method-closure(Declaration) --> V
+    block-closure(Declaration) --> V
+    
+  native operators
+    nativePrint: V -> V
+
+rules
+
+
+  MQCallOuter(e) --> outer(S)
+  where
+    e --> RefV(S).
+
+  MCallL(ID(x), es) --> v
+  where
+    case x of {
+      "print(_)" =>
+        es => [e];
+        nativePrint(e) => v
+        
+      "while(_)do(_)" =>
+        es => [e1, e2];
+        while-loop(e1, e2) --> v
+      
+      otherwise =>
+        call-implicit(x, es) --> v
+    }.
+
+  P Exec() |- MCallRecvL(e, ID(x), es) --> v
+  where
+    e --> recv;
+    case recv of {
+      BoolV(_) =>
+        bool-call(recv, x, es) --> v
+      NumV(_) =>
+        num-call(recv, x, es) --> v
+      StringV(_)=>
+        str-call(recv, x, es) --> v
+      otherwise =>
+        call-qualified(recv, x, es) --> v
+    }.
+
+  BlockL(params, _, code) --> block-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
+
+  Return(e) --> do-return(e).
+
+rules /* closure construction */
+
+  Src src |- method-closure(MethodL(_, _, ann, params, _, _, code)) :: L -->
+    ClosV(S, O, params, code, L', public, src, Return-To(fresh)) :: L
+  where
+    current-self() --> S;
+    current-outer() --> O;
+    alloc-locals(code) :: L --> _ :: L L';
+    is-public(ann) --> public.
+
+
+  block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L', true, Bottom(), No-Return()) :: L
+  where
+    current-self() --> S;
+    current-outer() --> O;
+    alloc-locals(code) :: L --> _ :: L L'.
+

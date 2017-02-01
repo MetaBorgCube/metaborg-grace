@@ -5,7 +5,6 @@ imports
   trans/semantics/values
   trans/semantics/statements
   trans/semantics/objectmodel
-  trans/semantics/functions
   
 signature
   sorts

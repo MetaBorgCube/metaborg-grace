@@ -7,7 +7,7 @@ imports
   trans/semantics/store
   trans/semantics/values
   trans/semantics/objectmodel
-  trans/semantics/functions
+  trans/semantics/functions/functions
   trans/semantics/expressions
   trans/semantics/statements
   trans/semantics/numbers
