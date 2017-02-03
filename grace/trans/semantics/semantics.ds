@@ -33,9 +33,7 @@ rules
 
   [] : Code --> DoneV().
 
-  [c] : Code --> c
-  where
-    c --> v.
+  [c] : Code --> c.
   
   [c | cs@[_|_]] : Code --> v
   where
