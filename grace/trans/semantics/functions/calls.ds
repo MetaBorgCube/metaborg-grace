@@ -104,7 +104,9 @@ rules
   disambiguate-closure(clos, x) --> disambiguate-closure(clos, DoneV(), x).
 
   // closure was defined in bottom and found in local
-  disambiguate-closure(clos@ClosV(_, _, _, _, _, _, Bottom(), _), _, _) --> clos.
+  disambiguate-closure(clos@ClosV(_, _, _, _, _, _, src, _), _, _) --> clos
+  where
+    src-is-base(src) --> true.
 
   // closure was only found in local
   disambiguate-closure(clos@ClosV(_, _, _, _, _, _, _, _), DoneV(), _) --> clos.
@@ -115,7 +117,7 @@ rules
   // closure found in inherited and in outer
   disambiguate-closure(ClosV(_, _, _, _, _, _, src, _), ClosV(_, _, _, _, _, _, _, _), x) --> DoneV()
   where
-    src =!=> Bottom();
+    src-is-base(src) --> false;
     halt-error("Method '" ++ x ++ "' is defined both as an inherited/used" ++
       "field and in an enclosing scope.", "") --> _.
 

@@ -62,8 +62,8 @@ rules
 
 rules /* closure construction */
 
-  Src src |- method-closure(MethodL(_, _, ann, params, _, _, code)) :: L -->
-    ClosV(S, O, params, code, L', public, src, Return-To(fresh)) :: L
+  Src |- method-closure(MethodL(_, _, ann, params, _, _, code)) :: L -->
+    ClosV(S, O, params, code, L', public, Src, Return-To(fresh)) :: L
   where
     current-self() --> S;
     current-outer() --> O;
@@ -71,7 +71,7 @@ rules /* closure construction */
     is-public(ann) --> public.
 
 
-  block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L', true, Bottom(), No-Return()) :: L
+  block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L', true, src-base(), No-Return()) :: L
   where
     current-self() --> S;
     current-outer() --> O;

@@ -27,9 +27,15 @@ rules
     get-dialect-object(code) --> s';
     S s', O S |- code --> v. // code has object decl inside so self becomes outer
 
+//  Program(code) --> v
+//  where
+//    code --> v. // code has object decl inside so self becomes outer
+
   [] : Code --> DoneV().
 
-  [c] : Code --> c.
+  [c] : Code --> c
+  where
+    c --> v.
   
   [c | cs@[_|_]] : Code --> v
   where
