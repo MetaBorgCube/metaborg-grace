@@ -195,7 +195,7 @@ rules
   where
     install-members(inherit) --> inherit';
     install-members-map(uses) --> uses';
-    O, Src |- install-code(code, aliases-map(aliases), excludes-map(excludes)) --> code'.
+    O, Src |- install-code(code, aliases-map(aliases), excludes-map(excludes)) :: L --> code' :: L _.
   
   install-members-map([]) --> [].
   
