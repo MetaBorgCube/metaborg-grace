@@ -13,10 +13,17 @@ signature
     L : Env
 
   arrows
+    alloc-params(List(Identifier)) --> U
     alloc-locals(Code) --> U
     Statement -alloc-> U
 
 rules
+  
+  alloc-params([]) --> U().
+  
+  alloc-params([id | params]) --> alloc-params(params)
+  where
+    add-local(id, UninitializedV()) --> _.
   
   alloc-locals([]) --> U().
 
@@ -39,7 +46,10 @@ signature
   arrows
     add-local(Identifier, V) --> U
     add-locals(List(Identifier), List(V)) --> U
+    
     update-local(Identifier, V) --> U
+    update-locals(List(Identifier), List(V)) --> U
+    
     is-local(String) --> Bool
     read-local(String) --> V
     snapshot-locals() --> Env
@@ -55,6 +65,8 @@ rules
     v-allocate(v) --> addr.
 
   add-local(WildCard(), _) --> U().
+
+
 
   ensure-valid-local(x) --> U()
   where
@@ -75,12 +87,21 @@ rules
   
   ensure-valid-local(_) --> U().
   
+  
+  update-locals([], []) --> U().
+  
+  update-locals([id | ids], [v | vs]) --> update-locals(ids, vs)
+  where
+    update-local(id, v) --> _.  
+  
   update-local(ID(x), v) :: L --> U() :: L
   where
-    log("updating local: '" ++ x ++ "'") --> _;
     v-update(L[x], v) --> _.
   
   update-local(WildCard(), _) --> U().
+
+
+
 
   is-local(x) :: L --> is-local :: L
   where
