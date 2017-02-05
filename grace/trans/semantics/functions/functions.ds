@@ -16,6 +16,7 @@ signature
   arrows
     method-closure(Declaration) --> V
     block-closure(Declaration) --> V
+    copy-closure(V) --> V
     
   native operators
     nativePrint: V -> V
@@ -77,3 +78,6 @@ rules /* closure construction */
     current-outer() --> O;
     alloc-locals(code) :: L --> _ :: L L'.
 
+  copy-closure(ClosV(S, O, params, code, L, _, Src, No-Return())) --> ClosV(S, O, params, code, L, false, Src, No-Return()).
+  
+  copy-closure(ClosV(S, O, params, code, L, _, Src, Return-To(_))) --> ClosV(S, O, params, code, L, false, Src, Return-To(fresh)).

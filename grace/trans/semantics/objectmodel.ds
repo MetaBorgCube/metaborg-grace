@@ -164,38 +164,48 @@ rules
 /* ========== OBJECT MEMBER INSTALLATION ===== */
 signature
   sort aliases
-    Aliases = Map(String, String)
-    Excludes = Map(String, String)
+    Aliases = List(Alias)
+    Excludes = List(Exclude)
   
   arrows
     install-members-top(V) --> V
     install-members(V) --> V
     install-members-map(List(V)) --> List(V)
     
-    install-code(Code, Aliases, Excludes) --> Code
+    install-code(Code)--> Code
     
-    install-declaration(Declaration, Aliases, Excludes) --> Code
+    install-declaration(Declaration) --> Code
     
     install-import(Statement) --> Code
     
-    install-method(Declaration, Aliases, Excludes) --> U
+    install-method(Declaration) --> U
     
-    aliases-map(List(Alias)) --> Aliases
-    excludes-map(List(Exclude)) --> Excludes
+    install-alias(String, V) --> U
+    install-aliases(String, V) --> U
+    
+    exclude-method(String) --> Bool
+    
+    install-aliases() --> U
+    exclude-methods() --> U
+    
+  components
+    Als: Aliases
+    Exs: Excludes
   
 rules
-  
+
   install-members-top(v) --> v'
   where
     install-members(v) :: NS 0, GS {} --> v'.
 
   install-members(NoObjC()) --> NoObjC().
   
-  install-members(ObjC(O, Src, L, code, inherit, uses, aliases, excludes)) --> ObjC(O, Src, L, code', inherit', uses', aliases, excludes)
+  install-members(ObjC(O, Src, L, code, inherit, uses, Als, Exs)) --> ObjC(O, Src, L, code', inherit', uses', Als, Exs)
   where
     install-members(inherit) --> inherit';
     install-members-map(uses) --> uses';
-    O, Src |- install-code(code, aliases-map(aliases), excludes-map(excludes)) :: L --> code' :: L _.
+    log("Installing code from depth: " ++ int2string(Src) ++ " aliases: " ++ str(Als : AST)) --> _;
+    O, Src |- install-code(code) :: L, Als, Exs --> code' :: L _, Als _, Exs _.
   
   install-members-map([]) --> [].
   
@@ -204,76 +214,114 @@ rules
     install-members(oc) --> oc';
     install-members-map(ocs) --> ocs'.
   
-  install-code([], _, _) --> [].
-  
-  install-code([Declaration(d) | code], aliases, excludes) --> decl-code ++ code'
+  install-code([]) --> []
   where
-    install-declaration(d, aliases, excludes) --> decl-code;
-    install-code(code, aliases, excludes) --> code'.
+    install-aliases() --> _;
+    exclude-methods() --> _.
+  
+  install-code([Declaration(d) | code]) --> decl-code ++ code'
+  where
+    install-declaration(d) --> decl-code;
+    install-code(code) --> code'.
 
-  install-code([imp@Import(_, _, _) | code], aliases, excludes) --> imp-code ++ code'
+  install-code([imp@Import(_, _, _) | code]) --> imp-code ++ code'
   where
     install-import(imp) --> imp-code;
-    install-code(code, aliases, excludes) --> code'. 
+    install-code(code) --> code'.
 
-  install-code([e | code], aliases, excludes) --> [e | code']
+  install-code([e | code]) --> [e | code']
   where
     e =!=> Declaration(_);
     e =!=> Import(_, _, _);
-    install-code(code, aliases, excludes) --> code'.
+    install-code(code) --> code'.
 
-  install-declaration(m@MethodL(_, _, _, _, _, _, _), aliases, excludes) --> []
+  install-declaration(m@MethodL(_, _, _, _, _, _, _)) --> []
   where
-    install-method(m, aliases, excludes) --> _.
+    install-method(m) --> _.
 
-  install-declaration(VariableL(ID(x), _, annos, e), aliases, excludes) --> [SlotWrite(i, e)]
-  where
-    add-slot(x) --> i;
-    install-method(field-getter(x, i, is-readable(annos)), aliases, excludes) --> _;
-    install-method(field-setter(x, i, is-writable(annos)), aliases, excludes) --> _.
-
-  install-declaration(VariableL(WildCard(), _, _, e), _, _) --> [Expression(e)].
-
-  install-declaration(ConstantL(ID(x), _, annos, e), aliases, excludes) --> [SlotWrite(i, e)]
+  install-declaration(VariableL(ID(x), _, annos, e)) --> [SlotWrite(i, e)]
   where
     add-slot(x) --> i;
-    install-method(field-getter(x, i, is-readable(annos)), aliases, excludes) --> _.
+    install-method(field-getter(x, i, is-readable(annos))) --> _;
+    install-method(field-setter(x, i, is-writable(annos))) --> _.
 
-  install-declaration(ConstantL(WildCard(), _, _, e), _, _) --> [Expression(e)].
+  install-declaration(VariableL(WildCard(), _, _, e)) --> [Expression(e)].
+
+  install-declaration(ConstantL(ID(x), _, annos, e)) --> [SlotWrite(i, e)]
+  where
+    add-slot(x) --> i;
+    install-method(field-getter(x, i, is-readable(annos))) --> _.
+
+  install-declaration(ConstantL(WildCard(), _, _, e)) --> [Expression(e)].
   
   install-import(Import(name, ID(x), annos)) --> []
   where
     add-slot(x) --> i;
     write-slot(i, get-import-object(name)) --> _;
-    install-method(field-getter(x, i, is-readable(annos)), {}, {}) --> _.
+    install-method(field-getter(x, i, is-readable(annos))) --> _.
   
-  install-method(m@MethodL(ID(name), [], _, params, param-types, type, code), aliases, excludes) --> U()
+  install-method(m@MethodL(ID(name), _, _, _, _, _, _)) --> U()
   where
-    // TODO FIXME: check whether the methods to alias/exclude actually exist
-    case aliases[name?] of {
-      true =>
-        aliases[name] => alias;
-        Src src-previous() |- method-closure(MethodL(ID(alias), [], Annotations([Confidential()]), params, param-types, type, code)) --> clos;
-        add-method(alias, clos) --> _
-      otherwise =>
-    };
-    case excludes[name?] of {
+    method-closure(m) --> clos;
+    install-aliases(name, clos) --> _;
+    exclude-method(name) --> excluded;
+    case excluded of {
       false =>
-        add-method(name, method-closure(m)) --> _
+        add-method(name, clos) --> _
       otherwise =>
     }.
 
-  aliases-map([]) --> {}.
+  install-aliases(_, _) :: Als [] --> U() :: Als [].
   
-  aliases-map([AliasL(ID(tox), ID(fromx)) | aliases]) --> { fromx |--> tox, alias-map}
+  install-aliases(name, clos) :: Als [AliasL(ID(x'), ID(x)) | Als] --> u :: Als'
   where
-    aliases-map(aliases) --> alias-map.
+    name == x;
+    install-alias(x', clos) --> _;
+    install-aliases(name, clos) :: Als --> u :: Als'.
 
-  excludes-map([]) --> {}.
-
-  excludes-map([ExcludeL(ID(x)) | excludes]) --> { x |--> x, excludes-map}
+  install-aliases(name, clos) :: Als [a@AliasL(_, ID(x)) | Als] --> u :: Als [a | Als']
   where
-    excludes-map(excludes) --> excludes-map.
+    name != x;
+    install-aliases(name, clos) :: Als --> u :: Als'.   
+
+  install-aliases() :: Als [] --> U() :: Als [].
+  
+  install-aliases() :: Als [AliasL(ID(x'), ID(x)) | Als] --> U() :: Als []
+  where
+    disambiguate-closure(lookup-local-method(current-self(), x), x) --> clos;
+    install-alias(x', clos) --> _;
+    install-aliases() :: Als --> _ :: Als _.
+
+  install-alias(x, clos@ClosV(_, _, _, _, _, _, _, _)) --> U()
+  where
+    copy-closure(clos) --> clos';
+    add-method(x, clos') --> _.
+
+  exclude-method(_) :: Exs [] --> false :: Exs [].
+  
+  exclude-method(name) :: Exs [ExcludeL(ID(x)) | Exs] --> true :: Exs
+  where
+    name == x.
+  
+  exclude-method(name) :: Exs [e@ExcludeL(ID(x)) | Exs] --> excluded :: Exs [e | Exs']
+  where
+    name != x;
+    exclude-method(name) :: Exs --> excluded :: Exs'.
+    
+  exclude-methods() :: Exs [] --> U() :: Exs [].
+  
+  exclude-methods() :: Exs [ExcludeL(ID(x)) | Exs] --> U() :: Exs []
+  where
+    disambiguate-closure(lookup-local-method(current-self(), x), x) --> ClosV(_, _, _, _, _, _, _, _);
+    remove-method(x) --> _;
+    exclude-methods() :: Exs --> _ :: Exs _.
+  
+
+
+
+
+
+
   
   
 /* ============== OBJECT INIT ========== */
@@ -336,6 +384,8 @@ signature
     write-slot(Int, V) --> U
     
     add-method(String, V) --> U
+    
+    remove-method(String) --> U
     
     check-add-method(String, V) --> U
     check-method-params(List(Identifier)) --> U
@@ -408,6 +458,7 @@ rules
   S |- add-method(x, v) --> U()
   where
     read(S) --> Obj(O, outers, slots, methods);
+    log("add method: " ++ x) --> _;
     check-add-method(x, v) --> _;
     update(S, Obj(O, outers, slots, {x |--> v, methods})) --> _.
 
@@ -431,96 +482,6 @@ rules
   
   
   
-  
-  S |- current-method-names() --> allkeys(methods)
-  where
-    read(S) --> Obj(_, _, _, methods).
-
-
-
-
-
-//  make-aliases(closures, []) --> closures
-//  where
-//    log("make-aliases: no aliases to make") --> _.
-//
-//  make-aliases(closures, ass@[a | as]) --> make-aliases(closures', as)
-//  where
-//    log("making aliases: closures: " ++ str(closures:AST) ++ " aliases: " ++ str(ass:AST)) --> _;
-//    make-alias(closures, a) --> closures';
-//    log("post making alias: closures': " ++ str(closures:AST)) --> _.
-//
-//  make-alias(closures, AliasL(toId,fromId)) --> [clos' | rest]
-//  where
-//    find-closure(closures, [], fromId) --> (clos, rest);
-//    copy-method(clos, toId, fromId) --> clos'.
-//
-//  remove-excludes(closures, []) --> closures.
-//
-//  remove-excludes(closures, exss@[ex | exs]) --> remove-excludes(closures', exs)
-//  where
-//    remove-exclude(closures, ex) --> closures'.
-//
-//  remove-exclude(closures, ExcludeL(id)) --> [clos' | rest]
-//  where
-//    find-closure(closures, [], id) --> (clos, rest);
-//    remove-method(clos, id) --> clos'.
-//
-//  find-closure([], not, ID(name)) --> (U() : ObjectClosure, not) // WTF?!
-//  where
-//    halt-error("Method to alias/exlude not found: ", name) --> _.
-//
-//  find-closure([clos | closs], not, id) --> (clos, not ++ closs)
-//  where
-//    closure-contains-method(clos, id) --> res;
-//    res == true.
-//
-//  find-closure([clos | closs], not, id) --> find-closure(closs, [clos | not], id)
-//  where
-//    closure-contains-method(clos, id) --> res;
-//    res == false.
-//
-//  closure-contains-method(ObjClos(_,[],_,_), _) --> false.
-//
-//  closure-contains-method(ObjClos(_, [Declaration(MethodL(ID(mName),_,_,_,_,_,_)) | _ ],_,_), ID(name)) --> true
-//  where
-//    mName == name.
-//
-//  closure-contains-method(clos@ObjClos(a, [Declaration(MethodL(ID(mName),_,_,_,_,_,_)) | decs ],c,d), id@ID(name))
-//    --> closure-contains-method(ObjClos(a,decs,c,d), id)
-//  where
-//    log("closure-contains-method Closure(: " ++ str(clos:AST)) --> _;
-//    mName != name.
-//
-//  copy-method(ObjClos(a, sts, c, d), toId, fromId) --> ObjClos(a,[st | sts],c,d)
-//  where
-//    copy-method-aux(sts, toId, fromId) --> res(st).
-//
-//  remove-method(ObjClos(a, sts, c, d), id) --> ObjClos(a,sts1 ++ sts2,c,d)
-//  where
-//    remove-method-aux(sts, [], id) --> (sts1, sts2).
-//
-//  remove-method-aux([st | sts1], sts2, id@ID(excludeName)) --> remove-method-aux(sts1, [st | sts2], id)
-//  where
-//    st => Declaration(MethodL(ID(name), _, _, _, _, _, _));
-//    name != excludeName.
-//
-//  remove-method-aux([st | sts1], sts2, ID(excludeName)) --> (sts1,sts2)
-//    where
-//      st => Declaration(MethodL(ID(name), _, _, _, _, _, _));
-//      name == excludeName.
-//
-//  copy-method-aux([st | sts], toId, fromId@ID(fromName)) --> copy-method-aux(sts, toId, fromId)
-//  where
-//    st => Declaration(MethodL(ID(name), _, _, _, _, _, _));
-//    name != fromName.
-//
-//  copy-method-aux([st | _], toId, ID(fromName)) -->
-//    res(Declaration(MethodL(toId, b, Annotations([Confidential()]),d,e,f,g)))
-//  where
-//    st => Declaration(MethodL(ID(name), b, _, d, e, f, g));
-//    name == fromName.
-
   S |- current-method-names() --> allkeys(methods)
   where
     read(S) --> Obj(_, _, _, methods).
@@ -528,6 +489,8 @@ rules
   S |- is-member(x) --> methods[x?]
   where
     read(S) --> Obj(_,_,_, methods).
+
+
 
   // Lookup in self
   lookup-local-method(RefV(S'), x) --> v
