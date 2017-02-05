@@ -263,26 +263,26 @@ rules
   install-method(m@MethodL(ID(name), _, _, _, _, _, _)) --> U()
   where
     method-closure(m) --> clos;
-    install-aliases(name, clos) --> _;
     exclude-method(name) --> excluded;
     case excluded of {
       false =>
         add-method(name, clos) --> _
       otherwise =>
-    }.
+    };
+    install-aliases(name, clos) --> _.
 
   install-aliases(_, _) :: Als [] --> U() :: Als [].
+
+  install-aliases(name, clos) :: Als [a@AliasL(_, ID(x)) | Als] --> u :: Als [a | Als']
+  where
+    name != x;
+    install-aliases(name, clos) :: Als --> u :: Als'.
   
   install-aliases(name, clos) :: Als [AliasL(ID(x'), ID(x)) | Als] --> u :: Als'
   where
     name == x;
     install-alias(x', clos) --> _;
     install-aliases(name, clos) :: Als --> u :: Als'.
-
-  install-aliases(name, clos) :: Als [a@AliasL(_, ID(x)) | Als] --> u :: Als [a | Als']
-  where
-    name != x;
-    install-aliases(name, clos) :: Als --> u :: Als'.   
 
   install-aliases() :: Als [] --> U() :: Als [].
   
