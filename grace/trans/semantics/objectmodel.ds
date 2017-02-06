@@ -401,9 +401,6 @@ signature
     
     remove-method(String) --> U
     
-//    check-add-method(String, V) --> U
-//    check-method-params(List(Identifier)) --> U
-    
     lookup-local-method(V, String) --> V
     lookup-outer-method(V, String) --> V
     
@@ -463,26 +460,6 @@ rules
 
 
 
-//  check-add-method(_, ClosV(_,_,ps,_,_,_,_,_)) --> U()
-//  where
-//    check-method-params(ps) --> _.
-//
-//  check-add-method(_, _) --> U().
-//  
-//  
-//  
-//
-//  check-method-params([]) --> U().
-//
-//  check-method-params([WildCard() | ps]) --> check-method-params(ps).
-//
-//  check-method-params([ID(p) | ps]) --> check-method-params(ps)
-//  where
-//    ensure-valid-local(p) --> _.
-  
-  
-  
-  
   S |- current-method-names() --> allkeys(methods)
   where
     read(S) --> Obj(_, _, _, methods).
