@@ -39,7 +39,11 @@ rules
           flatten-statements <+
           lower-fail
 
-  lower-post-analyse = analyse-duplicate-decls
+  // VV: disabling duplicate checking because we want proper error reporting
+
+//  lower-post-analyse = analyse-duplicate-decls
+  
+  lower-post-analyse = id
 
   lower-methodcallwdot:
     MCallWDot(recv, [Part(idf, args)]) ->
