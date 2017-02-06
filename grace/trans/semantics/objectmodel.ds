@@ -185,6 +185,8 @@ signature
     
     exclude-method(String) --> Bool
     
+    ensure-unique-method(String, V) --> U
+    
     install-aliases() --> U
     exclude-methods() --> U
     
@@ -204,7 +206,6 @@ rules
   where
     install-members(inherit) --> inherit';
     install-members-map(uses) --> uses';
-    log("Installing code from depth: " ++ int2string(Src) ++ " aliases: " ++ str(Als : AST)) --> _;
     O, Src |- install-code(code) :: L, Als, Exs --> code' :: L _, Als _, Exs _.
   
   install-members-map([]) --> [].
@@ -260,16 +261,17 @@ rules
     write-slot(i, get-import-object(name)) --> _;
     install-method(field-getter(x, i, is-readable(annos))) --> _.
   
-  install-method(m@MethodL(ID(name), _, _, _, _, _, _)) --> U()
+  install-method(m@MethodL(ID(x), _, _, _, _, _, _)) --> U()
   where
     method-closure(m) --> clos;
-    exclude-method(name) --> excluded;
+    install-aliases(x, clos) --> _;
+    exclude-method(x) --> excluded;
     case excluded of {
       false =>
-        add-method(name, clos) --> _
+        ensure-unique-method(x, clos) --> _;
+        add-method(x, clos) --> _
       otherwise =>
-    };
-    install-aliases(name, clos) --> _.
+    }.
 
   install-aliases(_, _) :: Als [] --> U() :: Als [].
 
@@ -295,6 +297,7 @@ rules
   install-alias(x, clos@ClosV(_, _, _, _, _, _, _, _)) --> U()
   where
     copy-closure(clos) --> clos';
+    ensure-unique-method(x, clos') --> _;
     add-method(x, clos') --> _.
 
   exclude-method(_) :: Exs [] --> false :: Exs [].
@@ -312,17 +315,28 @@ rules
   
   exclude-methods() :: Exs [ExcludeL(ID(x)) | Exs] --> U() :: Exs []
   where
-    disambiguate-closure(lookup-local-method(current-self(), x), x) --> ClosV(_, _, _, _, _, _, _, _);
+    disambiguate-closure(lookup-local-method(current-self(), x), x) --> _;
     remove-method(x) --> _;
     exclude-methods() :: Exs --> _ :: Exs _.
   
 
 
+  ensure-unique-method(x, clos) --> U()
+  where
+    lookup-local-method(current-self(), x) --> clos';
+    case clos' of {
+      ClosV(_, _, _, _, _, _, _, _) =>
+        closure-source(clos) --> src;
+        closure-source(clos') --> src';
+        case eqI(src, src') of {
+          true =>
+            halt-error("Duplicate method: ", x) --> _
+          otherwise =>
+        }
+      otherwise =>
+    }.
 
 
-
-
-  
   
 /* ============== OBJECT INIT ========== */
 signature
@@ -387,22 +401,8 @@ signature
     
     remove-method(String) --> U
     
-    check-add-method(String, V) --> U
-    check-method-params(List(Identifier)) --> U
-
-//    make-aliases(ObjectClosures, List(Alias)) --> ObjectClosures
-//    make-alias(ObjectClosures, Alias) --> ObjectClosures
-//
-//    remove-excludes(ObjectClosures, List(Exclude)) --> ObjectClosures
-//    remove-exclude(ObjectClosures, Exclude) --> ObjectClosures
-//
-//    find-closure(ObjectClosures, ObjectClosures, Identifier) --> (ObjectClosure * ObjectClosures)
-//    copy-method(ObjectClosure, Identifier, Identifier) --> ObjectClosure
-//    copy-method-aux(List(Statement), Identifier, Identifier) --> StatementResult
-//    remove-method(ObjectClosure, Identifier) --> ObjectClosure
-//    remove-method-aux(List(Statement), List(Statement), Identifier) --> (List(Statement) * List(Statement))
-//    
-//    closure-contains-method(ObjectClosure, Identifier) --> Bool
+//    check-add-method(String, V) --> U
+//    check-method-params(List(Identifier)) --> U
     
     lookup-local-method(V, String) --> V
     lookup-outer-method(V, String) --> V
@@ -458,26 +458,27 @@ rules
   S |- add-method(x, v) --> U()
   where
     read(S) --> Obj(O, outers, slots, methods);
-    log("add method: " ++ x) --> _;
-    check-add-method(x, v) --> _;
     update(S, Obj(O, outers, slots, {x |--> v, methods})) --> _.
 
 
 
 
-  check-add-method(_, ClosV(_,_,ps,_,_,_,_,_)) --> U()
-  where
-    check-method-params(ps) --> _.
-
-  check-add-method(_, _) --> U().
-
-  check-method-params([]) --> U().
-
-  check-method-params([WildCard() | ps]) --> check-method-params(ps).
-
-  check-method-params([ID(p) | ps]) --> check-method-params(ps)
-  where
-    ensure-valid-local(p) --> _.
+//  check-add-method(_, ClosV(_,_,ps,_,_,_,_,_)) --> U()
+//  where
+//    check-method-params(ps) --> _.
+//
+//  check-add-method(_, _) --> U().
+//  
+//  
+//  
+//
+//  check-method-params([]) --> U().
+//
+//  check-method-params([WildCard() | ps]) --> check-method-params(ps).
+//
+//  check-method-params([ID(p) | ps]) --> check-method-params(ps)
+//  where
+//    ensure-valid-local(p) --> _.
   
   
   
