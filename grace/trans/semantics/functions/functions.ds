@@ -79,6 +79,10 @@ rules /* closure construction */
     alloc-params(params) :: L --> _ :: L';
     alloc-locals(code) :: L' --> _ :: L''.
 
-  copy-closure(ClosV(S, O, params, code, L, _, Src, No-Return())) --> ClosV(S, O, params, code, L, false, Src, No-Return()).
+  copy-closure(ClosV(S, O, params, code, L, _, Src, No-Return())) --> ClosV(S, O, params, code, L, false, Src', No-Return())
+  where
+    Src |- src-previous() --> Src'.
   
-  copy-closure(ClosV(S, O, params, code, L, _, Src, Return-To(_))) --> ClosV(S, O, params, code, L, false, Src, Return-To(fresh)).
+  copy-closure(ClosV(S, O, params, code, L, _, Src, Return-To(_))) --> ClosV(S, O, params, code, L, false, Src', Return-To(fresh))
+  where
+    Src |- src-previous() --> Src'.
