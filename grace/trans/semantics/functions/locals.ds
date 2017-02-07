@@ -153,3 +153,4 @@ rules
   v-update(addr, v) :: VH --> addr :: VH {addr |--> v, VH}.
 
   v-next() --> fresh.
+

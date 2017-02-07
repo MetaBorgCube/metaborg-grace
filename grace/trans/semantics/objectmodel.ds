@@ -243,15 +243,15 @@ rules
   install-declaration(VariableL(ID(x), _, annos, e)) --> [SlotWrite(i, e)]
   where
     add-slot(x) --> i;
-    install-method(field-getter(x, i, is-readable(annos))) --> _;
-    install-method(field-setter(x, i, is-writable(annos))) --> _.
+    install-method(field-getter(x, i, has-anno-readable(annos))) --> _;
+    install-method(field-setter(x, i, has-anno-writable(annos))) --> _.
 
   install-declaration(VariableL(WildCard(), _, _, e)) --> [Expression(e)].
 
   install-declaration(ConstantL(ID(x), _, annos, e)) --> [SlotWrite(i, e)]
   where
     add-slot(x) --> i;
-    install-method(field-getter(x, i, is-readable(annos))) --> _.
+    install-method(field-getter(x, i, has-anno-readable(annos))) --> _.
 
   install-declaration(ConstantL(WildCard(), _, _, e)) --> [Expression(e)].
   
@@ -259,7 +259,7 @@ rules
   where
     add-slot(x) --> i;
     write-slot(i, get-import-object(name)) --> _;
-    install-method(field-getter(x, i, is-readable(annos))) --> _.
+    install-method(field-getter(x, i, has-anno-readable(annos))) --> _.
   
   install-method(m@MethodL(ID(x), _, _, _, _, _, _)) --> U()
   where
@@ -369,11 +369,10 @@ signature
 rules
 
   field-getter(x, i, c) -->
-    MethodL(ID(x), [], to-annotation(c), [], [], no-type(), [SlotRead(i)]).
+    MethodL(ID(x), [], visibility-annos(c), [], [], no-type(), [SlotRead(i)]).
 
   field-setter(x, i, c) -->
-    MethodL(ID(mksettername(x)), [], to-annotation(c), [ID("p")], [],
-      no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))]).
+    MethodL(ID(mksettername(x)), [], visibility-annos(c), [ID("p")], [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))]).
 
 
 

@@ -66,7 +66,7 @@ rules
 
   call(clos@ClosV(S, O, params, code, env, _, _, R), vs, name) --> v
   where
-    ensure-access(clos, S, name) --> _;
+    ensure-access(name, clos, S) --> _;
     update-locals(params, vs) :: L env --> _ :: L1;
     S, O |- handle-return(code, R) :: L1 --> v.
   

@@ -15,107 +15,92 @@ imports
   trans/semantics/statements
   trans/semantics/imports
 
-signature
 
+/* ======= REACHABILITY CHECK ======= */
+signature
   sort aliases
     HeapData = Object
-  
   arrows
-    is-readable(Annotations) --> Bool
-    is-writable(Annotations) --> Bool
-    is-confidential(Annotations) --> Bool
-    is-public(Annotations) --> Bool
+    ensure-access(String, V, Addr) --> V
     
-    
-    
-    ensure-access(V, Addr, String) --> V
-    
-    
-    
-    check-visibility(Bool, Addr, String) --> Bool
-    
-    contains-annotation(List(Annotation), Annotation) --> Bool
-
-    is-inside(List(Addr), Addr, String) --> Bool
-    is-inside-aux(Addr, Addr) --> Bool
-
-    to-annotation(Bool) --> Annotations
+    can-reach(Addr) --> Bool
+    can-reach-map(List(Addr), Addr) --> Bool
     
 rules
-
-  is-readable(Annotations(as)) --> contains-annotation(as, Readable()).
-
-  is-writable(Annotations(as)) --> contains-annotation(as, Writable()).
-
-  is-confidential(Annotations(as)) --> contains-annotation(as, Confidential()).
-
-  is-public(Annotations(as)) --> contains-annotation(as, Public()).
   
-  contains-annotation([], _) --> false.
-
-  contains-annotation([a | _], an) --> true
-  where
-    a == an.
-
-  contains-annotation([a | as], an) --> contains-annotation(as, an)
-  where
-    a != an.
+  ensure-access(x, clos@ClosV(_, _, _, _, _, true, _, _), recv) --> clos.
   
-  to-annotation(true) --> Annotations([Public()]).
-
-  to-annotation(false) --> Annotations([Confidential()]).
- 
-  ensure-access(clos@ClosV(_, _, _, _, _, public, _, _), addr, name) --> clos
+  ensure-access(x, clos@ClosV(_, _, _, _, _, false, _, _), recv) --> clos
   where
-    check-visibility(public, addr, name) --> visible;
+    can-reach(recv) --> visible;
     case visible of {
       false =>
-            halt-error("Requested confidential method '" ++ name ++ "' of object: " ++ int2string(addr) ++ " from outside", "") --> _
+            halt-error("Requested confidential method '" ++ x ++ "' of object: " ++ int2string(recv) ++ " from outside", "") --> _
       otherwise =>
     }.
- 
- 
-  check-visibility(true, _, _) --> true.
-  
-  // addr must be the self, or an outer of self
-  S |- check-visibility(false, addr, name) --> true
-  where
-    S == addr;
-    log("vis check on '" ++ name ++ "', caller == callee, true") --> _.
 
-  S |- check-visibility(false, addr, name) --> allowed
+  S |- can-reach(S') --> true
   where
-    S != addr;
-    log("vis check on '" ++ name ++ "', caller != callee, S: " ++ int2string(S) ++
-        " addr: " ++ int2string(addr)) --> _;
+    S == S'.
+
+  S |- can-reach(S') --> false
+  where
+    S != S';
+    is-stored(S) --> false.
+
+  S |- can-reach(S') --> maybe
+  where
+    S != S';
+    is-stored(S) --> true;
     read(S) --> Obj(_, outers, _, _);
-    log("vis check on '" ++ name ++ "', recurse to check outers.") --> _;
-    is-inside(outers, addr, name) --> allowed.
-
-  is-inside([], _, _) --> false.
-
-  is-inside([o | os], target, name) --> res
+    can-reach-map(outers, S') --> maybe.
+  
+  can-reach-map([], _) --> false.
+  
+  can-reach-map([S | ss], S') --> reachable'
   where
-    is-inside-aux(o, target) --> found;
-    case found of {
-      true => true => res
-      otherwise => is-inside(os, target, name) --> res
-    }.
-
-  // is o == target? does o have an outer that == target?
-  is-inside-aux(o, target) --> true
-  where
-    o == target;
-    log("o == target, o: " ++ int2string(o) ++ " target: " ++ int2string(target)) --> _.
-
-  is-inside-aux(o, target) :: H --> res
-  where
-    o != target;
-    log("o != target, o: " ++ int2string(o) ++ " target: " ++ int2string(target)) --> _;
-    case H[o?] of {
-      true =>
-        read(o) --> Obj(newOuter, _,_,_);
-        is-inside-aux(newOuter, target) --> res
+    S |- can-reach(S') --> reachable;
+    case reachable of {
+      false =>
+        can-reach-map(ss, S') --> reachable'
       otherwise =>
-        false => res
+        true => reachable'
     }.
+
+
+
+/* ==== VISIBILITY ANNOTATION PROCESSING ==== */
+signature
+
+  arrows
+    has-anno-readable(Annotations) --> Bool
+    has-anno-writable(Annotations) --> Bool
+    has-anno-confidential(Annotations) --> Bool
+    has-anno-public(Annotations) --> Bool
+    
+    has-anno(List(Annotation), Annotation) --> Bool
+    
+    visibility-annos(Bool) --> Annotations
+    
+rules
+  has-anno-readable(Annotations(annos)) --> has-anno(annos, Readable()).
+
+  has-anno-writable(Annotations(annos)) --> has-anno(annos, Writable()).
+
+  has-anno-confidential(Annotations(annos)) --> has-anno(annos, Confidential()).
+
+  has-anno-public(Annotations(annos)) --> has-anno(annos, Public()).
+
+  has-anno([], _) --> false.
+
+  has-anno([anno | _], anno') --> true
+  where
+    anno == anno'.
+ 
+  has-anno([anno | annos], anno') --> has-anno(annos, anno')
+  where
+    anno != anno'.
+
+  visibility-annos(true) --> Annotations([Public()]).
+
+  visibility-annos(false) --> Annotations([Confidential()]).

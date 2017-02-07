@@ -63,14 +63,13 @@ rules
 
 rules /* closure construction */
 
-  Src |- method-closure(MethodL(_, _, ann, params, _, _, code)) :: L -->
-    ClosV(S, O, params, code, L'', public, Src, Return-To(fresh)) :: L
+  Src |- method-closure(MethodL(_, _, annos, params, _, _, code)) :: L -->
+    ClosV(S, O, params, code, L'', has-anno-public(annos), Src, Return-To(fresh)) :: L
   where
     current-self() --> S;
     current-outer() --> O;
     alloc-params(params) :: L --> _ :: L';
-    alloc-locals(code) :: L' --> _ :: L'';
-    is-public(ann) --> public.
+    alloc-locals(code) :: L' --> _ :: L''.
 
   block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, code, L'', true, src-base(), No-Return()) :: L
   where
