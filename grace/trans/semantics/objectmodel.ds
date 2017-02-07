@@ -55,7 +55,7 @@ rules
     S' |- install-members-top(oc) --> oc';
     S' |- init-object(oc') --> U().
 
-  SlotRead(i) --> read-slot(i).
+  SlotRead(i) --> ensure-defined(read-slot(i)).
   
   SlotWrite(i, e) --> DoneV()
   where
@@ -319,8 +319,6 @@ rules
     remove-method(x) --> _;
     exclude-methods() :: Exs --> _ :: Exs _.
   
-
-
   ensure-unique-method(x, clos) --> U()
   where
     lookup-local-method(current-self(), x) --> clos';
@@ -335,8 +333,6 @@ rules
         }
       otherwise =>
     }.
-
-
   
 /* ============== OBJECT INIT ========== */
 signature

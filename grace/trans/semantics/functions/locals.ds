@@ -115,7 +115,7 @@ rules
         L[x?] => is-local
     }.
 
-  read-local(x) :: L --> v-read(L[x]) :: L.  
+  read-local(x) :: L --> ensure-defined(v-read(L[x])) :: L.
 
   add-locals([], []) --> U().
 

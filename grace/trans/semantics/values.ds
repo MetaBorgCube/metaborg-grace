@@ -1,5 +1,8 @@
 module trans/semantics/values
 
+imports
+  trans/semantics/runtime/natives
+
 signature
 
   sorts
@@ -13,3 +16,15 @@ signature
   variables
     v : V
     vs : List(V)
+
+  arrows
+    ensure-defined(V) --> V
+
+rules
+  ensure-defined(v) --> v
+  where
+    v =!=> UninitializedV().
+  
+  ensure-defined(v@UninitializedV()) --> v
+  where
+    halt-error("Read of an uninitialised value attempted", "") --> _.
