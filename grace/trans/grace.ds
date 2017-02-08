@@ -6,13 +6,13 @@ imports
 signature
   arrows
     Program -init-> (V * Exn * H)
-
+  
 rules
 
   p@Program(_) -init-> (v_out, EX, H)
   where
     next() --> base;
-    R No-Return(), O base, S base, P Exec(), Src src-base() |- p :: H {}, L {},
+    ProgPath native-term-origin-path(p), R No-Return(), O base, S base, P Exec(), Src src-base() |- p :: H {}, L {},
       VH {}, DCache {}, ICache {}, EX Ok() --> v :: H, L, VH, EX;
     case EX of {
       Ok() =>

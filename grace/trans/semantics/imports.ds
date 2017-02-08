@@ -27,14 +27,20 @@ signature
     dialect-cache-is-cached(String) --> Bool
     dialect-cache-add(String, Addr) --> Addr
     dialect-cache-get(String) --> Addr
-    
+  
   native operators
     native-parse-dialect: String -> Program
     native-term-origin-path: AST -> String
-
+    native-parent-directory: String -> String
+    
+  components
+    ProgPath: String
+    
 rules
   
-  parse-dialect(s) --> native-parse-dialect(s).
+  parse-dialect(s) --> native-parse-dialect(s)
+  where
+    log("Parsing dialect from: ") --> _.
   
   S |- load-dialect(Dialect("none")) --> new-object(S)
   where
@@ -44,10 +50,10 @@ rules
   where
     dialect-cache-is-cached(name) --> true.
 
-  load-dialect(d@Dialect(name)) --> dialect
+  ProgPath path |- load-dialect(Dialect(name)) --> dialect
   where
     dialect-cache-is-cached(name) --> false;
-    parse-dialect(name) --> program;
+    parse-dialect(native-parent-directory(path) ++ "/" ++ name) --> program;
     program --> RefV(dialect);
     read(dialect) --> Obj(_, outers, slots, methods);
     update(dialect, Obj(fresh, outers, slots, methods)) --> _;

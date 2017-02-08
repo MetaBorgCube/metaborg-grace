@@ -19,13 +19,11 @@ imports
 signature
   arrows
     Program --> V
-
+  
 rules
 
   S |- prog@Program(code) --> v
   where
-    native-term-origin-path(prog) => path;
-    log("Executing program: " ++ path) --> _;
     load-dialect(collect-dialect-statement(prog)) --> S';
     S', O S |- code --> v.
 
