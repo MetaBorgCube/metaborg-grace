@@ -44,7 +44,8 @@ rules // Debugging
       result   := <pp-debug> ast
   
 //  desugar-complete: ast -> <inject-all> <desugar-all-post> <desugar-all> <desugar-pre> ast
-  desugar-complete: ast -> <desugar-all-post> <desugar-all> <desugar-pre> ast
+
+  desugar-complete: ast -> <origin-track-forced(desugar-pre; desugar-all; desugar-all-post)> ast
   
   debug-show-desugared:
     (_, _, ast, path, _) -> (filename, result)
