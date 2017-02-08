@@ -22,14 +22,12 @@ signature
 
 rules
 
-  S S |- Program(code) --> v
+  S |- prog@Program(code) --> v
   where
-    get-dialect-object(code) --> s';
-    S s', O S |- code --> v. // code has object decl inside so self becomes outer
-
-//  Program(code) --> v
-//  where
-//    code --> v. // code has object decl inside so self becomes outer
+    native-term-origin-path(prog) => path;
+    log("Executing program: " ++ path) --> _;
+    load-dialect(collect-dialect-statement(prog)) --> S';
+    S', O S |- code --> v.
 
   [] : Code --> DoneV().
 

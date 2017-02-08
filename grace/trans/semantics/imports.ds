@@ -5,70 +5,80 @@ imports
   src-gen/ds-signatures/grace-lowered-sig
   trans/semantics/semantics
   trans/semantics/statements
-
-signature
-
-//  sorts
-//    Import
-//    
-  sort aliases
-    Import = Map(String, Addr)
   
+signature
+  sort aliases
+    Addr = Int
+    
   components
-    D : Import
-    I : Import
+    DCache : Map(String, Addr)
+    ICache : Map(String, Addr)
   
   arrows
-    get-dialect-object(List(Statement)) --> Addr
+    collect-dialect-statement(Program) --> Statement
+    load-dialect(Statement) --> Addr
+    
     get-import-object(String) --> V
-    parse-file(String) --> AST
+    
+    
+    parse-dialect(String) --> Program
+    parse-import(String) --> Program
+    
+    dialect-cache-is-cached(String) --> Bool
+    dialect-cache-add(String, Addr) --> Addr
+    dialect-cache-get(String) --> Addr
     
   native operators
-    parse_file: String -> Program
-    
+    native-parse-dialect: String -> Program
+    native-term-origin-path: AST -> String
+
+rules
+  
+  parse-dialect(s) --> native-parse-dialect(s).
+  
+  S |- load-dialect(Dialect("none")) --> new-object(S)
+  where
+    current-self() --> RefV(S).
+  
+  load-dialect(Dialect(name)) --> dialect-cache-get(name)
+  where
+    dialect-cache-is-cached(name) --> true.
+
+  load-dialect(d@Dialect(name)) --> dialect
+  where
+    dialect-cache-is-cached(name) --> false;
+    parse-dialect(name) --> program;
+    program --> RefV(dialect);
+    read(dialect) --> Obj(_, outers, slots, methods);
+    update(dialect, Obj(fresh, outers, slots, methods)) --> _;
+    dialect-cache-add(name, dialect) --> _.
+
+  collect-dialect-statement(Program([Expression(ObjectL(_,_,[dialect@Dialect(_) | _ ])) | _])) --> dialect.
+  
+  collect-dialect-statement(Program([Expression(ObjectL(_,_,[stm | _ ])) | _])) --> Dialect("standardGrace")
+  where
+    stm =!=> Dialect(_).
+  
+  
+  DCache |- dialect-cache-is-cached(name) --> DCache[name?].
+  
+  dialect-cache-add(name, dialect) :: DCache --> dialect :: DCache { name |--> dialect, DCache}.
+  
+  dialect-cache-get(name) :: DCache --> DCache[name] :: DCache.
+  
 rules
 
-  parse-file(s) --> parse_file(s).
-//  read-import(s) --> read_import(s).
+  parse-dialect(s) --> native-parse-dialect(s).
 
-  S |- get-dialect-object([Expression(ObjectL(_,_,[Dialect("none") | _ ])) | _ ]) --> new-object(S)
+  get-import-object(name) :: ICache --> RefV(objectAddr) :: ICache'
   where
-    log("file has dialect 'none', giving back empty object") --> _.
-
-  get-dialect-object([Expression(ObjectL(_,_,[Dialect(name) | _ ])) | _ ]) :: D --> objectAddr :: D'
-  where
-    log("reading dialect: " ++ name) --> _;
-    fresh => no-object;
-    case D[name?] of {
+    case ICache[name?] of {
       true =>
-        D[name] => objectAddr; //v@FlatObject(_);
-        D => D'
+        ICache[name] => objectAddr;
+        ICache => ICache'
       otherwise =>
-        // read the dialect ast
-        parse-file(name) --> p@Program(_);
-        // actually execute the dialect
-        p : Program :: D --> RefV(objectAddr);
-        // set dialect name as already read
-        {name |--> objectAddr, D} => D';
-        // remove outerchain from dialect
-        read(objectAddr) --> Obj(_, a, b, c);
-        update(objectAddr, Obj(no-object : Addr, a, b, c)) --> _
-      }.
-
-  
-  get-dialect-object(_) --> addr
-  where
-    get-dialect-object([Expression(ObjectL(NoInherit(),[] : List(Use),[Dialect("standardGrace")]))]) --> addr.
-
-  get-import-object(name) :: I --> RefV(objectAddr) :: I'
-  where
-    case I[name?] of {
-      true =>
-        I[name] => objectAddr;
-        I => I'
-      otherwise =>
-        parse-file(name) --> Program(code);
+        parse-import(name) --> Program(code);
         next() --> base;
-        S base , O base |- Program(code) :: I --> RefV(objectAddr) :: I'';
-        {name |--> objectAddr, I''} => I'
+        S base , O base |- Program(code) :: ICache --> RefV(objectAddr) :: ICache'';
+        {name |--> objectAddr, ICache''} => ICache'
     }.

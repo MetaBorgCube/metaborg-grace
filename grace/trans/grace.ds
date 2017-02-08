@@ -13,7 +13,7 @@ rules
   where
     next() --> base;
     R No-Return(), O base, S base, P Exec(), Src src-base() |- p :: H {}, L {},
-      VH {}, D {}, I {}, EX Ok() --> v :: H, L, VH, EX;
+      VH {}, DCache {}, ICache {}, EX Ok() --> v :: H, L, VH, EX;
     case EX of {
       Ok() =>
         v => v_out
