@@ -258,7 +258,7 @@ rules
   install-import(Import(name, ID(x), annos)) --> []
   where
     add-slot(x) --> i;
-    write-slot(i, get-import-object(name)) --> _;
+    write-slot(i, load-import(name)) --> _;
     install-method(field-getter(x, i, has-anno-readable(annos))) --> _.
   
   install-method(m@MethodL(ID(x), _, _, _, _, _, _)) --> U()

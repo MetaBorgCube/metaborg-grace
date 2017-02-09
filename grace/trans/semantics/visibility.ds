@@ -83,6 +83,7 @@ signature
     visibility-annos(Bool) --> Annotations
     
 rules
+
   has-anno-readable(Annotations(annos)) --> has-anno(annos, Readable()).
 
   has-anno-writable(Annotations(annos)) --> has-anno(annos, Writable()).

@@ -12,26 +12,28 @@ signature
     
   components
     DCache : Map(String, Addr)
-    ICache : Map(String, Addr)
+    ICache : Map(String, V)
   
   arrows
     collect-dialect-statement(Program) --> Statement
     load-dialect(Statement) --> Addr
     
-    get-import-object(String) --> V
+    load-import(String) --> V
     
-    
-    parse-dialect(String) --> Program
-    parse-import(String) --> Program
+    parse-file(String) --> Program
     
     dialect-cache-has(String) --> Bool
     dialect-cache-add(String, Addr) --> Addr
     dialect-cache-get(String) --> Addr
-    
     dialect-path(String) --> String
     
+    import-cache-has(String) --> Bool
+    import-cache-add(String, V) --> V
+    import-cache-get(String) --> V
+    import-path(String) --> String
+    
   native operators
-    native-parse-dialect: String -> Program
+    native-parse-file: String -> Program
     native-term-origin-path: AST -> String
     native-parent-directory: String -> String
     native-standardgrace: String
@@ -41,7 +43,7 @@ signature
     
 rules
   
-  parse-dialect(s) --> native-parse-dialect(s).
+  parse-file(s) --> native-parse-file(s).
   
   load-dialect(Dialect("none")) --> new-object(S)
   where
@@ -51,14 +53,13 @@ rules
   where
     dialect-cache-has(name) --> true.
 
-  load-dialect(Dialect(name)) --> dialect
+  load-dialect(Dialect(name)) --> dialect-cache-add(name, dialect)
   where
     dialect-cache-has(name) --> false;
-    parse-dialect(dialect-path(name)) --> program;
+    parse-file(dialect-path(name)) --> program;
     program --> RefV(dialect);
     read(dialect) --> Obj(_, outers, slots, methods);
-    update(dialect, Obj(fresh, outers, slots, methods)) --> _;
-    dialect-cache-add(name, dialect) --> _.
+    update(dialect, Obj(fresh, outers, slots, methods)) --> _.
 
   collect-dialect-statement(Program([Expression(ObjectL(_,_,[dialect@Dialect(_) | _ ])) | _])) --> dialect.
   
@@ -66,31 +67,37 @@ rules
   where
     stm =!=> Dialect(_).
   
-  DCache |- dialect-cache-has(name) --> DCache[name?].
   
-  dialect-cache-add(name, dialect) :: DCache --> dialect :: DCache { name |--> dialect, DCache}.
+  load-import(name) --> import-cache-get(name)
+  where
+    import-cache-has(name) --> true.
   
-  dialect-cache-get(name) :: DCache --> DCache[name] :: DCache.
+  load-import(name) --> import-cache-add(name, import)
+  where
+    import-cache-has(name) --> false;
+    parse-file(import-path(name)) --> program@Program(_);
+    program --> import@RefV(_).
+
+  
+  ProgPath |- import-path(name) --> native-parent-directory(ProgPath) ++ "/" ++ name.
   
   ProgPath |- dialect-path(name) --> native-parent-directory(ProgPath) ++ "/" ++ name
   where
     name != "standardGrace".
   
   dialect-path("standardGrace") --> native-standardgrace(). 
+
+
+  DCache |- dialect-cache-has(name) --> DCache[name?].
   
-rules
-
-  parse-dialect(s) --> native-parse-dialect(s).
-
-  get-import-object(name) :: ICache --> RefV(objectAddr) :: ICache'
-  where
-    case ICache[name?] of {
-      true =>
-        ICache[name] => objectAddr;
-        ICache => ICache'
-      otherwise =>
-        parse-import(name) --> Program(code);
-        next() --> base;
-        S base , O base |- Program(code) :: ICache --> RefV(objectAddr) :: ICache'';
-        {name |--> objectAddr, ICache''} => ICache'
-    }.
+  dialect-cache-add(name, dialect) :: DCache --> dialect :: DCache { name |--> dialect, DCache}.
+  
+  dialect-cache-get(name) :: DCache --> DCache[name] :: DCache.
+  
+  
+  ICache |- import-cache-has(name) --> ICache[name?].
+  
+  import-cache-add(name, import) :: ICache --> import :: ICache {name |--> import, ICache}.
+  
+  import-cache-get(name) :: ICache --> ICache[name] :: ICache.
+  
