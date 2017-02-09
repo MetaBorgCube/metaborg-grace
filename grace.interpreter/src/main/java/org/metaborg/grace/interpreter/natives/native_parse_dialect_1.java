@@ -27,7 +27,7 @@ public abstract class native_parse_dialect_1 extends TermBuild {
 		final File dialectFile = new File(s + ".grace");
 
 		if (!dialectFile.exists()) {
-			throw new RuntimeException("Dialect file: '" + s + "' does not exist.");
+			throw new RuntimeException("Grace module: '" + s + "' does not exist.");
 		}
 
 		try {

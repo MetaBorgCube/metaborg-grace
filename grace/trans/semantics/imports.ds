@@ -43,7 +43,7 @@ rules
   
   parse-dialect(s) --> native-parse-dialect(s).
   
-  S |- load-dialect(Dialect("none")) --> new-object(S)
+  load-dialect(Dialect("none")) --> new-object(S)
   where
     current-self() --> RefV(S).
   

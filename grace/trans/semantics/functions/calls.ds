@@ -64,11 +64,11 @@ rules
     lookup-local-method(recv, x) --> clos;
     disambiguate-closure(clos, x) --> _.
 
-  call(clos@ClosV(S, O, params, code, env, _, _, R), vs, name) --> v
+  call(clos@ClosV(S, O, params, code, L1, _, _, R), vs, name) :: L --> v :: L
   where
     ensure-access(name, clos, S) --> _;
-    update-locals(params, vs) :: L env --> _ :: L1;
-    S, O |- handle-return(code, R) :: L1 --> v.
+    update-locals(params, vs) :: L1 --> _ :: L2;
+    S, O |- handle-return(code, R) :: L2 --> v :: L3.
   
   closure-source(ClosV(_, _, _, _, _, _, Src, _)) --> Src.
   
