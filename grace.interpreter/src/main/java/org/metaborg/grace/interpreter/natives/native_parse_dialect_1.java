@@ -24,7 +24,7 @@ public abstract class native_parse_dialect_1 extends TermBuild {
 	@Specialization
 	@TruffleBoundary
 	public ITerm parseFile(String s) {
-		final File dialectFile = new File("src/main/resources/dialects/" + s + ".grace");
+		final File dialectFile = new File(s + ".grace");
 
 		if (!dialectFile.exists()) {
 			throw new RuntimeException("Dialect file: '" + s + "' does not exist.");

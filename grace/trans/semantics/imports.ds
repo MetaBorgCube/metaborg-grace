@@ -24,23 +24,24 @@ signature
     parse-dialect(String) --> Program
     parse-import(String) --> Program
     
-    dialect-cache-is-cached(String) --> Bool
+    dialect-cache-has(String) --> Bool
     dialect-cache-add(String, Addr) --> Addr
     dialect-cache-get(String) --> Addr
-  
+    
+    dialect-path(String) --> String
+    
   native operators
     native-parse-dialect: String -> Program
     native-term-origin-path: AST -> String
     native-parent-directory: String -> String
+    native-standardgrace: String
     
   components
     ProgPath: String
     
 rules
   
-  parse-dialect(s) --> native-parse-dialect(s)
-  where
-    log("Parsing dialect from: ") --> _.
+  parse-dialect(s) --> native-parse-dialect(s).
   
   S |- load-dialect(Dialect("none")) --> new-object(S)
   where
@@ -48,12 +49,12 @@ rules
   
   load-dialect(Dialect(name)) --> dialect-cache-get(name)
   where
-    dialect-cache-is-cached(name) --> true.
+    dialect-cache-has(name) --> true.
 
-  ProgPath path |- load-dialect(Dialect(name)) --> dialect
+  load-dialect(Dialect(name)) --> dialect
   where
-    dialect-cache-is-cached(name) --> false;
-    parse-dialect(native-parent-directory(path) ++ "/" ++ name) --> program;
+    dialect-cache-has(name) --> false;
+    parse-dialect(dialect-path(name)) --> program;
     program --> RefV(dialect);
     read(dialect) --> Obj(_, outers, slots, methods);
     update(dialect, Obj(fresh, outers, slots, methods)) --> _;
@@ -65,12 +66,17 @@ rules
   where
     stm =!=> Dialect(_).
   
-  
-  DCache |- dialect-cache-is-cached(name) --> DCache[name?].
+  DCache |- dialect-cache-has(name) --> DCache[name?].
   
   dialect-cache-add(name, dialect) :: DCache --> dialect :: DCache { name |--> dialect, DCache}.
   
   dialect-cache-get(name) :: DCache --> DCache[name] :: DCache.
+  
+  ProgPath |- dialect-path(name) --> native-parent-directory(ProgPath) ++ "/" ++ name
+  where
+    name != "standardGrace".
+  
+  dialect-path("standardGrace") --> native-standardgrace(). 
   
 rules
 
