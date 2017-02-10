@@ -11,7 +11,7 @@ signature
   
   constructors
     //     self   outer  params             body   env   decl. fields   public
-    ClosV: Addr * Addr * List(Identifier) * Code * Env * Bool * Source * Return-Marker -> V
+    ClosV: Addr * Addr * List(Identifier) * List(Identifier) * Code * Env * Bool * Source * Return-Marker -> V
     
     No-Return: Return-Marker
     Return-To: Int -> Return-Marker
@@ -55,7 +55,7 @@ rules
   
   access-local(x, []) --> read-local(x).
 
-  call-qualified(clos@ClosV(_, _, _, _, _, _, _, _), x, vs) --> call(clos, vs, x)
+  call-qualified(clos@ClosV(_, _, _, _, _, _, _, _, _), x, vs) --> call(clos, vs, x)
   where
     str-starts-with(x, "apply") == true.
     
@@ -64,13 +64,14 @@ rules
     lookup-local-method(recv, x) --> clos;
     disambiguate-closure(clos, x) --> _.
 
-  call(clos@ClosV(S, O, params, code, L1, _, _, R), vs, name) :: L --> v :: L
+  call(clos@ClosV(S, O, params, locals, code, L1, _, _, R), vs, name) :: L --> v :: L
   where
     ensure-access(name, clos, S) --> _;
-    update-locals(params, vs) :: L1 --> _ :: L2;
-    S, O |- handle-return(code, R) :: L2 --> v :: L3.
+    add-locals(locals) :: L1 --> _ :: L2;
+    update-locals(params, vs) :: L2 --> _ :: L3;
+    S, O |- handle-return(code, R) :: L3 --> v :: L4.
   
-  closure-source(ClosV(_, _, _, _, _, _, Src, _)) --> Src.
+  closure-source(ClosV(_, _, _, _, _, _, _, Src, _)) --> Src.
   
 signature
   arrows
@@ -108,18 +109,18 @@ rules
   disambiguate-closure(clos, x) --> disambiguate-closure(clos, DoneV(), x).
 
   // closure was defined in bottom and found in local
-  disambiguate-closure(clos@ClosV(_, _, _, _, _, _, src, _), _, _) --> clos
+  disambiguate-closure(clos@ClosV(_, _, _, _, _, _, _, src, _), _, _) --> clos
   where
     src-is-base(src) --> true.
 
   // closure was only found in local
-  disambiguate-closure(clos@ClosV(_, _, _, _, _, _, _, _), DoneV(), _) --> clos.
+  disambiguate-closure(clos@ClosV(_, _, _, _, _, _, _, _, _), DoneV(), _) --> clos.
   
   // closure was only found in outer
-  disambiguate-closure(DoneV(), clos@ClosV(_, _, _, _, _, _, _, _), _) --> clos.
+  disambiguate-closure(DoneV(), clos@ClosV(_, _, _, _, _, _, _, _, _), _) --> clos.
 
   // closure found in inherited and in outer
-  disambiguate-closure(ClosV(_, _, _, _, _, _, src, _), ClosV(_, _, _, _, _, _, _, _), x) --> DoneV()
+  disambiguate-closure(ClosV(_, _, _, _, _, _, _, src, _), ClosV(_, _, _, _, _, _, _, _, _), x) --> DoneV()
   where
     src-is-base(src) --> false;
     halt-error("Method '" ++ x ++ "' is defined both as an inherited/used" ++

@@ -13,39 +13,32 @@ signature
     L : Env
 
   arrows
-    alloc-params(List(Identifier)) --> U
-    alloc-locals(Code) --> U
-    Statement -alloc-> U
+    collect-locals(Code, List(Identifier)) --> List(Identifier)
+    declaration-name(Declaration) --> Identifier
+    
 
 rules
   
-  alloc-params([]) --> U().
+  collect-locals([], xs) --> xs.
+
+  collect-locals([c | code], xs) --> collect-locals(code, xs)
+  where
+    c =!=> Declaration(_).
   
-  alloc-params([id | params]) --> alloc-params(params)
+  collect-locals([Declaration(d) | code], xs) --> collect-locals(code, [x | xs])
   where
-    add-local(id, UninitializedV()) --> _.
+    declaration-name(d) --> x;
+    ensure-valid-local(x) --> _.
+
+  declaration-name(VariableL(x, _, _, _)) --> x.
   
-  alloc-locals([]) --> U().
-
-  alloc-locals([s | xs]) --> alloc-locals(xs)
-  where
-    s -alloc-> _.
-
-  Declaration(VariableL(id, _, _, _)) -alloc-> U()
-  where
-    add-local(id, UninitializedV()) --> _.
-
-  Declaration(ConstantL(id, _, _, _)) -alloc-> U()
-  where
-    add-local(id, UninitializedV()) --> _.
-
-  _ : Statement -alloc-> U().
+  declaration-name(ConstantL(x, _, _, _)) --> x.
 
 /* ======== local environment operations ========== */
 signature
   arrows
-    add-local(Identifier, V) --> U
-    add-locals(List(Identifier), List(V)) --> U
+    add-local(Identifier) --> U
+    add-locals(List(Identifier)) --> U
     
     update-local(Identifier, V) --> U
     update-locals(List(Identifier), List(V)) --> U
@@ -54,35 +47,38 @@ signature
     read-local(String) --> V
     snapshot-locals() --> Env
     
-    ensure-valid-local(String) --> U
+    ensure-valid-local(Identifier) --> U
     
     
 rules
 
-  add-local(ID(x), v) :: L --> U() :: L {x |--> addr, L}
+  add-local(ID(x)) :: L --> U() :: L {x |--> addr, L}
   where
-    ensure-valid-local(x) --> _;
-    v-allocate(v) --> addr.
+    v-allocate(UninitializedV()) --> addr.
 
-  add-local(WildCard(), _) --> U().
+  add-local(WildCard()) --> U().
 
+  add-locals([]) --> U().
 
+  add-locals([x | xs]) --> add-locals(xs)
+  where
+    add-local(x) --> _.
 
-  ensure-valid-local(x) --> U()
+  ensure-valid-local(ID(x)) --> U()
   where
     is-local(x) --> true;
     halt-error("Local '" ++ x ++ "' may not redefine local method.", "") --> _.
   
-  ensure-valid-local(x) --> U()
+  ensure-valid-local(ID(x)) --> U()
   where
     is-local(x) --> false;
-    lookup-local-method(current-self(), x) --> ClosV(_, _, _, _, _, _, _, _);
+    lookup-local-method(current-self(), x) --> ClosV(_, _, _, _, _, _, _, _, _);
     halt-error("Local '" ++ x ++ "' may not redefine method from self.", "") --> _.
   
-  ensure-valid-local(x) --> U()
+  ensure-valid-local(ID(x)) --> U()
   where
     is-local(x) --> false;
-    lookup-outer-method(current-outer(), x) --> ClosV(_, _, _, _, _, _, _, _);
+    lookup-outer-method(current-outer(), x) --> ClosV(_, _, _, _, _, _, _, _, _);
     halt-error("Local '" ++ x ++ "' may not shadow method from an enclosing scope.", "") --> _.
   
   ensure-valid-local(_) --> U().
@@ -117,12 +113,6 @@ rules
 
   read-local(x) :: L --> ensure-defined(v-read(L[x])) :: L.
 
-  add-locals([], []) --> U().
-
-  add-locals([x | xs], [v | vs]) --> add-locals(xs, vs)
-  where
-    log("adding locals") --> _;
-    add-local(x, v) --> _.
 
   snapshot-locals() :: L --> L :: L.
 
