@@ -27,12 +27,48 @@ rules
   
   collect-locals([Declaration(d) | code], xs) --> collect-locals(code, [x | xs])
   where
-    declaration-name(d) --> x;
-    ensure-valid-local(x) --> _.
+    declaration-name(d) --> x.
 
   declaration-name(VariableL(x, _, _, _)) --> x.
   
   declaration-name(ConstantL(x, _, _, _)) --> x.
+
+
+/* ======== local variable error checking ========= */
+signature
+  arrows
+    error-check-locals(List(Identifier)) --> U
+  
+    ensure-valid-local(String) --> U
+
+rules
+
+  error-check-locals([]) --> U().
+  
+  error-check-locals([ID(x) | ids]) :: L --> U() :: L
+  where
+    ensure-valid-local(x) --> _;
+    error-check-locals(ids) :: L { x |--> 0, L} --> _.
+  
+  ensure-valid-local(x) --> U()
+  where
+    is-local(x) --> true;
+    halt-error("Local '" ++ x ++ "' may not redefine local method.", "") --> _.
+  
+  ensure-valid-local(x) --> U()
+  where
+    is-local(x) --> false;
+    lookup-local-method(current-self(), x) --> ClosV(_, _, _, _, _, _, _, _, _);
+    halt-error("Local '" ++ x ++ "' may not redefine method from self.", "") --> _.
+  
+  ensure-valid-local(x) --> U()
+  where
+    is-local(x) --> false;
+    lookup-outer-method(current-outer(), x) --> ClosV(_, _, _, _, _, _, _, _, _);
+    halt-error("Local '" ++ x ++ "' may not shadow method from an enclosing scope.", "") --> _.
+  
+  ensure-valid-local(_) --> U().
+  
 
 /* ======== local environment operations ========== */
 signature
@@ -46,9 +82,6 @@ signature
     is-local(String) --> Bool
     read-local(String) --> V
     snapshot-locals() --> Env
-    
-    ensure-valid-local(Identifier) --> U
-    
     
 rules
 
@@ -64,26 +97,6 @@ rules
   where
     add-local(x) --> _.
 
-  ensure-valid-local(ID(x)) --> U()
-  where
-    is-local(x) --> true;
-    halt-error("Local '" ++ x ++ "' may not redefine local method.", "") --> _.
-  
-  ensure-valid-local(ID(x)) --> U()
-  where
-    is-local(x) --> false;
-    lookup-local-method(current-self(), x) --> ClosV(_, _, _, _, _, _, _, _, _);
-    halt-error("Local '" ++ x ++ "' may not redefine method from self.", "") --> _.
-  
-  ensure-valid-local(ID(x)) --> U()
-  where
-    is-local(x) --> false;
-    lookup-outer-method(current-outer(), x) --> ClosV(_, _, _, _, _, _, _, _, _);
-    halt-error("Local '" ++ x ++ "' may not shadow method from an enclosing scope.", "") --> _.
-  
-  ensure-valid-local(_) --> U().
-  
-  
   update-locals([], []) --> U().
   
   update-locals([id | ids], [v | vs]) --> update-locals(ids, vs)

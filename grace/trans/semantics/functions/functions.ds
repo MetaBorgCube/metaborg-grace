@@ -64,15 +64,19 @@ rules
 rules /* closure construction */
 
   Src |- method-closure(MethodL(_, _, annos, params, _, _, code)) :: L -->
-    ClosV(S, O, params, collect-locals(code, params), code, L, has-anno-public(annos), Src, Return-To(fresh)) :: L
+    ClosV(S, O, params, locals, code, L, has-anno-public(annos), Src, Return-To(fresh)) :: L
   where
     current-self() --> S;
-    current-outer() --> O.
+    current-outer() --> O;
+    collect-locals(code, params) --> locals;
+    error-check-locals(locals) --> _.
 
-  block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, collect-locals(code, params), code, L, true, src-base(), No-Return()) :: L
+  block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, locals, code, L, true, src-base(), No-Return()) :: L
   where
     current-self() --> S;
-    current-outer() --> O.
+    current-outer() --> O;
+    collect-locals(code, params) --> locals;
+    error-check-locals(locals) --> _.
 
   copy-closure(ClosV(S, O, params, locals, code, L, _, Src, No-Return())) --> ClosV(S, O, params, locals, code, L, false, Src', No-Return())
   where
