@@ -9,23 +9,23 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class string_call_2 extends TermBuild {
+public class string_call_native_2 extends TermBuild {
 
 	@Child
-	protected TermBuild leftNode;
-	@Child
 	protected TermBuild opNode;
+	@Child
+	protected TermBuild termNode;
 	
-	public string_call_2(SourceSection source, TermBuild l, TermBuild op) {
+	public string_call_native_2(SourceSection source, TermBuild op, TermBuild term) {
 		super(source);
-		this.leftNode = l;
 		this.opNode = op;
+		this.termNode = term;
 	}
 
 	@Override
 	public IVTerm executeGeneric(VirtualFrame frame) {
-		final StringV_1_Term left = TypesGen.asStringV_1_Term(leftNode.executeGeneric(frame));
 		final String op = TypesGen.asString(opNode.executeGeneric(frame));
+		final StringV_1_Term left = TypesGen.asStringV_1_Term(termNode.executeGeneric(frame));
 		switch (op) {
 		case "size":
 			return doSize(left);
@@ -38,8 +38,8 @@ public class string_call_2 extends TermBuild {
 		return new NumV_1_Term(left.get_1().length());
 	}
 	
-	public static TermBuild create(SourceSection source, TermBuild left, TermBuild op) {
-		return new string_call_2(source, left, op);
+	public static TermBuild create(SourceSection source, TermBuild op, TermBuild term) {
+		return new string_call_native_2(source, op, term);
 	}
 
 }

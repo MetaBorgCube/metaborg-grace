@@ -8,8 +8,6 @@ object {
               11;
           };
           
-          self.f;
-          self.g;
       };
   };
   
@@ -24,8 +22,6 @@ object {
               23;
           };
           
-          self.f;
-          self.g;
       };
   };
   

@@ -11,7 +11,6 @@ imports
   trans/semantics/strings
   trans/semantics/numbers
   trans/semantics/lineups
-  trans/semantics/functions
   trans/semantics/statements
   trans/semantics/imports
   trans/semantics/visibility
@@ -35,7 +34,6 @@ signature
     SlotWrite : Int * Exp -> Statement 
 
   constructors
-                // outers
     Obj: Addr * List(Addr) * Slots * Methods -> Object
     RefV: Addr -> V {implicit}
   
@@ -43,161 +41,321 @@ signature
     S : Addr
     O : Addr
     
-  arrows
-    get-scopes(List(Closure)) --> List(Addr)
-  
 rules
 
-  S, P Exec() |- ObjectL(inherit, uses, code) :: L --> S'
+  S, P Exec() |- ObjectL(inherit, uses, code) --> S'
   where
-    log("starting object construction, L: " ++ str(L:AST)) --> _;
     new-object(S) --> S';
-    S S', O S, P Flatten(), Src Inherit() |- inherit --> FlatObject(closures-inherited);
-    log("after inherit flatten") --> _;
-    S S', O S, P Flatten(), Src Trait() |- uses --> FlatObject(closures-used);
-    log("after use flatten") --> _;
-    closures-inherited ++ closures-used ++ [Closure(S, code, Bottom(), L)] => closures;
+    snapshot-locals() --> L;
+    S S', O S, P Flatten() |- inherit --> oc-inherit;
+    S S', O S, P Flatten() |- uses --> ocs-use;
+    ObjC(S, src-base(), L, code, oc-inherit, ocs-use, [], []) => oc;
+    read(S') --> Obj(outer, _, slots, methods);
+    update(S', Obj(outer, objc-gather-scopes(oc), slots, methods)) --> _;
+    S' |- install-members-top(oc) --> oc';
+    S' |- init-object(oc') --> U().
 
-    log("pre-install closures from object construction: " ++
-      str(closures : AST)) --> _;
-    read(S') --> Obj(a,_,c,d);
-    log("after reading object") --> _;
-    
-    update(S', Obj(a, get-scopes(closures), c, d)) --> _;
-    
-    log("after updating object") --> _;
-    S' |- install-members(closures) --> closures';
-    
-    log("post-install closures' from object construction: " ++
-      str(closures' : AST)) --> _;
-    S' |- init-object(closures') --> U();
-    log-object-creation(S') --> _.
-
-  SlotRead(i) --> read-slot(i).
+  SlotRead(i) --> ensure-defined(read-slot(i)).
   
   SlotWrite(i, e) --> DoneV()
   where
     e --> v;
     write-slot(i, v) --> _.
     
-  get-scopes([]) --> [].
 
-  get-scopes([Closure(addr,_,_,_) | cs]) --> [addr | get-scopes(cs)].
 
-/* ========== INIT METHODS =========== */
 
+
+
+/* ========== OBJECT FLATTENING =========== */
 signature
-  arrows
-    install-members(Closures) --> Closures
-    install-members-aux(Closures) --> Closures
+  sorts
+    Phase
+  
+  constructors
+    Exec    : Phase
+    Flatten : Phase
     
-    Closure -member-> Closure
-    Code -member-> Code
+  sort aliases
+    Source = Int
+  
+  components
+    P : Phase
+    Src : Int
+    
+  constructors
+    ObjC: Addr * Source * Env * Code * V * List(V) * List(Alias) * List(Exclude) -> V
+    NoObjC: V
+    
+  arrows
+    Inherit --> V
+    List(Use) --> List(V)
+
+  arrows
+    objc-rec-aliases(V, List(Alias)) --> V
+    objc-rec-excludes(V, List(Exclude)) --> V
+    objc-gather-scopes(V) --> List(Addr)
+    objc-gather-scopes-concat(List(V)) --> List(Addr)
+    
+    src-base() --> Source
+    src-next() --> Source
+    src-previous() --> Source
+    src-is-base(Source) --> Bool
+    
+rules
+
+  S, P Flatten(), Src |- ObjectL(inherit, uses, code) --> ObjC(S, Src, L, code, oc-inherit, ocs-use, [], [])
+  where
+    snapshot-locals() --> L;
+    O S, P Flatten() |- inherit --> oc-inherit;
+    O S, P Flatten() |- uses --> ocs-use.
+
+  P Flatten() |- MCallRecvL(e, ID(x), es) --> v
+  where
+    P Exec() |- e --> recv;
+    P Exec() |- es --> vs;
+    P Flatten() |- call-qualified(recv, x, vs) --> v.
+
+  NoInherit() --> NoObjC().
+  
+  InheritL(e, aliases, excludes) --> objc-rec-aliases(objc-rec-excludes(oc, excludes), aliases)
+  where
+    Src src-next() |- e --> oc@ObjC(_, _, _, _, _, _, _, _).
+  
+  [] : List(Use) --> [].
+
+  [UseL(e, aliases, excludes) | uses] : List(Use) --> [oc'|ocs]
+  where
+    Src src-next() |- e --> oc;
+    objc-rec-aliases(objc-rec-excludes(oc, excludes), aliases) --> oc';
+    Src src-next() |- uses --> ocs.
+
+
+
+  objc-gather-scopes(NoObjC()) --> [].
+
+  objc-gather-scopes(ObjC(O, _, _, _, inherit, uses, _, _)) --> [O | scopes]
+  where
+    objc-gather-scopes-concat([inherit | uses]) --> scopes.
+
+  objc-gather-scopes-concat([]) --> [].
+  
+  objc-gather-scopes-concat([oc | ocs]) --> ocs1 ++ ocs2 
+  where
+    objc-gather-scopes(oc) --> ocs1;
+    objc-gather-scopes-concat(ocs) --> ocs2.
+
+  objc-rec-excludes(ObjC(outer, src, L, code, inherit, use, aliases, _), excludes) --> ObjC(outer, src, L, code, inherit, use, aliases, excludes).
+  
+  objc-rec-aliases(ObjC(outer, src, L, code, inherit, use, _, excludes), aliases) --> ObjC(outer, src, L, code, inherit, use, aliases, excludes).
+
+  src-base() --> 0.
+  
+  Src |- src-next() --> addI(Src, 1).
+  
+  Src |- src-previous() --> addI(Src, -1)
+  where
+    gtI(Src, 0) == true.
+  
+  src-is-base(Src) --> eqI(Src, 0). 
+
+
+
+/* ========== OBJECT MEMBER INSTALLATION ===== */
+signature
+  sort aliases
+    Aliases = List(Alias)
+    Excludes = List(Exclude)
+  
+  arrows
+    install-members-top(V) --> V
+    install-members(V) --> V
+    install-members-map(List(V)) --> List(V)
+    
+    install-code(Code)--> Code
+    
+    install-declaration(Declaration) --> Code
+    
+    install-import(Statement) --> Code
     
     install-method(Declaration) --> U
     
+    install-alias(String, V) --> U
+    install-aliases(String, V) --> U
+    
+    exclude-method(String) --> Bool
+    
+    ensure-unique-method(String, V) --> U
+    
+    install-aliases() --> U
+    exclude-methods() --> U
+    
+  components
+    Als: Aliases
+    Exs: Excludes
+  
 rules
 
-  install-members(closures) --> closures'
+  install-members-top(v) --> v'
   where
-    log("installing members ...") --> _;
-    install-members-aux(closures) :: NS 0, GS {} --> closures' :: NS _, GS _;
-    log("installed members ...") --> _.
+    install-members(v) :: NS 0, GS {} --> v'.
 
-  install-members-aux([]) --> [].
+  install-members(NoObjC()) --> NoObjC().
   
-  install-members-aux([clos | closs]) --> [clos' | install-members-aux(closs)]
+  install-members(ObjC(O, Src, L, code, inherit, uses, Als, Exs)) --> ObjC(O, Src, L, code', inherit', uses', Als, Exs)
   where
-    clos :: L {} -member-> clos' :: L L;
-    log("-member-> ima " ++ str(clos) ++ " to " ++ str(clos') ++ ", L:" ++ str(L:AST)) --> _.
+    install-members(inherit) --> inherit';
+    install-members-map(uses) --> uses';
+    O, Src |- install-code(code) :: L, Als, Exs --> code' :: L _, Als _, Exs _.
   
-  Closure(O, code, src, env) -member-> Closure(O, current-method-names(), code', src, env)
+  install-members-map([]) --> [].
+  
+  install-members-map([oc | ocs]) --> [oc' | ocs']
   where
-    log("-member-> transforming closure? env: " ++ str(env:AST)) --> _;
-    O, Src src |- code :: L env -member-> code'. // set locals from closure?
+    install-members(oc) --> oc';
+    install-members-map(ocs) --> ocs'.
+  
+  install-code([]) --> []
+  where
+    install-aliases() --> _;
+    exclude-methods() --> _.
+  
+  install-code([Declaration(d) | code]) --> decl-code ++ code'
+  where
+    install-declaration(d) --> decl-code;
+    install-code(code) --> code'.
+
+  install-code([imp@Import(_, _, _) | code]) --> imp-code ++ code'
+  where
+    install-import(imp) --> imp-code;
+    install-code(code) --> code'.
+
+  install-code([e | code]) --> [e | code']
+  where
+    e =!=> Declaration(_);
+    e =!=> Import(_, _, _);
+    install-code(code) --> code'.
+
+  install-declaration(m@MethodL(_, _, _, _, _, _, _)) --> []
+  where
+    install-method(m) --> _.
+
+  install-declaration(VariableL(ID(x), _, annos, e)) --> [SlotWrite(i, e)]
+  where
+    add-slot(x) --> i;
+    install-method(field-getter(x, i, has-anno-readable(annos))) --> _;
+    install-method(field-setter(x, i, has-anno-writable(annos))) --> _.
+
+  install-declaration(VariableL(WildCard(), _, _, e)) --> [Expression(e)].
+
+  install-declaration(ConstantL(ID(x), _, annos, e)) --> [SlotWrite(i, e)]
+  where
+    add-slot(x) --> i;
+    install-method(field-getter(x, i, has-anno-readable(annos))) --> _.
+
+  install-declaration(ConstantL(WildCard(), _, _, e)) --> [Expression(e)].
+  
+  install-import(Import(name, ID(x), annos)) --> []
+  where
+    add-slot(x) --> i;
+    write-slot(i, load-import(name)) --> _;
+    install-method(field-getter(x, i, has-anno-readable(annos))) --> _.
+  
+  install-method(m@MethodL(ID(x), _, _, _, _, _, _)) --> U()
+  where
+    method-closure(m) --> clos;
+    install-aliases(x, clos) --> _;
+    exclude-method(x) --> excluded;
+    case excluded of {
+      false =>
+        ensure-unique-method(x, clos) --> _;
+        add-method(x, clos) --> _
+      otherwise =>
+    }.
+
+  install-aliases(_, _) :: Als [] --> U() :: Als [].
+
+  install-aliases(name, clos) :: Als [a@AliasL(_, ID(x)) | Als] --> u :: Als [a | Als']
+  where
+    name != x;
+    install-aliases(name, clos) :: Als --> u :: Als'.
+  
+  install-aliases(name, clos) :: Als [AliasL(ID(x'), ID(x)) | Als] --> u :: Als'
+  where
+    name == x;
+    install-alias(x', clos) --> _;
+    install-aliases(name, clos) :: Als --> u :: Als'.
+
+  install-aliases() :: Als [] --> U() :: Als [].
+  
+  install-aliases() :: Als [AliasL(ID(x'), ID(x)) | Als] --> U() :: Als []
+  where
+    disambiguate-closure(lookup-local-method(current-self(), x), x) --> clos;
+    install-alias(x', clos) --> _;
+    install-aliases() :: Als --> _ :: Als _.
+
+  install-alias(x, clos@ClosV(_, _, _, _, _, _, _, _, _)) --> U()
+  where
+    copy-closure(clos) --> clos';
+    ensure-unique-method(x, clos') --> _;
+    add-method(x, clos') --> _.
+
+  exclude-method(_) :: Exs [] --> false :: Exs [].
+  
+  exclude-method(name) :: Exs [ExcludeL(ID(x)) | Exs] --> true :: Exs
+  where
+    name == x.
+  
+  exclude-method(name) :: Exs [e@ExcludeL(ID(x)) | Exs] --> excluded :: Exs [e | Exs']
+  where
+    name != x;
+    exclude-method(name) :: Exs --> excluded :: Exs'.
     
-  [] : Code :: L -member-> []
-  where
-    log("-member-> running code ..., L: " ++ str(L:AST)) --> _.
+  exclude-methods() :: Exs [] --> U() :: Exs [].
   
-  [Declaration(m@MethodL(_, _, _, _, _, _, _)) | cs] : Code :: L -member-> cs'
+  exclude-methods() :: Exs [ExcludeL(ID(x)) | Exs] --> U() :: Exs []
   where
-    log("-member-> installing method..., L: " ++ str(L:AST)) --> _;
-    install-method(m) --> _;
-    cs -member-> cs'.
+    disambiguate-closure(lookup-local-method(current-self(), x), x) --> _;
+    remove-method(x) --> _;
+    exclude-methods() :: Exs --> _ :: Exs _.
   
-  [Declaration(VariableL(ID(x), _, ann, e)) | cs] : Code :: L -member-> [SlotWrite(i, e) | cs']
+  ensure-unique-method(x, clos) --> U()
   where
-    log("-member-> installing var..., L: " ++ str(L:AST)) --> _;
-    add-slot(x) --> i;
-    install-method(field-getter(x, i, is-readable(ann))) --> _;
-    install-method(field-setter(x, i, is-writable(ann))) --> _;
-    cs -member-> cs'.
-
-  [Declaration(VariableL(WildCard(), _, _, e)) | cs] : Code :: L -member-> [Expression(e) | cs']
-  where
-    log("-member-> installing var wldcrd..., L: " ++ str(L:AST)) --> _;
-    cs -member-> cs'.
-
-  [Import(name, ID(x), ann) | cs] : Code -member-> cs'
-  where
-    add-slot(x) --> i;
-    get-import-object(name) --> iAddr;
-    write-slot(i, RefV(iAddr)) --> _;
-    install-method(field-getter(x, i, is-readable(ann))) --> _;
-    cs -member-> cs'.
+    lookup-local-method(current-self(), x) --> clos';
+    case clos' of {
+      ClosV(_, _, _, _, _, _, _, _, _) =>
+        closure-source(clos) --> src;
+        closure-source(clos') --> src';
+        case eqI(src, src') of {
+          true =>
+            halt-error("Duplicate method: ", x) --> _
+          otherwise =>
+        }
+      otherwise =>
+    }.
   
-  [Declaration(ConstantL(ID(x), _, ann, e)) | cs] : Code :: L -member-> [SlotWrite(i, e) | cs']
-  where
-    log("-member-> installing def..., L: " ++ str(L:AST)) --> _;
-    add-slot(x) --> i;
-    install-method(field-getter(x, i, is-readable(ann))) --> _;
-    cs -member-> cs'.
-    
-  [Declaration(ConstantL(WildCard(), _, _, e)) | cs] : Code -member-> [Expression(e) | cs']
-  where
-    cs -member-> cs'.
-  
-  [c | cs] : Code :: L -member-> [c | cs']
-  where
-    log("-member-> code [_|_]..., L: " ++ str(L:AST)) --> _;
-    cs -member-> cs'.
-  
-  install-method(m@MethodL(ID(name), _, _, _, _, _, _)) --> U()
-  where
-    add-method(name, method-closure(m)) --> _.
-
-/* ========== OBJECT INIT ======== */
+/* ============== OBJECT INIT ========== */
 signature
   arrows
-    init-object(Closures) --> U
-    
-    Closure -obji-> U
-    Code -obji-> U
-    Statement -obji -> U
+    init-object(V) --> U
+    init-object-map(List(V)) --> U
     
 rules
   
-  init-object([]) --> U().
+  init-object(NoObjC()) --> U().
   
-  init-object([clos | closs]) --> init-object(closs)
+  init-object(ObjC(O, _, L, code, inherit, used, _, _)) --> U()
   where
-    clos -obji-> _.
-  
-  Closure(O, _, code, _, L) -obji-> U()
-  where
-    O |- code :: L -obji-> _.
-    
-  [] : Code -obji-> U().
-  
-  [c | cs] : Code -obji-> U()
-  where
-    c -obji-> _;
-    cs -obji-> _.
+    init-object(inherit) --> _;
+    init-object-map(used) --> _;
+    O |- code :: L --> _.
 
-  s : Statement -obji-> U()
+  init-object-map([]) --> U().
+  
+  init-object-map([oc | ocs]) --> U()
   where
-    s --> _.
+    init-object(oc) --> _;
+    init-object-map(ocs) --> _.
 
 /* ========== FIELD METHOD GENERATION ======= */
 signature
@@ -211,82 +369,13 @@ signature
 rules
 
   field-getter(x, i, c) -->
-    MethodL(ID(x), [], to-annotation(c), [], [], no-type(), [SlotRead(i)]).
+    MethodL(ID(x), [], visibility-annos(c), [], [], no-type(), [SlotRead(i)]).
 
   field-setter(x, i, c) -->
-    MethodL(ID(mksettername(x)), [], to-annotation(c), [ID("p")], [],
-      no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))]).
-
-/* ========== OBJECT FLATTENING =========== */
-signature
-  sorts
-    Phase
-  
-  constructors
-    Exec    : Phase
-    Flatten : Phase
-    Inherit : Source
-    Trait   : Source
-    Bottom  : Source
-    
-  components
-    P : Phase
-    Src : Source
-    
-  sorts
-    Closure
-    Source
-    
-  sort aliases
-    Closures = List(Closure)
-
-  constructors
-    Closure: Addr * Code * Source * Env -> Closure
-    Closure: Addr * List(String) * Code * Source * Env -> Closure
-    FlatObject: List(Closure) -> V
-
-  arrows
-    Inherit --> V
-    List(Use) --> V
-
-rules
-
-  S, P Flatten(), Src src |- ObjectL(inherit, uses, code) :: L -->
-    FlatObject(closures-inh ++ closures-uses ++ [Closure(S, code, src, L)]) :: L''
-  where
-    log("flattening object, current src: " ++ str(src) ++ " L: " ++ str(L:AST)) --> _;
-    O S, P Flatten(), Src Inherit() |- inherit :: L --> FlatObject(closures-inh) :: L';
-    log("done flattening inherit") --> _;
-    O S, P Flatten(), Src Trait() |- uses :: L' --> FlatObject(closures-uses) :: L'';
-    log("post flattening object, L': " ++ str(L':AST) ++ ", L'': " ++ str(L'':AST)) --> _.
-
-  P Flatten() |- MCallRecvL(e, ID(x), es) :: L --> v
-  where
-    log("method call recv during flatten(), L: " ++ str(L:AST)) --> _;
-    P Exec() |- e --> recv;
-    P Exec() |- es --> vs;
-    P Flatten() |- resolve-and-call-qual(recv, x, vs) --> v.
-
-  NoInherit() --> FlatObject([]).
-
-  InheritL(e, as, ex) --> FlatObject(remove-excludes(make-aliases(cls, as), ex))
-  where
-    log("InheritL(e,_,_), excludes: " ++ str(ex:AST)) --> _; // TODO fresh object check
-    e --> FlatObject(cls);
-    log("InheritL(e,_,_) done, ls: " ++ str(cls:AST)) --> _.
-
-  [] : List(Use) --> FlatObject([]).
-
-  [UseL(e, as, ex) | uses] : List(Use) --> FlatObject(cls' ++ closures')
-  where
-    e --> FlatObject(closures);
-    uses --> FlatObject(closures');
-    remove-excludes(make-aliases(closures, as), ex) --> cls'.
+    MethodL(ID(mksettername(x)), [], visibility-annos(c), [ID("p")], [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))]).
 
 /* ======== OBJECT META-FUNCTIONS ========= */
-
 signature
- 
   sorts
     StatementResult
     
@@ -302,22 +391,8 @@ signature
     write-slot(Int, V) --> U
     
     add-method(String, V) --> U
-    check-add-method(String, V) --> U
-    check-method-params(List(Identifier)) --> U
-
-    make-aliases(List(Closure), List(Alias)) --> List(Closure)
-    make-alias(List(Closure), Alias) --> List(Closure)
-
-    remove-excludes(List(Closure), List(Exclude)) --> List(Closure)
-    remove-exclude(List(Closure), Exclude) --> List(Closure)
-
-    find-closure(List(Closure), List(Closure), Identifier) --> (Closure * List(Closure))
-    copy-method(Closure, Identifier, Identifier) --> Closure
-    copy-method-aux(List(Statement), Identifier, Identifier) --> StatementResult
-    remove-method(Closure, Identifier) --> Closure
-    remove-method-aux(List(Statement), List(Statement), Identifier) --> (List(Statement) * List(Statement))
     
-    closure-contains-method(Closure, Identifier) --> Bool
+    remove-method(String) --> U
     
     lookup-local-method(V, String) --> V
     lookup-outer-method(V, String) --> V
@@ -373,118 +448,10 @@ rules
   S |- add-method(x, v) --> U()
   where
     read(S) --> Obj(O, outers, slots, methods);
-    log("S: " ++ int2string(S : Int) ++ " O " ++ int2string(O : Int) ++
-      " new method: " ++ x ++ " -> " ++ str(v)) --> _;
-    check-add-method(x, v) --> _;
     update(S, Obj(O, outers, slots, {x |--> v, methods})) --> _.
 
-  check-add-method(_, ClosV(_,_,ps,_,_,_,_,_)) --> U()
-  where
-    check-method-params(ps) --> _.
 
-  check-add-method(_, _) --> U()
-  where
-    log("anything else?") --> _.
 
-  check-method-params([]) --> U().
-
-  check-method-params([WildCard() | ps]) --> check-method-params(ps).
-
-  check-method-params([ID(p) | ps]) --> check-method-params(ps)
-  where
-    check-add-local(p) --> _.
-  
-  S |- current-method-names() --> allkeys(methods)
-  where
-    read(S) --> Obj(_, _, _, methods).
-
-  make-aliases(closures, []) --> closures
-  where
-    log("make-aliases: no aliases to make") --> _.
-
-  make-aliases(closures, ass@[a | as]) --> make-aliases(closures', as)
-  where
-    log("making aliases: closures: " ++ str(closures:AST) ++ " aliases: " ++ str(ass:AST)) --> _;
-    make-alias(closures, a) --> closures';
-    log("post making alias: closures': " ++ str(closures:AST)) --> _.
-
-  make-alias(closures, AliasL(toId,fromId)) --> [clos' | rest]
-  where
-    find-closure(closures, [], fromId) --> (clos, rest);
-    copy-method(clos, toId, fromId) --> clos'.
-
-  remove-excludes(closures, []) --> closures
-  where
-    log("remove-excludes: no exclusions to remove") --> _.
-
-  remove-excludes(closures, exss@[ex | exs]) --> remove-excludes(closures', exs)
-  where
-    log("removing excludes: closures: " ++ str(closures:AST) ++ " excludes: " ++ str(exss:AST)) --> _;
-    remove-exclude(closures, ex) --> closures';
-    log("post removing excludes: closures': " ++ str(closures:AST)) --> _.
-
-  remove-exclude(closures, ExcludeL(id)) --> [clos' | rest]
-  where
-    find-closure(closures, [], id) --> (clos, rest);
-    remove-method(clos, id) --> clos'.
-
-  find-closure([], not, ID(name)) --> (U() : Closure, not)
-  where
-    halt-error("Method to alias/exlude not found: ", name) --> _.
-
-  find-closure([clos | closs], not, id) --> (clos, not ++ closs)
-  where
-    closure-contains-method(clos, id) --> res;
-    res == true.
-
-  find-closure([clos | closs], not, id) --> find-closure(closs, [clos | not], id)
-  where
-    closure-contains-method(clos, id) --> res;
-    res == false.
-
-  closure-contains-method(clos@Closure(_,[],_,_), _) --> false
-  where
-    log("closure-contains-method Closure(: " ++ str(clos:AST)) --> _.
-
-  closure-contains-method(clos@Closure(_, [Declaration(MethodL(ID(mName),_,_,_,_,_,_)) | _ ],_,_), ID(name)) --> true
-  where
-    log("closure-contains-method Closure(: " ++ str(clos:AST)) --> _;
-    mName == name.
-
-  closure-contains-method(clos@Closure(a, [Declaration(MethodL(ID(mName),_,_,_,_,_,_)) | decs ],c,d), id@ID(name))
-    --> closure-contains-method(Closure(a,decs,c,d), id)
-  where
-    log("closure-contains-method Closure(: " ++ str(clos:AST)) --> _;
-    mName != name.
-
-  copy-method(Closure(a, sts, c, d), toId, fromId) --> Closure(a,[st | sts],c,d)
-  where
-    copy-method-aux(sts, toId, fromId) --> res(st).
-
-  remove-method(Closure(a, sts, c, d), id) --> Closure(a,sts1 ++ sts2,c,d)
-  where
-    remove-method-aux(sts, [], id) --> (sts1, sts2).
-
-  remove-method-aux([st | sts1], sts2, id@ID(excludeName)) --> remove-method-aux(sts1, [st | sts2], id)
-  where
-    st => Declaration(MethodL(ID(name), _, _, _, _, _, _));
-    name != excludeName.
-
-  remove-method-aux([st | sts1], sts2, ID(excludeName)) --> (sts1,sts2)
-    where
-      st => Declaration(MethodL(ID(name), _, _, _, _, _, _));
-      name == excludeName.
-
-  copy-method-aux([st | sts], toId, fromId@ID(fromName)) --> copy-method-aux(sts, toId, fromId)
-  where
-    st => Declaration(MethodL(ID(name), _, _, _, _, _, _));
-    name != fromName.
-
-  copy-method-aux([st | _], toId, ID(fromName)) -->
-    res(Declaration(MethodL(toId, b, Annotations([Confidential()]),d,e,f,g)))
-  where
-    st => Declaration(MethodL(ID(name), b, _, d, e, f, g));
-    name == fromName.
 
   S |- current-method-names() --> allkeys(methods)
   where
@@ -494,8 +461,10 @@ rules
   where
     read(S) --> Obj(_,_,_, methods).
 
+
+
   // Lookup in self
-  lookup-local-method(S', x) --> v
+  lookup-local-method(RefV(S'), x) --> v
   where
     read(S') --> Obj(_, _, _, methods);
     case methods[x?] of {
@@ -505,8 +474,12 @@ rules
         DoneV() => v
     }.
 
+  lookup-local-method(v, _) --> DoneV()
+  where
+    v =!=> RefV(_).
+
   // Lookup in outers
-  lookup-outer-method(S', x) --> v
+  lookup-outer-method(RefV(S'), x) --> v
   where
     read(S') --> Obj(O', _, _, methods);
     case methods[x?] of {
@@ -522,6 +495,9 @@ rules
         }
     }.
 
+  lookup-outer-method(v, _) --> DoneV()
+  where
+    v =!=> RefV(_).
 
 
 signature

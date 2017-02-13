@@ -11,95 +11,97 @@ imports
   trans/semantics/strings
   trans/semantics/numbers
   trans/semantics/lineups
-  trans/semantics/functions
   trans/semantics/objectmodel
   trans/semantics/statements
   trans/semantics/imports
 
-signature
 
+/* ======= REACHABILITY CHECK ======= */
+signature
   sort aliases
     HeapData = Object
-  
   arrows
-    is-readable(Annotations) --> Bool
-    is-writable(Annotations) --> Bool
-    is-confidential(Annotations) --> Bool
-    is-public(Annotations) --> Bool
-    check-visibility(Bool, Addr, String) --> Bool
+    ensure-access(String, V, Addr) --> V
     
-    contains-annotation(List(Annotation), Annotation) --> Bool
+    can-reach(Addr) --> Bool
+    can-reach-map(List(Addr), Addr) --> Bool
+    
+rules
+  
+  ensure-access(x, clos@ClosV(_, _, _, _, _, _, true, _, _), recv) --> clos.
+  
+  ensure-access(x, clos@ClosV(_, _, _, _, _, _, false, _, _), recv) --> clos
+  where
+    can-reach(recv) --> visible;
+    case visible of {
+      false =>
+            halt-error("Requested confidential method '" ++ x ++ "' of object: " ++ int2string(recv) ++ " from outside", "") --> _
+      otherwise =>
+    }.
 
-    is-inside(List(Addr), Addr, String) --> Bool
-    is-inside-aux(Addr, Addr) --> Bool
+  S |- can-reach(S') --> true
+  where
+    S == S'.
 
-    to-annotation(Bool) --> Annotations
+  S |- can-reach(S') --> false
+  where
+    S != S';
+    is-stored(S) --> false.
+
+  S |- can-reach(S') --> maybe
+  where
+    S != S';
+    is-stored(S) --> true;
+    read(S) --> Obj(_, outers, _, _);
+    can-reach-map(outers, S') --> maybe.
+  
+  can-reach-map([], _) --> false.
+  
+  can-reach-map([S | ss], S') --> reachable'
+  where
+    S |- can-reach(S') --> reachable;
+    case reachable of {
+      false =>
+        can-reach-map(ss, S') --> reachable'
+      otherwise =>
+        true => reachable'
+    }.
+
+
+
+/* ==== VISIBILITY ANNOTATION PROCESSING ==== */
+signature
+
+  arrows
+    has-anno-readable(Annotations) --> Bool
+    has-anno-writable(Annotations) --> Bool
+    has-anno-confidential(Annotations) --> Bool
+    has-anno-public(Annotations) --> Bool
+    
+    has-anno(List(Annotation), Annotation) --> Bool
+    
+    visibility-annos(Bool) --> Annotations
     
 rules
 
-  is-readable(Annotations(as)) --> contains-annotation(as, Readable()).
+  has-anno-readable(Annotations(annos)) --> has-anno(annos, Readable()).
 
-  is-writable(Annotations(as)) --> contains-annotation(as, Writable()).
+  has-anno-writable(Annotations(annos)) --> has-anno(annos, Writable()).
 
-  is-confidential(Annotations(as)) --> contains-annotation(as, Confidential()).
+  has-anno-confidential(Annotations(annos)) --> has-anno(annos, Confidential()).
 
-  is-public(Annotations(as)) --> contains-annotation(as, Public()).
-  
-  contains-annotation([], _) --> false.
+  has-anno-public(Annotations(annos)) --> has-anno(annos, Public()).
 
-  contains-annotation([a | _], an) --> true
+  has-anno([], _) --> false.
+
+  has-anno([anno | _], anno') --> true
   where
-    a == an.
-
-  contains-annotation([a | as], an) --> contains-annotation(as, an)
+    anno == anno'.
+ 
+  has-anno([anno | annos], anno') --> has-anno(annos, anno')
   where
-    a != an.
-  
-  to-annotation(true) --> Annotations([Public()]).
+    anno != anno'.
 
-  to-annotation(false) --> Annotations([Confidential()]).
-   
-  check-visibility(true, _, _) --> true.
-  
-  // addr must be the self, or an outer of self
-  S |- check-visibility(false, addr, name) --> true
-  where
-    S == addr;
-    log("vis check on '" ++ name ++ "', caller == callee, true") --> _.
+  visibility-annos(true) --> Annotations([Public()]).
 
-  S |- check-visibility(false, addr, name) --> allowed
-  where
-    S != addr;
-    log("vis check on '" ++ name ++ "', caller != callee, S: " ++ int2string(S) ++
-        " addr: " ++ int2string(addr)) --> _;
-    read(S) --> Obj(_, outers, _, _);
-    log("vis check on '" ++ name ++ "', recurse to check outers.") --> _;
-    is-inside(outers, addr, name) --> allowed.
-
-  is-inside([], _, _) --> false.
-
-  is-inside([o | os], target, name) --> res
-  where
-    is-inside-aux(o, target) --> found;
-    case found of {
-      true => true => res
-      otherwise => is-inside(os, target, name) --> res
-    }.
-
-  // is o == target? does o have an outer that == target?
-  is-inside-aux(o, target) --> true
-  where
-    o == target;
-    log("o == target, o: " ++ int2string(o) ++ " target: " ++ int2string(target)) --> _.
-
-  is-inside-aux(o, target) :: H --> res
-  where
-    o != target;
-    log("o != target, o: " ++ int2string(o) ++ " target: " ++ int2string(target)) --> _;
-    case H[o?] of {
-      true =>
-        read(o) --> Obj(newOuter, _,_,_);
-        is-inside-aux(newOuter, target) --> res
-      otherwise =>
-        false => res
-    }.
+  visibility-annos(false) --> Annotations([Confidential()]).

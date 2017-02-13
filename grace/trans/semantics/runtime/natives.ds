@@ -11,7 +11,7 @@ signature
     int2string: Int -> String
     str: AST -> String
     eqI: Int * Int -> Bool
-    
+    gtI: Int * Int -> Bool
   arrows
     string2int(String) --> Int
     int2str(Int) --> String

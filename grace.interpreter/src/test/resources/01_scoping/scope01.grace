@@ -7,8 +7,6 @@ object {
       def b is public = outer.after;
   };
   
-  print(self.A.a);
-  
   def after = -1;
   
   print(self.A.b);

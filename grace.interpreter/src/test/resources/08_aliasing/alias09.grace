@@ -1,18 +1,13 @@
-trait A {
-  method f { 5; };
-  method g { 6; };
+class A {
+  def f = 5;
 };
 
-trait B {
-  method h { 7; };
-  method i { 8; };
+class B {
+  inherit A alias g = f;
 };
 
 object {
-  use A alias j = f alias k = g;
-  use B alias l = h alias m = i;
-  print(j);
-  print(k);
-  print(l);
-  print(m);
+  inherit B alias h = g;
+  print(h);
+  print(f);
 };

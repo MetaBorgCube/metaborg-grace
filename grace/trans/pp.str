@@ -7,7 +7,6 @@ imports
   libstratego-gpp
   libspoofax/sdf/pp
   libspoofax/editor/refactoring/-
-  
   pp/grace-parenthesize
   pp/grace-pp
 

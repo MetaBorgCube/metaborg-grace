@@ -2,8 +2,6 @@ object {
 
   method A {
       object {
-          self.f;
-          
           method f {
               print("A");
           };

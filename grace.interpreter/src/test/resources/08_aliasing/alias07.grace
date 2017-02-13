@@ -1,8 +1,15 @@
-trait A {
-  method f { 5; };
+method x {
+    object {
+        method g {
+            print("g");
+        };
+    };
 };
 
 object {
-  use A alias g = f;
-  print(g);
+    inherit x alias h = g;
+    
+    method h { // 'h' cannot be redeclared because it is already declared as a method on line 10
+        print("h");
+    };
 };

@@ -6,7 +6,6 @@ object {
           };
           
           print("Init A");
-          self.f;
           
       };
   };
@@ -15,7 +14,6 @@ object {
       inherit outer.A;
   
       print("Init B/1");
-      self.f;
       
       def f is public = 13;
       

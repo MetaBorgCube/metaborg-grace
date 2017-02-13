@@ -14,36 +14,33 @@ import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.source.SourceSection;
 
-@NodeChild(value = "tb", type = TermBuild.class)
-public abstract class parse_file_1 extends TermBuild {
+@NodeChild(value = "fileTerm", type = TermBuild.class)
+public abstract class native_parse_file_1 extends TermBuild {
 
-	public parse_file_1(SourceSection source) {
+	public native_parse_file_1(SourceSection source) {
 		super(source);
 	}
 
 	@Specialization
 	@TruffleBoundary
 	public ITerm parseFile(String s) {
-		IStrategoTerm term;
-		File dialectFile = new File(new File(new File(new File(new File("src"), "main"), "resources"), "dialects"), s + ".grace");
+		final File dialectFile = new File(s + ".grace");
+
 		if (!dialectFile.exists()) {
-			dialectFile = new File(s + ".grace");
-			if (!dialectFile.exists()) {
-				throw new RuntimeException("Dialect file: '" + s +  "' does not exist.");
-			}
+			throw new RuntimeException("Grace module: '" + s + "' does not exist.");
 		}
-		
+
 		try {
-			term = graceEntryPoint.createTransformer().transform(getContext().getParser().parse(
-				Source.newBuilder(dialectFile).name("Dialect import: '" + s + "'").mimeType(graceEntryPoint.MIME_TYPE).build()));
+			final IStrategoTerm term = graceEntryPoint.createTransformer()
+					.transform(getContext().getParser().parse(Source.newBuilder(dialectFile)
+							.name("Dialect import: '" + s + "'").mimeType(graceEntryPoint.MIME_TYPE).build()));
+			return getContext().getTermRegistry().parseProgramTerm(term);
 		} catch (IOException e) {
 			throw new RuntimeException("Cannot read dialect file: '" + s + "'.");
 		}
-		ITerm programTerm = getContext().getTermRegistry().parseProgramTerm(term);
-		return programTerm;
 	}
-	
+
 	public static TermBuild create(SourceSection source, TermBuild tb) {
-		return parse_file_1NodeGen.create(source, tb);
+		return native_parse_file_1NodeGen.create(source, tb);
 	}
 }

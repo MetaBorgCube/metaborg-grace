@@ -29,7 +29,7 @@ def tree = Node(5,-5).setLeft(
              Node(7,-7).setLeft(Node(6,-6)).setRight(Node(8,-8))
            );
 
-print(tree.search(-1));
+//print(tree.search(-1));
 print(tree.search(1));
 print(tree.search(2));
 print(tree.search(3));
@@ -38,5 +38,5 @@ print(tree.search(5));
 print(tree.search(6));
 print(tree.search(7));
 print(tree.search(8));
-print(tree.search(234));
-print(tree.search(235));
+//print(tree.search(234));
+//print(tree.search(235));
