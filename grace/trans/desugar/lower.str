@@ -24,6 +24,7 @@ rules
           lower-block <+
 //          lower-assignment <+
           lower-type-unknown <+
+          lower-typerule <+
           lower-fail
 
   lower-post-all: ast -> <topdown(lower-post-analyse)> <topdown(try(lower-post-2))> <topdown(try(lower-post-1))> ast
@@ -133,10 +134,16 @@ rules
 //  lower-assignment: Assignment(a,b) -> AssignmentL(a, b)
 
   lower-type-unknown: TypeID(ID("Unknown"), NoTypeArg()) -> Unkwn()
-  
+
+  lower-typerule: TypeRule(Single(MethodID(iden, typeArg)), RH(retType)) ->
+    TypeRuleL(iden, [typeArg], [], retType)
+  lower-typerule: 
+    TypeRule(Multiple([ MethodID(iden, typeArgs, ps)]), RH(retType)) ->
+      TypeRuleL(iden, <lower-get-typeargs> typeArgs, <lower-get-param-types> ps, retType)
+
   flatten-statements-declaration: Declaration([a,b]) -> [Declaration(a),Expression(b)]      
   
-  flatten-statements: ObjectL(a, b, code) -> ObjectL(a,b, <flatten-list> code)
+  flatten-statements: ObjectL(a, b, code) -> ObjectL(a, b, <flatten-list> code)
   flatten-statements: MethodL(n, ta, a, p, pt, t, code) ->
     MethodL(n, ta, a, p, pt, t, <flatten-list> code)
   flatten-statements: BlockL(p, t, code) -> BlockL(p, t, <flatten-list> code)
