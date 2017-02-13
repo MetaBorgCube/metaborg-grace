@@ -5,6 +5,7 @@ imports
   pp
   src-gen/signatures/grace-sig
   trans/desugar/desugar
+  libspoofax/term/origin
 
 rules // Analysis
 

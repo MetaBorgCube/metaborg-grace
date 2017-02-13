@@ -16,8 +16,7 @@ rules
     e1 --> v1;
     e2 --> v2;
     while-loop-evaluated(v1, v2) --> v.
-  
-  
+
   w@while-loop-evaluated(v1, v2) --> DoneV()
   where
     call(v1, [], "apply") --> BoolV(cond);
@@ -27,4 +26,3 @@ rules
         w --> _
       otherwise =>
     }.
-  

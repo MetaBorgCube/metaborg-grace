@@ -109,9 +109,6 @@ rules
   
   update-local(WildCard(), _) --> U().
 
-
-
-
   is-local(x) :: L --> is-local :: L
   where
     ":=(_)" => bind_suffix;
@@ -126,8 +123,8 @@ rules
 
   read-local(x) :: L --> ensure-defined(v-read(L[x])) :: L.
 
-
   snapshot-locals() :: L --> L :: L.
+
 
 /* ============ variable heap operations ======== */
 
@@ -156,4 +153,3 @@ rules
   v-update(addr, v) :: VH --> addr :: VH {addr |--> v, VH}.
 
   v-next() --> fresh.
-

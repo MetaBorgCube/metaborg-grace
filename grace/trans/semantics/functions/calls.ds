@@ -10,7 +10,7 @@ signature
     Return-Marker
   
   constructors
-    //     self   outer  params             body   env   decl. fields   public
+    //     self   outer  params                                body   env   public source   return
     ClosV: Addr * Addr * List(Identifier) * List(Identifier) * Code * Env * Bool * Source * Return-Marker -> V
     
     No-Return: Return-Marker
