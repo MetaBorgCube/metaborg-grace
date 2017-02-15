@@ -140,7 +140,7 @@ rules
   lower-type-unknown: TypeID(ID("Unknown"), NoTypeArg()) -> Unkwn()
 
   lower-typerule: TypeRule(Single(MethodID(iden, typeArg)), RH(retType)) ->
-    TypeRuleL(iden, [typeArg], [], retType)
+    TypeRuleL(iden, <lower-get-typeargs> typeArg, [], retType)
   lower-typerule: 
     TypeRule(Multiple([ MethodID(iden, typeArgs, ps)]), RH(retType)) ->
       TypeRuleL(iden, <lower-get-typeargs> typeArgs, <lower-get-param-types> ps, retType)
