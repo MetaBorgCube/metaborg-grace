@@ -8,15 +8,11 @@ imports
 
 signature
 
-  sorts
-    Type
-    
   sort aliases
-    HeapData = Object
+    Type = List(TypeRule)
 
   constructors
-//    Type: List(Type) -> Type
-    Type: List(TypeRule) -> Type
+    TypeV: List(TypeRule) -> V
 
   arrows
     no-type() --> TypeExp
@@ -27,18 +23,18 @@ signature
 rules
 
   TypeExp(AnonType(TypeBlock(trs))) --> new-type(trs).
-  
+
   S |- new-type(trs) --> T
   where
     allocate(Obj(S, [S], {}, {})) --> T;
-    type-to-map(Type(trs)) => methods;
-    install-method(match-method(Type(trs))) --> _
-    .
-  
+    type-to-map(trs) => methods;
+    install-method(match-method(trs)) --> _.
+
   no-type() --> TypeID(ID("Unknown"), NoTypeArg()).
-  
-  match-method(Type(trs)) --> MethodL(ID("match(_)"), [], visibility-annos(true), [], [], no-type(), [Expression(Boolean(True()))])
+
+  match-method(trs) --> MethodL(ID("match(_)"), [], visibility-annos(true), [], [], no-type(), body)
   where
-    log("typerules?: " ++ str(trs:AST)) --> _.
-    
+    log("typerules?: " ++ str(trs:AST)) --> _;
+    [Expression(Boolean(True()))] => body.
+
   type-to-map(type) --> {}.
