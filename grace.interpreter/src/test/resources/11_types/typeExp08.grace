@@ -1,0 +1,1 @@
+type { f (a : type {}) -> type {}; };

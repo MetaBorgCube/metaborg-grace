@@ -1,4 +1,3 @@
-object {
-  method f { 5; };
-  Self.Match(self);
+type A = {
+  f (a);
 };
