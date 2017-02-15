@@ -2,10 +2,16 @@ module trans/semantics/types
 
 imports
   src-gen/ds-signatures/grace-sig
+  trans/semantics/visibility
 
 signature
   arrows
     no-type() --> TypeExp
+    type-getter(String, Int, List(TypeRule)) --> Declaration
 
 rules
   no-type() --> TypeID(ID("Unknown"), NoTypeArg()).
+  
+  type-getter(x, i, trs) --> MethodL(ID(x), [], visibility-annos(true), [], [], no-type(), [SlotRead(i)])
+  where
+    log("typerules?: " ++ str(trs:AST)) --> _.

@@ -255,6 +255,12 @@ rules
 
   install-declaration(ConstantL(WildCard(), _, _, e)) --> [Expression(e)].
   
+  install-declaration(TypeDecl(ID(x), NoTypeArg(), NoAnnotations(), TypeDeclBlock(TypeBlock(trs)))) --> []
+  where
+    add-slot(x) --> i;
+    install-method(type-getter(x, i, trs)) --> _
+    .
+  
   install-import(Import(name, ID(x), annos)) --> []
   where
     add-slot(x) --> i;
