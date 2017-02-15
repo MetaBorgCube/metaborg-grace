@@ -19,7 +19,9 @@ public abstract class native_parent_directory_1 extends TermBuild {
 	@Specialization
 	@TruffleBoundary
 	public String getParent(String s) {
-		return new File(s).getParentFile().getAbsolutePath();
+		File fp = (new File(s)).getParentFile();
+		if (fp == null) throw new RuntimeException("Parent of file '" + s + "' does not exist.");
+		return fp.getAbsolutePath();
 	}
 
 	public static TermBuild create(SourceSection source, TermBuild tb) {

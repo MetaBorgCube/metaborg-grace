@@ -36,6 +36,7 @@ signature
     native-parse-file: String -> Program
     native-term-origin-path: AST -> String
     native-parent-directory: String -> String
+    native-path-separator: String
     native-standardgrace: String
     
   components
@@ -79,9 +80,9 @@ rules
     program --> import@RefV(_).
 
   
-  ProgPath |- import-path(name) --> native-parent-directory(ProgPath) ++ "/" ++ name.
+  ProgPath |- import-path(name) --> native-parent-directory(ProgPath) ++ native-path-separator() ++ name.
   
-  ProgPath |- dialect-path(name) --> native-parent-directory(ProgPath) ++ "/" ++ name
+  ProgPath |- dialect-path(name) --> native-parent-directory(ProgPath) ++ native-path-separator() ++ name
   where
     name != "standardGrace".
   
