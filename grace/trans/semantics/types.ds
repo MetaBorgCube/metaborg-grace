@@ -3,15 +3,42 @@ module trans/semantics/types
 imports
   src-gen/ds-signatures/grace-sig
   trans/semantics/visibility
+  trans/semantics/store
+  trans/semantics/objectmodel
 
 signature
+
+  sorts
+    Type
+    
+  sort aliases
+    HeapData = Object
+
+  constructors
+//    Type: List(Type) -> Type
+    Type: List(TypeRule) -> Type
+
   arrows
     no-type() --> TypeExp
-    type-getter(String, Int, List(TypeRule)) --> Declaration
+    new-type(List(TypeRule)) --> Addr
+    match-method(Type) --> Declaration
+    type-to-map(Type) --> Methods
 
 rules
+
+  TypeExp(AnonType(TypeBlock(trs))) --> new-type(trs).
+  
+  S |- new-type(trs) --> T
+  where
+    allocate(Obj(S, [S], {}, {})) --> T;
+    type-to-map(Type(trs)) => methods;
+    install-method(match-method(Type(trs))) --> _
+    .
+  
   no-type() --> TypeID(ID("Unknown"), NoTypeArg()).
   
-  type-getter(x, i, trs) --> MethodL(ID(x), [], visibility-annos(true), [], [], no-type(), [SlotRead(i)])
+  match-method(Type(trs)) --> MethodL(ID("match(_)"), [], visibility-annos(true), [], [], no-type(), [Expression(Boolean(True()))])
   where
     log("typerules?: " ++ str(trs:AST)) --> _.
+    
+  type-to-map(type) --> {}.

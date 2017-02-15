@@ -1,3 +1,7 @@
-type { };
-type A = { };
-type B = A;
+type {
+  f;
+};
+//type A = {
+//  f;
+//};
+//type B = A;
