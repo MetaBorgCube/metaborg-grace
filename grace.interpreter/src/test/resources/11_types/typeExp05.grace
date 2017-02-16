@@ -1,1 +1,1 @@
-type { f (a) g (b); };
+var a: type { f (a) g (b); };

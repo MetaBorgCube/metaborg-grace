@@ -1,1 +1,1 @@
-type { f (a) -> type {}; };
+var a: type { f (a) -> type {}; };
