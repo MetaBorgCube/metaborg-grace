@@ -5,24 +5,24 @@ language grace
 start symbol Program
 
 test assign simple [[f := 5;]] run desugar-complete to
-Program([Expression(ObjectL(_,_,[Expression(MCallL(ID("f:=(_)"),[Number("5")]))]))],_)
+Program([Expression(ObjectL(_,_,[Expression(MCallL(ID("f:=(_)"),[Number("5")]))]))])
 
 test assign with self [[self.f := 5;]] run desugar-complete to
 Program([Expression(ObjectL(_,_,[Expression(MCallRecvL(Self(), ID("f:=(_)"), [
   Number("5")
-]))]))],_)
+]))]))])
 
 test assign with self double [[self.f := self.f;]] run desugar-complete to
 Program([Expression(ObjectL(_,_,[Expression(MCallRecvL(Self(), ID("f:=(_)"), [
   MCallRecvL(Self(), ID("f"), [])
-]))]))],_)
+]))]))])
 
 test assign with self double and exp [[self.f := self.f + 5;]] run desugar-complete to
 Program([Expression(ObjectL(_,_,[Expression(MCallRecvL(Self(), ID("f:=(_)"), [
   MCallRecvL(MCallRecvL(Self(), ID("f"), []), ID("+(_)"), [Number("5")])
-]))]))],_)
+]))]))])
 
 test assign with outer [[outer.f := 14;]] run desugar-complete to
 Program([Expression(ObjectL(_,_,[
   Expression(MCallRecvL(Outer(),ID("f:=(_)"),[Number("14")]))
-]))],_)
+]))])

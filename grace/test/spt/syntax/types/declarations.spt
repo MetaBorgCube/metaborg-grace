@@ -1,0 +1,64 @@
+module syntax-types-declarations
+
+language grace
+
+start symbol Program
+
+test type decl empty [[
+type A = { };
+]] 0 warnings 0 errors
+
+test type decl single name [[
+type A = {
+  f;
+};
+]] 0 warnings 0 errors
+
+test type decl two names [[
+type A = {
+  f;
+  g;
+};
+]] 0 warnings 0 errors
+
+test type decl method with argument [[
+type A = {
+  f (a);
+};
+]] 0 warnings 0 errors
+
+test type decl method with argument wildcard [[
+type A = {
+  f (_);
+};
+]] 0 warnings 0 errors
+
+test type decl mixfix method [[
+type A = {
+  f (a) g (b);
+};
+]] 0 warnings 0 errors
+
+test type decl return type [[
+type B = {
+  f -> A;
+};
+]] 0 warnings 0 errors
+
+test type decl argument and return type [[
+type A = {
+  f (a) -> A;
+};
+]] 0 warnings 0 errors
+
+test type decl argument type and return type [[
+type B = {
+  f (a : A) -> A;
+};
+]] 0 warnings 0 errors
+
+test type decl mixfix arguments and return type[[
+type B = {
+  f (a : A) g (b : A) -> A;
+};
+]] 0 warnings 0 errors
