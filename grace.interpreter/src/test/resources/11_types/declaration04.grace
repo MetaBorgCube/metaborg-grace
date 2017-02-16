@@ -1,0 +1,1 @@
+def a: type { f; } = 5; // doesnt conform
