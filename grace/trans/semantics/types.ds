@@ -20,11 +20,12 @@ signature
     no-type() --> TypeExp
     new-type(List(TypeRule)) --> V
     type-call(V, String, List(Exp)) --> V
-    get-type(V) --> Type
-    get-object-type(Addr) --> Type
-    methods-to-type(Methods) --> Type
-    compare-types(Type, Type) --> Bool
-
+    get-names(V) --> List(String)
+    get-object-methods(Addr) --> List(String)
+    get-type-methods(Type) --> List(String)
+    methods-to-list(Methods) --> List(String)
+    compare-names(List(String), List(String)) --> Bool
+    contains-name(String, List(String)) --> Bool
 rules
 
   AnonType(TypeBlock(trs)) --> new-type(trs)
@@ -37,14 +38,14 @@ rules
 
   new-type(trs) --> TypeV(trs).
 
-  type-call(TypeV(t), "match(_)", [other]) --> BoolV(compare-types(t, get-type(other))).
+  type-call(t, "match(_)", [other]) --> BoolV(compare-names(get-names(t), get-names(other))).
 
-  get-type(v) --> t : List(TypeRule)
+  get-names(v) --> t
   where
     "getting type of: " => prefix;
     case v of {
       RefV(addr) =>
-        get-object-type(addr) --> t;
+        get-object-methods(addr) --> t;
         "Object Ref" => type
       StringV(_) =>
         [] => t;
@@ -52,29 +53,55 @@ rules
       BoolV(_) =>
         [] => t;
         "Boolean V" => type
+      TypeV(trs) =>
+        get-type-methods(trs) --> t;
+        "Type V" => type
       otherwise =>
         [] => t;
         "Unknow V" => type
     };
     log(prefix ++ type) --> _.
   
-  get-object-type(addr) --> t
+  get-object-methods(addr) --> t
   where
     read(addr) --> Obj(_,_,_,methods);
-    methods-to-type(methods) --> t.
+    methods-to-list(methods) --> t.
   
-  methods-to-type(map) --> []
+  get-type-methods([]) --> [] : List(String).
+  get-type-methods([TypeRuleL(ID(n), _, _, _) | trs]) --> [n | get-type-methods(trs)].
+  
+  methods-to-list(map) --> methodnames
   where
-    log("methods-to-type not implemented") --> _.
+    allkeys(map) => methodnames.
   
-  compare-types([], []) --> true
+  compare-names([], []) --> true
   where
     log("type conforms because they are both empty") --> _.
   
-  compare-types(_, []) --> true
+  compare-names([], t2) --> true
   where
-    log("type conforms because empty type conforms to all types") --> _.
+    log("type conforms because empty type conforms to all types, t2: " ++ str(t2:AST)) --> _.
     
-  compare-types(_,_) --> false
+  compare-names(t1@[_|_],[]) --> false
   where
-    log("type doesn't conform because its not implemented") --> _.
+    log("type doesn't conform because t2 doesn't contain the types: " ++ str(t1:AST)) --> _.
+
+  compare-names([t1|t1s], t2s) --> compare-names(t1s, t2s)
+  where
+    contains-name(t1, t2s) --> true;
+    log("comparing names") --> _.
+    
+  compare-names([t1|_], t2s) --> false
+  where
+    contains-name(t1, t2s) --> false;
+    log("comparing names, t2 is missing a type that t1 has") --> _.
+
+  contains-name(s, []) --> false.
+
+  contains-name(s, [s' | _]) --> true
+  where
+    s == s'.
+
+  contains-name(s, [s' | ss]) --> contains-name(s, ss)
+  where
+    s != s'.

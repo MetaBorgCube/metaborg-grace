@@ -1,4 +1,1 @@
-object {
-  method f { 5; };
-  Self.Match(self);
-};
+print((type { }).match(object { }));
