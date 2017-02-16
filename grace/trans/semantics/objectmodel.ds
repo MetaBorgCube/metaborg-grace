@@ -255,11 +255,10 @@ rules
 
   install-declaration(ConstantL(WildCard(), _, _, e)) --> [Expression(e)].
   
-  install-declaration(TypeDecl(ID(x), NoTypeArg(), NoAnnotations(), TypeDeclBlock(TypeBlock(trs)))) --> []
+  install-declaration(TypeDecl(ID(x), NoTypeArg(), annos, TypeDeclBlock(TypeBlock(trs)))) --> []
   where
     add-slot(x) --> i;
-    install-method(type-getter(x, i, trs)) --> _
-    .
+    install-method(field-getter(x, i, has-anno-public(annos))) --> _.
   
   install-import(Import(name, ID(x), annos)) --> []
   where

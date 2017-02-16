@@ -15,26 +15,66 @@ signature
     TypeV: List(TypeRule) -> V
 
   arrows
+    TypeExp --> V
+
     no-type() --> TypeExp
-    new-type(List(TypeRule)) --> Addr
-    match-method(Type) --> Declaration
-    type-to-map(Type) --> Methods
+    new-type(List(TypeRule)) --> V
+    type-call(V, String, List(Exp)) --> V
+    get-type(V) --> Type
+    get-object-type(Addr) --> Type
+    methods-to-type(Methods) --> Type
+    compare-types(Type, Type) --> Bool
 
 rules
 
-  TypeExp(AnonType(TypeBlock(trs))) --> new-type(trs).
-
-  S |- new-type(trs) --> T
+  AnonType(TypeBlock(trs)) --> new-type(trs)
   where
-    allocate(Obj(S, [S], {}, {})) --> T;
-    type-to-map(trs) => methods;
-    install-method(match-method(trs)) --> _.
+    log("type constructed: " ++ str(trs:AST)) --> _.
+
+  TypeExp(t) --> t.
 
   no-type() --> TypeID(ID("Unknown"), NoTypeArg()).
 
-  match-method(trs) --> MethodL(ID("match(_)"), [], visibility-annos(true), [], [], no-type(), body)
-  where
-    log("typerules?: " ++ str(trs:AST)) --> _;
-    [Expression(Boolean(True()))] => body.
+  new-type(trs) --> TypeV(trs).
 
-  type-to-map(type) --> {}.
+  type-call(TypeV(t), "match(_)", [other]) --> BoolV(compare-types(t, get-type(other))).
+
+  get-type(v) --> t : List(TypeRule)
+  where
+    "getting type of: " => prefix;
+    case v of {
+      RefV(addr) =>
+        get-object-type(addr) --> t;
+        "Object Ref" => type
+      StringV(_) =>
+        [] => t;
+        "String V" => type
+      BoolV(_) =>
+        [] => t;
+        "Boolean V" => type
+      otherwise =>
+        [] => t;
+        "Unknow V" => type
+    };
+    log(prefix ++ type) --> _.
+  
+  get-object-type(addr) --> t
+  where
+    read(addr) --> Obj(_,_,_,methods);
+    methods-to-type(methods) --> t.
+  
+  methods-to-type(map) --> []
+  where
+    log("methods-to-type not implemented") --> _.
+  
+  compare-types([], []) --> true
+  where
+    log("type conforms because they are both empty") --> _.
+  
+  compare-types(_, []) --> true
+  where
+    log("type conforms because empty type conforms to all types") --> _.
+    
+  compare-types(_,_) --> false
+  where
+    log("type doesn't conform because its not implemented") --> _.

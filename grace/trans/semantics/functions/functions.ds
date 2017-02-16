@@ -51,8 +51,10 @@ rules
         bool-call(recv, x, es) --> v
       NumV(_) =>
         num-call(recv, x, es) --> v
-      StringV(_)=>
+      StringV(_) =>
         str-call(recv, x, es) --> v
+      TypeV(_) => 
+        type-call(recv, x, es) --> v
       otherwise =>
         call-qualified(recv, x, es) --> v
     }.
