@@ -19,13 +19,11 @@ context-free syntax
 
   Statement.Dialect             = <dialect <STRING>;>
   Statement.Import              = <import <STRING> as <Identifier><Annotations>;>
-//  Statement.Assignment          = <<Assignment>;>
   Statement.Declaration         = <<Declaration>;>
   Statement.Expression          = <<Exp>;>
 
 context-free syntax
 
-//  Assignment.Assignment         = <<ID> := <Exp>>
   VarInit.VarInit               = < := <Exp>>
   VarInit.NoVarInit             = <>
   Declaration.Constant          = <def <Identifier><TypeAnn><Annotations>=<Exp>>
@@ -52,8 +50,6 @@ context-free syntax
                                   
   Modifier.AliasModifier        = < alias <MethodNames> = <MethodNames>>
   Modifier.ExcludeModifier      = < exclude <MethodNames>>
-//  Alias.Alias                   = 
-//  Exclude.Exclude               = 
   
   ClassName.FullStop            = <<ID>.<MethodNames>>
   ClassName.MethodName          = <<MethodNames>>
@@ -108,7 +104,6 @@ context-free syntax
   Annotation.Overrides          = <override>
   
   Params.Params                 = <(<{Param ", "}+>)>
-//  Param.Param                   = <<Identifier>>
   Param.ParamWType              = <<Identifier><TypeAnn>>
 
   MethodBody.MethodBody         = <
@@ -148,7 +143,6 @@ context-free syntax
   Exp.MQCallOuter               = <<Exp>.outer>                {left}
   Exp.MQCallSelf                = <<Exp>.self>                 {left}      
   
-//  Exp.MCallPrefixOp             = <<OperatorCF> <CallArgs>>    {left}
   Exp.MCallPrefixOpExp          = <<OperatorCF> <Exp>>         {right}
   
   Exp.Ellipsis                  = <...>
