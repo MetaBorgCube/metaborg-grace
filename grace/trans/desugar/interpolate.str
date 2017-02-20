@@ -12,7 +12,7 @@ rules
   trim-string(|b,e): a -> <substring(|b, <subti> (<string-length> a, e))> a
   
   desugar-interpolate: Part(nm, ArgInterpolatedString(intpolstr))
-    -> Part(nm, ArgsParen([ InterpolatedString(intpolstr)]))
+    -> Part(nm, ArgsParen([InterpolatedString(intpolstr)]))
       
   desugar-interpolate:
     InterpolatedString(IntPolStr(beginStr,[],IntPolEnd(exp,endStr)))
