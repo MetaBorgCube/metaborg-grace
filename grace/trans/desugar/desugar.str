@@ -38,7 +38,6 @@ rules
     <+ desugar-mcallopexp
     <+ desugar-mcallopexpassign
     <+ desugar-mcallprefixopexp
-//    <+ desugar-blockExp
     <+ desugar-block
     <+ desugar-arg-noargs
     <+ desugar-arg-argsparen
@@ -126,7 +125,6 @@ rules
       name := <concat-strings> [n1', n2', <param-string> p2];
       ps   := <concat> [p1,p2]
 
-  
   merge-typeargs: [ TypeArg(ls) , TypeArg(ls2) ] -> TypeArg(<concat> [ls,ls2])
   merge-typeargs: [ NoTypeArg() , TypeArg(ls2) ] -> TypeArg(ls2)
   merge-typeargs: [ TypeArg(ls) , NoTypeArg()  ] -> TypeArg(ls)
@@ -225,7 +223,6 @@ rules
   strip-argsparen: ArgsParen(a) -> a
   
   desugar-argBlock: ArgBlock(o) -> ArgsParen([BlockExp(o)])
-//  desugar-blockExp: BlockExp(e) -> e
   
   desugar-block:
     Block(BlockWParams(a, b)) -> BlockWParams(a, b)
