@@ -16,8 +16,8 @@ test single underscore                [[_;]]            0 warnings 0 errors
 test word with primes                 [[fkfkf'feff'ffe'fe;]]
 test word with underscores            [[efe_Fefe__feefe_f;]]
 
-test trailing apostrophe              [[var var' := 3;]]
-test trailing underscore              [[var var_ := 3;]]
+test trailing apostrophe              [[def var' = 3;]] 0 warnings 0 errors
+test trailing underscore              [[def var_ = 3;]] 0 warnings 0 errors
 
 test single digit                     [[5;]]            0 warnings 0 errors
 test single prime                     [[';]]            parse fails
@@ -83,11 +83,11 @@ test keyword inherit                  [[inherit;]]      parse fails
 test keyword is                       [[is;]]           parse fails
 test keyword method                   [[method;]]       parse fails
 test keyword object                   [[object;]]       parse fails
-//test keyword outer                    [[outer]]         parse fails
+test keyword outer                    [[outer]]         parse fails
 test keyword prefix                   [[prefix;]]       parse fails
 test keyword required                 [[required;]]     parse fails
 test keyword return                   [[return;]]       parse fails
-//test keyword self                     [[self]]          parse fails
+test keyword self                     [[self]]          parse fails
 test keyword Self                     [[Self]]          parse fails
 test keyword trait                    [[trait;]]        parse fails
 test keyword type                     [[type;]]         parse fails

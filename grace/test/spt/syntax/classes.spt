@@ -31,6 +31,14 @@ class A {
 };
 ]] 0 warnings 0 errors
 
+test class three uses [[
+class A {
+  use a;
+  use b;
+  use c;
+};
+]] 0 warnings 0 errors
+
 test class inherit and use [[
 class A {
   inherit b;

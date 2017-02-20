@@ -4,7 +4,24 @@ language grace
 
 start symbol Program
 
-test object [[object {};]] 0 warnings 0 errors
-test object with content [[object { def a = 1; };]] 0 warnings 0 errors
-test hopper object missing close [[object { ;]] parse fails
-test hopper object missing close with content [[object { def a = 1; ;]] parse fails
+test object                                 [[object {};]] 0 warnings 0 errors
+test object with content                    [[object { def a = 1; };]] 0 warnings 0 errors
+test object with inherit                    [[object { inherit A; };]] 0 warnings 0 errors
+test object with use                        [[object { use A; };]] 0 warnings 0 errors
+test object with inherit and use            [[object { inherit A; use A; };]] 0 warnings 0 errors
+test object with use before inherit         [[object { use A; inherit A; };]] parse fails
+test object with content before inherit     [[object { def a = 1; inherit A; };]] parse fails
+test object with content before use         [[object { def a = 1; use A; };]] parse fails
+test object with inherit use and content    [[object { inherit A; use A; def a = 1; };]] 0 warnings 0 errors
+test object with all [[
+object {
+  inherit A;
+  use A;
+  def a = 1;
+  var b := call;
+  code (execution);
+};
+]] 0 warnings 0 errors
+
+test hopper object missing close            [[object { ;]] parse fails
+test hopper object missing close w content  [[object { def a = 1; ;]] parse fails
