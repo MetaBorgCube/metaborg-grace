@@ -1,4 +1,4 @@
-module syntax-canonicalnames
+module desugaring-canonicalnames
 
 language grace
 
