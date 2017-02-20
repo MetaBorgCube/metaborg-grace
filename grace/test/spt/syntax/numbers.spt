@@ -4,7 +4,7 @@ language grace
 
 start symbol Program
 
-test decimal number with leading dot                [[var aaaa := .5;]] 0 warnings 0 errors
+test decimal number with leading dot                [[var a := .5;]] 0 warnings 0 errors
 
 test integer zero                                   [[var a := 0;]] 0 warnings 0 errors
 
