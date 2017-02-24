@@ -8,11 +8,16 @@ imports
 
 signature
 
+  sorts
+    TypeOp
+
   sort aliases
     Type = List(TypeRule)
 
   constructors
     TypeV: List(TypeRule) -> V
+    TypeV: TypeOp * V * V -> V
+    TypeOp: String -> TypeOp
 
   arrows
     TypeExp --> V
@@ -26,6 +31,7 @@ signature
     methods-to-list(Methods) --> List(String)
     compare-names(List(String), List(String)) --> Bool
     contains-name(String, List(String)) --> Bool
+
 rules
 
   AnonType(TypeBlock(trs)) --> new-type(trs).
