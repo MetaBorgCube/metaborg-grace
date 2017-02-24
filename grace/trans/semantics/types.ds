@@ -17,6 +17,7 @@ signature
   constructors
     TypeV: List(TypeRule) -> V
     TypeV: TypeOp * V * V -> V
+    UnkwnV: V
     Variant: TypeOp
     Intersection: TypeOp
     Subtraction: TypeOp
@@ -24,7 +25,10 @@ signature
 
   arrows
     TypeExp --> V
-
+    List(TypeExp) --> List(V)
+    
+    type-check-params(List(V), List(V)) --> Bool
+    
     no-type() --> TypeExp
     new-type(List(TypeRule)) --> V
     type-call(V, String, List(Exp)) --> V
@@ -48,11 +52,31 @@ rules
 
   AnonType(TypeBlock(trs)) --> new-type(trs).
 
+  [] : List(TypeExp) --> [] : List(V).
+  [te | tes] : List(TypeExp) --> [tv | tvs] : List(V)
+  where
+    te --> tv;
+    tes --> tvs.
+
   TypeExp(t) --> t.
 
   Variant(v1, v2) --> TypeV(Variant(), v1, v2).
+  
+  Unkwn() --> UnkwnV().
 
   no-type() --> TypeID(ID("Unknown"), NoTypeArg()).
+
+  type-check-params([] , []) --> true.
+  type-check-params([pt | pts] , [v | vs]) --> type-check-params(pts, vs)
+  where
+    compare-types(pt, v) --> true.
+  
+  type-check-params([pt | pts] , [v | vs]) --> type-check-params(pts, vs)
+  where
+    compare-types(pt, v) --> false;
+    halt-error("Parameter types do not match the supplied argument types", "") --> _.
+      
+    
 
   new-type(trs) --> TypeV(trs).
 
@@ -103,7 +127,12 @@ rules
   where
     read(addr) --> Obj(_,_,_,methods);
     methods-to-type(methods) --> t.
-
+    
+  get-object-names(addr) --> ls
+  where
+    read(addr) --> Obj(_,_,_,methods);
+    methods-to-list(methods) --> ls.
+    
   get-type-methods([]) --> [] : List(String).
   get-type-methods([TypeRuleL(ID(n), _, _, _) | trs]) --> [n | get-type-methods(trs)].
 
@@ -119,6 +148,8 @@ rules
   where
     allkeys(map) => methodnames.
 
+  compare-types(UnkwnV(), _) --> true.
+
   compare-types(TypeV(Variant(), t1, t2), t3@TypeV(_)) --> b
   where
     compare-types(t1, t3) --> res;
@@ -130,9 +161,10 @@ rules
     };
     log("comparing type expression and type sig") --> _.
 
-  compare-types(t1@TypeV(_), t2@TypeV(_)) -->
-    compare-names(get-names(t1), get-names(t2))
+  compare-types(t1@TypeV(_), v) -->
+    compare-names(get-names(t1), get-names(v))
   where
+    log("what is v?: " ++ str(v)) --> _;
     log("comparing two type sigs") --> _.
 
   compare-names([], _) --> true.

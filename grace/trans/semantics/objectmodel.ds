@@ -299,7 +299,7 @@ rules
     install-alias(x', clos) --> _;
     install-aliases() :: Als --> _ :: Als _.
 
-  install-alias(x, clos@ClosV(_, _, _, _, _, _, _, _, _)) --> U()
+  install-alias(x, clos@ClosV(_, _, _, _, _, _, _, _, _, _, _)) --> U()
   where
     copy-closure(clos) --> clos';
     ensure-unique-method(x, clos') --> _;
@@ -328,7 +328,7 @@ rules
   where
     lookup-local-method(current-self(), x) --> clos';
     case clos' of {
-      ClosV(_, _, _, _, _, _, _, _, _) =>
+      ClosV(_, _, _, _, _, _, _, _, _, _, _) =>
         closure-source(clos) --> src;
         closure-source(clos') --> src';
         case eqI(src, src') of {

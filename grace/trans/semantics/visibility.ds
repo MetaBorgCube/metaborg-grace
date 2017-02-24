@@ -28,9 +28,9 @@ signature
     
 rules
   
-  ensure-access(x, clos@ClosV(_, _, _, _, _, _, true, _, _), recv) --> clos.
+  ensure-access(x, clos@ClosV(_, _, _, _, _, _, true, _, _, _, _), recv) --> clos.
   
-  ensure-access(x, clos@ClosV(_, _, _, _, _, _, false, _, _), recv) --> clos
+  ensure-access(x, clos@ClosV(_, _, _, _, _, _, false, _, _, _, _), recv) --> clos
   where
     can-reach(recv) --> visible;
     case visible of {

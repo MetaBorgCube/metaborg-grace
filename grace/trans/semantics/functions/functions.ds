@@ -68,25 +68,27 @@ rules
 
 rules /* closure construction */
 
-  Src |- method-closure(MethodL(_, _, annos, params, _, _, code)) :: L -->
-    ClosV(S, O, params, locals, code, L, has-anno-public(annos), Src, Return-To(fresh)) :: L
+  Src |- method-closure(MethodL(_, _, annos, params, paramTypes, returnType, code)) :: L -->
+    ClosV(S, O, params, locals, code, L, has-anno-public(annos), Src, Return-To(fresh), paramTypes, returnType) :: L
   where
     current-self() --> S;
     current-outer() --> O;
     collect-locals(code, params) --> locals;
     error-check-locals(locals) --> _.
 
-  block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, locals, code, L, true, src-base(), No-Return()) :: L
+  block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, locals, code, L, true, src-base(), No-Return(), [], no-type()) :: L
   where
     current-self() --> S;
     current-outer() --> O;
     collect-locals(code, params) --> locals;
     error-check-locals(locals) --> _.
 
-  copy-closure(ClosV(S, O, params, locals, code, L, _, Src, No-Return())) --> ClosV(S, O, params, locals, code, L, false, Src', No-Return())
+  copy-closure(ClosV(S, O, params, locals, code, L, _, Src, No-Return(), pt, rt)) -->
+    ClosV(S, O, params, locals, code, L, false, Src', No-Return(), pt, rt)
   where
     Src |- src-previous() --> Src'.
   
-  copy-closure(ClosV(S, O, params, locals, code, L, _, Src, Return-To(_))) --> ClosV(S, O, params, locals, code, L, false, Src', Return-To(fresh))
+  copy-closure(ClosV(S, O, params, locals, code, L, _, Src, Return-To(_), pt, rt)) -->
+    ClosV(S, O, params, locals, code, L, false, Src', Return-To(fresh), pt, rt)
   where
     Src |- src-previous() --> Src'.
