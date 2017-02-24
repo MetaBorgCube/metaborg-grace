@@ -22,6 +22,9 @@ rules
   desugar-annotate-defaults: Import(f, nm, NoAnnotations())
     -> Import(f, nm, Annotations([Confidential()]))
     
+  desugar-annotate-defaults: TypeDecl(name, ta, NoAnnotations(), tb)
+    -> TypeDecl(name, ta, Annotations([Public()]), tb)
+    
   desugar-annotations: Constant(nm, typeAnn, Annotations([Public()]), exp)
     -> Constant(nm, typeAnn, Annotations([Readable()]), exp)
     
