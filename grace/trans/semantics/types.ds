@@ -29,7 +29,11 @@ signature
     get-object-methods(Addr) --> List(String)
     get-type-methods(Type) --> List(String)
     methods-to-list(Methods) --> List(String)
+    
+    compare-types(V, V) --> Bool
+    
     compare-names(List(String), List(String)) --> Bool
+    
     contains-name(String, List(String)) --> Bool
 
 rules
@@ -42,7 +46,9 @@ rules
 
   new-type(trs) --> TypeV(trs).
 
-  type-call(t, "match(_)", [other]) --> BoolV(compare-names(get-names(t), get-names(other))).
+  type-call(t, "match(_)", [other]) --> BoolV(compare-types(t, other)).
+
+  
 
   get-names(v) --> t
   where
@@ -77,6 +83,26 @@ rules
   methods-to-list(map) --> methodnames
   where
     allkeys(map) => methodnames.
+    
+  compare-types(v1, v2) --> true
+  where
+    v1 => TypeV(_,_,_);
+    v2 => TypeV(_:List(TypeRule)).
+  
+  compare-types(v1, v2) --> true
+  where
+    v1 => TypeV(_,_,_);
+    v2 => TypeV(_,_,_).
+  
+  compare-types(v1, v2) --> true
+  where
+    v1 => TypeV(_:List(TypeRule));
+    v2 => TypeV(_,_,_).
+  
+  compare-types(v1, v2) --> compare-names(get-names(t1), get-names(t2))
+  where
+    v1 => t1@TypeV(_:List(TypeRule));
+    v2 => t2@TypeV(_:List(TypeRule)).
   
   compare-names([], _) --> true.
   
