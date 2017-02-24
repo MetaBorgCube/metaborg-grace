@@ -22,7 +22,6 @@ rules
           lower-constant <+
           lower-variable <+
           lower-block <+
-//          lower-assignment <+
           lower-type-unknown <+
           lower-typerule <+
           lower-fail
@@ -36,10 +35,6 @@ rules
   lower-post-2 =
           flatten-statements <+
           lower-fail
-
-  // VV: disabling duplicate checking because we want proper error reporting
-
-//  lower-post-analyse = analyse-duplicate-decls
   
   lower-post-analyse = id
 
@@ -84,10 +79,6 @@ rules
 
   lower-get-typeargs: TypeArg(tas) -> tas
   lower-get-typeargs: NoTypeArg() -> []
-  
-//  lower-mdecl:
-//    MethodDecl(Single(PrefixOp(mName)), annotations, MethodBody(cs)) ->
-//      MethodL(ID(mName), annotations, [], cs)
   
   lower-mcallwdot: 
     MCallWDot(recv, [Part(ID(name), args)]) ->
@@ -135,7 +126,6 @@ rules
     VariableL(a, <lower-typeann> t, b, exp)
   
   lower-typeann: TypeAnn(t) -> t
-//  lower-assignment: Assignment(a,b) -> AssignmentL(a, b)
 
   lower-type-unknown: TypeID(ID("Unknown"), NoTypeArg()) -> Unkwn()
 
