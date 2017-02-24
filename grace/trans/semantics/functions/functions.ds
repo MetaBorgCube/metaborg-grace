@@ -55,7 +55,10 @@ rules
         str-call(recv, x, es) --> v
       TypeV(_) => 
         type-call(recv, x, es) --> v
+      TypeV(_,_,_) =>
+        type-call(recv, x, es) --> v
       otherwise =>
+        log("calling on: " ++ str(recv)) --> _;
         call-qualified(recv, x, es) --> v
     }.
 

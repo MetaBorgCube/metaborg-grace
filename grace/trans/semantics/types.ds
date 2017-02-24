@@ -17,7 +17,10 @@ signature
   constructors
     TypeV: List(TypeRule) -> V
     TypeV: TypeOp * V * V -> V
-    TypeOp: String -> TypeOp
+    Variant: TypeOp
+    Intersection: TypeOp
+    Subtraction: TypeOp
+    Union: TypeOp
 
   arrows
     TypeExp --> V
@@ -25,10 +28,15 @@ signature
     no-type() --> TypeExp
     new-type(List(TypeRule)) --> V
     type-call(V, String, List(Exp)) --> V
+    get-type(V) --> V
     get-names(V) --> List(String)
-    get-object-methods(Addr) --> List(String)
+    get-object-names(Addr) --> List(String)
+    get-object-type(Addr) --> V
     get-type-methods(Type) --> List(String)
     methods-to-list(Methods) --> List(String)
+    methods-to-type(Methods) --> Type
+    
+    names-to-type(List(String)) --> Type
     
     compare-types(V, V) --> Bool
     
@@ -42,70 +50,93 @@ rules
 
   TypeExp(t) --> t.
 
+  Variant(v1, v2) --> TypeV(Variant(), v1, v2).
+
   no-type() --> TypeID(ID("Unknown"), NoTypeArg()).
 
   new-type(trs) --> TypeV(trs).
 
-  type-call(t, "match(_)", [other]) --> BoolV(compare-types(t, other)).
+  type-call(t, "match(_)", [other]) --> BoolV(compare-types(t, get-type(other))).
 
-  
-
-  get-names(v) --> t
+  get-type(v) --> v
   where
     "getting type of: " => prefix;
     case v of {
       RefV(addr) =>
-        get-object-methods(addr) --> t;
+        get-object-type(addr) --> v;
         "Object Ref" => type
       StringV(_) =>
-        [] => t;
+        TypeV([]) => v;
         "String V" => type
       BoolV(_) =>
-        [] => t;
+        TypeV([]) => v;
         "Boolean V" => type
-      TypeV(trs) =>
-        get-type-methods(trs) --> t;
+      tv@TypeV(_) =>
+        tv => v;
         "Type V" => type
+      tv@TypeV(_,_,_) =>
+        tv => v;
+        "Type V expr" => type
       otherwise =>
-        [] => t;
+        TypeV([]) => v;
         "Unknow V" => type
     };
     log(prefix ++ type) --> _.
-  
-  get-object-methods(addr) --> t
+
+  get-names(v) --> t
+  where
+    case v of {
+      RefV(addr) =>
+        get-object-names(addr) --> t
+      StringV(_) =>
+        [] => t
+      BoolV(_) =>
+        [] => t
+      TypeV(tr) =>
+        get-type-methods(tr) --> t
+      otherwise =>
+        [] => t;
+        halt-error("Unknown V to get type for: ", str(v)) --> _
+    }.
+
+  get-object-type(addr) --> TypeV(t)
   where
     read(addr) --> Obj(_,_,_,methods);
-    methods-to-list(methods) --> t.
-  
+    methods-to-type(methods) --> t.
+
   get-type-methods([]) --> [] : List(String).
   get-type-methods([TypeRuleL(ID(n), _, _, _) | trs]) --> [n | get-type-methods(trs)].
-  
+
+  methods-to-type(methods) --> trs
+  where
+    methods-to-list(methods) --> mls;
+    names-to-type(mls) --> trs.
+
+  names-to-type([]) --> [].
+  names-to-type([s|ss]) --> [TypeRuleL(ID(s), [], [], no-type()) | names-to-type(ss)].
+
   methods-to-list(map) --> methodnames
   where
     allkeys(map) => methodnames.
-    
-  compare-types(v1, v2) --> true
+
+  compare-types(TypeV(Variant(), t1, t2), t3@TypeV(_)) --> b
   where
-    v1 => TypeV(_,_,_);
-    v2 => TypeV(_:List(TypeRule)).
-  
-  compare-types(v1, v2) --> true
+    compare-types(t1, t3) --> res;
+    case res of {
+      true =>
+        true => b
+      otherwise =>
+        compare-types(t2, t3) --> b
+    };
+    log("comparing type expression and type sig") --> _.
+
+  compare-types(t1@TypeV(_), t2@TypeV(_)) -->
+    compare-names(get-names(t1), get-names(t2))
   where
-    v1 => TypeV(_,_,_);
-    v2 => TypeV(_,_,_).
-  
-  compare-types(v1, v2) --> true
-  where
-    v1 => TypeV(_:List(TypeRule));
-    v2 => TypeV(_,_,_).
-  
-  compare-types(v1, v2) --> compare-names(get-names(t1), get-names(t2))
-  where
-    v1 => t1@TypeV(_:List(TypeRule));
-    v2 => t2@TypeV(_:List(TypeRule)).
-  
+    log("comparing two type sigs") --> _.
+
   compare-names([], _) --> true.
-  
+
   compare-names(t1@[_|_],[]) --> false
   where
     log("type doesn't conform because t2 doesn't contain the types: " ++ str(t1:AST)) --> _.
