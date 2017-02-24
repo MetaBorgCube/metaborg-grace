@@ -63,8 +63,14 @@ rules
   Variant(v1, v2) --> TypeV(Variant(), v1, v2).
   
   Unkwn() --> UnkwnV().
+  
+  TypeID(ID(name), _) --> TypeV([])
+  where
+    log("TypeID: " ++ name) --> _;
+    call-implicit(name, []) --> type;
+    log("TypeID type: " ++ str(type)) --> _.
 
-  no-type() --> TypeID(ID("Unknown"), NoTypeArg()).
+  no-type() --> Unkwn().
 
   type-check-params([] , []) --> true.
   type-check-params([pt | pts] , [v | vs]) --> type-check-params(pts, vs)
