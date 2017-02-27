@@ -29,6 +29,8 @@ public class string_call_native_2 extends TermBuild {
 		switch (op) {
 		case "size":
 			return doSize(left);
+		case "asString":
+			return new StringV_1_Term(left.get_1());
 		default:
 			throw new IllegalArgumentException("operator: '" + op + "' not recognised as operator on string.");
 		}

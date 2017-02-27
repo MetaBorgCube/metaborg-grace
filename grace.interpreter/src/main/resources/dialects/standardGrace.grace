@@ -1,5 +1,34 @@
 dialect "none";
 
+type Object = {
+  isMe (other: Object);
+  != (other: Object);
+  asString;
+  asDebugString;
+  :: (other: Object);
+};
+
+class graceObject {
+  method isMe (other: Object) is confidential {
+    nativeIdentity(other);
+  };
+  method != (other: Object) {
+    !(==(other));
+  };
+  method asString { "an object"; };
+  method asDebugString { asString; };
+  method :: (other: Object) { binding(self,other); };
+};
+
+class binding(key,value) {
+  method getKey { key; };
+  method getValue { value; };
+};
+
+method print(a) {
+  nativePrint(a.asString);
+};
+
 method if(cond) then(blk) {
     cond.ifTrue(blk);
 };

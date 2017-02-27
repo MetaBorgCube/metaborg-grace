@@ -31,10 +31,12 @@ rules
   MCallL(ID(x), es) --> v
   where
     case x of {
-      "print(_)" =>
+      "nativePrint(_)" =>
         es => [e];
         nativePrint(e) => v
-        
+      "nativeIdentity(_)" =>
+        es => [e];
+        identity-check(e) --> v
       "while(_)do(_)" =>
         es => [e1, e2];
         while-loop(e1, e2) --> v
@@ -58,7 +60,6 @@ rules
       TypeV(_,_,_) =>
         type-call(recv, x, es) --> v
       otherwise =>
-        log("calling on: " ++ str(recv)) --> _;
         call-qualified(recv, x, es) --> v
     }.
 
@@ -72,7 +73,6 @@ rules /* closure construction */
   Src |- method-closure(MethodL(name, _, annos, params, paramTypes, returnType, code)) :: L -->
     clos :: L
   where
-    log("parameter types for method: " ++ str(name) ++ ", type: " ++ str(paramTypes:AST)) --> _;
     current-self() --> S;
     current-outer() --> O;
     collect-locals(code, params) --> locals;

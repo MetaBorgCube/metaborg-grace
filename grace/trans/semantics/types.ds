@@ -27,7 +27,7 @@ signature
     TypeExp --> V
     List(TypeExp) --> List(V)
     
-    type-check-params(List(V), List(V)) --> Bool
+    type-check(List(V), List(V)) --> Bool
     
     no-type() --> TypeExp
     new-type(List(TypeRule)) --> V
@@ -64,23 +64,21 @@ rules
   
   Unkwn() --> UnkwnV().
   
-  TypeID(ID(name), _) --> TypeV([])
+  TypeID(ID(name), _) --> type
   where
-    log("TypeID: " ++ name) --> _;
-    call-implicit(name, []) --> type;
-    log("TypeID type: " ++ str(type)) --> _.
+    call-implicit(name, []) --> type.
 
   no-type() --> Unkwn().
 
-  type-check-params([] , []) --> true.
-  type-check-params([pt | pts] , [v | vs]) --> type-check-params(pts, vs)
+  type-check([] , []) --> true.
+  type-check([pt | pts] , [v | vs]) --> type-check(pts, vs)
   where
     compare-types(pt, v) --> true.
   
-  type-check-params([pt | pts] , [v | vs]) --> type-check-params(pts, vs)
+  type-check([pt | pts] , [v | vs]) --> type-check(pts, vs)
   where
     compare-types(pt, v) --> false;
-    halt-error("Parameter types do not match the supplied argument types", "") --> _.
+    halt-error("Type mismatch!", "") --> _.
       
     
 
@@ -118,6 +116,8 @@ rules
     case v of {
       RefV(addr) =>
         get-object-names(addr) --> t
+      NumV(_) =>
+        [] => t
       StringV(_) =>
         [] => t
       BoolV(_) =>
@@ -164,14 +164,12 @@ rules
         true => b
       otherwise =>
         compare-types(t2, t3) --> b
-    };
-    log("comparing type expression and type sig") --> _.
+    }.
 
   compare-types(t1@TypeV(_), v) -->
     compare-names(get-names(t1), get-names(v))
   where
-    log("what is v?: " ++ str(v)) --> _;
-    log("comparing two type sigs") --> _.
+    log("comparing two type sigs, 1: " ++ str(t1) ++ ", 2: " ++ str(v)) --> _.
 
   compare-names([], _) --> true.
 
@@ -181,8 +179,7 @@ rules
 
   compare-names([t1|t1s], t2s) --> compare-names(t1s, t2s)
   where
-    contains-name(t1, t2s) --> true;
-    log("comparing names") --> _.
+    contains-name(t1, t2s) --> true.
     
   compare-names([t1|_], t2s) --> false
   where

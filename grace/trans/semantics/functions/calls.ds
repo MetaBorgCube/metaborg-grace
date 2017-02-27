@@ -11,7 +11,7 @@ signature
   
   constructors
     //     self   outer  params                                body   env   public source   return          paramtypes ret-type
-    ClosV: Addr * Addr * List(Identifier) * List(Identifier) * Code * Env * Bool * Source * Return-Marker * List(V) * V -> V
+    ClosV: Addr * Addr * List(Identifier) * List(Identifier) * Code * Env * Bool * Source * Return-Marker * List(TypeExp) * TypeExp -> V
     
     No-Return: Return-Marker
     Return-To: Int -> Return-Marker
@@ -66,7 +66,7 @@ rules
 
   call(clos@ClosV(S, O, params, locals, code, L1, _, _, R, pts, rt), vs, name) :: L --> v :: L
   where
-    type-check-params(pts, vs) --> true;
+    type-check(pts, vs) --> true;
     ensure-access(name, clos, S) --> _;
     add-locals(locals) :: L1 --> _ :: L2;
     update-locals(params, vs) :: L2 --> _ :: L3;

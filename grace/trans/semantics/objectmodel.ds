@@ -31,7 +31,7 @@ signature
 
   constructors // extra instructions
     SlotRead : Int -> Statement
-    SlotWrite : Int * Exp -> Statement 
+    SlotWrite : Int * Exp * TypeExp -> Statement 
 
   constructors
     Obj: Addr * List(Addr) * Slots * Methods -> Object
@@ -57,12 +57,11 @@ rules
 
   SlotRead(i) --> ensure-defined(read-slot(i)).
   
-  SlotWrite(i, e) --> DoneV()
+  SlotWrite(i, e, te) --> DoneV()
   where
-    log("trying to write " ++ str(e) ++ " to slot " ++ int2string(i)) --> _;
     e --> v;
-    write-slot(i, v) --> _;
-    log("wrote " ++ str(v) ++ " to slot " ++ int2string(i)) --> _.
+    type-check([te], [v]) --> true;
+    write-slot(i, v) --> _.
     
 
 
@@ -242,7 +241,7 @@ rules
   where
     install-method(m) --> _.
 
-  install-declaration(VariableL(ID(x), _, annos, e)) --> [SlotWrite(i, e)]
+  install-declaration(VariableL(ID(x), type, annos, e)) --> [SlotWrite(i, e, type)]
   where
     add-slot(x) --> i;
     install-method(field-getter(x, i, has-anno-readable(annos))) --> _;
@@ -250,7 +249,7 @@ rules
 
   install-declaration(VariableL(WildCard(), _, _, e)) --> [Expression(e)].
 
-  install-declaration(ConstantL(ID(x), _, annos, e)) --> [SlotWrite(i, e)]
+  install-declaration(ConstantL(ID(x), type, annos, e)) --> [SlotWrite(i, e, type)]
   where
     add-slot(x) --> i;
     install-method(field-getter(x, i, has-anno-readable(annos))) --> _.
@@ -258,9 +257,8 @@ rules
   install-declaration(ConstantL(WildCard(), _, _, e)) --> [Expression(e)].
 
   install-declaration(TypeDecl(ID(x), NoTypeArg(), annos, TypeDeclBlock(tb)))
-    --> [SlotWrite(i, TypeExp(AnonType(tb)))]
+    --> [SlotWrite(i, TypeExp(AnonType(tb)), Unkwn())]
   where
-    log("writing type value") --> _;
     add-slot(x) --> i;
     install-method(field-getter(x, i, has-anno-public(annos))) --> _.
 
@@ -381,7 +379,8 @@ rules
     MethodL(ID(x), [], visibility-annos(c), [], [], no-type(), [SlotRead(i)]).
 
   field-setter(x, i, c) -->
-    MethodL(ID(mksettername(x)), [], visibility-annos(c), [ID("p")], [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))]).
+    MethodL(ID(mksettername(x)), [], visibility-annos(c), [ID("p")],
+    [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)), Unkwn())]). // TODO type
 
 /* ======== OBJECT META-FUNCTIONS ========= */
 signature
@@ -414,6 +413,9 @@ signature
     
     outer(Addr) --> V
     self(Addr) --> V
+    
+    
+    identity-check(V) --> V
     
   components
     NS : Int // NextSlot
@@ -458,7 +460,6 @@ rules
   where
     read(S) --> Obj(O, outers, slots, methods);
     update(S, Obj(O, outers, slots, {x |--> v, methods})) --> _.
-
 
 
 
@@ -507,6 +508,18 @@ rules
   lookup-outer-method(v, _) --> DoneV()
   where
     v =!=> RefV(_).
+    
+  
+  
+  identity-check(other) --> BoolV(true)
+  where
+    other => RefV(addr);
+    current-self() == addr.
+
+  identity-check(other) --> BoolV(false)
+  where
+    other => RefV(addr);
+    current-self() != addr.
 
 
 signature

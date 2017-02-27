@@ -5,7 +5,7 @@ imports
   trans/semantics/values
   trans/semantics/statements
   trans/semantics/objectmodel
-  
+
 signature
   sorts
     Exn

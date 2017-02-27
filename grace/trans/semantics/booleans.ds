@@ -39,3 +39,6 @@ rules
   bool-call(BoolV(true), "ifFalse(_)", [_]) --> DoneV().  
 
   bool-call(BoolV(false), "ifFalse(_)", [e]) --> call(e, [], "apply").
+  
+  bool-call(BoolV(true), "asString", []) --> StringV("true").
+  bool-call(BoolV(false), "asString", []) --> StringV("false"). 
