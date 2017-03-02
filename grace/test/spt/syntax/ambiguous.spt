@@ -57,3 +57,9 @@ test assignment double self [[f := self.self + 1;]] 0 warnings 0 errors
 
 test var assign with escape string [[var x := "test\"quotes\"hello\"\"world";]] 0 warnings 0 errors
 
+test specifc scientific number [[4945E-1;]] 0 warnings 0 errors
+
+test operator and outer [[a + a.outer;]] 0 warnings 0 errors
+
+test type expression combination [[def a: type { } & type { } + type { } = false;]] 0 warnings 0 errors
+

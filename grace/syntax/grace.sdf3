@@ -158,7 +158,7 @@ context-free syntax
   Case.Case                     = [case {[CaseExp] [Arrow] [{Statement "\n"}*]}]
   Case.CaseParen                = [case ( {[CaseExp] [Arrow] [{Statement "\n"}*]} )]
   CaseExp.CaseExp               = <<CaseLiteral>>
-  CaseExp.CaseExpMulti          = <<CaseLiteral> <BoolOp> <CaseLiteral>>
+  CaseExp.CaseExpMulti          = <<CaseLiteral> <BoolOp> <CaseLiteral>> 
   CaseExp.ExpParens             = <(<Exp>)>
   CaseExp.CIdentifier           = <<Identifier>>
   CaseExp.ExpTyped              = <<Identifier> : <TypeExp>>
@@ -208,7 +208,18 @@ context-free priorities
   Exp.MCallOpExAssign
   ,
   Exp.MQCallSelf >
-  Exp.MCallOpExAssign
+  Exp.MCallOpExAssign  
+  ,
+  Exp.MQCallOuter >
+  Exp.MCallOpEx
+  ,
+  Exp.MQCallSelf >
+  Exp.MCallOpEx
+  ,
+  {left: TypeExp.Union 
+  TypeExp.Subtract 
+  TypeExp.Intersect 
+  TypeExp.Variant }
   
 template options
 

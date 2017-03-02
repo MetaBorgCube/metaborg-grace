@@ -10,7 +10,8 @@ lexical syntax
   NUM.Decimal    = [0-9]* "." [0-9]+
   NUM.RadixNum   = [02-9][0-9]* [xX] [a-zA-Z0-9]+ // some radix number
   NUM.RadixNum2  = [1][0-9]+ [xX] [a-zA-Z0-9]+ // some radix number
-  NUM.SciNum     = [0-9]* "."? [0-9]+ [eE] "-"? [0-9]+ // scientific notation
+  NUM.SciNum     = [0-9]* "." [0-9]+ [eE] "-"? [0-9]+ // scientific notation
+  NUM.SciNum2    = [0-9]+ [eE] "-"? [0-9]+ 
   PrefixOperator = "prefix" Operator
   Operator       = [\!\?\@\#\%\^\&\|\~\=\+\-\*\/\\\>\<\:\.\$]+
   STRING         = "\"" StringChar* "\""
