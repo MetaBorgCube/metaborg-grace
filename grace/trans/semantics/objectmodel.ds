@@ -245,7 +245,7 @@ rules
   where
     add-slot(x) --> i;
     install-method(field-getter(x, i, has-anno-readable(annos))) --> _;
-    install-method(field-setter(x, i, has-anno-writable(annos))) --> _.
+    install-method(field-setter(x, i, has-anno-writable(annos), type)) --> _.
 
   install-declaration(VariableL(WildCard(), _, _, e)) --> [Expression(e)].
 
@@ -368,7 +368,7 @@ rules
 signature
   arrows
     field-getter(String, Int, Bool) --> Declaration
-    field-setter(String, Int, Bool) --> Declaration
+    field-setter(String, Int, Bool, TypeExp) --> Declaration
 
   native operators
     mksettername: String -> String
@@ -378,9 +378,9 @@ rules
   field-getter(x, i, c) -->
     MethodL(ID(x), [], visibility-annos(c), [], [], no-type(), [SlotRead(i)]).
 
-  field-setter(x, i, c) -->
+  field-setter(x, i, c, argType) -->
     MethodL(ID(mksettername(x)), [], visibility-annos(c), [ID("p")],
-    [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)), Unkwn())]). // TODO type
+    [argType], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)), Unkwn())]).
 
 /* ======== OBJECT META-FUNCTIONS ========= */
 signature

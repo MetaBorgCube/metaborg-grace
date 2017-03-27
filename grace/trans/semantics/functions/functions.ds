@@ -31,7 +31,7 @@ rules
   MCallL(ID(x), es) --> v
   where
     case x of {
-      "nativePrint(_)" =>
+      "print(_)" =>
         es => [e];
         nativePrint(e) => v
       "nativeIdentity(_)" =>
@@ -63,8 +63,8 @@ rules
         call-qualified(recv, x, es) --> v
     }.
 
-  BlockL(params, _, code) -->
-    block-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
+  BlockL(params, paramTypes, code) -->
+    block-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, paramTypes, no-type(), code)).
 
   Return(e) --> do-return(e).
 
@@ -79,8 +79,8 @@ rules /* closure construction */
     error-check-locals(locals) --> _;
     ClosV(S, O, params, locals, code, L, has-anno-public(annos), Src, Return-To(fresh), paramTypes, returnType) => clos.
 
-  block-closure(MethodL(_, _, _, params, _, _, code)) :: L -->
-    ClosV(S, O, params, locals, code, L, true, src-base(), No-Return(), [], no-type()) :: L
+  block-closure(MethodL(_, _, _, params, paramTypes, _, code)) :: L -->
+    ClosV(S, O, params, locals, code, L, true, src-base(), No-Return(), paramTypes, no-type()) :: L
   where
     current-self() --> S;
     current-outer() --> O;

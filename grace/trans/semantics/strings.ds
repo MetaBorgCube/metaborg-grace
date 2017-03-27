@@ -25,6 +25,8 @@ rules
   str-call(v1, op, [v2]) --> str-call-evaluated(op, v1, v2).
 
   str-call(v, op, []) --> string-call-native(op, v).
+  
+  str-call-evaluated(op, v1, v2@StringV(_)) --> string-call-native(op, v1, v2).
 
   str-call-evaluated(op, v1, NumV(i)) --> string-call-native(op, v1, StringV(s))
   where

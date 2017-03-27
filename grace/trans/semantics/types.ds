@@ -75,12 +75,12 @@ rules
   where
     compare-types(pt, v) --> true.
   
-  type-check([pt | pts] , [v | vs]) --> type-check(pts, vs)
+  type-check(ptypes@[pt | pts] , vtypes@[v | vs]) --> type-check(pts, vs)
   where
+    log("parameter types:" ++ str(ptypes:AST) ++ " value types:" ++ str(vtypes:AST)) --> _;
     compare-types(pt, v) --> false;
     halt-error("Type mismatch!", "") --> _.
-      
-    
+
 
   new-type(trs) --> TypeV(trs).
 
@@ -107,7 +107,7 @@ rules
         "Type V expr" => type
       otherwise =>
         TypeV([]) => v;
-        "Unknow V" => type
+        "Unknown V" => type
     };
     log(prefix ++ type) --> _.
 
@@ -124,6 +124,8 @@ rules
         [] => t
       TypeV(tr) =>
         get-type-methods(tr) --> t
+      UninitializedV() =>
+        [] => t
       otherwise =>
         [] => t;
         halt-error("Unknown V to get type for: ", str(v)) --> _
@@ -165,6 +167,8 @@ rules
       otherwise =>
         compare-types(t2, t3) --> b
     }.
+
+  compare-types(_, UninitializedV()) --> true.
 
   compare-types(t1@TypeV(_), v) -->
     compare-names(get-names(t1), get-names(v))

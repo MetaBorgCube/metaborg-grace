@@ -67,6 +67,8 @@ rules
   collect-dialect-statement(Program([Expression(ObjectL(_,_,[stm | _ ])) | _])) --> Dialect("standardGrace")
   where
     stm =!=> Dialect(_).
+    
+  collect-dialect-statement(Program([Expression(ObjectL(_,_,[])) | _])) --> Dialect("standardGrace").
   
   
   load-import(name) --> import-cache-get(name)

@@ -46,6 +46,7 @@ rules
     is-local(x) --> false;
     lookup-local-method(current-self(), x) --> local-clos;
     lookup-outer-method(current-outer(), x) --> outer-clos;
+    log("disambiguate-closure, from implicit call") --> _;
     disambiguate-closure(local-clos, outer-clos, x) --> clos.
 
   access-local(x, [v]) --> DoneV()
@@ -62,10 +63,12 @@ rules
   call-qualified(recv, x, vs) --> call(clos, vs, x)
   where
     lookup-local-method(recv, x) --> clos;
+    log("disambiguate-closure, from qualified call") --> _;
     disambiguate-closure(clos, x) --> _.
 
   call(clos@ClosV(S, O, params, locals, code, L1, _, _, R, pts, rt), vs, name) :: L --> v :: L
   where
+    log(name ++ " params:  " ++ str(params:AST) ++ "code: " ++ str(code:AST) ++ str(pts:AST)) --> _;
     type-check(pts, vs) --> true;
     ensure-access(name, clos, S) --> _;
     add-locals(locals) :: L1 --> _ :: L2;

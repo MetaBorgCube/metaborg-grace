@@ -1,3 +1,3 @@
-method f -> type { f; } { }; // doesnt conform
+method f -> type { g; } { }; // doesnt conform
 
 f;
