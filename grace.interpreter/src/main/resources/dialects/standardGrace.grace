@@ -15,8 +15,8 @@ class graceObject {
   method != (other: Object) {
     !(==(other));
   };
-  method asString { "an object"; };
-  method asDebugString { asString; };
+//  method asString { "an object"; };
+//  method asDebugString { asString; };
   method :: (other: Object) { binding(self,other); };
 };
 
