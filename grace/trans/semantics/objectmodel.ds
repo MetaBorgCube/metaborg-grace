@@ -464,17 +464,12 @@ rules
     read(S) --> Obj(_,_,_, methods).
 
 
-
   // Lookup in self
   lookup-local-method(RefV(S'), x) --> v
   where
     read(S') --> Obj(_, _, _, methods);
-    case methods[x?] of {
-      true =>
-        methods[x] => v
-      false =>
-        DoneV() => v
-    }.
+    v as methods[x] if methods[x?]
+      or DoneV().
 
   lookup-local-method(v, _) --> DoneV()
   where
@@ -484,18 +479,9 @@ rules
   lookup-outer-method(RefV(S'), x) --> v
   where
     read(S') --> Obj(O', _, _, methods);
-    case methods[x?] of {
-      true =>
-        methods[x] => v
-      false =>
-        is-stored(O') --> outer-exists;
-        case outer-exists of {
-          true =>
-            lookup-outer-method(O', x) --> v
-          otherwise =>
-            DoneV() => v
-        }
-    }.
+    v as methods[x] if methods[x?]
+      or lookup-outer-method(O', x) if is-stored(O')
+      or DoneV().
 
   lookup-outer-method(v, _) --> DoneV()
   where

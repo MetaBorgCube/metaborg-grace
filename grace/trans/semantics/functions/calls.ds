@@ -91,14 +91,8 @@ rules
     R |- code :: EX Ok() --> vcode :: EX1;
     case EX1 of {
       Rex(r-mark', vret) =>
-        case eqI(r-mark', r-mark) of {
-          true =>
-            vret => v;
-            Ok() => EX
-          otherwise =>
-            vcode => v;
-            EX1 => EX
-        }
+        (v, EX) as (vret, Ok()) if eqI(r-mark', r-mark)
+                or (vcode, EX1)
       otherwise =>
         EX1 => EX;
         vcode => v

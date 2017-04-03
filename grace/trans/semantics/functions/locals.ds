@@ -115,14 +115,9 @@ rules
   is-local(x) :: L --> is-local :: L
   where
     ":=(_)" => bind_suffix;
-    str-ends-with(x, bind_suffix) --> is-assign;
-    case is-assign of {
-      true =>
-        str-rm-suffix(x, bind_suffix) --> x';
-        L[x'?] => is-local
-      false =>
-        L[x?] => is-local
-    }.
+    is-local
+      as L[str-rm-suffix(x, bind_suffix)?] if str-ends-with(x, bind_suffix)
+      or L[x?].
 
   read-local(x) :: L --> ensure-defined(v-read(L[x])) :: L.
 

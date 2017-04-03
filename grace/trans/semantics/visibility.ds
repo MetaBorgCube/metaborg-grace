@@ -33,11 +33,7 @@ rules
   ensure-access(x, clos@ClosV(_, _, _, _, _, _, false, _, _), recv) --> clos
   where
     can-reach(recv) --> visible;
-    case visible of {
-      false =>
-            halt-error("Requested confidential method '" ++ x ++ "' of object: " ++ int2string(recv) ++ " from outside", "") --> _
-      otherwise =>
-    }.
+    _ as halt-error("Requested confidential method '" ++ x ++ "' of object: " ++ int2string(recv) ++ " from outside", "") if not visible.
 
   S |- can-reach(S') --> true
   where
@@ -60,12 +56,9 @@ rules
   can-reach-map([S | ss], S') --> reachable'
   where
     S |- can-reach(S') --> reachable;
-    case reachable of {
-      false =>
-        can-reach-map(ss, S') --> reachable'
-      otherwise =>
-        true => reachable'
-    }.
+    reachable' as can-reach-map(ss, S') : Bool if reachable
+               or true.
+
 
 
 
