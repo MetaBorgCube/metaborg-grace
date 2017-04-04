@@ -451,9 +451,11 @@ rules
   where
     read(S) --> Obj(O, outers, slots, methods);
     update(S, Obj(O, outers, slots, {x |--> v, methods})) --> _.
-
-
-
+  
+  S |- remove-method(x) --> U()
+  where
+    read(S) --> Obj(O, outers, slots, methods);
+    update(S, Obj(O, outers, slots, methods \ x)) --> _.
 
   S |- current-method-names() --> allkeys(methods)
   where
