@@ -1,4 +1,4 @@
-module trans/semantics/objectmodel
+module trans/semantics/object/_cellar/objectmodel
 
 imports
   src-gen/ds-signatures/grace-sig

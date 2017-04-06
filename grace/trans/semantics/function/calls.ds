@@ -1,9 +1,9 @@
-module trans/semantics/functions/calls
+module trans/semantics/function/calls
 
 imports
   src-gen/ds-signatures/grace-sig
   trans/semantics/statements
-  trans/semantics/functions/locals
+  trans/semantics/function/locals
   
 signature
   sorts

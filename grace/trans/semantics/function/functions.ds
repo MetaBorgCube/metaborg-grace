@@ -1,15 +1,15 @@
-module trans/semantics/functions/functions
+module trans/semantics/function/functions
 
 imports
   src-gen/ds-signatures/grace-sig
   trans/semantics/values
   trans/semantics/statements
-  trans/semantics/objectmodel
+  trans/semantics/object/object
   trans/semantics/types
   trans/semantics/booleans
   trans/semantics/visibility
   trans/semantics/controlflow
-  trans/semantics/functions/calls
+  trans/semantics/function/calls
   trans/semantics/expressions
   
 signature

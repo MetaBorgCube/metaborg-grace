@@ -1,9 +1,9 @@
-module trans/semantics/functions/locals
+module trans/semantics/function/locals
 
 imports
   src-gen/ds-signatures/grace-sig
   trans/semantics/statements
-  trans/semantics/functions/calls
+  trans/semantics/function/calls
 
 signature
   sort aliases
