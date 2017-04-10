@@ -84,20 +84,8 @@ rules
     case EB of {
       E() =>
         S S', O S |- init-object(S') --> _
+      otherwise =>
     }.
-
-//  S, O, EB |- o@ObjectL(inherit, uses, code) :: NS --> RefV(S') :: NS
-//  where
-//    allocate(Obj(O, [], {}, {})) --> S';
-//      log("Alloc: S=" ++ int2string(S') ++ " O=" ++ int2string(O) ++ " from " ++ str(o)) --> _;
-//    S S', O S |- inherit --> super;
-//    S S', O S |- uses --> traits;
-//    S S', O S |- obj-members(code) --> (slots, methods);
-//    update(S', Obj(O, `[super|traits], slots, methods)) --> _;
-//    case EB of {
-//      E() =>
-//        S S', O S |- init-object(S') --> _
-//    }.
 
   NoInherit() --> (S, {} : Aliases, {} : Excludes)
   where
@@ -122,6 +110,18 @@ rules
     EB B() |- e --> RefV(S);
     alias-map(aliases) --> alias-map;
     exclude-map(excludes) --> exclude-map.
+  
+  alias-map([]) --> {}.
+  
+  alias-map([AliasL(ID(x'), ID(x)) | xs]) --> {x' |--> x, xs-map}
+  where
+    alias-map(xs) --> xs-map.
+  
+  exclude-map([]) --> {}.
+  
+  exclude-map([ExcludeL(ID(x)) | xs]) --> {x |--> x, xs-map}
+  where
+    exclude-map(xs) --> xs-map.
   
   EB B() |- MCallRecvL(e, ID(x), es) --> v
   where

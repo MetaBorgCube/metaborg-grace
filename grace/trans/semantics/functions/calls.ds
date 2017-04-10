@@ -42,13 +42,13 @@ rules
   S |- call-implicit(x, vs) --> v
   where
     is-local(x) --> false;
-    log("Call non-local " ++ x) --> _;
+      log("ICall non-local " ++ x) --> _;
     lookup(x, S) --> path;
-    log("Found " ++ x ++ " at " ++ str(path : AST)) --> _;
+      log("Found " ++ x ++ " at " ++ str(path : AST)) --> _;
     resolve(path, S) --> clos;
-    log("Resolved to " ++ str(clos)) --> _;
+      log("Resolved to " ++ str(clos)) --> _;
     call(clos, vs) --> v;
-    log("Call result " ++ str(v)) --> _.
+      log("Call result " ++ str(v)) --> _.
 
   access-local(x, [v]) --> DoneV()
   where
@@ -66,9 +66,13 @@ rules
   call-qualified(RefV(S), x, vs) --> v
   where
     // TODO enforce visibility
+      log("QCall non-local " ++ x) --> _;
     lookup(x, S) --> path;
-    resolve(path, S) --> clos@ClosV(O, _, _, _, _, _, _);
-    S, O |- call(clos, vs) --> v.
+      log("Found " ++ x ++ " at " ++ str(path : AST)) --> _;
+    resolve(path, S) --> clos;
+      log("Resolved to " ++ str(clos)) --> _;
+    call(clos, vs) --> v;
+      log("Call result " ++ str(v)) --> _.
 
   S |- call(ClosV(O, params, locals, code, L1, _, R), vs) :: L --> v :: L
   where
