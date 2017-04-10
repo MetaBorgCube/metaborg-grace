@@ -2,6 +2,7 @@ package org.metaborg.grace.interpreter.natives;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -18,7 +19,15 @@ public abstract class logdebug_1 extends TermBuild {
 	public String doInt(String s) {
 		getContext();
 		if (DynSemContext.LANGUAGE.isDEBUG()) {
-			getContext().getOutput().println(s);
+			int currentStackDepth = InterpreterUtils.stackDepth();
+			final StringBuilder msgBuilder = new StringBuilder();
+			for(; currentStackDepth > 0; currentStackDepth--){
+				msgBuilder.append(" ");
+			}
+			msgBuilder.append(" ");
+			msgBuilder.append(s);
+			
+			getContext().getErr().println(msgBuilder.toString());
 		}
 		return s;
 	}
