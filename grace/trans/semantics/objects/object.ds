@@ -38,8 +38,8 @@ signature
     EvalMode
   
   constructors
-    E: EvalMode
-    B: EvalMode
+    E: EvalMode // regular evaluation mode
+    B: EvalMode // object building mode
 
   components
     EB : EvalMode
@@ -63,8 +63,10 @@ signature
     
 rules
   
+  // source code for root object (ancestor of all objects)
   rootobj-code() --> RObjectL([]).
 
+  // allocate root object (may only occur in B() mode)
   EB B() |- o@RObjectL(code) --> RefV(S')
   where
     next() --> O;
@@ -73,6 +75,7 @@ rules
     O |- obj-members(code) --> (slots, methods);
     update(S', Obj(O, [], slots, methods)) --> _.
 
+  // allocate and optionally initialize object
   S, EB |- o@ObjectL(inherit, uses, code) :: NS --> RefV(S') :: NS
   where
     allocate(Obj(S, [], {}, {})) --> S';
@@ -83,12 +86,15 @@ rules
     update(S', Obj(S, `[super|traits], slots, methods)) --> _;
     case EB of {
       E() =>
+        // initialize only if E() indicating we are youngest descendant
         S S', O S |- init-object(S') --> _
       otherwise =>
     }.
 
+  
   NoInherit() --> (S, {} : Aliases, {} : Excludes)
   where
+    // inject inherit to root object if no explicit ancestor
     rootobj-code() --> root-obj;
     EB B() |- root-obj --> RefV(S).
   
@@ -129,6 +135,7 @@ rules
     EB E() |- es --> vs;
     EB B() |- call-qualified(recv, x, vs) --> v.
 
+  // initialize objects, calling constructors, ancestors first
   init-object(S') --> U()
   where
     read(S') --> Obj(_, parents, _, methods);
@@ -229,7 +236,9 @@ rules
 
   slot-setter(x, i, c) -->
     Declaration(MethodL(ID(mksettername(x)), [], visibility-annos(c), [ID("p")], [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))])).
-    
+
+
+
   S |- SlotRead(s) --> slots[s]
   where
     lookup-slot(s, S) --> SO(S');

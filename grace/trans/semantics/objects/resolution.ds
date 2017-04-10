@@ -37,7 +37,7 @@ signature
     
     path-resolve(String, Path, Self) --> V
     
-rules
+rules // ===== RESOLVE PATHS to VALUES === 
 
   resolve([PL(x)], S) --> methods[x]
   where
@@ -86,7 +86,9 @@ rules
   path-outers-only([]) --> true.
   
   path-outers-only([PO() | path]) --> path-outers-only(path).
-  
+
+
+// ==== LOOKUP method names to PATHs ====
 
 signature
   components
@@ -107,23 +109,23 @@ rules
   where
     read(S') --> Obj(_, _, _, methods);
     methods[x?] == true;
-    log("L: " ++ x ++ ": " ++ "FOUND LOCAL") --> _.
+        log("L: " ++ x ++ ": " ++ "FOUND LOCAL") --> _.
   
   O |- lookup(x, S') --> path
   where
     read(S') --> o@Obj(O', parents, _, methods);
     methods[x?] == false;
     O == O';
-    log("L: " ++ x ++ ": in " ++ int2string(S') ++ "=" ++ str(o)) --> _;
-    log("L: " ++ x ++ ": outer OK (" ++ int2string(O) ++ "==" ++ int2string(O') ++ ")") --> _;
-    log("L: " ++ x ++ ": " ++ "up PARENTS") --> _;
+        log("L: " ++ x ++ ": in " ++ int2string(S') ++ "=" ++ str(o)) --> _;
+        log("L: " ++ x ++ ": outer OK (" ++ int2string(O) ++ "==" ++ int2string(O') ++ ")") --> _;
+        log("L: " ++ x ++ ": " ++ "up PARENTS") --> _;
     O, PIDX 0 |- lookup-in-parents(x, parents) --> path-in-parent;
     /*
       the contextual Outer object is the Outer of the object we are looking up in.
       this means we are still looking up from within the object itself and may go to its
       surrounding lexical scope 
     */
-    log("L: " ++ x ++ ": " ++ "up OUTER") --> _;
+        log("L: " ++ x ++ ": " ++ "up OUTER") --> _;
     O |- lookup-in-outer(x, S') --> path-in-outer;
     disambiguate-paths(x, path-in-parent, path-in-outer) --> path.
   
@@ -132,9 +134,9 @@ rules
     read(S') --> o@Obj(O', parents, _, methods);
     methods[x?] == false;
     O != O';
-    log("L: " ++ x ++ ": in " ++ int2string(S') ++ "=" ++ str(o)) --> _;
-    log("L: " ++ x ++ ": outer NOK (" ++ int2string(O) ++ "<>" ++ int2string(O') ++ ")") --> _;
-    log("L: " ++ x ++ ": " ++ "up PARENTS") --> _;
+        log("L: " ++ x ++ ": in " ++ int2string(S') ++ "=" ++ str(o)) --> _;
+        log("L: " ++ x ++ ": outer NOK (" ++ int2string(O) ++ "<>" ++ int2string(O') ++ ")") --> _;
+        log("L: " ++ x ++ ": " ++ "up PARENTS") --> _;
     O, PIDX 0 |- lookup-in-parents(x, parents) --> path-in-parent.
 
 
@@ -156,7 +158,7 @@ rules
   
   PIDX |- lookup-in-parents(x, [parent | parents]) --> path
   where
-    log("L: " ++ x ++ ": " ++ "PARENT " ++ int2string(PIDX)) --> _;
+        log("L: " ++ x ++ ": " ++ "PARENT " ++ int2string(PIDX)) --> _;
     PIDX |- lookup-in-parent(x, parent) --> p-path;
     case path-found(p-path) : Bool of {
       true =>
@@ -196,6 +198,8 @@ rules
     halt-error(x ++ " is both inherited, and defined in an enclosing scope") --> _.
   
   disambiguate-paths(_, [], []) --> []. // not found
+
+// ====== SLOT OWNER LOOKUP ========= 
 
 signature
   sorts
