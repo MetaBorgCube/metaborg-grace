@@ -6,7 +6,6 @@ imports
 imports
   trans/semantics/store
   trans/semantics/values
-  trans/semantics/objectmodel
   trans/semantics/functions/functions
   trans/semantics/expressions
   trans/semantics/statements
@@ -22,10 +21,14 @@ signature
   
 rules
 
-  S |- prog@Program(code) --> v
+  S, O |- Program(code) --> v
   where
-    load-dialect(collect-dialect-statement(prog)) --> S';
-    S', O S |- code --> v.
+    S, O, R No-Return(), EB E() |- code :: NS 0, L {} --> v.
+
+//  S |- prog@Program(code) --> v
+//  where
+//    load-dialect(collect-dialect-statement(prog)) --> S';
+//    S', O S |- code --> v.
 
   [] : Code --> DoneV().
 

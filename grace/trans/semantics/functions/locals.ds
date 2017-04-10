@@ -1,9 +1,9 @@
-module trans/semantics/function/locals
+module trans/semantics/functions/locals
 
 imports
   src-gen/ds-signatures/grace-sig
   trans/semantics/statements
-  trans/semantics/function/calls
+  trans/semantics/functions/calls
 
 signature
   sort aliases
@@ -55,19 +55,26 @@ rules
     is-local(x) --> true;
     halt-error("Local '" ++ x ++ "' may not redefine local method.", "") --> _.
   
-  ensure-valid-local(x) --> U()
+  S |- ensure-valid-local(x) --> U()
   where
     is-local(x) --> false;
-    lookup-local-method(current-self(), x) --> ClosV(_, _, _, _, _, _, _, _, _);
-    halt-error("Local '" ++ x ++ "' may not redefine method from self.", "") --> _.
-  
-  ensure-valid-local(x) --> U()
-  where
-    is-local(x) --> false;
-    lookup-outer-method(current-outer(), x) --> ClosV(_, _, _, _, _, _, _, _, _);
-    halt-error("Local '" ++ x ++ "' may not shadow method from an enclosing scope.", "") --> _.
-  
-  ensure-valid-local(_) --> U().
+    lookup(x, S) --> path;
+    path-found(path) --> found;
+    case found of {
+      true =>
+        path-local(path) --> local;
+        case local of {
+          true =>
+            halt-error("Local '" ++ x ++ "' may not redefine method from self.") --> _
+          false =>
+            path-lexical-only(path) --> lexical;
+            case lexical of {
+              true =>
+                halt-error("Local '" ++ x ++ "' may not shadow method from an enclosing scope.") --> _
+            }
+        }
+      false =>
+    }.
   
 
 /* ======== local environment operations ========== */

@@ -1,0 +1,245 @@
+module trans/semantics/objects/object
+
+imports
+  trans/semantics/values
+  trans/semantics/store
+  trans/semantics/statements
+  trans/semantics/functions/functions
+
+signature
+  sort aliases
+    Self = Addr
+    Outer = Addr
+    
+  components
+    S : Self
+    O : Outer
+  
+  constructors
+    RefV: Addr -> V {implicit}
+  
+  sorts
+    Object
+  
+  sort aliases
+    HeapData = Object
+    Slots = Map(Int, V)
+    Methods = Map(String, V)
+    Aliases = Map(String, String)
+    Excludes = Map(String, String)
+    Parent = (Addr * Aliases * Excludes)
+    Parents = List(Parent)
+  
+  constructors
+    Obj: Outer * Parents * Slots * Methods -> Object
+    RObjectL: Code -> Exp
+    
+  sorts
+    EvalMode
+  
+  constructors
+    E: EvalMode
+    B: EvalMode
+
+  components
+    EB : EvalMode
+    NS : Int
+  
+  arrows
+    init-object(Self) --> U
+    init-object-parents(Parents) --> U
+    
+    Inherit --> Parent
+    List(Use) --> Parents
+    Use --> Parent
+    
+    constr-name() --> String
+    
+    alias-map(List(Alias)) --> Aliases
+    exclude-map(List(Exclude)) --> Excludes
+    
+    
+    rootobj-code() --> Exp
+    
+rules
+  
+  rootobj-code() --> RObjectL([]).
+
+  EB B() |- o@RObjectL(code) --> RefV(S')
+  where
+    next() --> O;
+    allocate(Obj(O, [], {}, {})) --> S';
+      log("Alloc (root): S=" ++ int2string(S') ++ " O=" ++ int2string(O) ++ " from " ++ str(o)) --> _;
+    O |- obj-members(code) --> (slots, methods);
+    update(S', Obj(O, [], slots, methods)) --> _.
+
+  S, EB |- o@ObjectL(inherit, uses, code) :: NS --> RefV(S') :: NS
+  where
+    allocate(Obj(S, [], {}, {})) --> S';
+      log("Alloc: S=" ++ int2string(S') ++ " O=" ++ int2string(S) ++ " from " ++ str(o)) --> _;
+    O S |- inherit --> super;
+    O S |- uses --> traits;
+    O S |- obj-members(code) --> (slots, methods);
+    update(S', Obj(S, `[super|traits], slots, methods)) --> _;
+    case EB of {
+      E() =>
+        S S', O S |- init-object(S') --> _
+    }.
+
+//  S, O, EB |- o@ObjectL(inherit, uses, code) :: NS --> RefV(S') :: NS
+//  where
+//    allocate(Obj(O, [], {}, {})) --> S';
+//      log("Alloc: S=" ++ int2string(S') ++ " O=" ++ int2string(O) ++ " from " ++ str(o)) --> _;
+//    S S', O S |- inherit --> super;
+//    S S', O S |- uses --> traits;
+//    S S', O S |- obj-members(code) --> (slots, methods);
+//    update(S', Obj(O, `[super|traits], slots, methods)) --> _;
+//    case EB of {
+//      E() =>
+//        S S', O S |- init-object(S') --> _
+//    }.
+
+  NoInherit() --> (S, {} : Aliases, {} : Excludes)
+  where
+    rootobj-code() --> root-obj;
+    EB B() |- root-obj --> RefV(S).
+  
+  InheritL(e, aliases, excludes) --> (S, alias-map, exclude-map)
+  where
+    EB B() |- e --> RefV(S);
+    alias-map(aliases) --> alias-map;
+    exclude-map(excludes) --> exclude-map.
+  
+  [] : List(Use) --> [].
+  
+  [use | uses] : List(Use) --> [p | ps]
+  where
+    use --> p;
+    uses --> ps.
+  
+  UseL(e, aliases, excludes) --> (S, alias-map, exclude-map)
+  where
+    EB B() |- e --> RefV(S);
+    alias-map(aliases) --> alias-map;
+    exclude-map(excludes) --> exclude-map.
+  
+  EB B() |- MCallRecvL(e, ID(x), es) --> v
+  where
+    EB E() |- e --> recv;
+    EB E() |- es --> vs;
+    EB B() |- call-qualified(recv, x, vs) --> v.
+
+  init-object(S') --> U()
+  where
+    read(S') --> Obj(_, parents, _, methods);
+    init-object-parents(`parents) --> _;
+      read(S') --> debug-s;
+      log("Init: " ++ int2string(S') ++ " : " ++ str(debug-s)) --> _;
+    methods[obj-constr-name()] => ctr;
+    call(ctr, []) --> _.
+  
+  init-object-parents([]) --> U().
+  
+  init-object-parents([(S, _, _) : Parent | parents]) --> U()
+  where
+    init-object(S) --> _;
+    init-object-parents(parents) --> _.
+
+signature
+  constructors // extra instructions
+    SlotRead : Int -> Statement
+    SlotWrite : Int * Exp -> Statement
+  
+  native operators
+    mksettername: String -> String
+  
+  arrows
+    obj-members(Code) --> (Slots * Methods)
+    obj-slots(Code, Slots, Methods) --> (Code * Slots * Methods)
+    obj-methods(Code, Slots, Methods) --> (Code * Slots * Methods)
+    obj-constr(Code, Slots, Methods) --> (Slots * Methods)
+    
+    
+    slot-getter(String, Int, Bool) --> Statement 
+    slot-setter(String, Int, Bool) --> Statement
+    
+    obj-constr-name() --> String
+    
+rules
+
+  obj-members(code) --> (slots3, methods3)
+  where
+    obj-slots(code, {}, {}) --> (code1, slots1, methods1);
+    obj-methods(code1, slots1, methods1) --> (code2, slots2, methods2);
+    obj-constr(code2, slots2, methods2) --> (slots3, methods3).
+  
+  obj-slots([], slots, methods) --> ([] : Code, slots, methods).
+  
+  obj-slots([s | code], slots, methods) --> ([s | code'], slots', methods')
+  where
+    s =!=> Declaration(VariableL(_, _, _, _));
+    s =!=> Declaration(ConstantL(_, _, _, _));
+    obj-slots(code, slots, methods) --> (code', slots', methods').
+  
+  obj-slots([Declaration(VariableL(WildCard(), _, _, e)) | code], slots, methods) --> ([Expression(e) | code'], slots', methods')
+  where
+    obj-slots(code, slots, methods) --> (code', slots', methods').
+  
+  obj-slots([Declaration(ConstantL(WildCard(), _, _, e)) | code], slots, methods) --> ([Expression(e) | code'], slots', methods')
+  where
+    obj-slots(code, slots, methods) --> (code', slots', methods').
+  
+  obj-slots([Declaration(VariableL(ID(x), _, annos, e)) | code], slots, methods) :: NS --> ([init-stm, getter, setter | code'], slots', methods') :: NS'
+  where
+    SlotWrite(NS, e) => init-stm;
+    slot-getter(x, NS, has-anno-readable(annos)) --> getter;
+    slot-setter(x, NS, has-anno-writable(annos)) --> setter;
+    obj-slots(code, {NS |--> UninitializedV(), slots}, methods) :: NS addI(NS, 1) --> (code', slots', methods') :: NS'.
+  
+  obj-slots([Declaration(ConstantL(ID(x), _, annos, e)) | code], slots, methods) :: NS --> ([init-stm, getter | code'], slots', methods') :: NS'
+  where
+    SlotWrite(NS, e) => init-stm;
+    slot-getter(x, NS, has-anno-readable(annos)) --> getter;
+    obj-slots(code, {NS |--> UninitializedV(), slots}, methods) :: NS addI(NS, 1) --> (code', slots', methods') :: NS'.
+  
+  obj-methods([], slots, methods) --> ([] : Code, slots, methods).
+  
+  obj-methods([s | code], slots, methods) --> ([s | code'], slots', methods')
+  where
+    s =!=> Declaration(MethodL(_, _, _, _, _, _, _));
+    obj-methods(code, slots, methods) --> (code', slots', methods').
+  
+  obj-methods([Declaration(m@MethodL(ID(x), _, _, _, _, _, _)) | code], slots, methods) --> (code', slots', methods')
+  where
+    method-closure(m) --> clos;
+    obj-methods(code, slots, {x |--> clos, methods}) --> (code', slots', methods').
+  
+  obj-constr(code, slots, methods) --> (slots, {ctr |--> clos, methods})
+  where
+    obj-constr-name() --> ctr;
+    method-closure(MethodL(ID(ctr), [], visibility-annos(true), [], [], no-type(), code)) --> clos.
+
+  obj-constr-name() --> "#ctr".
+
+  slot-getter(x, i, c) -->
+    Declaration(MethodL(ID(x), [], visibility-annos(c), [], [], no-type(), [SlotRead(i)])).
+
+  slot-setter(x, i, c) -->
+    Declaration(MethodL(ID(mksettername(x)), [], visibility-annos(c), [ID("p")], [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))])).
+    
+    
+    
+    
+    
+  
+//  S |- SlotRead(s) --> slots[s]
+//  where
+//    read(S) --> Obj(_, _, slots, _).
+//  
+//  S |- SlotWrite(s, e) --> DoneV()
+//  where
+//    e --> v;
+//    read(S) --> Obj(O, parents, slots, methods);
+//    update(S, Obj(O, parents, {s |--> v, slots}, methods)) --> _.
+
+    

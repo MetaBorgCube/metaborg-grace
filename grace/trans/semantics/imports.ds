@@ -45,9 +45,7 @@ rules
   
   parse-file(s) --> native-parse-file(s).
   
-  load-dialect(Dialect("none")) --> new-object(S)
-  where
-    current-self() --> RefV(S).
+  S |- load-dialect(Dialect("none")) --> S.
   
   load-dialect(Dialect(name)) --> dialect-cache-get(name)
   where

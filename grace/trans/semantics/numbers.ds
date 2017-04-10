@@ -6,6 +6,7 @@ imports
   trans/semantics/values
   trans/semantics/runtime/natives
   trans/semantics/booleans
+  trans/semantics/strings
 
 signature
   constructors

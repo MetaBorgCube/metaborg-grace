@@ -1,0 +1,201 @@
+module trans/semantics/objects/resolution
+
+imports
+  src-gen/ds-signatures/grace-sig
+
+imports
+  trans/semantics/values
+  trans/semantics/store
+  trans/semantics/objects/object
+
+signature
+  sorts
+    PathPart
+  
+  sort aliases
+    Path = List(PathPart) // invariant: empty means no path found 
+  
+  sort aliases
+    HeapData = Object
+    
+  constructors
+    PL: String -> PathPart // local
+    PP: Int * String -> PathPart // name S in parent I
+    PO: PathPart // outer
+  
+  arrows
+    resolve(Path, Addr) --> V
+    
+    
+    path-found(Path) --> Bool
+    path-local(Path) --> Bool
+    path-inherited(Path) --> Bool
+    path-lexical(Path) --> Bool
+    path-lexical-only(Path) --> Bool
+    
+    path-outers-only(Path) --> Bool    
+    
+    path-resolve(String, Path, Self) --> V
+    
+rules
+
+  resolve([PL(x)], S) --> methods[x]
+  where
+    read(S) --> Obj(_, _, _, methods).
+  
+  resolve([PO() | path], S) --> resolve(path, S')
+  where
+    read(S) --> Obj(S', _, _, _).
+  
+  resolve([PP(i, _) | path], S) --> resolve(path, S')
+  where
+    read(S) --> Obj(_, parents, _, _);
+    parents[i] => (S', _, _).
+
+
+  path-found([]) --> false.
+  
+  path-found([_|_]) --> true.
+  
+  
+  path-local([PL(_)]) --> true.
+  
+  path-local([p | _]) --> false
+  where
+    p =!=> PL(_).
+  
+  
+  path-inherited([PP(_, _)| _]) --> true.
+  
+  path-inherited([p | _]) --> false
+  where
+    p =!=> PP(_, _).
+  
+  
+  path-lexical([PO()|_]) --> true.
+  
+  path-lexical([p | _]) --> false
+  where
+    p =!=> PO().
+    
+  
+  path-lexical-only(paths) --> path-outers-only(`paths')
+  where
+    `paths => [PL(_) | paths'].
+  
+  path-outers-only([]) --> true.
+  
+  path-outers-only([PO() | path]) --> path-outers-only(path).
+  
+
+signature
+  components
+    PIDX : Int
+    
+  arrows
+    lookup(String, Self) --> Path
+    
+    lookup-in-parent(String, Parent) --> Path
+    lookup-in-outer(String, Self) --> Path
+    lookup-in-parents(String, Parents) --> Path
+    
+    disambiguate-paths(String, Path, Path) --> Path
+  
+
+rules
+
+  lookup(x, S') --> [PL(x)]
+  where
+    read(S') --> Obj(_, _, _, methods);
+    methods[x?] == true;
+    log("L: " ++ x ++ ": " ++ "FOUND LOCAL") --> _.
+  
+  O |- lookup(x, S') --> path
+  where
+    read(S') --> o@Obj(O', parents, _, methods);
+    methods[x?] == false;
+    O == O';
+    log("L: " ++ x ++ ": in " ++ int2string(S') ++ "=" ++ str(o)) --> _;
+    log("L: " ++ x ++ ": outer OK (" ++ int2string(O) ++ "==" ++ int2string(O') ++ ")") --> _;
+    log("L: " ++ x ++ ": " ++ "up PARENTS") --> _;
+    O, PIDX 0 |- lookup-in-parents(x, parents) --> path-in-parent;
+    /*
+      the contextual Outer object is the Outer of the object we are looking up in.
+      this means we are still looking up from within the object itself and may go to its
+      surrounding lexical scope 
+    */
+    log("L: " ++ x ++ ": " ++ "up OUTER") --> _;
+    O |- lookup-in-outer(x, S') --> path-in-outer;
+    disambiguate-paths(x, path-in-parent, path-in-outer) --> path.
+  
+  O |- lookup(x, S') --> path-in-parent
+  where
+    read(S') --> o@Obj(O', parents, _, methods);
+    methods[x?] == false;
+    O != O';
+    log("L: " ++ x ++ ": in " ++ int2string(S') ++ "=" ++ str(o)) --> _;
+    log("L: " ++ x ++ ": outer NOK (" ++ int2string(O) ++ "<>" ++ int2string(O') ++ ")") --> _;
+    log("L: " ++ x ++ ": " ++ "up PARENTS") --> _;
+    O, PIDX 0 |- lookup-in-parents(x, parents) --> path-in-parent.
+
+
+  lookup-in-outer(_, S) --> []
+  where
+    read(S) --> Obj(O, _, _, _);
+    is-stored(O) --> false.
+
+  lookup-in-outer(x, S) --> path
+  where
+    read(S) --> Obj(O, _, _, _);
+    is-stored(O) --> true;
+    read(O) --> Obj(OO, _, _, _);
+    O OO |- lookup(x, O) --> out-path;
+    path as [PO() | out-path] if path-found(out-path)
+         or [].
+
+  lookup-in-parents(_, []) --> [].
+  
+  PIDX |- lookup-in-parents(x, [parent | parents]) --> path
+  where
+    log("L: " ++ x ++ ": " ++ "PARENT " ++ int2string(PIDX)) --> _;
+    PIDX |- lookup-in-parent(x, parent) --> p-path;
+    case path-found(p-path) : Bool of {
+      true =>
+        p-path => path
+      otherwise =>
+        PIDX addI(PIDX, 1) |- lookup-in-parents(x, parents) --> path
+    }.
+    
+  lookup-in-parent(x, (_, _, excludes)) --> []
+  where
+    excludes[x?] == true.
+  
+  O, PIDX |- lookup-in-parent(x, (S', aliases, excludes)) --> path
+  where
+    excludes[x?] == false;
+    aliases[x?] == true;
+    aliases[x] => x';
+    O |- lookup(x', S') --> parent-path;
+    path as [PP(PIDX, x') | parent-path] if path-found(parent-path)
+         or [].
+ 
+  O, PIDX |- lookup-in-parent(x, (S', aliases, excludes)) --> path
+  where
+    excludes[x?] == false;
+    aliases[x?] == false;
+    O |- lookup(x, S') --> parent-path;
+    path as [PP(PIDX, x) | parent-path] if path-found(parent-path)
+         or [].
+
+
+  disambiguate-paths(_, p@[_|_], []) --> p. // parent
+  
+  disambiguate-paths(_, [], o@[_|_]) --> o. // outer
+  
+  disambiguate-paths(x, [_|_], [_|_]) --> [] // ambiguous
+  where
+    halt-error(x ++ " is both inherited, and defined in an enclosing scope") --> _.
+  
+  disambiguate-paths(_, [], []) --> []. // not found
+//  where
+//    halt-error("Unknown method " ++ x) --> _.

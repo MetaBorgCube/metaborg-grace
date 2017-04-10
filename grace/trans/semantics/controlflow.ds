@@ -20,10 +20,10 @@ rules
   
   w@while-loop-evaluated(v1, v2) --> DoneV()
   where
-    call(v1, [], "apply") --> BoolV(cond);
+    call(v1, []) --> BoolV(cond);
     case cond of {
       true =>
-        call(v2, [], "apply") --> _;
+        call(v2, []) --> _;
         w --> _
       otherwise =>
     }.

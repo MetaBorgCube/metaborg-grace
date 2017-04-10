@@ -4,7 +4,6 @@ imports
   src-gen/ds-signatures/grace-sig
   trans/semantics/values
   trans/semantics/statements
-  trans/semantics/objectmodel
   
 signature
   sorts
@@ -23,9 +22,9 @@ signature
     
 rules
 
-  Self() --> current-self().
+  S |- Self() --> RefV(S).
   
-  Outer() --> current-outer().
+  O |- Outer() --> RefV(O).
 
   Uninitialized() --> UninitializedV().
   

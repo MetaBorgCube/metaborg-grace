@@ -4,6 +4,7 @@ imports
   src-gen/ds-signatures/grace-sig
   trans/semantics/expressions
   trans/semantics/values
+  trans/semantics/functions/locals
 
 signature
   sorts V

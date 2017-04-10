@@ -16,6 +16,7 @@ signature
     string2int(String) --> Int
     int2str(Int) --> String
     halt-error(String, String) --> String
+    halt-error(String) --> String
     
 rules
   
@@ -23,7 +24,7 @@ rules
   int2str(i) --> int2string(i).
   
   halt-error(s1, s2) --> error(s1, s2).
-
+  halt-error(s) --> halt-error(s, "").
   
 /* string ops */
 

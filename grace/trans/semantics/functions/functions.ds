@@ -1,16 +1,19 @@
-module trans/semantics/function/functions
+module trans/semantics/functions/functions
 
 imports
   src-gen/ds-signatures/grace-sig
   trans/semantics/values
   trans/semantics/statements
-  trans/semantics/object/object
+  trans/semantics/objects/object
   trans/semantics/types
   trans/semantics/booleans
-  trans/semantics/visibility
   trans/semantics/controlflow
-  trans/semantics/function/calls
+  trans/semantics/functions/calls
   trans/semantics/expressions
+  trans/semantics/objects/resolution
+  trans/semantics/numbers
+  trans/semantics/strings
+  trans/semantics/visibility
   
 signature
   arrows
@@ -24,9 +27,9 @@ signature
 rules
 
 
-  MQCallOuter(e) --> outer(S)
-  where
-    e --> RefV(S).
+//  MQCallOuter(e) --> RefV(outer(e))
+//  where
+//    e --> RefV(S).
 
   MCallL(ID(x), es) --> v
   where
@@ -43,7 +46,7 @@ rules
         call-implicit(x, es) --> v
     }.
 
-  P Exec() |- MCallRecvL(e, ID(x), es) --> v
+  EB E() |- MCallRecvL(e, ID(x), es) --> v
   where
     e --> recv;
     case recv of {
@@ -51,37 +54,33 @@ rules
         bool-call(recv, x, es) --> v
       NumV(_) =>
         num-call(recv, x, es) --> v
-      StringV(_)=>
+      StringV(_) =>
         str-call(recv, x, es) --> v
       otherwise =>
         call-qualified(recv, x, es) --> v
     }.
 
-  BlockL(params, _, code) --> block-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
+//  BlockL(params, _, code) --> block-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
 
   Return(e) --> do-return(e).
 
 rules /* closure construction */
 
-  Src |- method-closure(MethodL(_, _, annos, params, _, _, code)) :: L -->
-    ClosV(S, O, params, locals, code, L, has-anno-public(annos), Src, Return-To(fresh)) :: L
+  O |- method-closure(MethodL(_, _, annos, params, _, _, code)) :: L --> ClosV(O, params, locals, code, L, has-anno-public(annos), Return-To(fresh)) :: L
   where
-    current-self() --> S;
-    current-outer() --> O;
     collect-locals(code, params) --> locals;
     error-check-locals(locals) --> _.
 
-  block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(S, O, params, locals, code, L, true, src-base(), No-Return()) :: L
+  O |- block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(O, params, locals, code, L, true, No-Return()) :: L
   where
-    current-self() --> S;
-    current-outer() --> O;
     collect-locals(code, params) --> locals;
     error-check-locals(locals) --> _.
 
-  copy-closure(ClosV(S, O, params, locals, code, L, _, Src, No-Return())) --> ClosV(S, O, params, locals, code, L, false, Src', No-Return())
-  where
-    Src |- src-previous() --> Src'.
-  
-  copy-closure(ClosV(S, O, params, locals, code, L, _, Src, Return-To(_))) --> ClosV(S, O, params, locals, code, L, false, Src', Return-To(fresh))
-  where
-    Src |- src-previous() --> Src'.
+//  copy-closure(ClosV(S, O, params, locals, code, L, _, Src, No-Return())) --> ClosV(S, O, params, locals, code, L, false, Src', No-Return())
+//  where
+//    Src |- src-previous() --> Src'.
+//  
+//  copy-closure(ClosV(S, O, params, locals, code, L, _, Src, Return-To(_))) --> ClosV(S, O, params, locals, code, L, false, Src', Return-To(fresh))
+//  where
+//    Src |- src-previous() --> Src'.
+

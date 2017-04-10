@@ -11,9 +11,10 @@ rules
 
   p@Program(_) -init-> (v_out, EX, H)
   where
-    next() --> base;
-    ProgPath native-term-origin-path(p), R No-Return(), O base, S base, P Exec(), Src src-base() |- p :: H {}, L {},
-      VH {}, DCache {}, ICache {}, EX Ok() --> v :: H, L, VH, EX;
+    next() --> dummy;
+    log("Dummy O => S => " ++ int2string(dummy)) --> _;    
+    ProgPath native-term-origin-path(p), O dummy, S dummy |- p :: H {},
+      VH {}, DCache {}, ICache {}, EX Ok() --> v :: H, VH, EX;
     case EX of {
       Ok() =>
         v => v_out
