@@ -69,14 +69,14 @@ rules
   where
     next() --> O;
     allocate(Obj(O, [], {}, {})) --> S';
-      log("Alloc (root): S=" ++ int2string(S') ++ " O=" ++ int2string(O) ++ " from " ++ str(o)) --> _;
+            log("Alloc (root): S=" ++ int2string(S') ++ " O=" ++ int2string(O) ++ " from " ++ str(o)) --> _;
     O |- obj-members(code) --> (slots, methods);
     update(S', Obj(O, [], slots, methods)) --> _.
 
   S, EB |- o@ObjectL(inherit, uses, code) :: NS --> RefV(S') :: NS
   where
     allocate(Obj(S, [], {}, {})) --> S';
-      log("Alloc: S=" ++ int2string(S') ++ " O=" ++ int2string(S) ++ " from " ++ str(o)) --> _;
+            log("Alloc: S=" ++ int2string(S') ++ " O=" ++ int2string(S) ++ " from " ++ str(o)) --> _;
     O S |- inherit --> super;
     O S |- uses --> traits;
     O S |- obj-members(code) --> (slots, methods);
@@ -133,10 +133,9 @@ rules
   where
     read(S') --> Obj(_, parents, _, methods);
     init-object-parents(`parents) --> _;
-      read(S') --> debug-s;
-      log("Init: " ++ int2string(S') ++ " : " ++ str(debug-s)) --> _;
-    methods[obj-constr-name()] => ctr;
-    call(ctr, []) --> _.
+          read(S') --> debug-s;
+          log("Init: " ++ int2string(S') ++ " : " ++ str(debug-s)) --> _;
+    call(methods[obj-constr-name()], []) --> _.
   
   init-object-parents([]) --> U().
   
@@ -211,13 +210,17 @@ rules
   
   obj-methods([Declaration(m@MethodL(ID(x), _, _, _, _, _, _)) | code], slots, methods) --> (code', slots', methods')
   where
+          log("Closing method " ++ x) --> _;
     method-closure(m) --> clos;
+          log("Closure = " ++ str(clos)) --> _;
     obj-methods(code, slots, {x |--> clos, methods}) --> (code', slots', methods').
   
   obj-constr(code, slots, methods) --> (slots, {ctr |--> clos, methods})
   where
     obj-constr-name() --> ctr;
-    method-closure(MethodL(ID(ctr), [], visibility-annos(true), [], [], no-type(), code)) --> clos.
+          log("Closing constructor " ++ ctr) --> _;
+    method-closure(MethodL(ID(ctr), [], visibility-annos(true), [], [], no-type(), code)) --> clos;
+          log("Closure = " ++ str(clos)) --> _.
 
   obj-constr-name() --> "#ctr".
 
@@ -227,19 +230,19 @@ rules
   slot-setter(x, i, c) -->
     Declaration(MethodL(ID(mksettername(x)), [], visibility-annos(c), [ID("p")], [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))])).
     
-    
-    
-    
-    
+  S |- SlotRead(s) --> slots[s]
+  where
+    lookup-slot(s, S) --> SO(S');
+    read(S') --> Obj(_, _, slots, _).
   
-//  S |- SlotRead(s) --> slots[s]
-//  where
-//    read(S) --> Obj(_, _, slots, _).
-//  
-//  S |- SlotWrite(s, e) --> DoneV()
-//  where
-//    e --> v;
-//    read(S) --> Obj(O, parents, slots, methods);
-//    update(S, Obj(O, parents, {s |--> v, slots}, methods)) --> _.
+  S |- SlotWrite(s, e) --> DoneV()
+  where
+    e --> v;
+    lookup-slot(s, S) --> SO(S');
+    read(S') --> Obj(O, parents, slots, methods);
+    update(S', Obj(O, parents, {s |--> v, slots}, methods)) --> _.
 
+  
+
+    
     

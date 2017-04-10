@@ -100,7 +100,6 @@ signature
     lookup-in-parents(String, Parents) --> Path
     
     disambiguate-paths(String, Path, Path) --> Path
-  
 
 rules
 
@@ -197,5 +196,49 @@ rules
     halt-error(x ++ " is both inherited, and defined in an enclosing scope") --> _.
   
   disambiguate-paths(_, [], []) --> []. // not found
-//  where
-//    halt-error("Unknown method " ++ x) --> _.
+
+signature
+  sorts
+    SlotOwner
+  constructors
+    SO: Addr -> SlotOwner
+    NS: SlotOwner
+    
+  arrows
+    lookup-slot(Int, Self) --> SlotOwner
+    lookup-slot-parents(Int, Parents) --> SlotOwner
+    lookup-slot-parent(Int, Parent) --> SlotOwner
+    
+rules
+  
+  lookup-slot(i, S) --> so
+  where
+    read(S) --> Obj(_, parents, slots, _);
+    case slots[i?] of {
+      true =>
+        SO(S) => so
+      false =>
+        lookup-slot-parents(i, `parents) --> so
+    }.
+  
+  lookup-slot-parents(_, []) --> NS().
+  
+  lookup-slot-parents(i, [parent | parents]) --> so'
+  where
+    lookup-slot-parent(i, parent) --> so;
+    case so of {
+      SO(_) =>
+        so => so'
+      NS() =>
+        lookup-slot-parents(i, parents) --> so'
+    }.
+  
+  lookup-slot-parent(i, (S, _, _)) --> lookup-slot(i, S).
+
+
+
+
+
+
+
+
