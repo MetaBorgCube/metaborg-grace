@@ -71,7 +71,7 @@ rules
       log("Found " ++ x ++ " at " ++ str(path : AST)) --> _;
     resolve(path, S) --> clos;
       log("Resolved to " ++ str(clos)) --> _;
-    call(clos, vs) --> v;
+    S |- call(clos, vs) --> v;
       log("Call result " ++ str(v)) --> _.
 
   S |- call(ClosV(O, params, locals, code, L1, _, R), vs) :: L --> v :: L
