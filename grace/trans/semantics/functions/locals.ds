@@ -71,6 +71,7 @@ rules
             case lexical of {
               true =>
                 halt-error("Local '" ++ x ++ "' may not shadow method from an enclosing scope.") --> _
+              false =>
             }
         }
       false =>
