@@ -1,11 +1,11 @@
 module trans/semantics/objects/obj-root
 
 imports
-  trans/semantics/statements
+  src-gen/ds-signatures/grace-sig
 
 signature  
   constructors
-    RObjectL: Code -> Exp
+    RObjectL: List(Statement) -> Exp
 
   arrows
     rootobj-code() --> Exp

@@ -1,0 +1,165 @@
+module trans/semantics/objects/obj-desugar
+
+imports
+  src-gen/ds-signatures/grace-sig
+  trans/semantics/objects/obj-root
+  trans/semantics/objects/obj-slots
+  trans/semantics/runtime/natives
+  trans/semantics/visibility
+  trans/semantics/types
+
+signature
+  sorts
+    LInherit
+  
+  sort aliases
+    LAliases = Map(String, String)
+    LExcludes = Map(String, String)
+    LSlots = List(Int)
+    LMethods = Map(String, Declaration)
+    
+  constructors
+    LObj: List(LInherit) * LSlots * LMethods -> Exp
+    LInherit: Exp * LAliases * LExcludes -> LInherit
+    
+  sort aliases
+    Code = List(Statement)
+    
+  arrows
+  
+    desugar-obj(Exp) --> Exp
+    desugar-inherit(Inherit) --> LInherit
+    desugar-uses(List(Use)) --> List(LInherit)
+    desugar-use(Use) --> LInherit
+    desugar-code(Code) --> (LSlots * LMethods)
+    alias-map(List(Alias)) --> LAliases
+    exclude-map(List(Exclude)) --> LExcludes
+    
+    desugar-slots(Code, LSlots, LMethods) --> (Code * LSlots * LMethods)
+    desugar-methods(Code, LSlots, LMethods) --> (Code * LSlots * LMethods)
+    desugar-constr(Code, LSlots, LMethods) --> (LSlots * LMethods)
+  
+    slot-getter(String, Int, Bool) --> Statement 
+    slot-setter(String, Int, Bool) --> Statement
+  
+  components
+    NS : Int
+  
+  native operators
+    mksettername: String -> String
+    
+rules
+
+  desugar-obj(ObjectL(inherit, uses, code)) --> LObj([inherit'|uses'], slots, methods)
+  where
+    desugar-inherit(inherit) --> inherit';
+    desugar-uses(uses) --> uses';
+    desugar-code(code) --> (slots, methods).
+  
+  desugar-obj(RObjectL(code)) --> LObj([], slots, methods)
+  where
+    desugar-code(code) --> (slots, methods).
+  
+  desugar-inherit(InheritL(e, als, exs)) --> LInherit(e, alsmap, exsmap)
+  where
+    alias-map(als) --> alsmap;
+    exclude-map(exs) --> exsmap.
+  
+  desugar-inherit(NoInherit()) --> LInherit(desugar-obj(rootobj-code()), {}, {}).
+  
+  desugar-use(UseL(e, als, exs)) --> desugar-inherit(InheritL(e, als, exs)).
+  
+  desugar-uses([]) --> [].
+  
+  desugar-uses([use | uses]) --> [use' | uses']
+  where
+    desugar-use(use) --> use';
+    desugar-uses(uses) --> uses'.
+  
+  desugar-code(code) --> (slots3, methods3)
+  where
+    desugar-slots(code, [], {}) --> (code1, slots1, methods1);
+    desugar-methods(code1, slots1, methods1) --> (code2, slots2, methods2);
+    desugar-constr(code2, slots2, methods2) --> (slots3, methods3).
+ 
+ 
+  
+  /* ==== SLOTS ====== */
+  
+  desugar-slots([], slots, methods) --> ([] : Code, slots, methods).
+  
+  desugar-slots([s | ss], slots, methods) --> ([s | ss'], slots', methods')
+  where
+    s =!=> Declaration(VariableL(_, _, _, _));
+    s =!=> Declaration(ConstantL(_, _, _, _));
+    desugar-slots(ss, slots, methods) --> (ss', slots', methods').
+  
+  desugar-slots([Declaration(VariableL(WildCard(), _, _, e)) | code], slots, methods) --> ([Expression(e) | code'], slots', methods')
+  where
+    desugar-slots(code, slots, methods) --> (code', slots', methods').
+  
+  desugar-slots([Declaration(ConstantL(WildCard(), _, _, e)) | code], slots, methods) --> ([Expression(e) | code'], slots', methods')
+  where
+    desugar-slots(code, slots, methods) --> (code', slots', methods').
+  
+  desugar-slots([Declaration(VariableL(ID(x), _, annos, e)) | code], slots, methods) :: NS --> ([init-stm, getter, setter | code'], slots', methods') :: NS'
+  where
+    SlotWrite(NS, e) => init-stm;
+    slot-getter(x, NS, has-anno-readable(annos)) --> getter;
+    slot-setter(x, NS, has-anno-writable(annos)) --> setter;
+    desugar-slots(code, [NS | slots], methods) :: NS addI(NS, 1) --> (code', slots', methods') :: NS'.
+
+  desugar-slots([Declaration(ConstantL(ID(x), _, annos, e)) | code], slots, methods) :: NS --> ([init-stm, getter | code'], slots', methods') :: NS'
+  where
+    SlotWrite(NS, e) => init-stm;
+    slot-getter(x, NS, has-anno-readable(annos)) --> getter;
+    desugar-slots(code, [NS | slots], methods) :: NS addI(NS, 1) --> (code', slots', methods') :: NS'.
+  
+  slot-getter(x, i, c) -->
+    Declaration(MethodL(ID(x), [], visibility-annos(c), [], [], no-type(), [SlotRead(i)])).
+
+  slot-setter(x, i, c) -->
+    Declaration(MethodL(ID(mksettername(x)), [], visibility-annos(c), [ID("p")], [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))])).
+
+
+
+  /* ==== METHODS ==== */
+
+  desugar-methods([], slots, methods) --> ([] : Code, slots, methods).
+
+  desugar-methods([s | ss], slots, methods) --> ([s | ss'], slots', methods')
+  where
+    s =!=> Declaration(MethodL(_, _, _, _, _, _, _));
+    desugar-methods(ss, slots, methods) --> (ss', slots', methods').
+  
+  desugar-methods([Declaration(m@MethodL(ID(x), _, _, _, _, _, _)) | code], slots, methods) --> (code', slots', methods')
+  where
+    desugar-methods(code, slots, {x |--> m, methods}) --> (code', slots', methods').
+  
+  
+  
+  /* ==== CONSTRUCTOR === */
+
+  
+  desugar-constr(code, slots, methods) --> (slots, {ctr |--> ctr-decl, methods})
+  where
+    obj-constr-name() --> ctr;
+    MethodL(ID(ctr), [], visibility-annos(true), [], [], no-type(), code) => ctr-decl.
+
+
+
+
+  /* === ALIASES & EXCLUDES === */
+  
+  alias-map([]) --> {}.
+  
+  alias-map([AliasL(ID(x'), ID(x)) | xs]) --> {x' |--> x, xs-map}
+  where
+    alias-map(xs) --> xs-map.
+  
+  exclude-map([]) --> {}.
+  
+  exclude-map([ExcludeL(ID(x)) | xs]) --> {x |--> x, xs-map}
+  where
+    exclude-map(xs) --> xs-map.
+ 
