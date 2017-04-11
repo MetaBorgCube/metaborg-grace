@@ -1,0 +1,16 @@
+module trans/semantics/objects/obj-root
+
+imports
+  trans/semantics/statements
+
+signature  
+  constructors
+    RObjectL: Code -> Exp
+
+  arrows
+    rootobj-code() --> Exp
+
+rules
+  
+  // source code for root object (ancestor of all objects)
+  rootobj-code() --> RObjectL([]).

@@ -1,0 +1,60 @@
+module trans/semantics/objects/path
+
+signature
+  sorts
+    PathPart
+  
+  sort aliases
+    Path = List(PathPart) // invariant: empty means no path found
+    
+  constructors
+    PL: String -> PathPart // local
+    PP: Int * String -> PathPart // name S in parent I
+    PO: PathPart // outer
+  
+  arrows
+    path-found(Path) --> Bool
+    path-local(Path) --> Bool
+    path-inherited(Path) --> Bool
+    path-lexical(Path) --> Bool
+    path-lexical-only(Path) --> Bool
+    
+    path-outers-only(Path) --> Bool    
+
+rules
+
+  path-found([]) --> false.
+  
+  path-found([_|_]) --> true.
+  
+  
+  path-local([PL(_)]) --> true.
+  
+  path-local([p | _]) --> false
+  where
+    p =!=> PL(_).
+  
+  
+  path-inherited([PP(_, _)| _]) --> true.
+  
+  path-inherited([p | _]) --> false
+  where
+    p =!=> PP(_, _).
+  
+  
+  path-lexical([PO()|_]) --> true.
+  
+  path-lexical([p | _]) --> false
+  where
+    p =!=> PO().
+    
+  
+  path-lexical-only(paths) --> path-outers-only(`paths')
+  where
+    `paths => [PL(_) | paths'].
+  
+  
+  path-outers-only([]) --> true.
+  
+  path-outers-only([PO() | path]) --> path-outers-only(path).
+  

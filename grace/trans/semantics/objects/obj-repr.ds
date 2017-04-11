@@ -1,0 +1,38 @@
+module trans/semantics/objects/obj-repr
+
+imports
+  trans/semantics/store
+  trans/semantics/values
+
+signature
+  sort aliases
+    Self = Addr
+    Outer = Addr
+    
+  components
+    S : Self
+    O : Outer
+  
+  constructors
+    RefV: Addr -> V {implicit}
+  
+  sorts
+    Object
+  
+  sort aliases
+    HeapData = Object
+    Slots = Map(Int, V)
+    Methods = Map(String, V)
+    Aliases = Map(String, String)
+    Excludes = Map(String, String)
+    Parent = (Addr * Aliases * Excludes)
+    Parents = List(Parent)
+  
+  constructors
+    Obj: Outer * Parents * Slots * Methods -> Object
+  
+  arrows
+    obj-constr-name() --> String
+
+rules
+  obj-constr-name() --> "#ctr".

@@ -2,7 +2,6 @@ module trans/semantics/functions/locals
 
 imports
   src-gen/ds-signatures/grace-sig
-  trans/semantics/statements
   trans/semantics/functions/calls
 
 signature
@@ -58,7 +57,7 @@ rules
   S |- ensure-valid-local(x) --> U()
   where
     is-local(x) --> false;
-    lookup(x, S) --> path;
+    resolve(x, S) --> path;
     path-found(path) --> found;
     case found of {
       true =>

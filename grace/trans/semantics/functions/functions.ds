@@ -4,13 +4,10 @@ imports
   src-gen/ds-signatures/grace-sig
   trans/semantics/values
   trans/semantics/statements
-  trans/semantics/objects/object
-  trans/semantics/types
   trans/semantics/booleans
   trans/semantics/controlflow
   trans/semantics/functions/calls
   trans/semantics/expressions
-  trans/semantics/objects/resolution
   trans/semantics/numbers
   trans/semantics/strings
   trans/semantics/visibility
@@ -68,7 +65,6 @@ rules /* closure construction */
 
   O |- method-closure(MethodL(_, _, annos, params, _, _, code)) :: L --> ClosV(O, params, locals, code, L, has-anno-public(annos), Return-To(fresh)) :: L
   where
-    log("Locals @ closure time " ++ str(L : AST)) --> _;
     collect-locals(code, params) --> locals.
     // TODO reenable duplicate locals checking
 //    error-check-locals(locals) --> _;

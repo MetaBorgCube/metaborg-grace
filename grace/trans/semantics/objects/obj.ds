@@ -1,0 +1,10 @@
+module trans/semantics/objects/obj
+
+imports
+  trans/semantics/objects/obj-repr
+  trans/semantics/objects/obj-constr
+  trans/semantics/objects/obj-init
+  
+  trans/semantics/objects/method-resolution
+  trans/semantics/objects/lookup
+  

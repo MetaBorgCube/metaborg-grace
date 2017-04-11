@@ -1,0 +1,24 @@
+module trans/semantics/objects/lookup
+
+imports
+  trans/semantics/objects/obj-repr
+  trans/semantics/objects/path
+
+signature
+  arrows
+    lookup(Path, Addr) --> V
+    
+rules
+
+  lookup([PL(x)], S) --> methods[x]
+  where
+    read(S) --> Obj(_, _, _, methods).
+  
+  lookup([PO() | path], S) --> lookup(path, S')
+  where
+    read(S) --> Obj(S', _, _, _).
+  
+  lookup([PP(i, _) | path], S) --> lookup(path, S')
+  where
+    read(S) --> Obj(_, parents, _, _);
+    parents[i] => (S', _, _).

@@ -1,39 +1,23 @@
-module trans/semantics/objects/object
+module trans/semantics/objects/obj-constr
 
 imports
-  trans/semantics/values
-  trans/semantics/store
-  trans/semantics/statements
-  trans/semantics/functions/functions
+  trans/semantics/objects/obj-root
+  trans/semantics/objects/obj-repr
+  trans/semantics/objects/obj-init
+  trans/semantics/objects/obj-slots
+  
+  trans/semantics/visibility
+  trans/semantics/types
 
 signature
   sort aliases
-    Self = Addr
-    Outer = Addr
-    
-  components
-    S : Self
-    O : Outer
-  
-  constructors
-    RefV: Addr -> V {implicit}
-  
-  sorts
-    Object
-  
-  sort aliases
     HeapData = Object
-    Slots = Map(Int, V)
-    Methods = Map(String, V)
-    Aliases = Map(String, String)
-    Excludes = Map(String, String)
-    Parent = (Addr * Aliases * Excludes)
-    Parents = List(Parent)
   
-  constructors
-    Obj: Outer * Parents * Slots * Methods -> Object
-    RObjectL: Code -> Exp
-    
+  arrows
+    Inherit --> Parent
+    List(Use) --> Parents
+    Use --> Parent
+  
   sorts
     EvalMode
   
@@ -45,28 +29,8 @@ signature
     EB : EvalMode
     NS : Int
   
-  arrows
-    init-object(Self) --> U
-    init-object-parents(Parents) --> U
-    
-    Inherit --> Parent
-    List(Use) --> Parents
-    Use --> Parent
-    
-    constr-name() --> String
-    
-    alias-map(List(Alias)) --> Aliases
-    exclude-map(List(Exclude)) --> Excludes
-    
-    
-    rootobj-code() --> Exp
-    
 rules
-  
-  // source code for root object (ancestor of all objects)
-  rootobj-code() --> RObjectL([]).
-
-  // allocate root object (may only occur in B() mode)
+    // allocate root object (may only occur in B() mode)
   EB B() |- o@RObjectL(code) --> RefV(S')
   where
     next() --> O;
@@ -90,7 +54,6 @@ rules
         S S', O S |- init-object(S') --> _
       otherwise =>
     }.
-
   
   NoInherit() --> (S, {} : Aliases, {} : Excludes)
   where
@@ -116,50 +79,21 @@ rules
     EB B() |- e --> RefV(S);
     alias-map(aliases) --> alias-map;
     exclude-map(excludes) --> exclude-map.
-  
-  alias-map([]) --> {}.
-  
-  alias-map([AliasL(ID(x'), ID(x)) | xs]) --> {x' |--> x, xs-map}
-  where
-    alias-map(xs) --> xs-map.
-  
-  exclude-map([]) --> {}.
-  
-  exclude-map([ExcludeL(ID(x)) | xs]) --> {x |--> x, xs-map}
-  where
-    exclude-map(xs) --> xs-map.
-  
+ 
   EB B() |- MCallRecvL(e, ID(x), es) --> v
   where
     EB E() |- e --> recv;
     EB E() |- es --> vs;
     EB B() |- call-qualified(recv, x, vs) --> v.
 
-  // initialize objects, calling constructors, ancestors first
-  init-object(S') --> U()
-  where
-    read(S') --> Obj(_, parents, _, methods);
-    init-object-parents(`parents) --> _;
-          read(S') --> debug-s;
-          log("Init: " ++ int2string(S') ++ " : " ++ str(debug-s)) --> _;
-    call(methods[obj-constr-name()], []) --> _.
-  
-  init-object-parents([]) --> U().
-  
-  init-object-parents([(S, _, _) : Parent | parents]) --> U()
-  where
-    init-object(S) --> _;
-    init-object-parents(parents) --> _.
-
 signature
-  constructors // extra instructions
-    SlotRead : Int -> Statement
-    SlotWrite : Int * Exp -> Statement
-  
   native operators
     mksettername: String -> String
-  
+    
   arrows
+    alias-map(List(Alias)) --> Aliases
+    exclude-map(List(Exclude)) --> Excludes
+    
     obj-members(Code) --> (Slots * Methods)
     obj-slots(Code, Slots, Methods) --> (Code * Slots * Methods)
     obj-methods(Code, Slots, Methods) --> (Code * Slots * Methods)
@@ -168,8 +102,6 @@ signature
     
     slot-getter(String, Int, Bool) --> Statement 
     slot-setter(String, Int, Bool) --> Statement
-    
-    obj-constr-name() --> String
     
 rules
 
@@ -231,29 +163,22 @@ rules
     method-closure(MethodL(ID(ctr), [], visibility-annos(true), [], [], no-type(), code)) --> clos;
           log("Closure = " ++ str(clos)) --> _.
 
-  obj-constr-name() --> "#ctr".
-
   slot-getter(x, i, c) -->
     Declaration(MethodL(ID(x), [], visibility-annos(c), [], [], no-type(), [SlotRead(i)])).
 
   slot-setter(x, i, c) -->
     Declaration(MethodL(ID(mksettername(x)), [], visibility-annos(c), [ID("p")], [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))])).
-
-
-
-  S |- SlotRead(s) --> slots[s]
-  where
-    lookup-slot(s, S) --> SO(S');
-    read(S') --> Obj(_, _, slots, _).
   
-  S |- SlotWrite(s, e) --> DoneV()
-  where
-    e --> v;
-    lookup-slot(s, S) --> SO(S');
-    read(S') --> Obj(O, parents, slots, methods);
-    update(S', Obj(O, parents, {s |--> v, slots}, methods)) --> _.
-
+  alias-map([]) --> {}.
   
+  alias-map([AliasL(ID(x'), ID(x)) | xs]) --> {x' |--> x, xs-map}
+  where
+    alias-map(xs) --> xs-map.
+  
+  exclude-map([]) --> {}.
+  
+  exclude-map([ExcludeL(ID(x)) | xs]) --> {x |--> x, xs-map}
+  where
+    exclude-map(xs) --> xs-map.
+ 
 
-    
-    

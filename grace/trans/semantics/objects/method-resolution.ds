@@ -1,0 +1,125 @@
+module trans/semantics/objects/method-resolution
+
+imports
+  trans/semantics/objects/path
+  trans/semantics/objects/obj-repr
+
+signature
+  components
+    PIDX : Int
+    
+  arrows
+    resolve(String, Self) --> Path
+    
+    resolve-in-parent(String, Parent) --> Path
+    
+    resolve-in-outer(String, Self) --> Path
+    resolve-in-parents(String, Parents) --> Path
+    
+    disambiguate-paths(String, Path, Path) --> Path
+
+rules
+
+  resolve(x, S') --> [PL(x)]
+  where
+    read(S') --> Obj(_, _, _, methods);
+    methods[x?] == true;
+        log("L: " ++ x ++ ": " ++ "FOUND LOCAL") --> _.
+  
+  O |- resolve(x, S') --> path
+  where
+    read(S') --> o@Obj(O', parents, _, methods);
+    methods[x?] == false;
+    O == O';
+        log("L: " ++ x ++ ": in " ++ int2string(S') ++ "=" ++ str(o)) --> _;
+        log("L: " ++ x ++ ": outer OK (" ++ int2string(O) ++ "==" ++ int2string(O') ++ ")") --> _;
+        log("L: " ++ x ++ ": " ++ "up PARENTS") --> _;
+    O, PIDX 0 |- resolve-in-parents(x, parents) --> path-in-parent;
+    /*
+      the contextual Outer object is the Outer of the object we are looking up in.
+      this means we are still looking up from within the object itself and may go to its
+      surrounding lexical scope 
+    */
+        log("L: " ++ x ++ ": " ++ "up OUTER") --> _;
+    O |- resolve-in-outer(x, S') --> path-in-outer;
+    disambiguate-paths(x, path-in-parent, path-in-outer) --> path.
+  
+  O |- resolve(x, S') --> path-in-parent
+  where
+    read(S') --> o@Obj(O', parents, _, methods);
+    methods[x?] == false;
+    O != O';
+        log("L: " ++ x ++ ": in " ++ int2string(S') ++ "=" ++ str(o)) --> _;
+        log("L: " ++ x ++ ": outer NOK (" ++ int2string(O) ++ "<>" ++ int2string(O') ++ ")") --> _;
+        log("L: " ++ x ++ ": " ++ "up PARENTS") --> _;
+    O, PIDX 0 |- resolve-in-parents(x, parents) --> path-in-parent.
+
+
+  resolve-in-outer(_, S) --> []
+  where
+    read(S) --> Obj(O, _, _, _);
+    is-stored(O) --> false.
+
+  resolve-in-outer(x, S) --> path
+  where
+    read(S) --> Obj(O, _, _, _);
+    is-stored(O) --> true;
+    read(O) --> Obj(OO, _, _, _);
+    O OO |- resolve(x, O) --> out-path;
+    path as [PO() | out-path] if path-found(out-path)
+         or [].
+
+  resolve-in-parents(_, []) --> [].
+  
+  PIDX |- resolve-in-parents(x, [parent | parents]) --> path
+  where
+        log("L: " ++ x ++ ": " ++ "PARENT " ++ int2string(PIDX)) --> _;
+    PIDX |- resolve-in-parent(x, parent) --> p-path;
+    case path-found(p-path) : Bool of {
+      true =>
+        p-path => path
+      otherwise =>
+        PIDX addI(PIDX, 1) |- resolve-in-parents(x, parents) --> path
+    }.
+    
+  resolve-in-parent(x, (_, _, excludes)) --> []
+  where
+    excludes[x?] == true.
+  
+  O, PIDX |- resolve-in-parent(x, (S', aliases, excludes)) --> path
+  where
+    excludes[x?] == false;
+    aliases[x?] == true;
+    aliases[x] => x';
+    O |- resolve(x', S') --> parent-path;
+    path as [PP(PIDX, x') | parent-path] if path-found(parent-path)
+         or [].
+ 
+  O, PIDX |- resolve-in-parent(x, (S', aliases, excludes)) --> path
+  where
+    excludes[x?] == false;
+    aliases[x?] == false;
+    O |- resolve(x, S') --> parent-path;
+    path as [PP(PIDX, x) | parent-path] if path-found(parent-path)
+         or [].
+
+
+  disambiguate-paths(_, p@[_|_], []) --> p. // parent
+  
+  disambiguate-paths(_, [], o@[_|_]) --> o. // outer
+  
+  disambiguate-paths(x, [_|_], [_|_]) --> [] // ambiguous
+  where
+    halt-error(x ++ " is both inherited, and defined in an enclosing scope") --> _.
+  
+  disambiguate-paths(_, [], []) --> []. // not found
+
+
+
+
+
+
+
+
+
+

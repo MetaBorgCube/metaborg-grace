@@ -3,7 +3,7 @@ module trans/semantics/expressions
 imports
   src-gen/ds-signatures/grace-sig
   trans/semantics/values
-  trans/semantics/statements
+  trans/semantics/objects/obj
   
 signature
   sorts

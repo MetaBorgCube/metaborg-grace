@@ -1,0 +1,28 @@
+module trans/semantics/objects/obj-init
+
+imports
+  trans/semantics/objects/obj-repr
+  trans/semantics/functions/calls
+
+signature
+  arrows
+    init-object(Addr) --> U
+    init-object-parents(Parents) --> U
+
+rules
+
+  // initialize objects, calling constructors, ancestors first
+  init-object(S') --> U()
+  where
+    read(S') --> Obj(_, parents, _, methods);
+    init-object-parents(`parents) --> _;
+          read(S') --> debug-s;
+          log("Init: " ++ int2string(S') ++ " : " ++ str(debug-s)) --> _;
+    call(methods[obj-constr-name()], []) --> _.
+  
+  init-object-parents([]) --> U().
+  
+  init-object-parents([(S, _, _) : Parent | parents]) --> U()
+  where
+    init-object(S) --> _;
+    init-object-parents(parents) --> _.
