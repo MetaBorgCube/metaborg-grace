@@ -76,7 +76,7 @@ rules
     update(S', Obj(O, [], slots, methods)) --> _.
 
   // allocate and optionally initialize object
-  S, EB |- o@ObjectL(inherit, uses, code) :: NS --> RefV(S') :: NS
+  S, EB |- o@ObjectL(inherit, uses, code) --> RefV(S')
   where
     allocate(Obj(S, [], {}, {})) --> S';
             log("Alloc: S=" ++ int2string(S') ++ " O=" ++ int2string(S) ++ " from " ++ str(o)) --> _;
@@ -197,6 +197,7 @@ rules
   
   obj-slots([Declaration(VariableL(ID(x), _, annos, e)) | code], slots, methods) :: NS --> ([init-stm, getter, setter | code'], slots', methods') :: NS'
   where
+    log("VAR SLOT ADD: " ++ x ++ " |--> " ++ int2string(NS)) --> _;
     SlotWrite(NS, e) => init-stm;
     slot-getter(x, NS, has-anno-readable(annos)) --> getter;
     slot-setter(x, NS, has-anno-writable(annos)) --> setter;
@@ -204,6 +205,7 @@ rules
   
   obj-slots([Declaration(ConstantL(ID(x), _, annos, e)) | code], slots, methods) :: NS --> ([init-stm, getter | code'], slots', methods') :: NS'
   where
+    log("DEF SLOT ADD: " ++ x ++ " |--> " ++ int2string(NS)) --> _;
     SlotWrite(NS, e) => init-stm;
     slot-getter(x, NS, has-anno-readable(annos)) --> getter;
     obj-slots(code, {NS |--> UninitializedV(), slots}, methods) :: NS addI(NS, 1) --> (code', slots', methods') :: NS'.
