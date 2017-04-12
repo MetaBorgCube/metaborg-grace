@@ -51,6 +51,7 @@ rules
     O S |- install-parents(parents) --> parent-links;
     O S |- install-slots(slots) --> slots-table;
     O S |- install-methods(methods) --> methods-table;
+    log("Constr: " ++ int2string(S') ++ " methods=" ++ str(allkeys(methods) : AST)) --> _;
     update(S', Obj(S, `parent-links, slots-table, methods-table)) --> _.
 
   install-parents([]) --> [].
