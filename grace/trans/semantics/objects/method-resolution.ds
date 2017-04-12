@@ -25,6 +25,7 @@ rules
   resolve-top(x, S') --> path
   where
     resolve(x, S') --> path;
+        log("R: " ++ x ++ " in " ++ int2string(S') ++ " ==> " ++ str(path : AST)) --> _;
     case path of {
       [] =>
         halt-error("Unknown method " ++ x) --> _
