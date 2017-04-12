@@ -123,8 +123,8 @@ rules
   slot-getter(x, i, c) -->
     Declaration(MethodL(ID(x), [], visibility-annos(c), [], [], no-type(), [SlotRead(i)])).
 
-  slot-setter(x, i, c) -->
-    Declaration(MethodL(ID(mksettername(x)), [], visibility-annos(c), [ID("p")], [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))])).
+  slot-setter(x, _, c) -->
+    Declaration(MethodL(ID(mksettername(x)), [], visibility-annos(c), [ID("p")], [], no-type(), [slot-assign-call(x, MCallL(ID("p"), [] : List(Exp)))])).
 
   slot-internal-setter(x, i) -->
     Declaration(MethodL(ID("#" ++ mksettername(x)), [], visibility-annos(false), [ID("p")], [], no-type(), [SlotWrite(i, MCallL(ID("p"), [] : List(Exp)))])).
