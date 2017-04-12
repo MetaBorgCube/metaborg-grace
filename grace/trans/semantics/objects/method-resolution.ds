@@ -119,9 +119,14 @@ rules
   
   disambiguate-paths(_, [], o@[_|_]) --> o. // outer
   
-  disambiguate-paths(x, [_|_], [_|_]) --> [] // ambiguous
+  disambiguate-paths(x, p@[_|_], o@[_|_]) --> o // potentially ambiguous
   where
-    halt-error(x ++ " is both inherited, and defined in an enclosing scope") --> _.
+    path-strictly-inherited(p) --> strictly-inherited;
+    case strictly-inherited of {
+      true =>
+        halt-error(x ++ " is both inherited, and defined in an enclosing scope") --> _
+      otherwise =>
+    }.
   
   disambiguate-paths(_, [], []) --> []. // not found
 

@@ -16,11 +16,14 @@ signature
     path-found(Path) --> Bool
     path-local(Path) --> Bool
     path-inherited(Path) --> Bool
+    path-strictly-inherited(Path) --> Bool
+    
     path-lexical(Path) --> Bool
-    path-lexical-only(Path) --> Bool
+    path-strictly-lexical(Path) --> Bool
     
     path-outers-only(Path) --> Bool    
-
+    path-parents-only(Path) --> Bool
+    
 rules
 
   path-found([]) --> false.
@@ -40,7 +43,10 @@ rules
   path-inherited([p | _]) --> false
   where
     p =!=> PP(_, _).
-  
+
+  path-strictly-inherited(path) --> path-parents-only(`path')
+  where
+    `path => [PL(_) | path'].
   
   path-lexical([PO()|_]) --> true.
   
@@ -49,7 +55,7 @@ rules
     p =!=> PO().
     
   
-  path-lexical-only(paths) --> path-outers-only(`paths')
+  path-strictly-lexical(paths) --> path-outers-only(`paths')
   where
     `paths => [PL(_) | paths'].
   
@@ -57,4 +63,19 @@ rules
   path-outers-only([]) --> true.
   
   path-outers-only([PO() | path]) --> path-outers-only(path).
+  
+  path-outers-only([p | _]) --> false
+  where
+    p =!=> PO().
+  
+  
+  path-parents-only([]) --> true.
+  
+  path-parents-only([PP(_, _) | path]) --> path-parents-only(path).
+  
+  path-parents-only([p | _]) --> false
+  where
+    p =!=> PP(_, _).
+  
+  
   

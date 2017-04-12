@@ -66,7 +66,7 @@ rules
           true =>
             halt-error("Local '" ++ x ++ "' may not redefine method from self.") --> _
           false =>
-            path-lexical-only(path) --> lexical;
+            path-strictly-lexical(path) --> lexical;
             case lexical of {
               true =>
                 halt-error("Local '" ++ x ++ "' may not shadow method from an enclosing scope.") --> _
