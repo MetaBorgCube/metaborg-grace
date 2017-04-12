@@ -11,8 +11,10 @@ signature
     EvalMode
   
   constructors
-    E: EvalMode // regular evaluation mode
-    B: EvalMode // object building mode
+    // regular evaluation mode
+    E: EvalMode
+    // object building mode. carries the address of the object being constructed
+    B: Addr -> EvalMode
   
   components
     EB : EvalMode
@@ -39,19 +41,24 @@ rules
     }.
 
     
-  EB B() |- MCallRecvL(e, ID(x), es) --> v
+  EB B(S) |- MCallRecvL(e, ID(x), es) --> v
   where
     EB E() |- e --> recv;
     EB E() |- es --> vs;
-    EB B() |- call-qualified(recv, x, vs) --> v.
+    EB B(S) |- call-qualified(recv, x, vs) --> v.
   
-  S |- construct-obj(LObj(parents, slots, methods)) --> S'
+  S, EB |- construct-obj(LObj(parents, slots, methods)) --> S'
   where
     allocate(Obj(S, [], {}, {})) --> S';
-    O S |- install-parents(parents) --> parent-links;
-    O S |- install-slots(slots) --> slots-table;
-    O S |- install-methods(methods) --> methods-table;
-    log("Constr: " ++ int2string(S') ++ " methods=" ++ str(allkeys(methods) : AST)) --> _;
+    case EB of {
+      B(S-init) =>
+      otherwise =>
+        S' => S-init
+    };
+    S S-init, O S |- install-parents(parents) --> parent-links;
+    S S-init, O S |- install-slots(slots) --> slots-table;
+    S S-init, O S |- install-methods(methods) --> methods-table;
+        log("Constructed: " ++ int2string(S') ++ " methods=" ++ str(allkeys(methods) : AST)) --> _;
     update(S', Obj(S, `parent-links, slots-table, methods-table)) --> _.
 
   install-parents([]) --> [].
@@ -61,9 +68,9 @@ rules
     install-parent(p) --> p';
     install-parents(parents) --> parents'.
   
-  install-parent(LInherit(e, alias-map, exclude-map)) --> (S, alias-map, exclude-map)
+  S |- install-parent(LInherit(e, alias-map, exclude-map)) --> (S, alias-map, exclude-map)
   where
-    EB B() |- e --> RefV(S).
+    EB B(S) |- e --> RefV(S).
   
   
   install-slots([]) --> {}.
