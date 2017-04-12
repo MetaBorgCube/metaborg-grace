@@ -57,7 +57,7 @@ rules
         call-qualified(recv, x, es) --> v
     }.
 
-//  BlockL(params, _, code) --> block-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
+  BlockL(params, _, code) --> block-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code)).
 
   Return(e) --> do-return(e).
 
@@ -69,9 +69,9 @@ rules /* closure construction */
     // TODO reenable duplicate locals checking
 //    error-check-locals(locals) --> _;
 
-//  O |- block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> ClosV(O, params, locals, code, L, true, No-Return()) :: L
-//  where
-//    collect-locals(code, params) --> locals;
+  S, O |- block-closure(MethodL(_, _, _, params, _, _, code)) :: L --> BlockV(S, ClosV(O, params, locals, code, L, true, No-Return())) :: L
+  where
+    collect-locals(code, params) --> locals.
 //    error-check-locals(locals) --> _.
 
 //  copy-closure(ClosV(S, O, params, locals, code, L, _, Src, No-Return())) --> ClosV(S, O, params, locals, code, L, false, Src', No-Return())

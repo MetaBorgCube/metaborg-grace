@@ -11,7 +11,7 @@ signature
   
   constructors
     ClosV: Outer * List(Identifier) * List(Identifier) * Code * Env * Bool * Return-Marker -> V
-    
+    BlockV: Self * V -> V
     No-Return: Return-Marker
     Return-To: Int -> Return-Marker
     
@@ -56,7 +56,10 @@ rules
   
   access-local(x, []) --> read-local(x).
 
-  // TODO handle lambdas
+  call-qualified(BlockV(S, clos), x, vs) --> v
+  where
+    str-starts-with(x, "apply") == true;
+    S |- call(clos, vs) --> v.
 
 //  call-qualified(clos@ClosV(_, _, _, _, _, _, _), x, vs) --> call(clos, vs, x)
 //  where
