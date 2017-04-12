@@ -29,9 +29,6 @@ signature
     
     access-local(String, List(V)) --> V
     
-//    disambiguate-closure(V, String) --> V
-//    disambiguate-closure(V, V, String) --> V
-    
 rules
   
   call-implicit(x, vs) --> access-local(x, vs)
@@ -41,13 +38,9 @@ rules
   S |- call-implicit(x, vs) --> v
   where
     is-local(x) --> false;
-      log("ICall non-local " ++ x) --> _;
     resolve-top(x, S) --> path;
-      log("Found " ++ x ++ " at " ++ str(path : AST)) --> _;
     lookup(path, S) --> (S', clos);
-      log("Resolved to " ++ str(clos)) --> _;
-    S' |- call(clos, vs) --> v;
-      log("Call result " ++ str(v)) --> _.
+    S' |- call(clos, vs) --> v.
 
   access-local(x, [v]) --> DoneV()
   where
@@ -61,20 +54,12 @@ rules
     str-starts-with(x, "apply") == true;
     S |- call(clos, vs) --> v.
 
-//  call-qualified(clos@ClosV(_, _, _, _, _, _, _), x, vs) --> call(clos, vs, x)
-//  where
-//    str-starts-with(x, "apply") == true.
-    
   call-qualified(RefV(S), x, vs) --> v
   where
     // TODO enforce visibility
-      log("QCall non-local " ++ x) --> _;
     resolve-top(x, S) --> path;
-      log("Found " ++ x ++ " at " ++ str(path : AST)) --> _;
-    lookup(path, S) --> (_ : Self, clos);
-      log("Resolved to " ++ str(clos)) --> _;
-    S |- call(clos, vs) --> v;
-      log("Call result " ++ str(v)) --> _.
+    lookup(path, S) --> (_, clos);
+    S |- call(clos, vs) --> v.
 
   S |- call(ClosV(O, params, locals, code, L1, _, R), vs) :: L --> v :: L
   where
