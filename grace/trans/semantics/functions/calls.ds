@@ -44,9 +44,9 @@ rules
       log("ICall non-local " ++ x) --> _;
     resolve-top(x, S) --> path;
       log("Found " ++ x ++ " at " ++ str(path : AST)) --> _;
-    lookup(path, S) --> clos;
+    lookup(path, S) --> (S', clos);
       log("Resolved to " ++ str(clos)) --> _;
-    call(clos, vs) --> v;
+    S' |- call(clos, vs) --> v;
       log("Call result " ++ str(v)) --> _.
 
   access-local(x, [v]) --> DoneV()
@@ -68,7 +68,7 @@ rules
       log("QCall non-local " ++ x) --> _;
     resolve-top(x, S) --> path;
       log("Found " ++ x ++ " at " ++ str(path : AST)) --> _;
-    lookup(path, S) --> clos;
+    lookup(path, S) --> (_ : Self, clos);
       log("Resolved to " ++ str(clos)) --> _;
     S |- call(clos, vs) --> v;
       log("Call result " ++ str(v)) --> _.

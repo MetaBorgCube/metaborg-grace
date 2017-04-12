@@ -6,11 +6,12 @@ imports
 
 signature
   arrows
-    lookup(Path, Addr) --> V
+    // walk Path from Addr returning the Self that contains V
+    lookup(Path, Addr) --> (Self * V)
     
 rules
 
-  lookup([PL(x)], S) --> methods[x]
+  lookup([PL(x)], S) --> (S, methods[x])
   where
     read(S) --> Obj(_, _, _, methods).
   
