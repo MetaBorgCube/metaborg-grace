@@ -9,6 +9,8 @@ signature
     PIDX : Int
     
   arrows
+    resolve-top(String, Self) --> Path
+    
     resolve(String, Self) --> Path
     
     resolve-in-parent(String, Parent) --> Path
@@ -19,6 +21,15 @@ signature
     disambiguate-paths(String, Path, Path) --> Path
 
 rules
+
+  resolve-top(x, S') --> path
+  where
+    resolve(x, S') --> path;
+    case path of {
+      [] =>
+        halt-error("Unknown method " ++ x) --> _
+      otherwise =>
+    }.
 
   resolve(x, S') --> [PL(x)]
   where
