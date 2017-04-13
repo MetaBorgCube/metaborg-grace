@@ -3,7 +3,8 @@ module trans/semantics/objects/obj-repr
 imports
   trans/semantics/store
   trans/semantics/values
-
+  trans/semantics/functions/functions
+  
 signature
   sort aliases
     Self = Addr
@@ -22,7 +23,7 @@ signature
   sort aliases
     HeapData = Object
     Slots = Map(Int, V)
-    Methods = Map(String, V)
+    Methods = Map(String, AnnotatedClosure)
     Aliases = Map(String, String)
     Excludes = Map(String, String)
     Parent = (Addr * Aliases * Excludes)
@@ -34,19 +35,19 @@ signature
   arrows
     obj-constr-name() --> String
     
-    self() --> Addr
-    outer() --> Addr
-    outer(Addr) --> Addr
+    self-addr() --> Addr
+    outer-addr() --> Addr
+    outer-addr(Addr) --> Addr
     
 rules
   
   obj-constr-name() --> "#ctr".
 
-  S |- self() --> S.
+  S |- self-addr() --> S.
 
-  O |- outer() --> O.
+  O |- outer-addr() --> O.
   
-  outer(S) --> O
+  outer-addr(S) --> O
   where
     read(S) --> Obj(O, _, _, _).
   

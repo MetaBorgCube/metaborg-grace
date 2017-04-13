@@ -1,0 +1,95 @@
+module trans/semantics/functions/func-call
+
+imports
+  trans/semantics/expressions
+  trans/semantics/statements
+  trans/semantics/functions/func-repr
+  trans/semantics/objects/method-resolution
+  trans/semantics/objects/lookup
+  
+signature
+  arrows
+    call-unqualified(String, List(V)) --> V
+    call-qualified(V, String, List(V)) --> V
+    
+    call(Closure, List(V)) --> V
+    RCode --> V
+    doreturn(V) --> V
+    catch-return(Code, ReturnMarker) --> V
+    
+  constructors
+    RExn: Int * V -> Exn
+  
+  components
+    R: ReturnMarker
+  
+rules
+
+  call-unqualified(x, vs) --> call-qualified(DoneV(), x, vs)
+  where
+    is-local(x) --> true.
+  
+  S |- call-unqualified(x, vs) --> v
+  where
+    is-local(x) --> false;
+    resolve-top(x, S) --> path;
+    lookup(path, S) --> (S', annoclos);
+    S' |- visibility-call-proxy(annoclos, vs) --> v.
+  
+
+  // object as receiver
+  call-qualified(RefV(S), x, vs) --> v
+  where
+    resolve-top(x, S) --> path;
+    lookup(path, S) --> (_, annoclos);
+    S |- visibility-call-proxy(annoclos, vs) --> v.
+
+  // block as receiver of apply method  
+  call-qualified(BlockV(clos), x, vs) --> v
+  where
+    str-starts-with(x, "apply") --> true;
+    call(clos, vs) --> v.
+  
+  // local variable read 
+  call-qualified(DoneV(), x, []) --> read-local(x).
+  
+  // local variable assign
+  call-qualified(DoneV(), x, [v]) --> DoneV()
+  where
+    str-ends-with(x, ":=(_)") --> true;
+    write-local(str-rm-suffix(x, ":=(_)"), v) --> _.
+
+  call(Block(S, clos), vs) --> v
+  where
+    S |- call(clos, vs) --> v.
+  
+  call(Clos(O, params, locals, rcode, E_func), vs) :: E --> v :: E
+  where
+    bind-locals(locals) :: E_func --> _ :: E_func';
+    bind-locals(params, vs) :: E_func' --> _ :: E_func'';
+    O |- rcode :: E_func'' --> v.
+  
+  RCode(code, DynRet()) --> catch-return(code, R(fresh)).
+  
+  RCode(code, StatRet(R)) --> catch-return(code, R).
+  
+  catch-return(code, R@R(r-to)) :: EX Ok() --> v :: EX
+  where
+    R |- code :: EX Ok() --> vcode :: EX_code;
+    case EX_code of {
+      RExn(r-to', vret) =>
+        case eqI(r-to', r-to) of {
+          true =>
+            Ok() => EX;
+            vret => v
+          otherwise =>
+            EX_code => EX;
+            vcode => v
+        }
+      otherwise =>
+        EX_code => EX;
+        vcode => v
+    }.
+  
+  R R(r-to) |- doreturn(v) :: EX Ok() --> ??? :: EX RExn(r-to, v).
+

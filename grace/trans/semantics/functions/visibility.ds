@@ -1,0 +1,27 @@
+module trans/semantics/functions/visibility
+
+imports
+  trans/semantics/functions/func-repr
+
+signature
+  sorts
+    VisAnno
+    AnnotatedClosure
+  
+  constructors
+    ClosVis: Closure * VisAnno -> AnnotatedClosure
+    Pub: VisAnno
+    Priv: VisAnno
+  
+  arrows
+    visibility-call-proxy(AnnotatedClosure, List(V)) --> V
+    
+    anno-to-vis(Annotations) --> VisAnno
+    
+rules
+  
+  // TODO enforce visibility
+  visibility-call-proxy(ClosVis(clos, _), vs) --> call(clos, vs).
+  
+  anno-to-vis(_) --> Pub().
+

@@ -23,7 +23,7 @@ rules
 
   S, O |- Program(code) --> v
   where
-    S, O, R No-Return(), EB E() |- code :: NS 0, L {} --> v.
+    S, O, R NR(), EB E() |- code :: NS 0, E {} --> v.
 
 //  S |- prog@Program(code) --> v
 //  where

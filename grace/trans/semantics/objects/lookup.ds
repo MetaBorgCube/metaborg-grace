@@ -7,7 +7,7 @@ imports
 signature
   arrows
     // walk Path from Addr returning the Self that contains V
-    lookup(Path, Addr) --> (Self * V)
+    lookup(Path, Addr) --> (Self * AnnotatedClosure)
     
 rules
 

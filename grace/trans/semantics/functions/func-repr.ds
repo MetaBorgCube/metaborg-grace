@@ -1,0 +1,42 @@
+module trans/semantics/functions/func-repr
+
+imports
+  src-gen/ds-signatures/grace-sig
+  trans/semantics/values
+  trans/semantics/statements
+  trans/semantics/objects/obj-repr
+  trans/semantics/functions/func-locals
+
+signature
+  sorts
+    Closure
+    RCode
+    RetKind
+    
+  sorts
+    ReturnMarker
+  
+  constructors
+    BlockV: Closure -> V
+    
+    // no return marker
+    NR: ReturnMarker
+    // concrete return marker
+    R: Int -> ReturnMarker
+  
+    Clos: Outer * List(Identifier) * List(Identifier) * RCode * Env -> Closure
+    Block: Self * Closure -> Closure
+    
+    // code wrapped with a return kind
+    RCode: Code * RetKind -> RCode
+    
+    // dynamic return kind
+    DynRet: RetKind
+    // fixed return kind
+    StatRet: ReturnMarker -> RetKind
+  
+rules
+
+  
+  
+     

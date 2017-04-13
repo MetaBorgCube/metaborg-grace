@@ -1,0 +1,88 @@
+module trans/semantics/functions/func-locals
+
+imports
+  src-gen/ds-signatures/grace-sig
+  trans/semantics/values
+  
+
+signature
+  sort aliases
+    Env = Map(String, VAddr)
+    
+  components
+    VH: VHeap
+    E : Env
+
+  arrows
+    bind-locals(List(Identifier)) --> U
+    bind-locals(List(Identifier), List(V)) --> U
+
+    bind-local(String, V) --> U
+    
+    default-values(List(Identifier)) --> List(V)
+
+    is-local(String) --> Bool
+    read-local(String) --> V
+    write-local(String, V) --> U
+    
+rules
+
+  bind-locals(ids) --> bind-locals(ids, default-values(ids)).
+  
+  bind-locals([], []) --> U().
+  
+  bind-locals([WildCard() | ids], [_ | vs]) --> bind-locals(ids, vs).
+  
+  bind-locals([ID(x) | ids], [v | vs]) --> bind-locals(ids, vs)
+  where
+    bind-local(x, v) --> U().
+
+  bind-local(x, v) :: E --> U() :: E {x |--> vaddr, E}
+  where
+    v-allocate(v) --> vaddr.
+
+  default-values([]) --> [].
+  
+  default-values([_ | ids]) --> [ v | vs]
+  where
+    default-value() --> v;
+    default-values(ids) --> vs.
+  
+  is-local(x) :: E --> is-local :: E
+  where
+    ":=(_)" => bind_suffix;
+    is-local as E[str-rm-suffix(x, bind_suffix)?] if str-ends-with(x, bind_suffix)
+             or E[x?].
+
+  read-local(x) :: E --> v-read(E[x]) :: E.
+  
+  write-local(x, v) :: E --> U() :: E
+  where
+    v-update(E[x], v) --> _.
+
+  
+signature
+  sort aliases
+    VAddr = Int
+    VHeap = Map(VAddr, V)
+  
+  components
+    VH : VHeap
+  
+  arrows
+    v-allocate(V) --> VAddr
+    v-update(VAddr, V) --> VAddr
+    v-read(VAddr) --> V
+    v-next() --> VAddr
+    
+rules
+
+  v-allocate(v) :: VH --> addr :: VH {addr |--> v, VH}
+  where
+    v-next() --> addr.
+
+  v-read(addr) :: VH --> VH[addr] :: VH.
+
+  v-update(addr, v) :: VH --> addr :: VH {addr |--> v, VH}.
+
+  v-next() --> fresh.

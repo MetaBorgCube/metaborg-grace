@@ -2,7 +2,7 @@ module trans/semantics/objects/obj-init
 
 imports
   trans/semantics/objects/obj-repr
-  trans/semantics/functions/calls
+
 
 signature
   arrows
@@ -18,7 +18,7 @@ rules
     init-obj-parents(`parents) --> _;
           read(S') --> debug-s;
           log("Init: " ++ int2string(S') ++ " : " ++ str(debug-s)) --> _;
-    call(methods[obj-constr-name()], []) --> _.
+    visibility-call-proxy(methods[obj-constr-name()], []) --> _.
   
   init-obj-parents([]) --> U().
   

@@ -19,8 +19,11 @@ signature
 
   arrows
     ensure-defined(V) --> V
-
+    default-value() --> V
+    
+    
 rules
+
   ensure-defined(v) --> v
   where
     v =!=> UninitializedV().
@@ -28,3 +31,6 @@ rules
   ensure-defined(v@UninitializedV()) --> v
   where
     halt-error("Read of an uninitialised value attempted", "") --> _.
+
+  default-value() --> UninitializedV().
+

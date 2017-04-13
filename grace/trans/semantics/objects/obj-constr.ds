@@ -29,9 +29,13 @@ signature
     
 rules
 
-  Self() --> RefV(self()).
+  Self() --> RefV(self-addr()).
   
-  Outer() --> RefV(outer()).
+  Outer() --> RefV(outer-addr()).
+
+  MQCallOuter(e) --> RefV(outer-addr(S))
+  where
+    e --> RefV(S).
 
   o@ObjectL(_, _, _) --> desugar-obj(o).
   
@@ -77,8 +81,9 @@ rules
   
   install-slots([]) --> {}.
   
-  install-slots([s | ss]) --> { s |--> UninitializedV(), slots}
+  install-slots([s | ss]) --> { s |--> v, slots}
   where
+    default-value() --> v;
     install-slots(ss) --> slots.
   
   install-methods(methods) --> install-methods-aux(method-names, methods)

@@ -3,27 +3,28 @@ module trans/semantics/controlflow
 imports
   src-gen/ds-signatures/grace-lowered-sig
   trans/semantics/expressions
+  trans/semantics/functions/func-call
   
 signature
   arrows
     while-loop(Exp, Exp) --> V
-    while-loop-evaluated(V, V) --> V
+    while-loop-evaluated(Closure, Closure) --> V
   
 rules
   
   while-loop(e1, e2) --> v
   where
-    e1 --> v1;
-    e2 --> v2;
-    while-loop-evaluated(v1, v2) --> v.
+    e1 --> BlockV(clos-cond);
+    e2 --> BlockV(clos-body);
+    while-loop-evaluated(clos-cond, clos-body) --> v.
   
   
-  w@while-loop-evaluated(v1, v2) --> DoneV()
+  w@while-loop-evaluated(clos-cond, clos-body) --> DoneV()
   where
-    call(v1, []) --> BoolV(cond);
+    call(clos-cond, []) --> BoolV(cond);
     case cond of {
       true =>
-        call(v2, []) --> _;
+        call(clos-body, []) --> _;
         w --> _
       otherwise =>
     }.
