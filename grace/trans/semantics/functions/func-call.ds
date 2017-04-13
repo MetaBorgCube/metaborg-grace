@@ -69,13 +69,18 @@ rules
     bind-locals(params, vs) :: E_func' --> _ :: E_func'';
     O |- rcode :: E_func'' --> v.
   
-  RCode(code, DynRet()) --> catch-return(code, R(fresh)).
-  
-  RCode(code, StatRet(R)) --> catch-return(code, R).
-  
-  catch-return(code, R@R(r-to)) :: EX Ok() --> v :: EX
+  RCode(code, DynRet()) --> v
   where
-    R |- code :: EX Ok() --> vcode :: EX_code;
+    R(fresh) => R;
+    R |- catch-return(code, R) --> v.
+  
+  R |- RCode(code, StatRet(R')) --> v
+  where
+    R' |- catch-return(code, R) --> v.
+  
+  catch-return(code, R(r-to)) :: EX Ok() --> v :: EX
+  where
+    code :: EX Ok() --> vcode :: EX_code;
     case EX_code of {
       RExn(r-to', vret) =>
         case eqI(r-to', r-to) of {
