@@ -29,6 +29,10 @@ signature
     
 rules
 
+  Self() --> RefV(self()).
+  
+  Outer() --> RefV(outer()).
+
   o@ObjectL(_, _, _) --> desugar-obj(o).
   
   S, EB |- o@LObj(_, _, _) --> RefV(S')
@@ -38,14 +42,7 @@ rules
       E() =>
         S S', O S |- init-obj(S') --> _
       otherwise =>
-    }.
-
-    
-  EB B(S) |- MCallRecvL(e, ID(x), es) --> v
-  where
-    EB E() |- e --> recv;
-    EB E() |- es --> vs;
-    EB B(S) |- call-qualified(recv, x, vs) --> v.
+    }.  
   
   S, EB |- construct-obj(LObj(parents, slots, methods)) --> S'
   where
@@ -72,6 +69,11 @@ rules
   where
     EB B(S) |- e --> RefV(S).
   
+  EB B(S) |- MCallRecvL(e, ID(x), es) --> v
+  where
+    EB E() |- e --> recv;
+    EB E() |- es --> vs;
+    EB B(S) |- call-qualified(recv, x, vs) --> v.
   
   install-slots([]) --> {}.
   

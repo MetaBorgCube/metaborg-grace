@@ -11,6 +11,7 @@ imports
   trans/semantics/numbers
   trans/semantics/strings
   trans/semantics/visibility
+  trans/semantics/objects/obj-constr
   
 signature
   arrows
@@ -18,15 +19,17 @@ signature
     block-closure(Declaration) --> V
     copy-closure(V) --> V
     
+    foo(V) --> V 
+   
   native operators
     nativePrint: V -> V
 
 rules
 
-
-//  MQCallOuter(e) --> RefV(outer(e))
-//  where
-//    e --> RefV(S).
+  MQCallOuter(e) --> RefV(outer(S))
+  where
+    e --> RefV(S).
+    
 
   MCallL(ID(x), es) --> v
   where

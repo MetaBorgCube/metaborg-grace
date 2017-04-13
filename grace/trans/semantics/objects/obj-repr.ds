@@ -33,6 +33,25 @@ signature
   
   arrows
     obj-constr-name() --> String
-
+    
+    self() --> Addr
+    outer() --> Addr
+    outer(Addr) --> Addr
+    
 rules
+  
   obj-constr-name() --> "#ctr".
+
+  S |- self() --> S.
+
+  O |- outer() --> O.
+  
+  outer(S) --> O
+  where
+    read(S) --> Obj(O, _, _, _).
+  
+  
+  
+   
+  
+  
