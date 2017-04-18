@@ -7,7 +7,7 @@ imports
 signature
   arrows
     // walk Path from Addr returning the Self that contains V
-    lookup(Path, Addr) --> (Self * AnnotatedClosure)
+    lookup(Path, Addr) --> (Addr * AnnotatedClosure)
     
 rules
 
@@ -19,7 +19,8 @@ rules
   where
     read(S) --> Obj(S', _, _, _).
   
-  lookup([PP(i, _) | path], S) --> lookup(path, S')
+  lookup([PP(i, _) | path], S) --> (S, anno-clos)
   where
     read(S) --> Obj(_, parents, _, _);
-    parents[i] => (S', _, _).
+    parents[i] => (S', _, _);
+    lookup(path, S') --> (_, anno-clos).

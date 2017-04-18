@@ -27,7 +27,7 @@ rules
     method-desugar(m) --> LFunc(params, locals, code, _);
     Clos(O, params, locals, RCode(code, StatRet(R)), E) => clos.
   
-  BlockL(params, _, code) --> BlockV(block-closure(MethodL(ID("lambda"), [], NoAnnotations(), params, [], no-type(), code))).
+  BlockL(params, _, code) --> BlockV(block-closure(MethodL(ID("lambda"), [], Annotations([Public()]), params, [], no-type(), code))).
 
   Return(e) --> doreturn(e).
 

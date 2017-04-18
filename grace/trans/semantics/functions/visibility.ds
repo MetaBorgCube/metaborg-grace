@@ -1,8 +1,8 @@
 module trans/semantics/functions/visibility
 
 imports
-  trans/semantics/functions/func-repr
-
+  trans/semantics/objects/obj-repr
+  
 signature
   sorts
     VisAnno
@@ -14,14 +14,41 @@ signature
     Priv: VisAnno
   
   arrows
-    visibility-call-proxy(AnnotatedClosure, List(V)) --> V
-    
     anno-to-vis(Annotations) --> VisAnno
+    
+    resolve-lookup(String, Addr) --> (Addr * Closure)
+    
+    ensure-visible(String, Addr, Path, Addr, VisAnno) --> U
     
 rules
   
-  // TODO enforce visibility
-  visibility-call-proxy(ClosVis(clos, _), vs) --> call(clos, vs).
+  S |- resolve-lookup(x, S-recv) --> (S-owner, clos)
+  where
+    resolve-top(x, S-recv) --> path;
+    lookup(path, S-recv) --> (S-owner, ClosVis(clos, vis));
+    ensure-visible(x, S, path, S-owner, vis) --> _.
   
-  anno-to-vis(_) --> Pub().
+  ensure-visible(_, S-call, _, S-owner, _) --> U()
+  where
+    S-call == S-owner.
+  
+  ensure-visible(x, S-call, path, S-owner, Pub()) --> U()
+  where
+    S-call != S-owner;
+    path-aliased(x, path) --> is-aliased;
+    case is-aliased of {
+      true =>
+        halt-error("Requested confidential method '" ++ x ++ "' from outside") --> _
+      otherwise =>
+    }.
+  
+  ensure-visible(x, S-call, _, S-owner, Priv()) --> U()
+  where
+    S-call != S-owner;
+    halt-error("Requested confidential method '" ++ x ++ "' from outside") --> _.
+
+  
+  anno-to-vis(Annotations([Public()])) --> Pub().
+  
+  anno-to-vis(Annotations([Confidential()])) --> Priv().
 

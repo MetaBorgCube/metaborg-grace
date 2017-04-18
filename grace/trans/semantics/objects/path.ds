@@ -24,6 +24,8 @@ signature
     path-outers-only(Path) --> Bool    
     path-parents-only(Path) --> Bool
     
+    path-aliased(String, Path) --> Bool
+    
 rules
 
   path-found([]) --> false.
@@ -77,5 +79,17 @@ rules
   where
     p =!=> PP(_, _).
   
+  
+  path-aliased(x1, [PL(x2)]) --> true
+  where
+    x1 != x2.
+  
+  path-aliased(x1, [PL(x2)]) --> false
+  where
+    x1 == x2.
+  
+  path-aliased(x1, [p | path]) --> path-aliased(x1, path)
+  where
+    p =!=> PL(_).
   
   

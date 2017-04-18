@@ -32,17 +32,15 @@ rules
   S |- call-unqualified(x, vs) --> v
   where
     is-local(x) --> false;
-    resolve-top(x, S) --> path;
-    lookup(path, S) --> (S', annoclos);
-    S' |- visibility-call-proxy(annoclos, vs) --> v.
+    resolve-lookup(x, S) --> (S', clos);
+    S' |- call(clos, vs) --> v.
   
 
   // object as receiver
   call-qualified(RefV(S), x, vs) --> v
   where
-    resolve-top(x, S) --> path;
-    lookup(path, S) --> (_, annoclos);
-    S |- visibility-call-proxy(annoclos, vs) --> v.
+    resolve-lookup(x, S) --> (_, clos);
+    S |- call(clos, vs) --> v.
 
   // block as receiver of apply method  
   call-qualified(BlockV(clos), x, vs) --> v
