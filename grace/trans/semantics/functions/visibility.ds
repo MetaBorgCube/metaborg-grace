@@ -32,6 +32,10 @@ rules
   where
     S-call == S-owner.
   
+  ensure-visible(_, S-call, [PO() | _], S-owner, Priv()) --> U()
+  where
+    S-call != S-owner.
+  
   ensure-visible(x, S-call, path, S-owner, Pub()) --> U()
   where
     S-call != S-owner;
@@ -42,9 +46,10 @@ rules
       otherwise =>
     }.
   
-  ensure-visible(x, S-call, _, S-owner, Priv()) --> U()
+  ensure-visible(x, S-call, [p | _], S-owner, Priv()) --> U()
   where
     S-call != S-owner;
+    p =!=> PO();
     halt-error("Requested confidential method '" ++ x ++ "' from outside") --> _.
 
   
