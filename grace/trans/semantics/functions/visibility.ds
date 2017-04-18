@@ -18,39 +18,20 @@ signature
     
     resolve-lookup(String, Addr) --> (Addr * Closure)
     
-    ensure-visible(String, Addr, Path, Addr, VisAnno) --> U
+    //                  ID    *  visi  * recv * own *
+    S |- ensure-visible(String, VisAnno, Addr, Addr, Path) --> U
     
 rules
   
-  S |- resolve-lookup(x, S-recv) --> (S-owner, clos)
+  resolve-lookup(x, S-recv) --> (S-owner, clos)
   where
     resolve-top(x, S-recv) --> path;
     lookup(path, S-recv) --> (S-owner, ClosVis(clos, vis));
-    ensure-visible(x, S, path, S-owner, vis) --> _.
-  
-  ensure-visible(_, S-call, _, S-owner, _) --> U()
-  where
-    S-call == S-owner.
-  
-  ensure-visible(_, S-call, [PO() | _], S-owner, Priv()) --> U()
-  where
-    S-call != S-owner.
-  
-  ensure-visible(x, S-call, path, S-owner, Pub()) --> U()
-  where
-    S-call != S-owner;
-    path-aliased(x, path) --> is-aliased;
-    case is-aliased of {
-      true =>
-        halt-error("Requested confidential method '" ++ x ++ "' from outside") --> _
-      otherwise =>
-    }.
-  
-  ensure-visible(x, S-call, [p | _], S-owner, Priv()) --> U()
-  where
-    S-call != S-owner;
-    p =!=> PO();
-    halt-error("Requested confidential method '" ++ x ++ "' from outside") --> _.
+    ensure-visible(x, vis, S-recv, S-owner, path) --> _.
+
+  ensure-visible(_, _, _, _, _) --> U().
+
+   
 
   
   anno-to-vis(Annotations([Public()])) --> Pub().
