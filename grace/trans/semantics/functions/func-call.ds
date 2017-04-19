@@ -27,54 +27,54 @@ rules
 
   call-unqualified(x, vs) --> call-qualified(DoneV(), x, vs)
   where
-    is-local(x) --> true.
+    is-local(x) --> true
   
   S |- call-unqualified(x, vs) --> v
   where
     is-local(x) --> false;
     resolve-lookup(x, S) --> (S', clos);
-    S' |- call(clos, vs) --> v.
+    S' |- call(clos, vs) --> v
   
 
   // object as receiver
   call-qualified(RefV(S), x, vs) --> v
   where
     O bogus-addr(), S |- resolve-lookup(x, S) --> (_, clos);
-    S |- call(clos, vs) --> v.
+    S |- call(clos, vs) --> v
 
   // block as receiver of apply method  
   call-qualified(BlockV(clos), x, vs) --> v
   where
     str-starts-with(x, "apply") --> true;
-    call(clos, vs) --> v.
+    call(clos, vs) --> v
   
   // local variable read 
-  call-qualified(DoneV(), x, []) --> read-local(x).
+  call-qualified(DoneV(), x, []) --> read-local(x)
   
   // local variable assign
   call-qualified(DoneV(), x, [v]) --> DoneV()
   where
     str-ends-with(x, ":=(_)") --> true;
-    write-local(str-rm-suffix(x, ":=(_)"), v) --> _.
+    write-local(str-rm-suffix(x, ":=(_)"), v) --> _
 
   call(Block(S, clos), vs) --> v
   where
-    S |- call(clos, vs) --> v.
+    S |- call(clos, vs) --> v
   
   call(Clos(O, params, locals, rcode, E_func), vs) :: E --> v :: E
   where
     bind-locals(locals) :: E_func --> _ :: E_func';
     bind-locals(params, vs) :: E_func' --> _ :: E_func'';
-    O |- rcode :: E_func'' --> v.
+    O |- rcode :: E_func'' --> v
   
   RCode(code, DynRet()) --> v
   where
     R(fresh) => R;
-    R |- catch-return(code, R) --> v.
+    R |- catch-return(code, R) --> v
   
   R |- RCode(code, StatRet(R')) --> v
   where
-    R' |- catch-return(code, R) --> v.
+    R' |- catch-return(code, R) --> v
   
   catch-return(code, R(r-to)) :: EX Ok() --> v :: EX
   where
@@ -92,7 +92,7 @@ rules
       otherwise =>
         EX_code => EX;
         vcode => v
-    }.
+    }
   
-  R R(r-to) |- doreturn(v) :: EX Ok() --> ??? :: EX RExn(r-to, v).
+  R R(r-to) |- doreturn(v) :: EX Ok() --> ??? :: EX RExn(r-to, v)
 

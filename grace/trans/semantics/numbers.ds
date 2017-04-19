@@ -22,18 +22,18 @@ signature
   
 rules
 
-  Number(a) --> NumV(string2int(a)).
+  Number(a) --> NumV(string2int(a))
   
-  num-call(v1, x, [v2]) --> num-call-evaluated(x, v1, v2).
+  num-call(v1, x, [v2]) --> num-call-evaluated(x, v1, v2)
   
-  num-call(v1, x, []) --> num-call-native(x, v1).
+  num-call(v1, x, []) --> num-call-native(x, v1)
   
   num-call-evaluated("==(_)", _, v2) --> BoolV(false)
   where
-    v2 =!=> NumV(_).
+    v2 =!=> NumV(_)
   
   num-call-evaluated("++(_)", NumV(i1), StringV(s2)) --> StringV(s1 ++ s2)
   where
-    int2str(i1) --> s1.
+    int2str(i1) --> s1
   
-  num-call-evaluated(x, v1, v2) --> num-call-native(x, v1, v2).
+  num-call-evaluated(x, v1, v2) --> num-call-native(x, v1, v2)

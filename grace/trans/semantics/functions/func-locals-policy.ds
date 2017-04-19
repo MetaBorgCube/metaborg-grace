@@ -1,0 +1,196 @@
+module trans/semantics/functions/func-locals-policy
+
+imports
+  src-gen/ds-signatures/grace-sig
+  trans/semantics/values
+  trans/semantics/functions/func-locals
+  trans/semantics/objects/path
+  trans/semantics/objects/method-resolution
+
+signature
+  arrows
+    policy-locals-allow-duplicates() --> Bool
+    policy-locals-allow-shadow-lexical() --> Bool
+    policy-locals-allow-shadow-inherited() --> Bool
+    policy-locals-allow-shadow-members() --> Bool
+
+    policy-members-allow-duplicates() --> Bool
+    policy-members-allow-duplicate-inherited() --> Bool
+    policy-members-allow-shadow-lexical-local() --> Bool
+    policy-members-allow-shadow-lexical-member() --> Bool
+    policy-members-allow-shadow-lexical-inherited() --> Bool
+
+
+    enforce-member-policy(Addr, String) --> U
+    check-member-duplicate(Addr, String) --> U
+    
+    
+    enforce-closure-policy(Addr, AnnotatedClosure) --> U
+    
+
+//    enforce-obj-policy(Addr) --> U
+//    enforce-members-policy(Addr, Methods) --> U
+    
+//    enforce-members-policy(List(String)) --> U
+//
+//    enforce-locals-policy(List(Identifier)) --> U
+//
+//    check-duplicate-locals(List(String)) --> U
+//    check-duplicate-locals-aux(List(String)) --> Map(String, String)
+//    
+//    check-local-shadowing-lexical(List(String)) --> U
+//    check-local-shadowing-lexical-aux(List(String)) --> U
+    
+    idents-to-strings(List(Identifier)) --> List(String)
+    
+    
+    
+rules
+  
+  policy-locals-allow-duplicates() --> false
+  
+  policy-locals-allow-shadow-lexical() --> false
+  
+  policy-locals-allow-shadow-inherited() --> true
+  
+  policy-locals-allow-shadow-members() --> false
+  
+  policy-members-allow-duplicates() --> false
+  
+  policy-members-allow-duplicate-inherited() --> true
+  
+  policy-members-allow-shadow-lexical-local() --> false
+  
+  policy-members-allow-shadow-lexical-member() --> true
+  
+  policy-members-allow-shadow-lexical-inherited() --> true
+  
+rules
+  
+//  enforce-member-policy(S, x) --> U()
+//  where
+//    read(S) --> Obj(O, parents, slots, methods);
+//    S, O |- resolve(x, S) --> x-path;
+//    case path-found(x-path) : Bool of {
+//      false =>
+//      otherwise =>
+//        check-member-duplicate(x, x-path) --> _ 
+//    }
+  enforce-member-policy(S, x) --> U()
+  
+  
+//  where
+//    read(S) --> Obj(O, parents, slots, methods);
+//    S, O |- resolve(x, S) --> x-path;
+//    case path-found(x-path) : Bool of {
+//      false =>
+//      otherwise =>
+//        check-member-duplicate(x, x-path) --> _ 
+//    }
+  
+//    check-member-duplicate(S, x) --> _;
+//    check-member-duplicate-inherited(S, x) --> _;
+//    check-member-shadow-lexical-local(S, x) --> _;
+//    check-member-shadow-lexical-member(S, x) --> _;
+//    check-member-shadow-lexical-inherited(S, x) --> _.
+//  
+//  check-member-duplicate(S, x) --> U()
+//  where
+//    case policy-members-allow-duplicates() : Bool of {
+//      false =>
+//        resolve(x, S) --> path;
+//        case path-found(path) : Bool of {
+//          true =>
+//            case path-local(path) : Bool of {
+//              true =>
+//                halt-error("Duplicate member '" ++ x ++ "'") --> _
+//              otherwise =>
+//            }
+//          otherwise =>
+//        }
+//      otherwise =>
+//    }.
+  
+  
+  enforce-closure-policy(S, ClosVis(clos, _)) --> U()
+
+  
+  
+  
+//  enforce-obj-policy(S) --> U()
+//  where
+//    read(S) --> Obj(_, _, _, methods);
+//    enforce-members-policy(S, methods) --> _.
+  
+  
+  
+//  enforce-locals-policy(locals) --> U()
+//  where
+//    idents-to-strings(locals) --> localxs;
+//    check-duplicate-locals(localxs) --> _;
+//    check-local-shadowing-lexical(localxs) --> _.
+//    
+//
+//
+//  check-duplicate-locals(xs) --> U()
+//  where
+//    case policy-locals-allow-duplicates() : Bool of {
+//      false =>
+//        check-duplicate-locals-aux(`xs) --> _
+//      otherwise =>
+//    }.
+//
+//  check-duplicate-locals-aux([]) --> {}.
+//  
+//  check-duplicate-locals-aux([x | xs]) --> {x |--> x, lmap}
+//  where
+//    check-duplicate-locals-aux(xs) --> lmap;
+//    case lmap[x?] of {
+//      true =>
+//        halt-error("Duplicate local variable '" ++ x ++ "'") --> _
+//      otherwise =>
+//    }.
+//
+//
+//  check-local-shadowing-lexical(xs) --> U()
+//  where
+//    case policy-locals-allow-shadow-lexical() : Bool of {
+//      false =>
+//        check-local-shadowing-lexical-aux(xs) --> _
+//      otherwise =>
+//    }.
+//  
+//  check-local-shadowing-lexical-aux([]) --> U().
+//  
+//  check-local-shadowing-lexical-aux([x | xs]) --> check-local-shadowing-lexical-aux(xs)
+//  where
+//    is-local(x) --> true;
+//    halt-error("Local variable '" ++ x ++ "' shadows local variable in surrounding scope") --> _.
+//  
+//  S |- check-local-shadowing-lexical-aux([x | xs]) --> check-local-shadowing-lexical-aux(xs)
+//  where
+//    is-local(x) --> false;
+//    resolve(x, S) --> path;
+//    case path-found(path) : Bool of {
+//      true =>
+//        case path-strictly-lexical(path) : Bool of {
+//          true =>
+//            halt-error("Local variable '" ++ x ++ "' shadows members in surrounding scope") --> _
+//          otherwise =>
+//        }
+//      otherwise =>
+//    }.
+//  
+//  
+//  
+//  
+//  
+//  enforce-members-policy(_) --> U().
+//
+//  idents-to-strings([]) --> [].
+//  
+//  idents-to-strings([WildCard() | xs]) --> idents-to-strings(xs).
+//  
+//  idents-to-strings([ID(x) | xs]) --> [x | xs']
+//  where
+//    idents-to-strings(xs) --> xs'.

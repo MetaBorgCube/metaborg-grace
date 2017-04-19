@@ -27,14 +27,14 @@ rules
   where
     resolve-top(x, S-recv) --> path;
     lookup(path, S-recv) --> (S-owner, ClosVis(clos, vis));
-    ensure-visible(x, vis, S-recv, S-owner, path) --> _.
+    ensure-visible(x, vis, S-recv, S-owner, path) --> _
 
-  ensure-visible(_, _, _, _, _) --> U().
+  ensure-visible(_, _, _, _, _) --> U()
 
    
 
   
-  anno-to-vis(Annotations([Public()])) --> Pub().
+  anno-to-vis(Annotations([Public()])) --> Pub()
   
-  anno-to-vis(Annotations([Confidential()])) --> Priv().
+  anno-to-vis(Annotations([Confidential()])) --> Priv()
 

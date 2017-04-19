@@ -10,4 +10,4 @@ signature
     
 rules
 
-   LineupExp(Lineup(vs)) --> LineupV(vs).
+   LineupExp(Lineup(vs)) --> LineupV(vs)

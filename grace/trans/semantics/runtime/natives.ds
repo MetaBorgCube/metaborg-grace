@@ -20,11 +20,11 @@ signature
     
 rules
   
-  string2int(s) --> parseI(s).
-  int2str(i) --> int2string(i).
+  string2int(s) --> parseI(s)
+  int2str(i) --> int2string(i)
   
-  halt-error(s1, s2) --> error(s1, s2).
-  halt-error(s) --> halt-error(s, "").
+  halt-error(s1, s2) --> error(s1, s2)
+  halt-error(s) --> halt-error(s, "")
   
 /* string ops */
 
@@ -45,26 +45,26 @@ signature
     
 rules
 
-  concat([]) --> "".
+  concat([]) --> ""
   
   concat([s | ss]) --> s ++ ss'
   where
-    concat(ss) --> ss'.
+    concat(ss) --> ss'
 
-  separate-by([], _) --> [].
+  separate-by([], _) --> []
   
-  separate-by([s], _) --> [s].
+  separate-by([s], _) --> [s]
   
   separate-by([s1| xs@[_ | _]], sep) --> [s1, sep | xs']
   where
-    separate-by(xs, sep) --> xs'.
+    separate-by(xs, sep) --> xs'
 
-  str-starts-with(s, prefix) --> str_starts_with(s, prefix).
+  str-starts-with(s, prefix) --> str_starts_with(s, prefix)
   
-  str-ends-with(s, suffix) --> str_ends_with(s, suffix).
+  str-ends-with(s, suffix) --> str_ends_with(s, suffix)
   
-  str-rm-suffix(s, suffix) --> str_remove_suffix(s, suffix).
+  str-rm-suffix(s, suffix) --> str_remove_suffix(s, suffix)
   
   log(s) --> s
   where
-    logdebug(s) => _.
+    logdebug(s) => _

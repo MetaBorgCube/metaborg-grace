@@ -42,17 +42,17 @@ signature
     
 rules
   
-  obj-constr-name() --> "#ctr".
+  obj-constr-name() --> "#ctr"
 
-  S |- self-addr() --> S.
+  S |- self-addr() --> S
 
-  O |- outer-addr() --> O.
+  O |- outer-addr() --> O
   
   outer-addr(S) --> O
   where
-    read(S) --> Obj(O, _, _, _).
+    read(S) --> Obj(O, _, _, _)
   
-  bogus-addr() --> -99.
+  bogus-addr() --> -99
   
   
    

@@ -16,7 +16,7 @@ rules
   where
     e1 --> BlockV(clos-cond);
     e2 --> BlockV(clos-body);
-    while-loop-evaluated(clos-cond, clos-body) --> v.
+    while-loop-evaluated(clos-cond, clos-body) --> v
   
   
   w@while-loop-evaluated(clos-cond, clos-body) --> DoneV()
@@ -27,5 +27,5 @@ rules
         call(clos-body, []) --> _;
         w --> _
       otherwise =>
-    }.
+    }
   

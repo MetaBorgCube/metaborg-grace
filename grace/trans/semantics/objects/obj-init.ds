@@ -19,11 +19,11 @@ rules
           read(S') --> debug-s;
           log("Init: " ++ int2string(S') ++ " : " ++ str(debug-s)) --> _;
     methods[obj-constr-name()] => ClosVis(clos, _);
-    call(clos, []) --> _.
+    call(clos, []) --> _
   
-  init-obj-parents([]) --> U().
+  init-obj-parents([]) --> U()
   
   init-obj-parents([(S, _, _) : Parent | parents]) --> U()
   where
     init-obj(S) --> _;
-    init-obj-parents(parents) --> _.
+    init-obj-parents(parents) --> _

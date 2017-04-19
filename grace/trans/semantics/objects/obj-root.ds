@@ -13,4 +13,4 @@ signature
 rules
   
   // source code for root object (ancestor of all objects)
-  rootobj-code() --> RObjectL([]).
+  rootobj-code() --> RObjectL([])

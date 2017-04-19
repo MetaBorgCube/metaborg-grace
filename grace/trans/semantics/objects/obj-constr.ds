@@ -5,6 +5,7 @@ imports
   trans/semantics/objects/obj-repr
   trans/semantics/objects/obj-init
   trans/semantics/store
+  trans/semantics/functions/func-locals-policy
   
 signature
   sorts
@@ -21,23 +22,23 @@ signature
   
   arrows
     construct-obj(Exp) --> Addr
-    install-parents(List(LInherit)) --> Parents
-    install-parent(LInherit) --> Parent
-    install-slots(LSlots) --> Slots
-    install-methods(LMethods) --> Methods
-    install-methods-aux(List(String), LMethods) --> Methods
+    install-parents(Addr, List(LInherit)) --> U
+    install-parent(Addr, LInherit) --> U
+    install-slots(Addr, LSlots) --> U
+    install-methods(Addr, LMethods) --> U
+    install-methods-aux(Addr, List(String), LMethods) --> U
     
 rules
 
-  Self() --> RefV(self-addr()).
+  Self() --> RefV(self-addr())
   
-  Outer() --> RefV(outer-addr()).
+  Outer() --> RefV(outer-addr())
 
   MQCallOuter(e) --> RefV(outer-addr(S))
   where
-    e --> RefV(S).
+    e --> RefV(S)
 
-  o@ObjectL(_, _, _) --> desugar-obj(o).
+  o@ObjectL(_, _, _) --> desugar-obj(o)
   
   S, EB |- o@LObj(_, _, _) --> RefV(S')
   where
@@ -46,7 +47,7 @@ rules
       E() =>
         S S', O S |- init-obj(S') --> _
       otherwise =>
-    }.  
+    }
   
   S, EB |- construct-obj(LObj(parents, slots, methods)) --> S'
   where
@@ -56,44 +57,50 @@ rules
       otherwise =>
         S' => S-init
     };
-    S S-init, O S |- install-parents(parents) --> parent-links;
-    S S-init, O S |- install-slots(slots) --> slots-table;
-    S S-init, O S |- install-methods(methods) --> methods-table;
-        log("Constructed: " ++ int2string(S') ++ " methods=" ++ str(allkeys(methods) : AST)) --> _;
-    update(S', Obj(S, `parent-links, slots-table, methods-table)) --> _.
+    S S-init, O S |- install-parents(S', parents) --> _;
+    S S-init, O S |- install-slots(S', slots) --> _;
+    S S-init, O S |- install-methods(S', methods) --> _
 
-  install-parents([]) --> [].
+  install-parents(S', []) --> U()
   
-  install-parents([p | parents]) --> [p' | parents']
+  install-parents(S', [p | parents]) --> U()
   where
-    install-parent(p) --> p';
-    install-parents(parents) --> parents'.
+    install-parent(S', p) --> _;
+    install-parents(S', parents) --> _
   
-  S |- install-parent(LInherit(e, alias-map, exclude-map)) --> (S, alias-map, exclude-map)
+  S |- install-parent(S', LInherit(e, alias-map, exclude-map)) --> U()
   where
-    EB B(S) |- e --> RefV(S).
+    EB B(S) |- e --> RefV(S);
+    read(S') --> Obj(O, parents, slots, methods);
+    update(S', Obj(O, [(S, alias-map, exclude-map) | parents], slots, methods)) --> _
   
   EB B(S) |- MCallRecvL(e, ID(x), es) --> v
   where
     EB E() |- e --> recv;
     EB E() |- es --> vs;
-    EB B(S) |- call-qualified(recv, x, vs) --> v.
+    EB B(S) |- call-qualified(recv, x, vs) --> v
   
-  install-slots([]) --> {}.
+  install-slots(S', []) --> U()
   
-  install-slots([s | ss]) --> { s |--> v, slots}
+  install-slots(S', [s | ss]) --> U()
   where
     default-value() --> v;
-    install-slots(ss) --> slots.
+    read(S') --> Obj(O, parents, slots, methods);
+    update(S', Obj(O, parents, {s |--> v, slots}, methods)) --> _;
+    install-slots(S', ss) --> _
   
-  install-methods(methods) --> install-methods-aux(method-names, methods)
+  install-methods(S', methods) --> install-methods-aux(S', method-names, methods)
   where
-    allkeys(methods) => method-names.
+    allkeys(methods) => method-names
   
-  install-methods-aux([], _) --> {}.
+  install-methods-aux(S', [], _) --> U()
   
-  install-methods-aux([m | ms], methods) --> {m |--> clos, methods-map}
+  install-methods-aux(S', [m | ms], method-sources) --> U()
   where
-    method-closure(methods[m]) --> clos;
-    install-methods-aux(ms, methods) --> methods-map.
+    enforce-member-policy(S', m) --> _;
+    method-closure(method-sources[m]) --> clos;
+    enforce-closure-policy(S', clos) --> _;
+    read(S') --> Obj(O, parents, slots, methods);
+    update(S', Obj(O, parents, slots, {m |--> clos, methods})) --> _;
+    install-methods-aux(S', ms, method-sources) --> _
 

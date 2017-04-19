@@ -20,9 +20,9 @@ signature
 rules
 
   // unwrap expression
-  Expression(e) --> e.
+  Expression(e) --> e
   
-  Dialect(_) --> DoneV().
+  Dialect(_) --> DoneV()
   
 //  Declaration(VariableL(x, _, _, e)) --> v
 //  where

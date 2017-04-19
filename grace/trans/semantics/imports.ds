@@ -43,13 +43,13 @@ signature
     
 rules
   
-  parse-file(s) --> native-parse-file(s).
+  parse-file(s) --> native-parse-file(s)
   
-  S |- load-dialect(Dialect("none")) --> S.
+  S |- load-dialect(Dialect("none")) --> S
   
   load-dialect(Dialect(name)) --> dialect-cache-get(name)
   where
-    dialect-cache-has(name) --> true.
+    dialect-cache-has(name) --> true
 
   load-dialect(Dialect(name)) --> dialect-cache-add(name, dialect)
   where
@@ -57,45 +57,45 @@ rules
     parse-file(dialect-path(name)) --> program;
     program --> RefV(dialect);
     read(dialect) --> Obj(_, outers, slots, methods);
-    update(dialect, Obj(fresh, outers, slots, methods)) --> _.
+    update(dialect, Obj(fresh, outers, slots, methods)) --> _
 
-  collect-dialect-statement(Program([Expression(ObjectL(_,_,[dialect@Dialect(_) | _ ])) | _])) --> dialect.
+  collect-dialect-statement(Program([Expression(ObjectL(_,_,[dialect@Dialect(_) | _ ])) | _])) --> dialect
   
   collect-dialect-statement(Program([Expression(ObjectL(_,_,[stm | _ ])) | _])) --> Dialect("standardGrace")
   where
-    stm =!=> Dialect(_).
+    stm =!=> Dialect(_)
   
   
   load-import(name) --> import-cache-get(name)
   where
-    import-cache-has(name) --> true.
+    import-cache-has(name) --> true
   
   load-import(name) --> import-cache-add(name, import)
   where
     import-cache-has(name) --> false;
     parse-file(import-path(name)) --> program@Program(_);
-    program --> import@RefV(_).
+    program --> import@RefV(_)
 
   
-  ProgPath |- import-path(name) --> native-parent-directory(ProgPath) ++ "/" ++ name.
+  ProgPath |- import-path(name) --> native-parent-directory(ProgPath) ++ "/" ++ name
   
   ProgPath |- dialect-path(name) --> native-parent-directory(ProgPath) ++ "/" ++ name
   where
-    name != "standardGrace".
+    name != "standardGrace"
   
-  dialect-path("standardGrace") --> native-standardgrace(). 
+  dialect-path("standardGrace") --> native-standardgrace() 
 
 
-  DCache |- dialect-cache-has(name) --> DCache[name?].
+  DCache |- dialect-cache-has(name) --> DCache[name?]
   
-  dialect-cache-add(name, dialect) :: DCache --> dialect :: DCache { name |--> dialect, DCache}.
+  dialect-cache-add(name, dialect) :: DCache --> dialect :: DCache { name |--> dialect, DCache}
   
-  dialect-cache-get(name) :: DCache --> DCache[name] :: DCache.
+  dialect-cache-get(name) :: DCache --> DCache[name] :: DCache
   
   
-  ICache |- import-cache-has(name) --> ICache[name?].
+  ICache |- import-cache-has(name) --> ICache[name?]
   
-  import-cache-add(name, import) :: ICache --> import :: ICache {name |--> import, ICache}.
+  import-cache-add(name, import) :: ICache --> import :: ICache {name |--> import, ICache}
   
-  import-cache-get(name) :: ICache --> ICache[name] :: ICache.
+  import-cache-get(name) :: ICache --> ICache[name] :: ICache
   

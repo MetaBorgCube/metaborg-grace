@@ -8,4 +8,4 @@ signature
     no-type() --> TypeExp
 
 rules
-  no-type() --> TypeID(ID("Unknown"), NoTypeArg()).
+  no-type() --> TypeID(ID("Unknown"), NoTypeArg())

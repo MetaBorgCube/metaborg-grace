@@ -23,18 +23,18 @@ rules
 
   S, O |- Program(code) --> v
   where
-    S, O, R NR(), EB E() |- code :: NS 0, E {} --> v.
+    S, O, R NR(), EB E() |- code :: NS 0, E {} --> v
 
 //  S |- prog@Program(code) --> v
 //  where
 //    load-dialect(collect-dialect-statement(prog)) --> S';
-//    S', O S |- code --> v.
+//    S', O S |- code --> v
 
-  [] : Code --> DoneV().
+  [] : Code --> DoneV()
 
-  [c] : Code --> c.
+  [c] : Code --> c
   
   [c | cs@[_|_]] : Code --> v
   where
     c --> _;
-    cs --> v.
+    cs --> v

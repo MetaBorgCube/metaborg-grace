@@ -77,24 +77,24 @@ signature
     
 rules
 
-  has-anno-readable(Annotations(annos)) --> has-anno(annos, Readable()).
+  has-anno-readable(Annotations(annos)) --> has-anno(annos, Readable())
 
-  has-anno-writable(Annotations(annos)) --> has-anno(annos, Writable()).
+  has-anno-writable(Annotations(annos)) --> has-anno(annos, Writable())
 
-  has-anno-confidential(Annotations(annos)) --> has-anno(annos, Confidential()).
+  has-anno-confidential(Annotations(annos)) --> has-anno(annos, Confidential())
 
-  has-anno-public(Annotations(annos)) --> has-anno(annos, Public()).
+  has-anno-public(Annotations(annos)) --> has-anno(annos, Public())
 
-  has-anno([], _) --> false.
+  has-anno([], _) --> false
 
   has-anno([anno | _], anno') --> true
   where
-    anno == anno'.
+    anno == anno'
  
   has-anno([anno | annos], anno') --> has-anno(annos, anno')
   where
-    anno != anno'.
+    anno != anno'
 
-  visibility-annos(true) --> Annotations([Public()]).
+  visibility-annos(true) --> Annotations([Public()])
 
-  visibility-annos(false) --> Annotations([Confidential()]).
+  visibility-annos(false) --> Annotations([Confidential()])

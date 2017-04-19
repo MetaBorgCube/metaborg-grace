@@ -28,68 +28,68 @@ signature
     
 rules
 
-  path-found([]) --> false.
+  path-found([]) --> false
   
-  path-found([_|_]) --> true.
+  path-found([_|_]) --> true
   
   
-  path-local([PL(_)]) --> true.
+  path-local([PL(_)]) --> true
   
   path-local([p | _]) --> false
   where
-    p =!=> PL(_).
+    p =!=> PL(_)
   
   
-  path-inherited([PP(_, _)| _]) --> true.
+  path-inherited([PP(_, _)| _]) --> true
   
   path-inherited([p | _]) --> false
   where
-    p =!=> PP(_, _).
+    p =!=> PP(_, _)
 
   path-strictly-inherited(path) --> path-parents-only(`path')
   where
-    `path => [PL(_) | path'].
+    `path => [PL(_) | path']
   
-  path-lexical([PO()|_]) --> true.
+  path-lexical([PO()|_]) --> true
   
   path-lexical([p | _]) --> false
   where
-    p =!=> PO().
+    p =!=> PO()
     
   
   path-strictly-lexical(paths) --> path-outers-only(`paths')
   where
-    `paths => [PL(_) | paths'].
+    `paths => [PL(_) | paths']
   
   
-  path-outers-only([]) --> true.
+  path-outers-only([]) --> true
   
-  path-outers-only([PO() | path]) --> path-outers-only(path).
+  path-outers-only([PO() | path]) --> path-outers-only(path)
   
   path-outers-only([p | _]) --> false
   where
-    p =!=> PO().
+    p =!=> PO()
   
   
-  path-parents-only([]) --> true.
+  path-parents-only([]) --> true
   
-  path-parents-only([PP(_, _) | path]) --> path-parents-only(path).
+  path-parents-only([PP(_, _) | path]) --> path-parents-only(path)
   
   path-parents-only([p | _]) --> false
   where
-    p =!=> PP(_, _).
+    p =!=> PP(_, _)
   
   
   path-aliased(x1, [PL(x2)]) --> true
   where
-    x1 != x2.
+    x1 != x2
   
   path-aliased(x1, [PL(x2)]) --> false
   where
-    x1 == x2.
+    x1 == x2
   
   path-aliased(x1, [p | path]) --> path-aliased(x1, path)
   where
-    p =!=> PL(_).
+    p =!=> PL(_)
   
   

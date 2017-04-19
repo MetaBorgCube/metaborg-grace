@@ -30,13 +30,13 @@ rules
       [] =>
         halt-error("Unknown method " ++ x) --> _
       otherwise =>
-    }.
+    }
 
   resolve(x, S') --> [PL(x)]
   where
     read(S') --> Obj(_, _, _, methods);
     methods[x?] == true;
-        log("L: " ++ x ++ ": " ++ "FOUND LOCAL") --> _.
+        log("L: " ++ x ++ ": " ++ "FOUND LOCAL") --> _
   
   O |- resolve(x, S') --> path
   where
@@ -54,7 +54,7 @@ rules
     */
         log("L: " ++ x ++ ": " ++ "up OUTER") --> _;
     O, S' |- resolve-in-outer(x, S') --> path-in-outer;
-    disambiguate-paths(x, path-in-parent, path-in-outer) --> path.
+    disambiguate-paths(x, path-in-parent, path-in-outer) --> path
   
   O |- resolve(x, S') --> path-in-parent
   where
@@ -64,12 +64,12 @@ rules
         log("L: " ++ x ++ ": in " ++ int2string(S') ++ "=" ++ str(o)) --> _;
         log("L: " ++ x ++ ": outer NOK (" ++ int2string(O) ++ "<>" ++ int2string(O') ++ ")") --> _;
         log("L: " ++ x ++ ": " ++ "up PARENTS") --> _;
-    O, PIDX 0 |- resolve-in-parents(x, parents) --> path-in-parent.
+    O, PIDX 0 |- resolve-in-parents(x, parents) --> path-in-parent
 
   resolve-in-outer(_, S) --> []
   where
     read(S) --> Obj(O, _, _, _);
-    is-stored(O) --> false.
+    is-stored(O) --> false
 
   resolve-in-outer(x, S) --> path
   where
@@ -78,9 +78,9 @@ rules
     read(O) --> Obj(OO, _, _, _);
     O OO |- resolve(x, O) --> out-path;
     path as [PO() | out-path] if path-found(out-path)
-         or [].
+         or []
 
-  resolve-in-parents(_, []) --> [].
+  resolve-in-parents(_, []) --> []
   
   PIDX |- resolve-in-parents(x, [parent | parents]) --> path
   where
@@ -91,11 +91,11 @@ rules
         p-path => path
       otherwise =>
         PIDX addI(PIDX, 1) |- resolve-in-parents(x, parents) --> path
-    }.
+    }
     
   resolve-in-parent(x, (_, _, excludes)) --> []
   where
-    excludes[x?] == true.
+    excludes[x?] == true
   
   O, PIDX |- resolve-in-parent(x, (S', aliases, excludes)) --> path
   where
@@ -104,7 +104,7 @@ rules
     aliases[x] => x';
     O |- resolve(x', S') --> parent-path;
     path as [PP(PIDX, x') | parent-path] if path-found(parent-path)
-         or [].
+         or []
  
   O, PIDX |- resolve-in-parent(x, (S', aliases, excludes)) --> path
   where
@@ -112,12 +112,12 @@ rules
     aliases[x?] == false;
     O |- resolve(x, S') --> parent-path;
     path as [PP(PIDX, x) | parent-path] if path-found(parent-path)
-         or [].
+         or []
 
 
-  disambiguate-paths(_, p@[_|_], []) --> p. // parent
+  disambiguate-paths(_, p@[_|_], []) --> p // parent
   
-  disambiguate-paths(_, [], o@[_|_]) --> o. // outer
+  disambiguate-paths(_, [], o@[_|_]) --> o // outer
   
   disambiguate-paths(x, p@[_|_], o@[_|_]) --> o // potentially ambiguous
   where
@@ -126,9 +126,9 @@ rules
       true =>
         halt-error(x ++ " is both inherited, and defined in an enclosing scope") --> _
       otherwise =>
-    }.
+    }
   
-  disambiguate-paths(_, [], []) --> []. // not found
+  disambiguate-paths(_, [], []) --> [] // not found
 
 
 

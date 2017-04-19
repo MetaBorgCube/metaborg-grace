@@ -13,14 +13,14 @@ rules
 
   lookup([PL(x)], S) --> (S, methods[x])
   where
-    read(S) --> Obj(_, _, _, methods).
+    read(S) --> Obj(_, _, _, methods)
   
   lookup([PO() | path], S) --> lookup(path, S')
   where
-    read(S) --> Obj(S', _, _, _).
+    read(S) --> Obj(S', _, _, _)
   
   lookup([PP(i, _) | path], S) --> (S, anno-clos)
   where
     read(S) --> Obj(_, parents, _, _);
     parents[i] => (S', _, _);
-    lookup(path, S') --> (_, anno-clos).
+    lookup(path, S') --> (_, anno-clos)

@@ -26,11 +26,11 @@ rules
 
   ensure-defined(v) --> v
   where
-    v =!=> UninitializedV().
+    v =!=> UninitializedV()
   
   ensure-defined(v@UninitializedV()) --> v
   where
-    halt-error("Read of an uninitialised value attempted", "") --> _.
+    halt-error("Read of an uninitialised value attempted", "") --> _
 
-  default-value() --> UninitializedV().
+  default-value() --> UninitializedV()
 

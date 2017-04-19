@@ -21,16 +21,16 @@ signature
 
 rules
 
-  String(s) --> StringV(s).
+  String(s) --> StringV(s)
 
-  str-call(v1, op, [v2]) --> str-call-evaluated(op, v1, v2).
+  str-call(v1, op, [v2]) --> str-call-evaluated(op, v1, v2)
 
-  str-call(v, op, []) --> string-call-native(op, v).
+  str-call(v, op, []) --> string-call-native(op, v)
 
   str-call-evaluated(op, v1, NumV(i)) --> string-call-native(op, v1, StringV(s))
   where
-    int2str(i) --> s.
+    int2str(i) --> s
 
   str-call-evaluated("==(_)", _, v2) --> BoolV(false)
   where
-    v2 =!=> StringV(_). 
+    v2 =!=> StringV(_)

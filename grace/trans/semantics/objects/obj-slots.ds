@@ -26,9 +26,9 @@ rules
         SO(S) => so
       false =>
         resolve-slot-parents(i, `parents) --> so
-    }.
+    }
   
-  resolve-slot-parents(_, []) --> NS().
+  resolve-slot-parents(_, []) --> NS()
   
   resolve-slot-parents(i, [parent | parents]) --> so'
   where
@@ -38,9 +38,9 @@ rules
         so => so'
       NS() =>
         resolve-slot-parents(i, parents) --> so'
-    }.
+    }
   
-  resolve-slot-parent(i, (S, _, _)) --> resolve-slot(i, S).
+  resolve-slot-parent(i, (S, _, _)) --> resolve-slot(i, S)
 
 
 signature
@@ -53,14 +53,14 @@ rules
   S |- SlotRead(s) --> slots[s]
   where
     resolve-slot(s, S) --> SO(S');
-    read(S') --> Obj(_, _, slots, _).
+    read(S') --> Obj(_, _, slots, _)
   
   S |- SlotWrite(s, e) --> DoneV()
   where
     e --> v;
     resolve-slot(s, S) --> SO(S');
     read(S') --> Obj(O, parents, slots, methods);
-    update(S', Obj(O, parents, {s |--> v, slots}, methods)) --> _.
+    update(S', Obj(O, parents, {s |--> v, slots}, methods)) --> _
 
 
 

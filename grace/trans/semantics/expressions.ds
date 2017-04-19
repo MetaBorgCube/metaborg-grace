@@ -21,14 +21,14 @@ signature
     
 rules
 
-  Uninitialized() --> UninitializedV().
+  Uninitialized() --> UninitializedV()
   
-  [] : List(Exp) --> [].
+  [] : List(Exp) --> []
   
   [e | es] : List(Exp) --> [ v | vs ]
   where
     e --> v;
-    es --> vs.
+    es --> vs
 
     
 
