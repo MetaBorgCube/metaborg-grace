@@ -79,7 +79,6 @@ rules
   where
     p =!=> PP(_, _)
   
-  
   path-aliased(x1, [PL(x2)]) --> true
   where
     x1 != x2
