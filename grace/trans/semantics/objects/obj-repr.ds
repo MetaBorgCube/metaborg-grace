@@ -38,6 +38,7 @@ signature
     self-addr() --> Addr
     outer-addr() --> Addr
     outer-addr(Addr) --> Addr
+    bogus-addr() --> Addr
     
 rules
   
@@ -51,6 +52,7 @@ rules
   where
     read(S) --> Obj(O, _, _, _).
   
+  bogus-addr() --> -99.
   
   
    

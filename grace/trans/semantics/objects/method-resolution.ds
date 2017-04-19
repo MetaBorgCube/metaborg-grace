@@ -53,7 +53,7 @@ rules
       surrounding lexical scope 
     */
         log("L: " ++ x ++ ": " ++ "up OUTER") --> _;
-    O |- resolve-in-outer(x, S') --> path-in-outer;
+    O, S' |- resolve-in-outer(x, S') --> path-in-outer;
     disambiguate-paths(x, path-in-parent, path-in-outer) --> path.
   
   O |- resolve(x, S') --> path-in-parent
@@ -65,7 +65,6 @@ rules
         log("L: " ++ x ++ ": outer NOK (" ++ int2string(O) ++ "<>" ++ int2string(O') ++ ")") --> _;
         log("L: " ++ x ++ ": " ++ "up PARENTS") --> _;
     O, PIDX 0 |- resolve-in-parents(x, parents) --> path-in-parent.
-
 
   resolve-in-outer(_, S) --> []
   where

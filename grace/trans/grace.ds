@@ -11,9 +11,7 @@ rules
 
   p@Program(_) -init-> (v_out, EX, H)
   where
-    next() --> dummy;
-    log("Dummy O => S => " ++ int2string(dummy)) --> _;    
-    ProgPath native-term-origin-path(p), O dummy, S dummy |- p :: H {},
+    ProgPath native-term-origin-path(p), O bogus-addr(), S bogus-addr() |- p :: H {},
       VH {}, DCache {}, ICache {}, EX Ok() --> v :: H, VH, EX;
     case EX of {
       Ok() =>

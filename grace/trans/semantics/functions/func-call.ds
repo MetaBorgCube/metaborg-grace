@@ -39,7 +39,7 @@ rules
   // object as receiver
   call-qualified(RefV(S), x, vs) --> v
   where
-    resolve-lookup(x, S) --> (_, clos);
+    O bogus-addr(), S |- resolve-lookup(x, S) --> (_, clos);
     S |- call(clos, vs) --> v.
 
   // block as receiver of apply method  
