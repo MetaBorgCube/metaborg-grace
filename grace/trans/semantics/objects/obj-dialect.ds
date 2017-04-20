@@ -1,0 +1,62 @@
+module trans/semantics/objects/obj-dialect
+
+imports
+  src-gen/ds-signatures/grace-lowered-sig
+  trans/semantics/objects/obj-repr
+  trans/semantics/runtime/context
+  trans/semantics/semantics
+  
+signature
+  components
+    Dialects: Map(String, Addr)
+  
+  arrows
+    load-dialect(String) --> Addr
+
+    desugar-program-dialect(Program) --> (Statement * Program)
+    desugar-rootobj-dialect(Exp) --> (Statement * Exp)
+    dialect-path(String) --> String
+    
+rules
+  
+  desugar-program-dialect(Program([Expression(obj)])) --> (dialect, Program([Expression(obj')]))
+  where
+    desugar-rootobj-dialect(obj) --> (dialect, obj')
+  
+  desugar-rootobj-dialect(ObjectL(inherit, uses, [dialect@Dialect(_) | codexs])) --> (dialect, ObjectL(inherit, uses, codexs))
+  
+  desugar-rootobj-dialect(ObjectL(inherit, uses, code@[s | _])) --> (Dialect("standardGrace"), ObjectL(inherit, uses, code))
+  where
+    s =!=> Dialect(_)
+  
+  desugar-rootobj-dialect(ObjectL(inherit, uses, code@[])) --> (Dialect("standardGrace"), ObjectL(inherit, uses, code))  
+  
+  ProgPath |- dialect-path(name) --> native-parent-directory(ProgPath) ++ "/" ++ name
+  where
+    name != "standardGrace"
+  
+  dialect-path("standardGrace") --> native-standardgrace()
+  
+rules
+  
+  S |- load-dialect("none") --> S
+  
+  load-dialect(dialect) :: Dialects --> Dialects[dialect] :: Dialects
+  where
+    dialect != "none";
+    Dialects[dialect?] == true
+  
+  load-dialect(dialect) :: Dialects --> dia-addr :: Dialects'
+  where
+    dialect != "none";
+    Dialects[dialect?] == false;
+    parse-program(dialect-path(dialect)) --> dia-prog;
+    dia-prog --> RefV(dia-addr);
+    read(dia-addr) --> Obj(_, outers, slots, methods);
+    update(dia-addr, Obj(fresh, outers, slots, methods)) --> _;
+    { dialect |--> dia-addr, Dialects} => Dialects'
+    
+  
+
+  
+  

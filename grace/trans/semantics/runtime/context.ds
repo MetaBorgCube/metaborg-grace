@@ -1,0 +1,21 @@
+module trans/semantics/runtime/context
+
+imports
+  src-gen/ds-signatures/grace-lowered-sig
+
+signature
+  native operators
+    native-parse-program: String -> Program
+    native-term-origin-path: AST -> String
+    native-parent-directory: String -> String
+    native-standardgrace: String
+    
+  components
+    ProgPath: String
+  
+  arrows
+    parse-program(String) --> Program
+
+rules
+  
+  parse-program(path) --> native-parse-program(path)

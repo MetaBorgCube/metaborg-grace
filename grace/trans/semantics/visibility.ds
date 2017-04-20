@@ -12,7 +12,7 @@ imports
   trans/semantics/numbers
   trans/semantics/lineups
   trans/semantics/statements
-  trans/semantics/imports
+//  trans/semantics/imports
 
 
 /* ======= REACHABILITY CHECK ======= */

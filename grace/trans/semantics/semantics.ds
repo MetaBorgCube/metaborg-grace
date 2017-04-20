@@ -6,14 +6,16 @@ imports
 imports
   trans/semantics/store
   trans/semantics/values
+  trans/semantics/objects/obj
   trans/semantics/functions/functions
   trans/semantics/expressions
   trans/semantics/statements
   trans/semantics/numbers
   trans/semantics/booleans
   trans/semantics/strings
-  trans/semantics/imports
+//  trans/semantics/imports
   trans/semantics/store
+//  trans/semantics/lib/lib
   
 signature
   arrows
@@ -21,9 +23,15 @@ signature
   
 rules
 
-  S, O |- Program(code) --> v
+//  S, O |- Program(code) --> v
+//  where
+//    S, O, R NR(), EB E() |- code :: NS 0, E {} --> v
+  
+  S |- prog@Program(_) --> v
   where
-    S, O, R NR(), EB E() |- code :: NS 0, E {} --> v
+    desugar-program-dialect(prog) --> (Dialect(dialect), Program(code'));
+    load-dialect(dialect) --> S_dialect;
+    S_dialect, O S, R NR(), EB E() |- code' :: NS 0, E {} --> v
 
 //  S |- prog@Program(code) --> v
 //  where

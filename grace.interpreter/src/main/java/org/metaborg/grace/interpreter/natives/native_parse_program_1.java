@@ -15,9 +15,9 @@ import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChild(value = "fileTerm", type = TermBuild.class)
-public abstract class native_parse_file_1 extends TermBuild {
+public abstract class native_parse_program_1 extends TermBuild {
 
-	public native_parse_file_1(SourceSection source) {
+	public native_parse_program_1(SourceSection source) {
 		super(source);
 	}
 
@@ -41,6 +41,6 @@ public abstract class native_parse_file_1 extends TermBuild {
 	}
 
 	public static TermBuild create(SourceSection source, TermBuild tb) {
-		return native_parse_file_1NodeGen.create(source, tb);
+		return native_parse_program_1NodeGen.create(source, tb);
 	}
 }
