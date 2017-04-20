@@ -16,7 +16,7 @@ signature
     LAliases = Map(String, String)
     LExcludes = Map(String, String)
     LSlots = List(Int)
-    LMethods = Map(String, Declaration)
+    LMethods = List((String * Declaration))
     
   constructors
     LObj: List(LInherit) * LSlots * LMethods -> Exp
@@ -81,7 +81,7 @@ rules
   
   desugar-code(code) --> (slots3, methods3)
   where
-    desugar-slots(code, [], {}) --> (code1, slots1, methods1);
+    desugar-slots(code, [], []) --> (code1, slots1, methods1);
     desugar-methods(code1, slots1, methods1) --> (code2, slots2, methods2);
     desugar-constr(code2, slots2, methods2) --> (slots3, methods3)
  
@@ -142,14 +142,14 @@ rules
   
   desugar-methods([Declaration(m@MethodL(ID(x), _, _, _, _, _, _)) | code], slots, methods) --> (code', slots', methods')
   where
-    desugar-methods(code, slots, {x |--> m, methods}) --> (code', slots', methods')
+    desugar-methods(code, slots, [(x, m)| methods]) --> (code', slots', methods')
   
   
   
   /* ==== CONSTRUCTOR === */
 
   
-  desugar-constr(code, slots, methods) --> (slots, {ctr |--> ctr-decl, methods})
+  desugar-constr(code, slots, methods) --> (slots, [(ctr, ctr-decl) | methods])
   where
     obj-constr-name() --> ctr;
     MethodL(ID(ctr), [], visibility-annos(true), [], [], no-type(), code) => ctr-decl

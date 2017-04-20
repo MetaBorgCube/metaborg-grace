@@ -80,7 +80,7 @@ rules
     EB E() |- es --> vs;
     EB B(S) |- call-qualified(recv, x, vs) --> v
   
-  install-slots(S', []) --> U()
+  install-slots(_, []) --> U()
   
   install-slots(S', [s | ss]) --> U()
   where
@@ -89,18 +89,14 @@ rules
     update(S', Obj(O, parents, {s |--> v, slots}, methods)) --> _;
     install-slots(S', ss) --> _
   
-  install-methods(S', methods) --> install-methods-aux(S', method-names, methods)
-  where
-    allkeys(methods) => method-names
+  install-methods(_, []) --> U()
   
-  install-methods-aux(S', [], _) --> U()
-  
-  install-methods-aux(S', [m | ms], method-sources) --> U()
+  install-methods(S', [ (m, decl) | ms]) --> install-methods(S', ms)
   where
     enforce-member-policy(S', m) --> _;
-    method-closure(method-sources[m]) --> clos;
+    method-closure(decl) --> clos;
     enforce-closure-policy(S', clos) --> _;
     read(S') --> Obj(O, parents, slots, methods);
-    update(S', Obj(O, parents, slots, {m |--> clos, methods})) --> _;
-    install-methods-aux(S', ms, method-sources) --> _
+    update(S', Obj(O, parents, slots, {m |--> clos, methods})) --> _
+  
 
