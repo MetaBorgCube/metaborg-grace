@@ -43,6 +43,7 @@ rules
   S, EB |- o@LObj(_, _, _) --> RefV(S')
   where
     construct-obj(o) --> S';
+    enforce-closure-policy(S') --> _;
     case EB of {
       E() =>
         S S', O S |- init-obj(S') --> _
@@ -95,7 +96,6 @@ rules
   where
     enforce-member-policy(S', m) --> _;
     method-closure(decl) --> clos;
-    enforce-closure-policy(S', clos) --> _;
     read(S') --> Obj(O, parents, slots, methods);
     update(S', Obj(O, parents, slots, {m |--> clos, methods})) --> _
   

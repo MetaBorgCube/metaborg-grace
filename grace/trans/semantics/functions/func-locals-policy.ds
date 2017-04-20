@@ -127,6 +127,8 @@ signature
     policy-locals-allow-shadow-member() --> Bool
     policy-locals-allow-shadow-inherited() --> Bool
   
+    enforce-closure-policy(Addr) --> U
+    enforce-closure-policy-aux(Addr, List(AnnotatedClosure)) --> U
     enforce-closure-policy(Addr, AnnotatedClosure) --> U
     enforce-closure-policy-aux(List(String)) --> U
     check-locals-duplicates(List(String)) --> U
@@ -146,6 +148,17 @@ rules
   
   
 rules
+  
+  enforce-closure-policy(S) --> U()
+  where
+    read(S) --> Obj(_, _, _, methods);
+    enforce-closure-policy-aux(S, allvalues(methods)) --> _
+  
+  enforce-closure-policy-aux(_, []) --> U()
+  
+  enforce-closure-policy-aux(S, [clos | closs]) --> enforce-closure-policy-aux(S, closs)
+  where
+    enforce-closure-policy(S, clos) --> _
   
   enforce-closure-policy(S, ClosVis(Clos(O, params, locals, _, _), _)) --> U()
   where
