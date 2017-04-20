@@ -9,6 +9,8 @@ imports
 
 signature
   arrows
+    policy-member-applies-to(String) --> Bool
+  
     policy-members-allow-duplicates() --> Bool
     policy-members-allow-duplicate-inherited() --> Bool
     policy-members-allow-shadow-lexical-local() --> Bool
@@ -24,7 +26,7 @@ signature
     check-members-shadow-lexical-inherited(String, Path) --> U
     
 rules
-
+  
   policy-members-allow-duplicates() --> false
   policy-members-allow-duplicate-inherited() --> true
   policy-members-allow-shadow-lexical-local() --> false
@@ -33,18 +35,24 @@ rules
   
 rules
   
+  policy-member-applies-to(x) --> notB(str-starts-with(x, "#"))
+  
   enforce-member-policy(S, x) --> U()
   where
-    read(S) --> Obj(O, parents, slots, methods);
-    S, O |- resolve(x, S) --> x-path;
-    case path-found(x-path) : Bool of {
+    case policy-member-applies-to(x) : Bool of {
       false =>
-      otherwise =>
-        check-member-duplicate(x, x-path) --> _;
-        check-member-duplicate-inherited(x, x-path) --> _;
-        check-members-shadow-lexical-local(x, x-path) --> _;
-        check-members-shadow-lexical-member(x, x-path) --> _;
-        check-members-shadow-lexical-inherited(x, x-path) --> _
+      true =>
+        outer-addr(S) --> O;
+        S, O |- resolve(x, S) --> x-path;
+        case path-found(x-path) : Bool of {
+          false =>
+          otherwise =>
+            check-member-duplicate(x, x-path) --> _;
+            check-member-duplicate-inherited(x, x-path) --> _;
+            check-members-shadow-lexical-local(x, x-path) --> _;
+            check-members-shadow-lexical-member(x, x-path) --> _;
+            check-members-shadow-lexical-inherited(x, x-path) --> _
+      }
     }
   
   check-member-duplicate(x, path) --> U()
