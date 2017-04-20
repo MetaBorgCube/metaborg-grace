@@ -4,6 +4,7 @@ imports
   src-gen/ds-signatures/grace-sig
   trans/semantics/objects/obj-root
   trans/semantics/objects/obj-slots
+  trans/semantics/objects/obj-dialect
   trans/semantics/runtime/natives
   trans/semantics/visibility
   trans/semantics/types
@@ -95,6 +96,7 @@ rules
   where
     s =!=> Declaration(VariableL(_, _, _, _));
     s =!=> Declaration(ConstantL(_, _, _, _));
+    s =!=> Import(_, _, _);
     desugar-slots(ss, slots, methods) --> (ss', slots', methods')
   
   desugar-slots([Declaration(VariableL(WildCard(), _, _, e)) | code], slots, methods) --> ([Expression(e) | code'], slots', methods')
@@ -119,6 +121,12 @@ rules
     slot-internal-setter(x, NS) --> internal-setter;
     slot-getter(x, NS, has-anno-readable(annos)) --> getter;
     desugar-slots(code, [NS | slots], methods) :: NS addI(NS, 1) --> (code', slots', methods') :: NS'
+  
+  
+  desugar-slots([Import(name, x, annos) | code], slots, methods) --> rest
+  where
+    Declaration(ConstantL(x, no-type(), annos, ReadImport(name))) => imp-repl;
+    desugar-slots([imp-repl | code], slots, methods) --> rest
   
   slot-getter(x, i, c) -->
     Declaration(MethodL(ID(x), [], visibility-annos(c), [], [], no-type(), [SlotRead(i)]))

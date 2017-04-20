@@ -56,7 +56,33 @@ rules
     update(dia-addr, Obj(fresh, outers, slots, methods)) --> _;
     { dialect |--> dia-addr, Dialects} => Dialects'
     
+signature
+  constructors
+    ReadImport: String -> Exp
   
+  arrows
+    import-path(String) --> String
+
+  components
+    Imports: Map(String, Addr)
+
+rules
+  
+  ReadImport(import) :: Imports --> RefV(Imports[import]) :: Imports
+  where
+    Imports[import?] == true
+  
+  ReadImport(import) :: Imports --> RefV(import-addr) :: Imports'
+  where
+    Imports[import?] == false;
+    parse-program(import-path(import)) --> import-prog;
+    import-prog --> RefV(import-addr);
+    {import |--> import-addr, Imports} => Imports'
+
+  ProgPath |- import-path(name) --> native-parent-directory(ProgPath) ++ "/" ++ name
+    
+
+
 
   
   

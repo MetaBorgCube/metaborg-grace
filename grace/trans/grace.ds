@@ -12,7 +12,7 @@ rules
   p@Program(_) -init-> (v_out, EX, H)
   where
     ProgPath native-term-origin-path(p), O bogus-addr(), S bogus-addr() |- p :: H {},
-      VH {}, Dialects {}, EX Ok() --> v :: H, VH, EX;
+      VH {}, Dialects {}, Imports {}, EX Ok() --> v :: H, VH, EX;
     case EX of {
       Ok() =>
         v => v_out
