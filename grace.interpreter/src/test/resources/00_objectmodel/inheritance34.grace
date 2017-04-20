@@ -2,7 +2,7 @@ object {
 
   method A {
       object {
-          f;
+          f; // this should not be resolved
           
       };
   };
