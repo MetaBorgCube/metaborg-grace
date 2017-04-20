@@ -136,6 +136,7 @@ signature
     enforce-closure-policy-aux(Addr, List(AnnotatedClosure)) --> U
     enforce-closure-policy(Addr, AnnotatedClosure) --> U
     enforce-closure-policy-aux(List(String)) --> U
+    enforce-block-policy(Closure) --> U
     check-locals-duplicates(List(String)) --> U
     check-locals-duplicates-aux(List(String)) --> Map(String, String)
     check-local-shadow-local(String) --> U
@@ -170,6 +171,8 @@ rules
     idents-to-strings(params ++ locals) --> xs;
     check-locals-duplicates(xs) --> _;
     S, O |- enforce-closure-policy-aux(xs) --> _
+
+  enforce-block-policy(Block(S, clos)) --> enforce-closure-policy(S, ClosVis(clos, Pub()))
 
   check-locals-duplicates(xs) --> U()
   where
