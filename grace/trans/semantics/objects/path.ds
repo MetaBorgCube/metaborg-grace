@@ -26,6 +26,7 @@ signature
     
     path-aliased(String, Path) --> Bool
     
+    path-local-aliased(String, Path) --> Bool
 rules
 
   path-found([]) --> false
@@ -91,4 +92,15 @@ rules
   where
     p =!=> PL(_)
   
+  path-local-aliased(x1, [PP(_, x2) | _]) --> true
+  where
+    x1 != x2
+  
+  path-local-aliased(x1, [PP(_, x2) | _]) --> false
+  where
+    x1 == x2
+  
+  path-local-aliased(_, [p | _]) --> false
+  where
+    p =!=> PP(_, _)
   

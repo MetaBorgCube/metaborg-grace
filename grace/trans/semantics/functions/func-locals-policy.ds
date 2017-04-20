@@ -64,6 +64,11 @@ rules
           true =>
             halt-error("Duplicate member '" ++ x ++ "'") --> _
           false =>
+            case path-local-aliased(x, path) : Bool of {
+              true =>
+                halt-error("Duplicate member '" ++ x ++ "'") --> _
+              false =>
+            }
         }
     }
   
