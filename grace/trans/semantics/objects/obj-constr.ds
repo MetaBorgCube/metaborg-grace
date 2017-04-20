@@ -5,7 +5,7 @@ imports
   trans/semantics/objects/obj-repr
   trans/semantics/objects/obj-init
   trans/semantics/store
-  trans/semantics/functions/func-locals-policy
+  trans/semantics/objects/obj-members-policy
   
 signature
   sorts

@@ -1,0 +1,121 @@
+module trans/semantics/objects/obj-members-policy
+
+imports
+  trans/semantics/store
+  trans/semantics/objects/path
+  trans/semantics/objects/obj-repr
+  trans/semantics/runtime/natives
+  trans/semantics/values
+
+signature
+  arrows
+    policy-member-applies-to(String) --> Bool
+  
+    policy-members-allow-duplicates() --> Bool
+    policy-members-allow-duplicate-inherited() --> Bool
+    policy-members-allow-shadow-lexical-local() --> Bool
+    policy-members-allow-shadow-lexical-member() --> Bool
+    policy-members-allow-shadow-lexical-inherited() --> Bool
+
+
+    enforce-member-policy(Addr, String) --> U
+    check-member-duplicate(String, Path) --> U
+    check-member-duplicate-inherited(String, Path) --> U
+    check-members-shadow-lexical-local(String, Path) --> U
+    check-members-shadow-lexical-member(String, Path) --> U
+    check-members-shadow-lexical-inherited(String, Path) --> U
+    
+rules
+  
+  policy-members-allow-duplicates() --> false
+  policy-members-allow-duplicate-inherited() --> true
+  policy-members-allow-shadow-lexical-local() --> false
+  policy-members-allow-shadow-lexical-member() --> true
+  policy-members-allow-shadow-lexical-inherited() --> true
+  
+rules
+  
+  policy-member-applies-to(x) --> notB(str-starts-with(x, "#"))
+  
+  enforce-member-policy(S, x) --> U()
+  where
+    case policy-member-applies-to(x) : Bool of {
+      false =>
+      true =>
+        outer-addr(S) --> O;
+        S, O |- resolve(x, S) --> x-path;
+        case path-found(x-path) : Bool of {
+          false =>
+          otherwise =>
+            check-member-duplicate(x, x-path) --> _;
+            check-member-duplicate-inherited(x, x-path) --> _;
+            check-members-shadow-lexical-local(x, x-path) --> _;
+            check-members-shadow-lexical-member(x, x-path) --> _;
+            check-members-shadow-lexical-inherited(x, x-path) --> _
+      }
+    }
+  
+  check-member-duplicate(x, path) --> U()
+  where
+    case policy-members-allow-duplicates() : Bool of {
+      true =>
+      false =>
+        case path-local(path) : Bool of {
+          true =>
+            halt-error("Duplicate member '" ++ x ++ "'") --> _
+          false =>
+            case path-local-aliased(x, path) : Bool of {
+              true =>
+                halt-error("Duplicate member '" ++ x ++ "'") --> _
+              false =>
+            }
+        }
+    }
+  
+  check-member-duplicate-inherited(x, path) --> U()
+  where
+    case policy-members-allow-duplicate-inherited() : Bool of {
+      true =>
+      false =>
+        case path-strictly-inherited(path) : Bool of {
+          true =>
+            halt-error("Member '" ++ x ++ "' overrides inherited member") --> _
+          false =>
+        }
+    }
+  
+  check-members-shadow-lexical-local(x, _) --> U()
+  where
+    case policy-members-allow-shadow-lexical-local() : Bool of {
+      true =>
+      false =>
+        case is-local(x) : Bool of {
+          true =>
+            halt-error("Member '" ++ x ++ "' shadows local variable in surrounding scope") --> _
+          false =>
+        }
+    }
+  
+  check-members-shadow-lexical-member(x, x-path) --> U()
+  where
+    case policy-members-allow-shadow-lexical-member() : Bool of {
+      true =>
+      false =>
+        case path-strictly-lexical(x-path) : Bool of {
+          true =>
+            halt-error("Member '" ++ x ++ "' shadows member defined in surrounding scope") --> _
+          false =>
+        }
+    }
+  
+  check-members-shadow-lexical-inherited(x, x-path) --> U()
+  where
+    case policy-members-allow-shadow-lexical-inherited() : Bool of {
+      true =>
+      false =>
+        case (path-lexical(x-path) : Bool, path-strictly-lexical(x-path) : Bool) of {
+          (true, false) =>
+            halt-error("Member '" ++ x ++ "' shadows member inherited into surrounding scope") --> _
+          otherwise =>
+        }
+    }

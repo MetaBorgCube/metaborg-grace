@@ -2,6 +2,7 @@ module trans/semantics/functions/visibility
 
 imports
   trans/semantics/objects/obj-repr
+  trans/semantics/store
   
 signature
   sorts
