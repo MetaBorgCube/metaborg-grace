@@ -9,6 +9,7 @@ imports
   trans/semantics/functions/func-locals-policy
   trans/semantics/types
   trans/semantics/objects/obj-constr
+  trans/semantics/lib/lib
   
 signature
     
@@ -47,33 +48,34 @@ signature
   native operators
     nativePrint: V -> V
 
+  arrows
+    call-qualified-proxy(V, String, List(Exp)) --> V
+
 rules
 
-  MCallL(ID(x), es) --> v
+  MCallL(ID(x), es) --> v_res
   where
     case x of {
       "print(_)" =>
         es => [e];
-        nativePrint(e) => v
+        nativePrint(call-qualified-proxy(e, "asString", [])) => v_res
         
       "while(_)do(_)" =>
         es => [e1, e2];
-        while-loop(e1, e2) --> v
+        while-loop(e1, e2) --> v_res
       
       otherwise =>
-        call-unqualified(x, es) --> v
+        call-unqualified(x, es) --> v_res
     }
 
-  EB E() |- MCallRecvL(e, ID(x), es) --> v
+  EB E() |- MCallRecvL(e, ID(x), es) --> call-qualified-proxy(e, x, es)
+  
+  call-qualified-proxy(recv, x, es) --> v
   where
-    e --> recv;
-    case recv of {
-      BoolV(_) =>
-        bool-call(recv, x, es) --> v
-      NumV(_) =>
-        num-call(recv, x, es) --> v
-      StringV(_) =>
-        str-call(recv, x, es) --> v
+    case is-native(recv) : Bool of {
+      true =>
+        native-call(recv, x, es) --> v
       otherwise =>
         call-qualified(recv, x, es) --> v
     }
+    

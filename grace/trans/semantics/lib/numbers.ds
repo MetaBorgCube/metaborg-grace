@@ -1,0 +1,24 @@
+module trans/semantics/lib/numbers
+
+imports
+  src-gen/ds-signatures/grace-sig
+  trans/semantics/values
+  trans/semantics/expressions
+  trans/semantics/lib/lib
+  
+signature
+  
+  constructors
+    NumV: Int -> V
+  
+  native operators
+    native-numv-literal: String -> V
+    native-numv-call: String * V * List(V) -> V
+
+rules
+
+  is-native(NumV(_)) --> true
+  
+  Number(s) --> native-numv-literal(s)
+  
+  native-call(num@NumV(_), op, params) --> native-numv-call(op, num, params)

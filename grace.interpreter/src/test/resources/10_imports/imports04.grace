@@ -2,7 +2,7 @@
 def o = object {
   import "animals" as a is confidential;
   print "initialising cat module";
-  print(a.mammal);
+  print(a.mammal.asString);
   
   class cat {
 //      inherit a.mammal;

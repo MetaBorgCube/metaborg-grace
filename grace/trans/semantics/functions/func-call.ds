@@ -33,8 +33,7 @@ rules
   where
     is-local(x) --> false;
     resolve-lookup(x, S) --> (S', clos);
-    S' |- call(clos, vs) --> v
-  
+    S' |- call(clos, vs) --> v  
 
   // object as receiver
   call-qualified(RefV(S), x, vs) --> v
@@ -47,6 +46,9 @@ rules
   where
     str-starts-with(x, "apply") --> true;
     call(clos, vs) --> v
+  
+  // block as receiver of asString method
+  call-qualified(BlockV(_), "asString", []) --> StringV("block<SOMELOCATION>")
   
   // local variable read 
   call-qualified(DoneV(), x, []) --> read-local(x)

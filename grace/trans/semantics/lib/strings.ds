@@ -1,0 +1,24 @@
+module trans/semantics/lib/strings
+
+imports
+  src-gen/ds-signatures/grace-lowered-sig
+  trans/semantics/values
+  trans/semantics/lib/lib
+
+signature
+  constructors
+    StringV: String -> V
+  
+  native operators
+    native-stringv-call: String * V * List(V) -> V
+  
+rules
+
+  is-native(StringV(_)) --> true
+  
+  String(s) --> StringV(s)
+  
+  native-call(str@StringV(_), op, params) --> native-stringv-call(op, str, params)
+  
+  
+

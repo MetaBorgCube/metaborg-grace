@@ -15,8 +15,6 @@ signature
     Priv: VisAnno
   
   arrows
-    anno-to-vis(Annotations) --> VisAnno
-    
     resolve-lookup(String, Addr) --> (Addr * Closure)
     
     //                  ID    *  visi  * recv * own *
@@ -31,11 +29,76 @@ rules
     ensure-visible(x, vis, S-recv, S-owner, path) --> _
 
   ensure-visible(_, _, _, _, _) --> U()
-
-   
-
   
-  anno-to-vis(Annotations([Public()])) --> Pub()
+
+signature
+  arrows
+    slot-annos-to-vis-getter(List(Annotation)) --> VisAnno
+    slot-anno-to-vis-getter(Annotation) --> VisAnno
+    slot-annos-to-vis-setter(List(Annotation)) --> VisAnno
+    slot-anno-to-vis-setter(Annotation) --> VisAnno
+    
+    method-annos-to-vis(List(Annotation)) --> VisAnno
+    method-anno-to-vis(Annotation) --> VisAnno
+    
+    vis-to-method-annos(VisAnno) --> List(Annotation)
+    
+    vis-reconcile(VisAnno, VisAnno) --> VisAnno
+    
+rules
   
-  anno-to-vis(Annotations([Confidential()])) --> Priv()
+  slot-annos-to-vis-getter([]) --> Priv()
+  
+  slot-annos-to-vis-getter([anno | annos]) --> vis-reconcile(curr-anno, prev-anno)
+  where
+    slot-annos-to-vis-getter(annos) --> prev-anno;
+    slot-anno-to-vis-getter(anno) --> curr-anno
+  
+  slot-anno-to-vis-getter(a) --> vis
+  where
+    case a of {
+      Readable() =>
+        Pub() => vis
+      Public() =>
+        Pub() => vis
+      otherwise =>
+        Priv() => vis
+    }
+  
+  slot-annos-to-vis-setter([]) --> Priv()
+  
+  slot-annos-to-vis-setter([anno | annos]) --> vis-reconcile(curr-anno, prev-anno)
+  where
+    slot-annos-to-vis-setter(annos) --> prev-anno;
+    slot-anno-to-vis-setter(anno) --> curr-anno
+  
+  slot-anno-to-vis-setter(a) --> vis
+  where
+    case a of {
+      Writable() =>
+        Pub() => vis
+      Public() =>
+        Pub() => vis
+      otherwise =>
+        Priv() => vis
+    }
+  
+  method-annos-to-vis([]) --> Priv()
+  
+  method-annos-to-vis([anno | annos]) --> vis-reconcile(curr-anno, prev-anno)
+  where
+    method-annos-to-vis(annos) --> prev-anno;
+    method-anno-to-vis(anno) --> curr-anno
+  
+  method-anno-to-vis(Confidential()) --> Priv()
+  
+  method-anno-to-vis(Public()) --> Pub()
+  
+  vis-to-method-annos(Pub()) --> [Public()]
+  vis-to-method-annos(Priv()) --> [Confidential()]
+  
+  vis-reconcile(Pub(), _) --> Pub()
+  vis-reconcile(_, Pub()) --> Pub()
+  vis-reconcile(Priv(), Priv()) --> Priv()
+  
 

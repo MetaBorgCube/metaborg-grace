@@ -1,0 +1,70 @@
+module trans/semantics/lib/booleans
+
+imports
+  src-gen/ds-signatures/grace-lowered-sig
+  trans/semantics/values
+  trans/semantics/lib/lib
+  trans/semantics/functions/func-call
+
+signature
+  constructors
+    BoolV: Bool -> V
+  
+  arrows
+    bool-call(V, String, List(Exp)) --> V
+      
+  native operators
+    native-boolv-call: String * V * List(V) -> V
+
+rules
+  
+  is-native(BoolV(_)) --> true
+  
+  Boolean(True()) --> BoolV(true)
+
+  Boolean(False()) --> BoolV(false)
+  
+  native-call(b@BoolV(_), op, params) --> bool-call(b, op, params)
+  
+  bool-call(b, op, params) --> native-boolv-call(op, b, params)
+  where
+    op != "ifTrue(_)ifFalse(_)";
+    op != "ifTrue(_)";
+    op != "ifFalse(_)"
+  
+  bool-call(b, "ifTrue(_)ifFalse(_)", [e1, e2]) --> v
+  where
+    case b of {
+      BoolV(true) =>
+        call-qualified(e1, "apply", []) --> v
+      otherwise =>
+        call-qualified(e2, "apply", []) --> v
+    }
+  
+  bool-call(b, "ifTrue(_)", [e]) --> v
+  where
+    case b of {
+      BoolV(true) =>
+        call-qualified(e, "apply", []) --> v
+      otherwise =>
+        DoneV() => v
+    }
+
+  bool-call(b, "ifFalse(_)", [e]) --> v
+  where
+    case b of {
+      BoolV(false) =>
+        call-qualified(e, "apply", []) --> v
+      otherwise =>
+        DoneV() => v
+    }
+
+
+    
+    
+    
+    
+    
+    
+    
+    

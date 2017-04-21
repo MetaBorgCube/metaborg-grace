@@ -1,6 +1,8 @@
 package org.metaborg.grace.interpreter.natives;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
@@ -17,7 +19,7 @@ public abstract class error_2 extends TermBuild {
 	@Specialization
 	public Object doObjects(Object s, Object s2) {
 		String r = s.toString() + s2.toString();
-		throw new RuntimeException(r);
+		throw new ReductionFailure(r, InterpreterUtils.createStacktrace());
 	}
 
 	public static TermBuild create(SourceSection source, TermBuild s, TermBuild s2) {

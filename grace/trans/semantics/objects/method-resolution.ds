@@ -122,11 +122,18 @@ rules
   disambiguate-paths(x, p@[_|_], o@[_|_]) --> o // potentially ambiguous
   where
     path-strictly-inherited(p) --> strictly-inherited;
-    case strictly-inherited of {
-      true =>
+    path-strictly-lexical(o) --> strictly-lexical;
+    case (strictly-inherited, strictly-lexical) of {
+      (true, true) =>
         halt-error(x ++ " is both inherited, and defined in an enclosing scope") --> _
       otherwise =>
     }
+//    case strictly-inherited of {
+//      true =>
+//        
+//        halt-error(x ++ " is both inherited, and defined in an enclosing scope") --> _
+//      otherwise =>
+//    }
   
   disambiguate-paths(_, [], []) --> [] // not found
 

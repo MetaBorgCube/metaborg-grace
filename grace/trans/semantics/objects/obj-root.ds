@@ -13,4 +13,8 @@ signature
 rules
   
   // source code for root object (ancestor of all objects)
-  rootobj-code() --> RObjectL([])
+  rootobj-code() --> RObjectL([Declaration(as-string)])
+  where
+    MethodL(ID("asString"), [] : List(Identifier), Annotations([Public()]), [] : List(Identifier), [] : List(TypeExp), Unkwn(), [Expression(String("an object"))]) => as-string;
+    as-string == as-string
+          

@@ -1,0 +1,20 @@
+module trans/semantics/lib/lib
+
+imports
+  trans/semantics/values
+  trans/semantics/lib/numbers
+  trans/semantics/lib/booleans
+  trans/semantics/lib/strings
+  trans/semantics/expressions
+  
+signature
+  sorts
+    NativeValue
+  
+  constructors
+    NativeV: NativeValue -> V
+
+  arrows
+    is-native(V) --> Bool
+    native-call(V, String, List(Exp)) --> V
+

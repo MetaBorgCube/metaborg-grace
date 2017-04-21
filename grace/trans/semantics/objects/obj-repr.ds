@@ -4,6 +4,7 @@ imports
   trans/semantics/store
   trans/semantics/values
   trans/semantics/functions/functions
+  trans/semantics/lib/lib
   
 signature
   sort aliases
@@ -41,6 +42,8 @@ signature
     bogus-addr() --> Addr
     
 rules
+  
+  is-native(RefV(_)) --> false
   
   obj-constr-name() --> "#ctr"
 

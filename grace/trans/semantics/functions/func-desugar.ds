@@ -18,10 +18,10 @@ signature
     
 rules
 
-  method-desugar(MethodL(_, _, annos, params, _, _, code-in)) --> LFunc(params, locals, code-out, vis)
+  method-desugar(MethodL(_, _, Annotations(annos), params, _, _, code-in)) --> LFunc(params, locals, code-out, vis)
   where
     method-body-desugar(code-in) --> (code-out, locals);
-    anno-to-vis(annos) --> vis
+    method-annos-to-vis(annos) --> vis
 
   method-body-desugar([]) --> ([] : Code, [] : List(Identifier))
   

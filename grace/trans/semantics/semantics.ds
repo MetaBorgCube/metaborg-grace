@@ -10,12 +10,8 @@ imports
   trans/semantics/functions/functions
   trans/semantics/expressions
   trans/semantics/statements
-  trans/semantics/numbers
-  trans/semantics/booleans
-  trans/semantics/strings
-//  trans/semantics/imports
   trans/semantics/store
-//  trans/semantics/lib/lib
+  trans/semantics/lib/lib
   
 signature
   arrows
@@ -23,20 +19,11 @@ signature
   
 rules
 
-//  S, O |- Program(code) --> v
-//  where
-//    S, O, R NR(), EB E() |- code :: NS 0, E {} --> v
-  
   S |- prog@Program(_) --> v
   where
     desugar-program-dialect(prog) --> (Dialect(dialect), Program(code'));
     load-dialect(dialect) --> S_dialect;
     S_dialect, O S, R NR(), EB E() |- code' :: NS 0, E {} --> v
-
-//  S |- prog@Program(code) --> v
-//  where
-//    load-dialect(collect-dialect-statement(prog)) --> S';
-//    S', O S |- code --> v
 
   [] : Code --> DoneV()
 

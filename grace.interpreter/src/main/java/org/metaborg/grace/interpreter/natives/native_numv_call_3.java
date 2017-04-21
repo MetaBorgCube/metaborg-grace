@@ -3,33 +3,61 @@ package org.metaborg.grace.interpreter.natives;
 import org.metaborg.grace.interpreter.generated.TypesGen;
 import org.metaborg.grace.interpreter.generated.terms.BoolV_1_Term;
 import org.metaborg.grace.interpreter.generated.terms.IVTerm;
+import org.metaborg.grace.interpreter.generated.terms.List_IVTerm;
 import org.metaborg.grace.interpreter.generated.terms.NumV_1_Term;
+import org.metaborg.grace.interpreter.generated.terms.StringV_1_Term;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class num_call_native_3 extends TermBuild {
+public class native_numv_call_3 extends TermBuild {
 
 	@Child
 	protected TermBuild opNode;
 	@Child
 	protected TermBuild leftNode;
 	@Child
-	protected TermBuild rightNode;
+	protected TermBuild rightNodes;
 
-	public num_call_native_3(SourceSection source, TermBuild op, TermBuild l, TermBuild r) {
+	public native_numv_call_3(SourceSection source, TermBuild op, TermBuild l, TermBuild r) {
 		super(source);
 		this.opNode = op;
 		this.leftNode = l;
-		this.rightNode = r;
+		this.rightNodes = r;
 	}
 
 	@Override
 	public IVTerm executeGeneric(VirtualFrame frame) {
 		final String op = TypesGen.asString(opNode.executeGeneric(frame));
 		final NumV_1_Term left = TypesGen.asNumV_1_Term(leftNode.executeGeneric(frame));
-		final NumV_1_Term right = TypesGen.asNumV_1_Term(rightNode.executeGeneric(frame));
+		final List_IVTerm params = TypesGen.asList_IVTerm(rightNodes.executeGeneric(frame));
+		switch (params.size()) {
+		case 0:
+			return executeGenericNullary(op, left);
+		case 1:
+			return executeGenericUnary(op, left, TypesGen.asNumV_1_Term(params.head()));
+		default:
+			throw new IllegalArgumentException("operator: '" + op + "' not recognised as operator on number.");
+		}
+	}
+
+	private IVTerm executeGenericNullary(String op, NumV_1_Term left) {
+		switch (op) {
+		case "prefix-":
+			return doPrefixMinus(left);
+		case "asString":
+			return new StringV_1_Term("" + left.get_1());
+		default:
+			throw new IllegalArgumentException("operator: '" + op + "' not recognised as operator on number.");
+		}
+	}
+
+	private IVTerm doPrefixMinus(NumV_1_Term left) {
+		return new NumV_1_Term(-left.get_1());
+	}
+
+	private IVTerm executeGenericUnary(String op, NumV_1_Term left, NumV_1_Term right) {
 		switch (op) {
 		case "+(_)":
 			return doPlus(left, right);
@@ -69,7 +97,7 @@ public class num_call_native_3 extends TermBuild {
 	private IVTerm doTimes(NumV_1_Term left, NumV_1_Term right) {
 		return new NumV_1_Term(left.get_1() * right.get_1());
 	}
-	
+
 	private IVTerm doMod(NumV_1_Term left, NumV_1_Term right) {
 		return new NumV_1_Term(left.get_1() % right.get_1());
 	}
@@ -101,9 +129,9 @@ public class num_call_native_3 extends TermBuild {
 	private IVTerm doLessEq(NumV_1_Term left, NumV_1_Term right) {
 		return new BoolV_1_Term(left.get_1() <= right.get_1());
 	}
-	
+
 	public static TermBuild create(SourceSection source, TermBuild op, TermBuild left, TermBuild right) {
-		return new num_call_native_3(source, op, left, right);
+		return new native_numv_call_3(source, op, left, right);
 	}
 
 }

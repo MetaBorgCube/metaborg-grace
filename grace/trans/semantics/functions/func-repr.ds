@@ -37,6 +37,6 @@ signature
   
 rules
 
-  
+  is-native(BlockV(_)) --> false
   
      
