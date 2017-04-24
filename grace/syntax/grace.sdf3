@@ -156,6 +156,8 @@ context-free syntax
   
   Exp.Return                    = <return <Exp>>               {right}
   
+  Exp.ReturnVoid                = <return>
+  
   Exp.MatchCase                 = <
                                    match (<Exp>)
                                        <{Case "\n"}+>
