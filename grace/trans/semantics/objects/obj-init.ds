@@ -16,8 +16,6 @@ rules
   where
     read(S') --> Obj(_, parents, _, methods);
     init-obj-parents(`parents) --> _;
-          read(S') --> debug-s;
-          log("Init: " ++ int2string(S') ++ " : " ++ str(debug-s)) --> _;
     methods[obj-constr-name()] => ClosVis(clos, _);
     call(clos, []) --> _
   

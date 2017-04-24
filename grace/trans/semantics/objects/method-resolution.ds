@@ -25,7 +25,6 @@ rules
   resolve-top(x, S') --> path
   where
     resolve(x, S') --> path;
-//        log("R: " ++ x ++ " in " ++ int2string(S') ++ " ==> " ++ str(path : AST)) --> _;
     case path of {
       [] =>
         halt-error("Unknown method " ++ x) --> _
@@ -36,23 +35,18 @@ rules
   where
     read(S') --> Obj(_, _, _, methods);
     methods[x?] == true
-//        log("L: " ++ x ++ ": " ++ "FOUND LOCAL") --> _
   
   O |- resolve(x, S') --> path
   where
     read(S') --> o@Obj(O', parents, _, methods);
     methods[x?] == false;
     O == O';
-//        log("L: " ++ x ++ ": in " ++ int2string(S') ++ "=" ++ str(o)) --> _;
-//        log("L: " ++ x ++ ": outer OK (" ++ int2string(O) ++ "==" ++ int2string(O') ++ ")") --> _;
-//        log("L: " ++ x ++ ": " ++ "up PARENTS") --> _;
     O, PIDX 0 |- resolve-in-parents(x, parents) --> path-in-parent;
     /*
       the contextual Outer object is the Outer of the object we are looking up in.
       this means we are still looking up from within the object itself and may go to its
       surrounding lexical scope 
     */
-//        log("L: " ++ x ++ ": " ++ "up OUTER") --> _;
     O, S' |- resolve-in-outer(x, S') --> path-in-outer;
     disambiguate-paths(x, path-in-parent, path-in-outer) --> path
   
@@ -61,9 +55,6 @@ rules
     read(S') --> o@Obj(O', parents, _, methods);
     methods[x?] == false;
     O != O';
-//        log("L: " ++ x ++ ": in " ++ int2string(S') ++ "=" ++ str(o)) --> _;
-//        log("L: " ++ x ++ ": outer NOK (" ++ int2string(O) ++ "<>" ++ int2string(O') ++ ")") --> _;
-//        log("L: " ++ x ++ ": " ++ "up PARENTS") --> _;
     O, PIDX 0 |- resolve-in-parents(x, parents) --> path-in-parent
 
   resolve-in-outer(_, S) --> []
@@ -84,7 +75,6 @@ rules
   
   PIDX |- resolve-in-parents(x, [parent | parents]) --> path
   where
-//        log("L: " ++ x ++ ": " ++ "PARENT " ++ int2string(PIDX)) --> _;
     PIDX |- resolve-in-parent(x, parent) --> p-path;
     case path-found(p-path) : Bool of {
       true =>
@@ -128,12 +118,6 @@ rules
         halt-error(x ++ " is both inherited, and defined in an enclosing scope") --> _
       otherwise =>
     }
-//    case strictly-inherited of {
-//      true =>
-//        
-//        halt-error(x ++ " is both inherited, and defined in an enclosing scope") --> _
-//      otherwise =>
-//    }
   
   disambiguate-paths(_, [], []) --> [] // not found
 
