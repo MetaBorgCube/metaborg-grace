@@ -36,6 +36,7 @@ rules
 
   Return(e) --> doreturn(e)
 
+  ReturnVoid() --> doreturn(DoneV())
 
 
 
