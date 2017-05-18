@@ -28,3 +28,4 @@ def ac2 = C2;
 
 ac2.foo;
 ac2.bar;
+
