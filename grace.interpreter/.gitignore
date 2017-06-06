@@ -2,6 +2,7 @@
 /target/
 src/main/resources/specification.aterm
 src/main/resources/parsetable.tbl
+src/main/resources/logback.xml
 src/main/java/org/metaborg/grace/interpreter/generated
 src/main/java/org/metaborg/grace/interpreter/generated/terms
 src/main/java/org/metaborg/grace/interpreter/generated/terms/build
@@ -9,7 +10,9 @@ src/main/java/org/metaborg/grace/interpreter/generated/terms/match
 src/test/java/org/metaborg/grace/interpreter/generated/test
 /grace.launch
 /Testgrace.launch
+/grace (Core).launch
 /grace (Daemon).launch
+/grace-core
 /grace-server
 /grace-client
 /grace
