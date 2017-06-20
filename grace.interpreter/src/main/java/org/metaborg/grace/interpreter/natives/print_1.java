@@ -1,7 +1,6 @@
 package org.metaborg.grace.interpreter.natives;
 
 import org.metaborg.grace.interpreter.generated.terms.IVTerm;
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 
 import com.oracle.truffle.api.dsl.NodeChild;
@@ -17,7 +16,7 @@ public abstract class print_1 extends TermBuild {
 
 	@Specialization
 	public IVTerm doInt(IVTerm t) {
-		if (DynSemContext.LANGUAGE.isDEBUG()) {
+		if (getContext().isDEBUG()) {
 			System.err.println(t);
 		}
 		return t;

@@ -3,7 +3,7 @@ package org.metaborg.grace.interpreter.natives;
 import java.io.File;
 import java.io.IOException;
 
-import org.metaborg.grace.interpreter.generated.graceEntryPoint;
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -29,11 +29,11 @@ public abstract class native_parse_program_1 extends TermBuild {
 		if (!dialectFile.exists()) {
 			throw new RuntimeException("Grace module: '" + s + "' does not exist.");
 		}
-
+		final DynSemContext ctx = getContext();
 		try {
-			final IStrategoTerm term = graceEntryPoint.createTransformer()
+			final IStrategoTerm term = ctx.getTermTransformer()
 					.transform(getContext().getParser().parse(Source.newBuilder(dialectFile)
-							.name("Dialect import: '" + s + "'").mimeType(graceEntryPoint.MIME_TYPE).build()));
+							.name("Dialect import: '" + s + "'").mimeType(ctx.getMimeTypeObjLanguage()).build()));
 			return getContext().getTermRegistry().parseProgramTerm(term);
 		} catch (IOException e) {
 			throw new RuntimeException("Cannot read dialect file: '" + s + "'.");

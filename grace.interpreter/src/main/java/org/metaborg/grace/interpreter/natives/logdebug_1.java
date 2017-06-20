@@ -1,6 +1,5 @@
 package org.metaborg.grace.interpreter.natives;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
@@ -17,8 +16,7 @@ public abstract class logdebug_1 extends TermBuild {
 
 	@Specialization
 	public String doInt(String s) {
-		getContext();
-		if (DynSemContext.LANGUAGE.isDEBUG()) {
+		if (getContext().isDEBUG()) {
 			int currentStackDepth = InterpreterUtils.stackDepth();
 			final StringBuilder msgBuilder = new StringBuilder();
 			for(; currentStackDepth > 0; currentStackDepth--){
