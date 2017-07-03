@@ -21,12 +21,12 @@ signature
     EB : EvalMode
   
   arrows
-    construct-obj(Exp) --> Addr
-    install-parents(Addr, List(LInherit)) --> U
-    install-parent(Addr, LInherit) --> U
-    install-slots(Addr, LSlots) --> U
-    install-methods(Addr, LMethods) --> U
-    install-methods-aux(Addr, List(String), LMethods) --> U
+    Exp -bld-> Addr
+    add-parents(Addr, List(LInherit)) --> U
+    add-parent(Addr, LInherit) --> U
+    add-slots(Addr, LSlots) --> U
+    add-methods(Addr, LMethods) --> U
+    add-methods-aux(Addr, List(String), LMethods) --> U
     
 rules
 
@@ -40,36 +40,33 @@ rules
 
   o@ObjectL(_, _, _) --> desugar-obj(o)
   
-  S, EB |- o@LObj(_, _, _) --> RefV(S')
+  S |- o@LObj(_, _, _) --> RefV(S')
   where
-    construct-obj(o) --> S';
+    o -bld-> S';
     enforce-closure-policy(S') --> _;
-    case EB of {
-      E() =>
-        S S', O S |- init-obj(S') --> _
-      otherwise =>
-    }
+    // TODO: outer might not be necessary
+    S S', O S |- init-obj(S') --> _
   
-  S, EB |- construct-obj(LObj(parents, slots, methods)) --> S'
+  S, EB |- LObj(parents, slots, methods) -bld-> S'
   where
     allocate(Obj(S, [], {}, {})) --> S';
     case EB of {
-      B(S-init) =>
+      B(S'') =>
       otherwise =>
-        S' => S-init
+        S' => S''
     };
-    S S-init, O S |- install-parents(S', parents) --> _;
-    S S-init, O S |- install-slots(S', slots) --> _;
-    S S-init, O S |- install-methods(S', methods) --> _
+    S S'', O S |- add-parents(S', parents) --> _;
+    O S |- add-slots(S', slots) --> _;
+    O S |- add-methods(S', methods) --> _
 
-  install-parents(S', []) --> U()
+  add-parents(S', []) --> U()
   
-  install-parents(S', [p | parents]) --> U()
+  add-parents(S', [p | parents]) --> U()
   where
-    install-parent(S', p) --> _;
-    install-parents(S', parents) --> _
+    add-parent(S', p) --> _;
+    add-parents(S', parents) --> _
   
-  S |- install-parent(S', LInherit(e, alias-map, exclude-map)) --> U()
+  S |- add-parent(S', LInherit(e, alias-map, exclude-map)) --> U()
   where
     EB B(S) |- e --> RefV(S);
     read(S') --> Obj(O, parents, slots, methods);
@@ -81,22 +78,22 @@ rules
     EB E() |- es --> vs;
     EB B(S) |- call-qualified(recv, x, vs) --> v
   
-  install-slots(_, []) --> U()
+  add-slots(_, []) --> U()
   
-  install-slots(S', [s | ss]) --> U()
+  add-slots(S', [s | ss]) --> U()
   where
     default-value() --> v;
     read(S') --> Obj(O, parents, slots, methods);
     update(S', Obj(O, parents, {s |--> v, slots}, methods)) --> _;
-    install-slots(S', ss) --> _
+    add-slots(S', ss) --> _
   
-  install-methods(_, []) --> U()
+  add-methods(_, []) --> U()
   
-  install-methods(S', [ (m, decl) | ms]) --> install-methods(S', ms)
+  add-methods(S', [ (m, decl) | ms]) --> add-methods(S', ms)
   where
     enforce-member-policy(S', m) --> _;
     method-closure(decl) --> clos;
     read(S') --> Obj(O, parents, slots, methods);
     update(S', Obj(O, parents, slots, {m |--> clos, methods})) --> _
-  
+
 

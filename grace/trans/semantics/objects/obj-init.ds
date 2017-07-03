@@ -11,8 +11,10 @@ signature
 
 rules
 
+  EB B(_) |- init-obj(_) --> U()
+
   // initialize objects, calling constructors, ancestors first
-  init-obj(S') --> U()
+  EB E() |- init-obj(S') --> U()
   where
     read(S') --> Obj(_, parents, _, methods);
     init-obj-parents(`parents) --> _;

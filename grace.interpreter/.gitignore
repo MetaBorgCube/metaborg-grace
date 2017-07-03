@@ -1,5 +1,6 @@
 
 /target/
+src/main/resources/signatures-digest.cache
 src/main/resources/specification.aterm
 src/main/resources/parsetable.tbl
 src/main/resources/logback.xml
