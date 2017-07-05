@@ -9,6 +9,7 @@ signature
     error: String * String -> String
     addI: Int * Int -> Int
     int2string: Int -> String
+    bool2string: Bool -> String
     str: AST -> String
     eqI: Int * Int -> Bool
     gtI: Int * Int -> Bool
@@ -17,6 +18,7 @@ signature
   arrows
     string2int(String) --> Int
     int2str(Int) --> String
+    bool2str(Bool) --> String
     halt-error(String, String) --> String
     halt-error(String) --> String
     
@@ -24,6 +26,7 @@ rules
   
   string2int(s) --> parseI(s)
   int2str(i) --> int2string(i)
+  bool2str(b) --> bool2string(b)
   
   halt-error(s1, s2) --> error(s1, s2)
   halt-error(s) --> halt-error(s, "")
