@@ -22,7 +22,7 @@ signature
 
 rules
 
-  full-transform = desugar-complete; make-occurrences
+  full-transform = desugar-complete //; make-occurrences
 
   make-occurrences = {| FreshCounter:
     rules(FreshCounter: _ -> 1);
