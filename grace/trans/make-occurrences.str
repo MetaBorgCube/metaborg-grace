@@ -1,0 +1,39 @@
+module make-occurrences
+
+imports
+  signatures/-
+  analysis
+  
+signature
+  constructors
+    LetOccurrence: Occurrence * Exp * Exp -> Exp
+    VarOccurrence: Occurrence -> Exp
+  
+  sorts
+    Occurrence Namespace TermIndex
+  
+  constructors
+    TermIndex : String * Int -> TermIndex
+    NoNamespace: Namespace
+    Occurrence : Namespace * Name * TermIndex -> Occurrence
+  
+  constructors
+    Occ2ID: Occurrence -> Identifier 
+
+rules
+
+  full-transform = desugar-complete; make-occurrences
+
+  make-occurrences = {| FreshCounter:
+    rules(FreshCounter: _ -> 1);
+    alltd(make-occurrence)
+  |}
+  
+  fresh =
+    FreshCounter;
+    inc; ?idx;
+    rules(FreshCounter: _ -> idx)
+  
+  make-occurrence:
+    ID(x) -> Occ2ID(Occurrence(NoNamespace(), x, TermIndex(x, <fresh>)))
+  
