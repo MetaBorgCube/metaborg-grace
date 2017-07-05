@@ -92,7 +92,7 @@ rules
   add-methods(S', [ (m, decl) | ms]) --> add-methods(S', ms)
   where
     enforce-member-policy(S', m) --> _;
-    method-closure(decl) --> clos;
+    DObj DObj(S') |- method-closure(decl) --> clos;
     read(S') --> Obj(O, parents, slots, methods);
     update(S', Obj(O, parents, slots, {m |--> clos, methods})) --> _
 

@@ -19,15 +19,15 @@ signature
     
 rules
   
-  O |- method-closure(m@MethodL(_, _, _, _, _, _, _)) :: E --> ClosVis(clos, vis) :: E
+  DObj, O |- method-closure(m@MethodL(_, _, _, _, _, _, _)) :: E --> ClosVis(clos, vis) :: E
   where
     method-desugar(m) --> LFunc(params, locals, code, vis);
-    Clos(O, params, locals, RCode(code, DynRet()), E) => clos
+    Clos(DObj, O, params, locals, RCode(code, DynRet()), E) => clos
   
   S, O, R |- block-closure(m@MethodL(_, _, _, _, _, _, _)) :: E --> Block(S, clos) :: E
   where
     method-desugar(m) --> LFunc(params, locals, code, _);
-    Clos(O, params, locals, RCode(code, StatRet(R)), E) => clos
+    Clos(DObj(S), O, params, locals, RCode(code, StatRet(R)), E) => clos
 
   BlockL(params, _, code) --> BlockV(clos)
   where

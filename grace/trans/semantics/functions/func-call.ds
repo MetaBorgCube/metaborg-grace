@@ -63,11 +63,11 @@ rules
   where
     S |- call(clos, vs) --> v
   
-  call(Clos(O, params, locals, rcode, E_func), vs) :: E --> v :: E
+  call(Clos(DObj, O, params, locals, rcode, E_func), vs) :: E --> v :: E
   where
     bind-locals(locals) :: E_func --> _ :: E_func';
     bind-locals(params, vs) :: E_func' --> _ :: E_func'';
-    O |- rcode :: E_func'' --> v
+    DObj, O |- rcode :: E_func'' --> v
   
   RCode(code, DynRet()) --> v
   where

@@ -53,7 +53,7 @@ rules
   where
     enforce-closure-policy(S, clos) --> _
   
-  enforce-closure-policy(S, ClosVis(Clos(O, params, locals, _, _), _)) --> U()
+  enforce-closure-policy(S, ClosVis(Clos(_, O, params, locals, _, _), _)) --> U()
   where
     idents-to-strings(params ++ locals) --> xs;
     check-locals-duplicates(xs) --> _;

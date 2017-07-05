@@ -24,7 +24,7 @@ signature
     // concrete return marker
     R: Int -> ReturnMarker
   
-    Clos: Outer * List(Identifier) * List(Identifier) * RCode * Env -> Closure
+    Clos: DeclObj * Outer * List(Identifier) * List(Identifier) * RCode * Env -> Closure
     Block: Self * Closure -> Closure
     
     // code wrapped with a return kind
@@ -35,8 +35,17 @@ signature
     // fixed return kind
     StatRet: ReturnMarker -> RetKind
   
+  sorts
+    DeclObj
+  
+  constructors
+    DObj: Addr -> DeclObj
+  
+  components
+    DObj : DeclObj
+  
 rules
 
   is-native(BlockV(_)) --> false
   
-     
+  

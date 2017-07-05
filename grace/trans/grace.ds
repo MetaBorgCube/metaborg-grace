@@ -11,7 +11,7 @@ rules
 
   p@Program(_) -init-> (v_out, EX, OH)
   where
-    ProgPath native-term-origin-path(p), O bogus-addr(), S bogus-addr() |- p :: OH {},
+    ProgPath native-term-origin-path(p), O bogus-addr(), S bogus-addr(), DObj DObj(bogus-addr()) |- p :: OH {},
       VH {}, Dialects {}, Imports {}, EX Ok() --> v :: OH, VH, EX;
     case EX of {
       Ok() =>
