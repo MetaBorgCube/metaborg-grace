@@ -22,7 +22,7 @@ signature
     Object
   
   sort aliases
-    HeapData = Object
+    StoreData = Object
     Slots = Map(Int, V)
     Methods = Map(String, AnnotatedClosure)
     Aliases = Map(String, String)

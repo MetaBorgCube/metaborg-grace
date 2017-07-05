@@ -2,33 +2,33 @@ module trans/semantics/store
 
 signature
   sorts
-    HeapData
+    StoreData
     
   sort aliases
     Addr = Int
-    H = Map(Addr, HeapData)
+    OH = Map(Addr, StoreData)
   
   components
-    H : H
+    OH : OH
 
   arrows
-    allocate(HeapData) :: H --> Addr :: H
-    update(Addr, HeapData) :: H --> Addr :: H
-    is-stored(Addr) :: H --> Bool :: H
-    read(Addr) :: H --> HeapData :: H
+    allocate(StoreData) :: OH --> Addr :: OH
+    update(Addr, StoreData) :: OH --> Addr :: OH
+    is-stored(Addr) :: OH --> Bool :: OH
+    read(Addr) :: OH --> StoreData :: OH
     next() --> Addr
         
 rules
   
-  allocate(data) :: H --> addr :: H {addr |--> data, H}
+  allocate(data) :: OH --> addr :: OH {addr |--> data, OH}
   where
     next() --> addr
   
-  is-stored(addr) :: H --> H[addr?] :: H
+  is-stored(addr) :: OH --> OH[addr?] :: OH
   
-  read(addr) :: H --> H[addr] :: H
+  read(addr) :: OH --> OH[addr] :: OH
 
-  update(addr, data) :: H --> addr :: H {addr |--> data, H}
+  update(addr, data) :: OH --> addr :: OH {addr |--> data, OH}
   
   next() --> fresh
   
