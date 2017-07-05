@@ -23,7 +23,7 @@ rules
   where
     desugar-program-dialect(prog) --> (Dialect(dialect), Program(code'));
     load-dialect(dialect) --> S_dialect;
-    S_dialect, O S, R NR(), EB E() |- code' :: NS 0, E {} --> v
+    S_dialect, O S, R NR(), EB E() |- code' :: E {} --> v
 
   [] : Code --> DoneV()
 

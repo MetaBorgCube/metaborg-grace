@@ -15,7 +15,7 @@ signature
   sort aliases
     LAliases = Map(String, String)
     LExcludes = Map(String, String)
-    LSlots = List(Int)
+    LSlots = List(String)
     LMethods = List((String * Declaration))
     
   constructors
@@ -39,15 +39,12 @@ signature
     desugar-methods(Code, LSlots, LMethods) --> (Code * LSlots * LMethods)
     desugar-constr(Code, LSlots, LMethods) --> (LSlots * LMethods)
   
-    slot-getter(String, Int, VisAnno) --> Statement 
-    slot-setter(String, Int, VisAnno) --> Statement
-    slot-internal-setter(String, Int) --> Statement
+    slot-getter(String, VisAnno) --> Statement 
+    slot-setter(String, VisAnno) --> Statement
+    slot-internal-setter(String) --> Statement
 
     slot-assign-call(String, Exp) --> Statement
     
-  components
-    NS : Int
-  
   native operators
     mksettername: String -> String
     
@@ -106,20 +103,20 @@ rules
   where
     desugar-slots(code, slots, methods) --> (code', slots', methods')
   
-  desugar-slots([Declaration(VariableL(ID(x), _, Annotations(annos), e)) | code], slots, methods) :: NS --> ([init-stm, internal-setter, getter, setter | code'], slots', methods') :: NS'
+  desugar-slots([Declaration(VariableL(ID(x), _, Annotations(annos), e)) | code], slots, methods) --> ([init-stm, internal-setter, getter, setter | code'], slots', methods')
   where
     slot-assign-call(x, e) --> init-stm;
-    slot-internal-setter(x, NS) --> internal-setter;
-    slot-getter(x, NS, slot-annos-to-vis-getter(annos)) --> getter;
-    slot-setter(x, NS, slot-annos-to-vis-setter(annos)) --> setter;
-    desugar-slots(code, [NS | slots], methods) :: NS addI(NS, 1) --> (code', slots', methods') :: NS'
+    slot-internal-setter(x) --> internal-setter;
+    slot-getter(x, slot-annos-to-vis-getter(annos)) --> getter;
+    slot-setter(x, slot-annos-to-vis-setter(annos)) --> setter;
+    desugar-slots(code, [x | slots], methods) --> (code', slots', methods')
 
-  desugar-slots([Declaration(ConstantL(ID(x), _, Annotations(annos), e)) | code], slots, methods) :: NS --> ([init-stm, internal-setter, getter | code'], slots', methods') :: NS'
+  desugar-slots([Declaration(ConstantL(ID(x), _, Annotations(annos), e)) | code], slots, methods) --> ([init-stm, internal-setter, getter | code'], slots', methods')
   where
     slot-assign-call(x, e) --> init-stm;
-    slot-internal-setter(x, NS) --> internal-setter;
-    slot-getter(x, NS, slot-annos-to-vis-getter(annos)) --> getter;
-    desugar-slots(code, [NS | slots], methods) :: NS addI(NS, 1) --> (code', slots', methods') :: NS'
+    slot-internal-setter(x) --> internal-setter;
+    slot-getter(x, slot-annos-to-vis-getter(annos)) --> getter;
+    desugar-slots(code, [x | slots], methods) --> (code', slots', methods')
   
   
   desugar-slots([Import(name, x, annos) | code], slots, methods) --> rest
@@ -127,14 +124,14 @@ rules
     Declaration(ConstantL(x, no-type(), annos, ReadImport(name))) => imp-repl;
     desugar-slots([imp-repl | code], slots, methods) --> rest
   
-  slot-getter(x, i, vis) -->
-    Declaration(MethodL(ID(x), [], Annotations(vis-to-method-annos(vis)), [], [], no-type(), [SlotRead(i)]))
+  slot-getter(x, vis) -->
+    Declaration(MethodL(ID(x), [], Annotations(vis-to-method-annos(vis)), [], [], no-type(), [SlotRead(x)]))
 
-  slot-setter(x, _, vis) -->
+  slot-setter(x, vis) -->
     Declaration(MethodL(ID(mksettername(x)), [], Annotations(vis-to-method-annos(vis)), [ID("$p")], [], no-type(), [slot-assign-call(x, MCallL(ID("$p"), [] : List(Exp)))]))
 
-  slot-internal-setter(x, i) -->
-    Declaration(MethodL(ID("#" ++ mksettername(x)), [], Annotations(vis-to-method-annos(Priv())), [ID("$p")], [], no-type(), [SlotWrite(i, MCallL(ID("$p"), [] : List(Exp)))]))
+  slot-internal-setter(x) -->
+    Declaration(MethodL(ID("#" ++ mksettername(x)), [], Annotations(vis-to-method-annos(Priv())), [ID("$p")], [], no-type(), [SlotWrite(x, MCallL(ID("$p"), [] : List(Exp)))]))
 
   slot-assign-call(x, e) --> Expression(MCallL(ID("#" ++ mksettername(x)), [e]))
 

@@ -23,7 +23,7 @@ signature
   
   sort aliases
     StoreData = Object
-    Slots = Map(Int, V)
+    Slots = Map(String, V)
     Methods = Map(String, AnnotatedClosure)
     Aliases = Map(String, String)
     Excludes = Map(String, String)

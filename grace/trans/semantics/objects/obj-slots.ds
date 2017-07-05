@@ -4,49 +4,10 @@ imports
   trans/semantics/objects/obj-repr
   trans/semantics/statements
 
-//signature
-//  sorts
-//    SlotOwner
-//  constructors
-//    SO: Addr -> SlotOwner
-//    NS: SlotOwner
-//    
-//  arrows
-//    resolve-slot(Int, Self) --> SlotOwner
-//    resolve-slot-parents(Int, Parents) --> SlotOwner
-//    resolve-slot-parent(Int, Parent) --> SlotOwner
-    
-//rules
-//  
-//  resolve-slot(i, S) --> so
-//  where
-//    read(S) --> Obj(_, parents, slots, _);
-//    case slots[i?] of {
-//      true =>
-//        SO(S) => so
-//      false =>
-//        resolve-slot-parents(i, `parents) --> so
-//    }
-//  
-//  resolve-slot-parents(_, []) --> NS()
-//  
-//  resolve-slot-parents(i, [parent | parents]) --> so'
-//  where
-//    resolve-slot-parent(i, parent) --> so;
-//    case so of {
-//      SO(_) =>
-//        so => so'
-//      NS() =>
-//        resolve-slot-parents(i, parents) --> so'
-//    }
-//  
-//  resolve-slot-parent(i, (S, _, _)) --> resolve-slot(i, S)
-
-
 signature
   constructors // extra instructions
-    SlotRead : Int -> Statement
-    SlotWrite : Int * Exp -> Statement
+    SlotRead : String -> Statement
+    SlotWrite : String * Exp -> Statement
 
 rules
 
