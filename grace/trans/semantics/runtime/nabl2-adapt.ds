@@ -1,0 +1,16 @@
+module semantics/runtime/nabl2-adapt
+
+imports
+  semantics/runtime/nabl2-runtime/nabl2
+  ds-signatures/grace-sig
+  
+signature
+  constructors
+    Occ2ID: Occurrence -> Identifier
+    
+  sort aliases
+    Name = String
+  
+  arrows
+    occ-get-name(Occurrence) --> Name
+    occ-set-name(Occurrence, Name) --> Occurrence

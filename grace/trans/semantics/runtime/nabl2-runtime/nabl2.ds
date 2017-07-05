@@ -1,0 +1,5 @@
+module semantics/runtime/nabl2-runtime/nabl2
+
+imports
+  semantics/runtime/nabl2-runtime/scopegraph-impl
+  semantics/runtime/nabl2-runtime/frame-impl
