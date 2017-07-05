@@ -23,15 +23,20 @@ signature
   
   sort aliases
     StoreData = Object
-    Slots = Map(String, V)
-    Methods = Map(String, AnnotatedClosure)
+    Attributes = Map(String, V)
+    
+    
+//    Slots = Map(String, V)
+//    
+//    Methods = Map(String, AnnotatedClosure)
     Aliases = Map(String, String)
+    
     Excludes = Map(String, String)
     Parent = (Addr * Aliases * Excludes)
     Parents = List(Parent)
   
   constructors
-    Obj: Outer * Parents * Slots * Methods -> Object
+    Obj: Outer * Parents * Attributes -> Object
   
   arrows
     obj-constr-name() --> String
@@ -53,7 +58,7 @@ rules
   
   outer-addr(S) --> O
   where
-    read(S) --> Obj(O, _, _, _)
+    read(S) --> Obj(O, _, _)
   
   bogus-addr() --> -99
   

@@ -52,8 +52,8 @@ rules
     Dialects[dialect?] == false;
     parse-program(dialect-path(dialect)) --> dia-prog;
     dia-prog --> RefV(dia-addr);
-    read(dia-addr) --> Obj(_, outers, slots, methods);
-    update(dia-addr, Obj(fresh, outers, slots, methods)) --> _;
+    read(dia-addr) --> Obj(_, outers, attrs);
+    update(dia-addr, Obj(fresh, outers, attrs)) --> _;
     { dialect |--> dia-addr, Dialects} => Dialects'
     
 signature

@@ -47,6 +47,7 @@ signature
     
   native operators
     mksettername: String -> String
+    mkslotname: String -> String
     
 rules
 
@@ -109,15 +110,14 @@ rules
     slot-internal-setter(x) --> internal-setter;
     slot-getter(x, slot-annos-to-vis-getter(annos)) --> getter;
     slot-setter(x, slot-annos-to-vis-setter(annos)) --> setter;
-    desugar-slots(code, [x | slots], methods) --> (code', slots', methods')
+    desugar-slots(code, [mkslotname(x) | slots], methods) --> (code', slots', methods')
 
   desugar-slots([Declaration(ConstantL(ID(x), _, Annotations(annos), e)) | code], slots, methods) --> ([init-stm, internal-setter, getter | code'], slots', methods')
   where
     slot-assign-call(x, e) --> init-stm;
     slot-internal-setter(x) --> internal-setter;
     slot-getter(x, slot-annos-to-vis-getter(annos)) --> getter;
-    desugar-slots(code, [x | slots], methods) --> (code', slots', methods')
-  
+    desugar-slots(code, [mkslotname(x) | slots], methods) --> (code', slots', methods')
   
   desugar-slots([Import(name, x, annos) | code], slots, methods) --> rest
   where
@@ -125,15 +125,16 @@ rules
     desugar-slots([imp-repl | code], slots, methods) --> rest
   
   slot-getter(x, vis) -->
-    Declaration(MethodL(ID(x), [], Annotations(vis-to-method-annos(vis)), [], [], no-type(), [SlotRead(x)]))
+    Declaration(MethodL(ID(x), [], Annotations(vis-to-method-annos(vis)), [], [], no-type(), [SlotRead(mkslotname(x))]))
 
   slot-setter(x, vis) -->
-    Declaration(MethodL(ID(mksettername(x)), [], Annotations(vis-to-method-annos(vis)), [ID("$p")], [], no-type(), [slot-assign-call(x, MCallL(ID("$p"), [] : List(Exp)))]))
+    Declaration(MethodL(ID(mksettername(x)), [], Annotations(vis-to-method-annos(vis)), [ID("$pv")], [], no-type(), [SlotWrite(mkslotname(x), MCallL(ID("$pv"), [] : List(Exp)))]))
 
   slot-internal-setter(x) -->
-    Declaration(MethodL(ID("#" ++ mksettername(x)), [], Annotations(vis-to-method-annos(Priv())), [ID("$p")], [], no-type(), [SlotWrite(x, MCallL(ID("$p"), [] : List(Exp)))]))
+    Declaration(MethodL(ID("_#_set_#_" ++ x), [], Annotations(vis-to-method-annos(Priv())), [ID("$px")], [], no-type(), [SlotWrite(mkslotname(x), MCallL(ID("$px"), [] : List(Exp)))]))
 
-  slot-assign-call(x, e) --> Expression(MCallL(ID("#" ++ mksettername(x)), [e]))
+  slot-assign-call(x, e) --> Expression(MCallL(ID("_#_set_#_" ++ x), [e]))
+
 
   /* ==== METHODS ==== */
 

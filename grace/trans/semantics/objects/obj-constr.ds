@@ -49,7 +49,7 @@ rules
   
   S, EB |- LObj(parents, slots, methods) -bld-> S'
   where
-    allocate(Obj(S, [], {}, {})) --> S';
+    allocate(Obj(S, [], {})) --> S';
     case EB of {
       B(S'') =>
       otherwise =>
@@ -69,8 +69,8 @@ rules
   S |- add-parent(S', LInherit(e, alias-map, exclude-map)) --> U()
   where
     EB B(S) |- e --> RefV(S);
-    read(S') --> Obj(O, parents, slots, methods);
-    update(S', Obj(O, [(S, alias-map, exclude-map) | parents], slots, methods)) --> _
+    read(S') --> Obj(O, parents, attrs);
+    update(S', Obj(O, [(S, alias-map, exclude-map) | parents], attrs)) --> _
   
   EB B(S) |- MCallRecvL(e, ID(x), es) --> v
   where
@@ -83,8 +83,8 @@ rules
   add-slots(S', [s | ss]) --> U()
   where
     default-value() --> v;
-    read(S') --> Obj(O, parents, slots, methods);
-    update(S', Obj(O, parents, {s |--> v, slots}, methods)) --> _;
+    read(S') --> Obj(O, parents, attrs);
+    update(S', Obj(O, parents, {s |--> v, attrs})) --> _;
     add-slots(S', ss) --> _
   
   add-methods(_, []) --> U()
@@ -93,7 +93,7 @@ rules
   where
     enforce-member-policy(S', m) --> _;
     DObj DObj(S') |- method-closure(decl) --> clos;
-    read(S') --> Obj(O, parents, slots, methods);
-    update(S', Obj(O, parents, slots, {m |--> clos, methods})) --> _
+    read(S') --> Obj(O, parents, attrs);
+    update(S', Obj(O, parents, {m |--> clos, attrs})) --> _
 
 

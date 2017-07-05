@@ -16,9 +16,9 @@ rules
   // initialize objects, calling constructors, ancestors first
   EB E() |- init-obj(S') --> U()
   where
-    read(S') --> Obj(_, parents, _, methods);
+    read(S') --> Obj(_, parents, attrs);
     init-obj-parents(`parents) --> _;
-    methods[obj-constr-name()] => ClosVis(clos, _);
+    attrs[obj-constr-name()] => ClosVis(clos, _);
     call(clos, []) --> _
   
   init-obj-parents([]) --> U()

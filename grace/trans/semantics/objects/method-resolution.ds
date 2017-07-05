@@ -33,13 +33,13 @@ rules
 
   resolve(x, S') --> [PL(x)]
   where
-    read(S') --> Obj(_, _, _, methods);
-    methods[x?] == true
+    read(S') --> Obj(_, _, attrs);
+    attrs[x?] == true
   
   O |- resolve(x, S') --> path
   where
-    read(S') --> o@Obj(O', parents, _, methods);
-    methods[x?] == false;
+    read(S') --> o@Obj(O', parents, attrs);
+    attrs[x?] == false;
     O == O';
     O, PIDX 0 |- resolve-in-parents(x, parents) --> path-in-parent;
     /*
@@ -52,21 +52,21 @@ rules
   
   O |- resolve(x, S') --> path-in-parent
   where
-    read(S') --> o@Obj(O', parents, _, methods);
-    methods[x?] == false;
+    read(S') --> o@Obj(O', parents, attrs);
+    attrs[x?] == false;
     O != O';
     O, PIDX 0 |- resolve-in-parents(x, parents) --> path-in-parent
 
   resolve-in-outer(_, S) --> []
   where
-    read(S) --> Obj(O, _, _, _);
+    read(S) --> Obj(O, _, _);
     is-stored(O) --> false
 
   resolve-in-outer(x, S) --> path
   where
-    read(S) --> Obj(O, _, _, _);
+    read(S) --> Obj(O, _, _);
     is-stored(O) --> true;
-    read(O) --> Obj(OO, _, _, _);
+    read(O) --> Obj(OO, _, _);
     O OO |- resolve(x, O) --> out-path;
     path as [PO() | out-path] if path-found(out-path)
          or []

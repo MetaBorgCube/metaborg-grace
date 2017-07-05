@@ -11,15 +11,15 @@ signature
 
 rules
 
-  DObj DObj(S) |- SlotRead(s) --> slots[s]
+  DObj DObj(S) |- SlotRead(s) --> attrs[s]
   where
-    read(S) --> Obj(_, _, slots, _)
+    read(S) --> Obj(_, _, attrs)
   
   DObj DObj(S) |- SlotWrite(s, e) --> DoneV()
   where
     e --> v;
-    read(S) --> Obj(O, parents, slots, methods);
-    update(S, Obj(O, parents, {s |--> v, slots}, methods)) --> _
+    read(S) --> Obj(O, parents, attrs);
+    update(S, Obj(O, parents, {s |--> v, attrs})) --> _
 
 
 

@@ -7,10 +7,9 @@ imports
 signature
   sorts
     VisAnno
-    AnnotatedClosure
   
   constructors
-    ClosVis: Closure * VisAnno -> AnnotatedClosure
+    ClosVis: Closure * VisAnno -> V
     Pub: VisAnno
     Priv: VisAnno
   

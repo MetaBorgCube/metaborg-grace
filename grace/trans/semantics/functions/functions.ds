@@ -14,7 +14,7 @@ imports
 signature
     
   arrows
-    method-closure(Declaration) --> AnnotatedClosure
+    method-closure(Declaration) --> V
     block-closure(Declaration) --> Closure
     
 rules
