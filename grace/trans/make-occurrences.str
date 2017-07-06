@@ -19,10 +19,97 @@ signature
   
   constructors
     Occ2ID: Occurrence -> Identifier 
-
+    //        inherit * traits    * slot ids         * code 
+    ObjectLS: Inherit * List(Use) * List(Identifier) * List(Statement) -> Object 
+    SlotWrite: Identifier * Expression -> Expression
+    SlotRead: Identifier -> Expression
 rules
 
-  full-transform = desugar-complete //; make-occurrences
+  debug-show-full-transform:
+    (_, _, ast, path, _) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"transformed.aterm")> path;
+      result   := <full-transform> ast
+
+  full-transform =
+    desugar-complete;
+    desugar-wildcard-decls;
+    desugar-fields //;
+    //make-occurrences
+
+  desugar-wildcard-decls = alltd(desugar-wildcard-decl)
+  
+  desugar-wildcard-decl:
+    Declaration(VariableL(WildCard(), _, _, e)) ->
+      Expression(e)
+
+  desugar-wildcard-decl:
+    Declaration(ConstantL(WildCard(), _, _, e)) ->
+      Expression(e)
+
+  desugar-fields = bottomup(try(desugar-obj-fields))
+  
+  desugar-obj-fields:
+    ObjectL(inherit, uses, code) -> ObjectLS(inherit, uses, slots, code')
+    where
+      debug(!0);
+      (code', slots) := <map(debug(!1); desugar-obj-field; debug(!2) <+ !([<id>], [])); unzip; (conc, conc)> code
+      ;debug(!3)
+  
+  desugar-obj-field:
+    Declaration(VariableL(fid@ID(_), _,  Annotations(annos), e)) ->
+      ([init-stm, getter, setter, internal-setter], [sid])
+    where
+      sid := <mk-slotname> fid;
+      init-stm := <slot-assign-call> (fid, e);
+      internal-setter := <slot-internal-setter> fid;
+      getter := <slot-getter> (fid, annos);
+      setter := <slot-setter> (fid, annos)
+  
+  slot-assign-call:
+    (fid, e) -> Expression(MCallL(<mk-internal-settername> fid, [e]))
+  
+  slot-internal-setter:
+    fid ->
+      Declaration(MethodL(
+        <mk-settername> fid, [], Annotations([Confidential()]), [ID("$px")], [], <no-type>, 
+          [SlotWrite(<mk-slotname> fid, MCallL(ID("$px"), []))]))
+  
+  slot-getter:
+    (fid, annos) ->
+      Declaration(MethodL(
+        <mk-gettername> fid, [], <mk-getter-annos> annos, [], [], <no-type>,
+          [SlotRead(<mk-slotname> fid)]))
+  
+  slot-setter:
+    (fid, annos) ->
+      Declaration(MethodL(
+        <mk-settername> fid, [], <mk-setter-annos> annos, [ID("$pv")], [], <no-type>,
+          [SlotWrite(<mk-slotname> fid, MCallL(ID("$pv"), []))]))
+  
+  mk-slotname:
+    ID(x) -> ID($[_#_slot_#_[x]])
+  
+  mk-gettername:
+    ID(x) -> ID(x)
+  
+  mk-settername:
+    ID(x) -> ID($[[x]:=(_)])
+  
+  mk-internal-settername:
+    ID(x) -> ID($[_#_set_#_[x]])
+  
+  mk-getter-annos =
+    filter(?Public() + ?Confidential() + \ Readable() -> Public() \);
+    foldr(!Confidential(), \ (_, Public()) -> Public() \ + \ (a, Confidential()) -> a \);
+    !Annotations([<id>])
+  
+  mk-setter-annos =
+    filter(?Public() + ?Confidential() + \ Writable() -> Public() \);
+    foldr(!Confidential(), \ (_, Public()) -> Public() \ + \ (a, Confidential()) -> a \);
+    !Annotations([<id>])
+  
+  no-type = !TypeID(ID("Unknown"), NoTypeArg())
 
   make-occurrences = {| FreshCounter:
     rules(FreshCounter: _ -> 1);

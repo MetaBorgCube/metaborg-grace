@@ -20,3 +20,4 @@ menus
     action: "Show desugared AST and PP" = debug-show-desugared-nolower-pp
     action: "Show desugared+lowered AST" = debug-show-desugared
     action: "Show desugared+lowered AST and PP" = debug-show-desugared-pp
+    action: "Show interpretable AST" = debug-show-full-transform
