@@ -19,9 +19,9 @@ signature
     policy-locals-allow-shadow-member() --> Bool
     policy-locals-allow-shadow-inherited() --> Bool
   
-    enforce-closure-policy(Addr) --> U
-    enforce-closure-policy-aux(Addr, List(V)) --> U
-    enforce-closure-policy(Addr, V) --> U
+    enforce-closure-policy(Loc) --> U
+    enforce-closure-policy-aux(Loc, List(V)) --> U
+    enforce-closure-policy(Loc, V) --> U
     enforce-closure-policy-aux(List(String)) --> U
     enforce-block-policy(Closure) --> U
     check-locals-duplicates(List(String)) --> U

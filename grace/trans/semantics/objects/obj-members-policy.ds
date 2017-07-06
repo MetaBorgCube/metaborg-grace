@@ -18,7 +18,7 @@ signature
     policy-members-allow-shadow-lexical-inherited() --> Bool
 
 
-    enforce-member-policy(Addr, String) --> U
+    enforce-member-policy(Loc, String) --> U
     check-member-duplicate(String, Path) --> U
     check-member-duplicate-inherited(String, Path) --> U
     check-members-shadow-lexical-local(String, Path) --> U

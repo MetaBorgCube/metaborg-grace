@@ -14,9 +14,9 @@ signature
     Priv: VisAnno
   
   arrows
-    resolve-lookup(String, Addr) --> (Addr * Closure)
+    resolve-lookup(String, Loc) --> (Loc * Closure)
     
-    ensure-visible(String, Addr, Path, Addr, VisAnno) --> U
+    ensure-visible(String, Loc, Path, Loc, VisAnno) --> U
 
     
 rules

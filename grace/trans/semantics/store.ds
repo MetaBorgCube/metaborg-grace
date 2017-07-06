@@ -5,18 +5,18 @@ signature
     StoreData
     
   sort aliases
-    Addr = Int
-    OH = Map(Addr, StoreData)
+    Loc = Int
+    OH = Map(Loc, StoreData)
   
   components
     OH : OH
 
   arrows
-    allocate(StoreData) :: OH --> Addr :: OH
-    update(Addr, StoreData) :: OH --> Addr :: OH
-    is-stored(Addr) :: OH --> Bool :: OH
-    read(Addr) :: OH --> StoreData :: OH
-    next() --> Addr
+    allocate(StoreData) :: OH --> Loc :: OH
+    update(Loc, StoreData) :: OH --> Loc :: OH
+    is-stored(Loc) :: OH --> Bool :: OH
+    read(Loc) :: OH --> StoreData :: OH
+    next() --> Loc
         
 rules
   

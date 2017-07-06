@@ -15,18 +15,18 @@ signature
     // regular evaluation mode
     E: EvalMode
     // object building mode. carries the address of the object being constructed
-    B: Addr -> EvalMode
+    B: Loc -> EvalMode
   
   components
     EB : EvalMode
   
   arrows
-    Exp -bld-> Addr
-    add-parents(Addr, List(LInherit)) --> U
-    add-parent(Addr, LInherit) --> U
-    add-slots(Addr, LSlots) --> U
-    add-methods(Addr, LMethods) --> U
-    add-methods-aux(Addr, List(String), LMethods) --> U
+    Exp -bld-> Loc
+    add-parents(Loc, List(LInherit)) --> U
+    add-parent(Loc, LInherit) --> U
+    add-slots(Loc, LSlots) --> U
+    add-methods(Loc, LMethods) --> U
+    add-methods-aux(Loc, List(String), LMethods) --> U
     
 rules
 

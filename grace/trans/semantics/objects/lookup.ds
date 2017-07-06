@@ -6,8 +6,8 @@ imports
 
 signature
   arrows
-    // walk Path from Addr returning the Self that contains V
-    lookup(Path, Addr) --> (Addr * V)
+    // walk Path from Loc returning the Self that contains V
+    lookup(Path, Loc) --> (Loc * V)
     
 rules
 

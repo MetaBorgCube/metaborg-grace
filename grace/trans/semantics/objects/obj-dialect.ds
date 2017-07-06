@@ -8,10 +8,10 @@ imports
   
 signature
   components
-    Dialects: Map(String, Addr)
+    Dialects: Map(String, Loc)
   
   arrows
-    load-dialect(String) --> Addr
+    load-dialect(String) --> Loc
 
     desugar-program-dialect(Program) --> (Statement * Program)
     desugar-rootobj-dialect(Exp) --> (Statement * Exp)
@@ -64,7 +64,7 @@ signature
     import-path(String) --> String
 
   components
-    Imports: Map(String, Addr)
+    Imports: Map(String, Loc)
 
 rules
   

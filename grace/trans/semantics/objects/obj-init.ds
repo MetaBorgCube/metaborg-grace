@@ -6,7 +6,7 @@ imports
 
 signature
   arrows
-    init-obj(Addr) --> U
+    init-obj(Loc) --> U
     init-obj-parents(Parents) --> U
 
 rules

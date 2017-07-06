@@ -8,15 +8,15 @@ imports
   
 signature
   sort aliases
-    Self = Addr
-    Outer = Addr
+    Self = Loc
+    Outer = Loc
     
   components
     S : Self
     O : Outer
   
   constructors
-    RefV: Addr -> V {implicit}
+    RefV: Loc -> V {implicit}
   
   sorts
     Object
@@ -24,15 +24,9 @@ signature
   sort aliases
     StoreData = Object
     Attributes = Map(String, V)
-    
-    
-//    Slots = Map(String, V)
-//    
-//    Methods = Map(String, AnnotatedClosure)
     Aliases = Map(String, String)
-    
     Excludes = Map(String, String)
-    Parent = (Addr * Aliases * Excludes)
+    Parent = (Loc * Aliases * Excludes)
     Parents = List(Parent)
   
   constructors
@@ -41,10 +35,10 @@ signature
   arrows
     obj-constr-name() --> String
     
-    self-addr() --> Addr
-    outer-addr() --> Addr
-    outer-addr(Addr) --> Addr
-    bogus-addr() --> Addr
+    self-addr() --> Loc
+    outer-addr() --> Loc
+    outer-addr(Loc) --> Loc
+    bogus-addr() --> Loc
     
 rules
   

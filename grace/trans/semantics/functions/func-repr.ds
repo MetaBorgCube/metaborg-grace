@@ -39,7 +39,7 @@ signature
     DeclObj
   
   constructors
-    DObj: Addr -> DeclObj
+    DObj: Loc -> DeclObj
   
   components
     DObj : DeclObj
