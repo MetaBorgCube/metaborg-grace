@@ -1,0 +1,24 @@
+module semantics/frames/frames-impl
+
+imports
+  semantics/frames/frames-api
+
+signature
+  
+  constructors
+    Occurrence: Namespace * Name * TermIndex -> Occurrence
+  
+  sorts Namespace constructors
+    DefaultNamespace: Namespace
+    
+  sorts TermIndex constructors
+    TermIndex: Int -> TermIndex
+
+  constructors
+    Addr: Frame * Occurrence -> Addr
+  
+  constructors
+    FC: Map(Label, List(Frame)) * Map(Occurrence, Val) -> Frame
+    F_: Int -> Frame
+    H_: Map(Frame, Frame) -> Heap
+  

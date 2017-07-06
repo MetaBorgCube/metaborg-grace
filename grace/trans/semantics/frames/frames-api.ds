@@ -1,0 +1,48 @@
+module semantics/frames/frames-api
+
+signature
+  sorts
+    Val
+  
+  sorts
+    Frame
+    Heap
+    Addr
+  
+  sorts Label constructors
+    P: Label
+    I: Label
+  
+  sort aliases
+    Path = List(Step)
+  
+  sorts Step constructors
+    D: Frame * Occurrence -> Step // declaration
+    E: Frame * Label -> Step // edge
+    
+  components
+    F: Frame
+    H: Heap
+  
+  sorts
+    Occurrence
+    Name
+  
+  arrows
+    pathOf(Occurrence) --> Path // resolution
+    F, H |- lookup(Path) --> Addr // lookup
+
+  arrows
+    H |- linksOf(Frame) --> Map(Label, List(Frame))
+    H |- slotsOf(Frame) --> Map(Occurrence, Val)
+  
+  arrows
+    H |- get(Addr) --> Val // read slot
+    set(Addr, Val) :: H --> Val :: H // set slot
+
+  arrows
+    initFrame(Map(Label, List(Frame)), Map(Occurrence, Val)) :: H --> Frame :: H
+    mkAddr(Frame, Occurrence) --> Addr
+    
+    
+    
