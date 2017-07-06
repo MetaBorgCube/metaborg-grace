@@ -21,8 +21,8 @@ signature
     Occ2ID: Occurrence -> Identifier 
     //        inherit * traits    * slot ids         * code 
     ObjectLS: Inherit * List(Use) * List(Identifier) * List(Statement) -> Object 
-    SlotWrite: Identifier * Expression -> Expression
-    SlotRead: Identifier -> Expression
+    SlotWrite: Identifier * Exp -> Exp
+    SlotRead: Identifier -> Exp
 rules
 
   debug-show-full-transform:
