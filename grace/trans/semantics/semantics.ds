@@ -22,6 +22,7 @@ rules
   S |- prog@Program(_) --> v
   where
     desugar-program-dialect(prog) --> (Dialect(dialect), Program(code'));
+    log("Loading dialect: " ++ dialect) --> _;
     load-dialect(dialect) --> S_dialect;
     S_dialect, O S, R NR(), EB E() |- code' :: E {} --> v
 

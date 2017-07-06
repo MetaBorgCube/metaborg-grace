@@ -21,8 +21,8 @@ signature
     Occ2ID: Occurrence -> Identifier 
     //        inherit * traits    * slot ids         * code 
     ObjectLS: Inherit * List(Use) * List(Identifier) * List(Statement) -> Object 
-    SlotWrite: Identifier * Exp -> Exp
-    SlotRead: Identifier -> Exp
+    SlotWrite: Identifier * Exp -> Statement
+    SlotRead: Identifier -> Statement
 rules
 
   debug-show-full-transform:
@@ -34,8 +34,11 @@ rules
   full-transform =
     desugar-complete;
     desugar-wildcard-decls;
-    desugar-fields //;
+    desugar-fields;
+    desugar-constructors
     //make-occurrences
+
+// -------------
 
   desugar-wildcard-decls = alltd(desugar-wildcard-decl)
   
@@ -46,6 +49,8 @@ rules
   desugar-wildcard-decl:
     Declaration(ConstantL(WildCard(), _, _, e)) ->
       Expression(e)
+
+// --------------
 
   desugar-fields = bottomup(try(desugar-obj-fields))
   
@@ -117,6 +122,22 @@ rules
     !Annotations([<id>])
   
   no-type = !TypeID(ID("Unknown"), NoTypeArg())
+
+// --------------
+
+  desugar-constructors = bottomup(try(desugar-constructor))
+
+  desugar-constructor:
+    ObjectLS(inherit, uses, slots, code) -> ObjectLS(inherit, uses, slots, <conc> (decls-code, [ctr]))
+    where
+      (decls-code, constr-code) := <partition(?Declaration(_) <+ ?Dialect(_))> code;
+      ctr := <mk-constructor> constr-code
+  
+  mk-constructor:
+    ctr-code -> Declaration(MethodL(ID("#ctr"), [], Annotations([Confidential()]), [], [], <no-type>, ctr-code))
+      
+
+// --------------
 
   make-occurrences = {| FreshCounter:
     rules(FreshCounter: _ -> 1);

@@ -6,5 +6,5 @@ imports
 signature
   constructors
     ObjectLS: Inherit * List(Use) * List(Identifier) * List(Statement) -> Exp 
-    SlotWrite: Identifier * Exp -> Exp
-    SlotRead: Identifier -> Exp
+    SlotWrite: Identifier * Exp -> Statement
+    SlotRead: Identifier -> Statement

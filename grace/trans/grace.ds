@@ -11,8 +11,7 @@ rules
 
   p@Program(_) -init-> (v_out, EX, OH)
   where
-    log("Program " ++ str(p)) --> _;
-    halt-error("Forced exit") --> _;
+    log(str(p)) --> _;
     ProgPath native-term-origin-path(p), O bogus-addr(), S bogus-addr(), DObj DObj(bogus-addr()) |- p :: OH {},
       VH {}, Dialects {}, Imports {}, EX Ok() --> v :: OH, VH, EX;
     case EX of {

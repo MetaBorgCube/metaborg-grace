@@ -38,7 +38,7 @@ rules
   where
     e --> RefV(S)
 
-  o@ObjectL(_, _, _) --> desugar-obj(o)
+  o@ObjectLS(_, _, _, _) --> desugar-obj(o)
   
   S |- o@LObj(_, _, _) --> RefV(S')
   where
@@ -94,6 +94,7 @@ rules
 //    enforce-member-policy(S', m) --> _;
     DObj DObj(S') |- method-closure(decl) --> clos;
     read(S') --> Obj(O, parents, attrs);
-    update(S', Obj(O, parents, {m |--> clos, attrs})) --> _
+    update(S', Obj(O, parents, {m |--> clos, attrs})) --> _;
+    log("Added method " ++ m ++ " to obj " ++ int2string(S')) --> _
 
 

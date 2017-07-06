@@ -1,7 +1,7 @@
 module trans/semantics/objects/obj-dialect
 
 imports
-  src-gen/ds-signatures/grace-lowered-sig
+  semantics/signatures
   trans/semantics/objects/obj-repr
   trans/semantics/runtime/context
   trans/semantics/semantics
@@ -23,13 +23,13 @@ rules
   where
     desugar-rootobj-dialect(obj) --> (dialect, obj')
   
-  desugar-rootobj-dialect(ObjectL(inherit, uses, [dialect@Dialect(_) | codexs])) --> (dialect, ObjectL(inherit, uses, codexs))
+  desugar-rootobj-dialect(ObjectLS(inherit, uses, slots, [dialect@Dialect(_) | codexs])) --> (dialect, ObjectLS(inherit, uses, slots, codexs))
   
-  desugar-rootobj-dialect(ObjectL(inherit, uses, code@[s | _])) --> (Dialect("standardGrace"), ObjectL(inherit, uses, code))
+  desugar-rootobj-dialect(ObjectLS(inherit, uses, slots, code@[s | _])) --> (Dialect("standardGrace"), ObjectLS(inherit, uses, slots, code))
   where
     s =!=> Dialect(_)
   
-  desugar-rootobj-dialect(ObjectL(inherit, uses, code@[])) --> (Dialect("standardGrace"), ObjectL(inherit, uses, code))  
+  desugar-rootobj-dialect(ObjectLS(inherit, uses, slots, code@[])) --> (Dialect("standardGrace"), ObjectLS(inherit, uses, slots, code))
   
   ProgPath |- dialect-path(name) --> native-parent-directory(ProgPath) ++ "/" ++ name
   where
