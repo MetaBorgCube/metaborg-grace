@@ -1,0 +1,10 @@
+module semantics/signatures
+
+imports
+  ds-signatures/grace-sig
+
+signature
+  constructors
+    ObjectLS: Inherit * List(Use) * List(Identifier) * List(Statement) -> Exp 
+    SlotWrite: Identifier * Exp -> Exp
+    SlotRead: Identifier -> Exp

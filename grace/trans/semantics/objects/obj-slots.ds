@@ -2,20 +2,16 @@ module trans/semantics/objects/obj-slots
 
 imports
   trans/semantics/objects/obj-repr
-  trans/semantics/statements
-
-signature
-  constructors // extra instructions
-    SlotRead : String -> Statement
-    SlotWrite : String * Exp -> Statement
+  semantics/signatures
+//  trans/semantics/statements
 
 rules
 
-  DObj DObj(S) |- SlotRead(s) --> attrs[s]
+  DObj DObj(S) |- SlotRead(ID(s)) --> attrs[s]
   where
     read(S) --> Obj(_, _, attrs)
   
-  DObj DObj(S) |- SlotWrite(s, e) --> DoneV()
+  DObj DObj(S) |- SlotWrite(ID(s), e) --> DoneV()
   where
     e --> v;
     read(S) --> Obj(O, parents, attrs);

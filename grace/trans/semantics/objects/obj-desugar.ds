@@ -1,7 +1,7 @@
 module trans/semantics/objects/obj-desugar
 
 imports
-  src-gen/ds-signatures/grace-sig
+  semantics/signatures
   trans/semantics/objects/obj-root
   trans/semantics/objects/obj-slots
   trans/semantics/objects/obj-dialect

@@ -1,7 +1,7 @@
 module trans/semantics/functions/func-repr
 
 imports
-  src-gen/ds-signatures/grace-sig
+  semantics/signatures
   trans/semantics/values
   trans/semantics/statements
   trans/semantics/objects/obj-repr

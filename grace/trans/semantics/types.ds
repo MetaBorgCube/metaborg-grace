@@ -1,7 +1,7 @@
 module trans/semantics/types
 
 imports
-  src-gen/ds-signatures/grace-sig
+  semantics/signatures
 
 signature
   arrows

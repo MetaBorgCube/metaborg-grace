@@ -1,7 +1,7 @@
 module trans/semantics/functions/functions
 
 imports
-  src-gen/ds-signatures/grace-sig
+  semantics/signatures
   trans/semantics/values
   trans/semantics/functions/func-desugar
   trans/semantics/functions/func-call

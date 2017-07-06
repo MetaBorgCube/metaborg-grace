@@ -1,7 +1,7 @@
 module trans/semantics/statements
 
 imports
-  src-gen/ds-signatures/grace-sig
+  semantics/signatures
   trans/semantics/expressions
   trans/semantics/values
 

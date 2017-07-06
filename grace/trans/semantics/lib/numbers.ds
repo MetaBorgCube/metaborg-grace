@@ -1,7 +1,7 @@
 module trans/semantics/lib/numbers
 
 imports
-  src-gen/ds-signatures/grace-sig
+  semantics/signatures
   trans/semantics/values
   trans/semantics/expressions
   trans/semantics/lib/lib

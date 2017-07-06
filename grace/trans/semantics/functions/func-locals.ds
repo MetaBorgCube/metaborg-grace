@@ -1,7 +1,7 @@
 module trans/semantics/functions/func-locals
 
 imports
-  src-gen/ds-signatures/grace-sig
+  semantics/signatures
   trans/semantics/values
   
 
