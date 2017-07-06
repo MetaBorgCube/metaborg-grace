@@ -31,8 +31,8 @@ rules
 
   BlockL(params, _, code) --> BlockV(clos)
   where
-    block-closure(MethodL(ID("lambda"), [], Annotations([Public()]), params, [], no-type(), code)) --> clos;
-    enforce-block-policy(clos) --> _
+    block-closure(MethodL(ID("lambda"), [], Annotations([Public()]), params, [], no-type(), code)) --> clos
+//    enforce-block-policy(clos) --> _
 
   Return(e) --> doreturn(e)
 

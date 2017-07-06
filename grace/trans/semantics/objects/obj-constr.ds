@@ -43,7 +43,7 @@ rules
   S |- o@LObj(_, _, _) --> RefV(S')
   where
     o -bld-> S';
-    enforce-closure-policy(S') --> _;
+//    enforce-closure-policy(S') --> _;
     // TODO: outer might not be necessary
     S S', O S |- init-obj(S') --> _
   
@@ -91,7 +91,7 @@ rules
   
   add-methods(S', [ (m, decl) | ms]) --> add-methods(S', ms)
   where
-    enforce-member-policy(S', m) --> _;
+//    enforce-member-policy(S', m) --> _;
     DObj DObj(S') |- method-closure(decl) --> clos;
     read(S') --> Obj(O, parents, attrs);
     update(S', Obj(O, parents, {m |--> clos, attrs})) --> _
