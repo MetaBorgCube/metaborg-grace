@@ -52,9 +52,7 @@ rules
   desugar-obj-fields:
     ObjectL(inherit, uses, code) -> ObjectLS(inherit, uses, slots, code')
     where
-      debug(!0);
-      (code', slots) := <map(debug(!1); desugar-obj-field; debug(!2) <+ !([<id>], [])); unzip; (conc, conc)> code
-      ;debug(!3)
+      (code', slots) := <map(desugar-obj-field <+ !([<id>], [])); unzip; (concat, concat)> code
   
   desugar-obj-field:
     Declaration(VariableL(fid@ID(_), _,  Annotations(annos), e)) ->
@@ -65,6 +63,15 @@ rules
       internal-setter := <slot-internal-setter> fid;
       getter := <slot-getter> (fid, annos);
       setter := <slot-setter> (fid, annos)
+  
+  desugar-obj-field:
+    Declaration(ConstantL(fid@ID(_), _,  Annotations(annos), e)) ->
+      ([init-stm, getter, internal-setter], [sid])
+    where
+      sid := <mk-slotname> fid;
+      init-stm := <slot-assign-call> (fid, e);
+      internal-setter := <slot-internal-setter> fid;
+      getter := <slot-getter> (fid, annos)
   
   slot-assign-call:
     (fid, e) -> Expression(MCallL(<mk-internal-settername> fid, [e]))
