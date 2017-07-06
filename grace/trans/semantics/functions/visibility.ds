@@ -16,7 +16,7 @@ signature
   arrows
     resolve-lookup(String, Loc) --> (Loc * Closure)
     
-    ensure-visible(String, Loc, Path, Loc, VisAnno) --> U
+    ensure-visible(String, Loc, ResPath, Loc, VisAnno) --> U
 
     
 rules

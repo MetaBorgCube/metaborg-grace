@@ -5,7 +5,7 @@ signature
     PathPart
   
   sort aliases
-    Path = List(PathPart) // invariant: empty means no path found
+    ResPath = List(PathPart) // invariant: empty means no path found
     
   constructors
     PL: String -> PathPart // local
@@ -13,20 +13,20 @@ signature
     PO: PathPart // outer
   
   arrows
-    path-found(Path) --> Bool
-    path-local(Path) --> Bool
-    path-inherited(Path) --> Bool
-    path-strictly-inherited(Path) --> Bool
+    path-found(ResPath) --> Bool
+    path-local(ResPath) --> Bool
+    path-inherited(ResPath) --> Bool
+    path-strictly-inherited(ResPath) --> Bool
     
-    path-lexical(Path) --> Bool
-    path-strictly-lexical(Path) --> Bool
+    path-lexical(ResPath) --> Bool
+    path-strictly-lexical(ResPath) --> Bool
     
-    path-outers-only(Path) --> Bool    
-    path-parents-only(Path) --> Bool
+    path-outers-only(ResPath) --> Bool    
+    path-parents-only(ResPath) --> Bool
     
-    path-aliased(String, Path) --> Bool
+    path-aliased(String, ResPath) --> Bool
     
-    path-local-aliased(String, Path) --> Bool
+    path-local-aliased(String, ResPath) --> Bool
 rules
 
   path-found([]) --> false

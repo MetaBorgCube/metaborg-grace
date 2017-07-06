@@ -19,11 +19,11 @@ signature
 
 
     enforce-member-policy(Loc, String) --> U
-    check-member-duplicate(String, Path) --> U
-    check-member-duplicate-inherited(String, Path) --> U
-    check-members-shadow-lexical-local(String, Path) --> U
-    check-members-shadow-lexical-member(String, Path) --> U
-    check-members-shadow-lexical-inherited(String, Path) --> U
+    check-member-duplicate(String, ResPath) --> U
+    check-member-duplicate-inherited(String, ResPath) --> U
+    check-members-shadow-lexical-local(String, ResPath) --> U
+    check-members-shadow-lexical-member(String, ResPath) --> U
+    check-members-shadow-lexical-inherited(String, ResPath) --> U
     
 rules
   

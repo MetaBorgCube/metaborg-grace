@@ -9,16 +9,16 @@ signature
     PIDX : Int
     
   arrows
-    resolve-top(String, Self) --> Path
+    resolve-top(String, Self) --> ResPath
     
-    resolve(String, Self) --> Path
+    resolve(String, Self) --> ResPath
     
-    resolve-in-parent(String, Parent) --> Path
+    resolve-in-parent(String, Parent) --> ResPath
     
-    resolve-in-outer(String, Self) --> Path
-    resolve-in-parents(String, Parents) --> Path
+    resolve-in-outer(String, Self) --> ResPath
+    resolve-in-parents(String, Parents) --> ResPath
     
-    disambiguate-paths(String, Path, Path) --> Path
+    disambiguate-paths(String, ResPath, ResPath) --> ResPath
 
 rules
 
