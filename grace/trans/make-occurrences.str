@@ -84,7 +84,7 @@ rules
   slot-internal-setter:
     fid ->
       Declaration(MethodL(
-        <mk-settername> fid, [], Annotations([Confidential()]), [ID("$px")], [], <no-type>, 
+        <mk-internal-settername> fid, [], Annotations([Confidential()]), [ID("$px")], [], <no-type>, 
           [SlotWrite(<mk-slotname> fid, MCallL(ID("$px"), []))]))
   
   slot-getter:
