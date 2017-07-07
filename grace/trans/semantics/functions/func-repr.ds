@@ -25,7 +25,7 @@ signature
     R: Int -> ReturnMarker
   
     Clos: DeclObj * Outer * List(Identifier) * List(Identifier) * RCode * Env -> Closure
-    Block: Self * Closure -> Closure
+    Block: Loc * Closure -> Closure
     
     // code wrapped with a return kind
     RCode: Code * RetKind -> RCode

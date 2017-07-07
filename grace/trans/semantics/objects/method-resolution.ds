@@ -9,13 +9,13 @@ signature
     PIDX : Int
     
   arrows
-    resolve-top(Identifier, Self) --> ResPath
+    resolve-top(Identifier, Loc) --> ResPath
     
-    resolve(Identifier, Self) --> ResPath
+    resolve(Identifier, Loc) --> ResPath
     
     resolve-in-parent(Identifier, Parent) --> ResPath
     
-    resolve-in-outer(Identifier, Self) --> ResPath
+    resolve-in-outer(Identifier, Loc) --> ResPath
     resolve-in-parents(Identifier, Parents) --> ResPath
     
     disambiguate-paths(Identifier, ResPath, ResPath) --> ResPath

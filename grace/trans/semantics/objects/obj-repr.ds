@@ -7,13 +7,9 @@ imports
   trans/semantics/lib/lib
   
 signature
-  sort aliases
-    Self = Loc
-    Outer = Loc
-    
   components
-    S : Self
-    O : Outer
+    S : Loc
+    O : Loc
   
   constructors
     RefV: Loc -> V {implicit}
@@ -30,7 +26,8 @@ signature
     Parents = List(Parent)
   
   constructors
-    Obj: Outer * Parents * Attributes -> Object
+    //   outer * supers * members
+    Obj: Loc * Parents * Attributes -> Object
   
   arrows
     obj-constr-name() --> Identifier
@@ -55,8 +52,10 @@ rules
     read(S) --> Obj(O, _, _)
   
   bogus-addr() --> -99
+
   
   
-   
+  
+  
   
   
