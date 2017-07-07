@@ -15,7 +15,7 @@ rules
   // source code for root object (ancestor of all objects)
   rootobj-code() --> RObjectL([Declaration(as-string), Declaration(ctr)])
   where
-    MethodL(ID("asString"), [] : List(Identifier), Annotations([Public()]), [] : List(Identifier), [] : List(TypeExp), Unkwn(), [Expression(String("an object"))]) => as-string;
-    MethodL(ID("#ctr"), [] : List(Identifier), Annotations([Confidential()]), [] : List(Identifier), [] : List(TypeExp), Unkwn(), []) => ctr;
+    MethodLS(ID("asString"), [] : List(Identifier), Annotations([Public()]), [] : List(Identifier), [] : List(TypeExp), Unkwn(), [], [Expression(String("an object"))]) => as-string;
+    MethodLS(ID("#ctr"), [] : List(Identifier), Annotations([Confidential()]), [] : List(Identifier), [] : List(TypeExp), Unkwn(), [], []) => ctr;
     as-string == as-string
           

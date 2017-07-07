@@ -20,7 +20,11 @@ signature
   constructors
     Occ2ID: Occurrence -> Identifier 
     //        inherit * traits    * slot ids         * code 
-    ObjectLS: Inherit * List(Use) * List(Identifier) * List(Statement) -> Object 
+    ObjectLS: Inherit * List(Use) * List(Identifier) * List(Statement) -> Object
+    //         name       * dunno            * annos       * params           * typein        * typeout * locals           * code 
+    MethodLS : Identifier * List(Identifier) * Annotations * List(Identifier) * List(TypeExp) * TypeExp * List(Identifier) * List(Statement) -> Declaration
+    //       params           * types         * locals           * code
+    BlockLS: List(Identifier) * List(TypeExp) * List(Identifier) * List(Statement) -> Exp
     SlotWrite: Identifier * Exp -> Statement
     SlotRead: Identifier -> Statement
 rules
@@ -34,8 +38,9 @@ rules
   full-transform =
     desugar-complete;
     desugar-wildcard-decls;
-    desugar-fields;
-    desugar-constructors
+    desugar-objects;
+    desugar-constructors;
+    desugar-methods
     //make-occurrences
 
 // -------------
@@ -52,7 +57,7 @@ rules
 
 // --------------
 
-  desugar-fields = bottomup(try(desugar-obj-fields))
+  desugar-objects = bottomup(try(desugar-obj-fields))
   
   desugar-obj-fields:
     ObjectL(inherit, uses, code) -> ObjectLS(inherit, uses, slots, code')
@@ -135,7 +140,35 @@ rules
   
   mk-constructor:
     ctr-code -> Declaration(MethodL(ID("#ctr"), [], Annotations([Confidential()]), [], [], <no-type>, ctr-code))
-      
+
+// --------------
+
+  desugar-methods = bottomup(try(desugar-method))
+  
+  desugar-method:
+    MethodL(ID(x), dunno, annos, params, types-in, type-out, code) ->
+      MethodLS(ID(x), dunno, annos, params, types-in, type-out, locals, code')
+    where
+      locals := <filter(get-decl-id)> code;
+      code'  := <map(try(desugar-method-local))> code
+  
+  desugar-method:
+    BlockL(params, types, code) -> BlockLS(params, types, locals, code')
+    where
+      locals := <filter(get-decl-id)> code;
+      code'  := <map(try(desugar-method-local))> code
+  
+  get-decl-id:
+    Declaration(VariableL(vid@ID(_), _,  _, _)) -> vid
+
+  get-decl-id:
+    Declaration(ConstantL(vid@ID(_), _,  _, _)) -> vid
+
+  desugar-method-local:
+    Declaration(VariableL(vid@ID(x), _, _, e)) -> Expression(MCallL(ID($[[x]:=(_)]), [e]))
+
+  desugar-method-local:
+    Declaration(ConstantL(vid@ID(x), _, _, e)) -> Expression(MCallL(ID($[[x]:=(_)]), [e]))
 
 // --------------
 

@@ -19,19 +19,19 @@ signature
     
 rules
   
-  DObj, O |- method-closure(m@MethodL(_, _, _, _, _, _, _)) :: E --> ClosVis(clos, vis) :: E
+  DObj, O |- method-closure(m@MethodLS(_, _, _, _, _, _, _, _)) :: E --> ClosVis(clos, vis) :: E
   where
     method-desugar(m) --> LFunc(params, locals, code, vis);
     Clos(DObj, O, params, locals, RCode(code, DynRet()), E) => clos
   
-  S, O, R |- block-closure(m@MethodL(_, _, _, _, _, _, _)) :: E --> Block(S, clos) :: E
+  S, O, R |- block-closure(m@MethodLS(_, _, _, _, _, _, _, _)) :: E --> Block(S, clos) :: E
   where
     method-desugar(m) --> LFunc(params, locals, code, _);
     Clos(DObj(S), O, params, locals, RCode(code, StatRet(R)), E) => clos
 
-  BlockL(params, _, code) --> BlockV(clos)
+  BlockLS(params, _, locals, code) --> BlockV(clos)
   where
-    block-closure(MethodL(ID("lambda"), [], Annotations([Public()]), params, [], no-type(), code)) --> clos
+    block-closure(MethodLS(ID("lambda"), [], Annotations([Public()]), params, [], no-type(), locals, code)) --> clos
 //    enforce-block-policy(clos) --> _
 
   Return(e) --> doreturn(e)

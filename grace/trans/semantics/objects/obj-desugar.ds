@@ -88,7 +88,7 @@ rules
 
   collect-methods([]) --> []
   
-  collect-methods([Declaration(m@MethodL(ID(x), _, _, _, _, _, _)) | ms]) --> [(x, m) | ms']
+  collect-methods([Declaration(m@MethodLS(ID(x), _, _, _, _, _, _, _)) | ms]) --> [(x, m) | ms']
   where
     collect-methods(ms) --> ms'
   

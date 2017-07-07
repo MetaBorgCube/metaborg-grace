@@ -13,33 +13,9 @@ signature
   
   arrows
     method-desugar(Declaration) --> LMethod
-    method-body-desugar(Code) --> (Code * List(Identifier))
-    method-vardec-desugar(Declaration) --> (Code * List(Identifier))
     
 rules
 
-  method-desugar(MethodL(_, _, Annotations(annos), params, _, _, code-in)) --> LFunc(params, locals, code-out, vis)
+  method-desugar(MethodLS(_, _, Annotations(annos), params, _, _, locals, code)) --> LFunc(params, locals, code, vis)
   where
-    method-body-desugar(code-in) --> (code-out, locals);
     method-annos-to-vis(annos) --> vis
-
-  method-body-desugar([]) --> ([] : Code, [] : List(Identifier))
-  
-  method-body-desugar([s | xs]) --> ([s | xs'], locals) 
-  where
-    s =!=> Declaration(_);
-    method-body-desugar(xs) --> (xs', locals)
-
-  method-body-desugar([Declaration(d) | xs]) --> (init-stms ++ xs', locals ++ locals')
-  where
-    method-vardec-desugar(d) --> (init-stms, locals);
-    method-body-desugar(xs) --> (xs', locals')
-  
-  method-vardec-desugar(VariableL(WildCard(), _, _, e)) --> ([Expression(e)], []: List(Identifier))
-  
-  method-vardec-desugar(ConstantL(WildCard(), _, _, e)) --> ([Expression(e)], []: List(Identifier))
-  
-  method-vardec-desugar(VariableL(id@ID(x), _, _, e)) --> ([Expression(MCallL(ID(x ++ ":=(_)"), [e]))], [id])
-  
-  method-vardec-desugar(ConstantL(id@ID(x), _, _, e)) --> ([Expression(MCallL(ID(x ++ ":=(_)"), [e]))], [id])
-  

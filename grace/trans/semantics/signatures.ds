@@ -5,6 +5,28 @@ imports
 
 signature
   constructors
-    ObjectLS: Inherit * List(Use) * List(Identifier) * List(Statement) -> Exp 
+    ObjectLS: 
+        Inherit // inherit
+      * List(Use) // uses
+      * List(Identifier) // slots
+      * List(Statement) // code
+      -> Exp
+      
+    MethodLS:
+        Identifier // name
+      * List(Identifier) // dunno
+      * Annotations // annos
+      * List(Identifier) // params
+      * List(TypeExp) // typesin
+      * TypeExp // typeout
+      * List(Identifier) // locals
+      * List(Statement) // code
+      -> Declaration
+    BlockLS:
+        List(Identifier) // params
+        * List(TypeExp) // types
+        * List(Identifier) // locals
+        * List(Statement) // code
+        -> Exp
     SlotWrite: Identifier * Exp -> Statement
     SlotRead: Identifier -> Statement
