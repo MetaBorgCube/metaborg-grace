@@ -37,36 +37,20 @@ signature
     alias-map(List(Alias)) --> LAliases
     exclude-map(List(Exclude)) --> LExcludes
     
-//    desugar-code(Code) --> (LSlots * LMethods)
-//    
-//    desugar-slots(Code, LSlots, LMethods) --> (Code * LSlots * LMethods)
-//    desugar-methods(Code, LSlots, LMethods) --> (Code * LSlots * LMethods)
-//    desugar-constr(Code, LSlots, LMethods) --> (LSlots * LMethods)
-//  
-//    slot-getter(String, VisAnno) --> Statement 
-//    slot-setter(String, VisAnno) --> Statement
-//    slot-internal-setter(String) --> Statement
-//
-//    slot-assign-call(String, Exp) --> Statement
-    
-//  native operators
-//    mksettername: String -> String
-//    mkslotname: String -> String
+    lmethods-to-names(LMethods) --> List(String)
     
 rules
 
   desugar-obj(RObjectL(code)) --> LObj([], [], methods)
   where
-    collect-methods(code) --> methods;
-    log("Root methods are: " ++ str(methods : AST)) --> _
+    collect-methods(code) --> methods
 
   desugar-obj(ObjectLS(inherit, uses, slotids, code)) --> LObj([inherit'|uses'], slots, methods)
   where
     desugar-inherit(inherit) --> inherit';
     desugar-uses(uses) --> uses';
     idents-to-slots(slotids) --> slots;
-    collect-methods(code) --> methods;
-    log("Methods are: " ++ str(methods : AST)) --> _
+    collect-methods(code) --> methods
 
   desugar-inherit(InheritL(e, als, exs)) --> LInherit(e, alsmap, exsmap)
   where

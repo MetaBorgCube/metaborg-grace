@@ -94,7 +94,6 @@ rules
 //    enforce-member-policy(S', m) --> _;
     DObj DObj(S') |- method-closure(decl) --> clos;
     read(S') --> Obj(O, parents, attrs);
-    update(S', Obj(O, parents, {m |--> clos, attrs})) --> _;
-    log("Added method " ++ m ++ " to obj " ++ int2string(S')) --> _
+    update(S', Obj(O, parents, {m |--> clos, attrs})) --> _
 
 
