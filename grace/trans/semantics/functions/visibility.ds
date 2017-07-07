@@ -14,9 +14,9 @@ signature
     Priv: VisAnno
   
   arrows
-    resolve-lookup(String, Loc) --> (Loc * Closure)
+    resolve-lookup(Identifier, Loc) --> (Loc * Closure)
     
-    ensure-visible(String, Loc, ResPath, Loc, VisAnno) --> U
+    ensure-visible(Identifier, Loc, ResPath, Loc, VisAnno) --> U
 
     
 rules
@@ -41,7 +41,8 @@ rules
     path-aliased(x, path) --> is-aliased;
     case is-aliased of {
       true =>
-        halt-error("Requested confidential method '" ++ x ++ "' from outside") --> _
+        name(x) --> name;
+        halt-error("Requested confidential method '" ++ name ++ "' from outside") --> _
       otherwise =>
     }
   
@@ -49,7 +50,8 @@ rules
   where
     S-call != S-owner;
     p =!=> PO();
-    halt-error("Requested confidential method '" ++ x ++ "' from outside") --> _
+    name(x) --> name;
+    halt-error("Requested confidential method '" ++ name ++ "' from outside") --> _
 
   
 

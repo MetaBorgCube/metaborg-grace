@@ -1,5 +1,8 @@
 module trans/semantics/objects/path
 
+imports
+  semantics/signatures
+
 signature
   sorts
     PathPart
@@ -8,8 +11,8 @@ signature
     ResPath = List(PathPart) // invariant: empty means no path found
     
   constructors
-    PL: String -> PathPart // local
-    PP: Int * String -> PathPart // name S in parent I
+    PL: Identifier -> PathPart // local
+    PP: Int * Identifier -> PathPart // name S in parent I
     PO: PathPart // outer
   
   arrows
@@ -24,9 +27,9 @@ signature
     path-outers-only(ResPath) --> Bool    
     path-parents-only(ResPath) --> Bool
     
-    path-aliased(String, ResPath) --> Bool
+    path-aliased(Identifier, ResPath) --> Bool
     
-    path-local-aliased(String, ResPath) --> Bool
+    path-local-aliased(Identifier, ResPath) --> Bool
 rules
 
   path-found([]) --> false

@@ -9,7 +9,7 @@ imports
 
 signature
   arrows
-    policy-member-applies-to(String) --> Bool
+    policy-member-applies-to(Identifier) --> Bool
   
     policy-members-allow-duplicates() --> Bool
     policy-members-allow-duplicate-inherited() --> Bool
@@ -18,12 +18,12 @@ signature
     policy-members-allow-shadow-lexical-inherited() --> Bool
 
 
-    enforce-member-policy(Loc, String) --> U
-    check-member-duplicate(String, ResPath) --> U
-    check-member-duplicate-inherited(String, ResPath) --> U
-    check-members-shadow-lexical-local(String, ResPath) --> U
-    check-members-shadow-lexical-member(String, ResPath) --> U
-    check-members-shadow-lexical-inherited(String, ResPath) --> U
+    enforce-member-policy(Loc, Identifier) --> U
+    check-member-duplicate(Identifier, ResPath) --> U
+    check-member-duplicate-inherited(Identifier, ResPath) --> U
+    check-members-shadow-lexical-local(Identifier, ResPath) --> U
+    check-members-shadow-lexical-member(Identifier, ResPath) --> U
+    check-members-shadow-lexical-inherited(Identifier, ResPath) --> U
     
 rules
   
@@ -35,7 +35,7 @@ rules
   
 rules
   
-  policy-member-applies-to(x) --> notB(str-starts-with(x, "#"))
+  policy-member-applies-to(x) --> notB(str-starts-with(name(x), "#"))
   
   enforce-member-policy(S, x) --> U()
   where
@@ -62,11 +62,13 @@ rules
       false =>
         case path-local(path) : Bool of {
           true =>
-            halt-error("Duplicate member '" ++ x ++ "'") --> _
+            name(x) --> name;
+            halt-error("Duplicate member '" ++ name ++ "'") --> _
           false =>
             case path-local-aliased(x, path) : Bool of {
               true =>
-                halt-error("Duplicate member '" ++ x ++ "'") --> _
+                name(x) --> name;
+                halt-error("Duplicate member '" ++ name ++ "'") --> _
               false =>
             }
         }
@@ -79,7 +81,8 @@ rules
       false =>
         case path-strictly-inherited(path) : Bool of {
           true =>
-            halt-error("Member '" ++ x ++ "' overrides inherited member") --> _
+            name(x) --> name;
+            halt-error("Member '" ++ name ++ "' overrides inherited member") --> _
           false =>
         }
     }
@@ -91,7 +94,8 @@ rules
       false =>
         case is-local(x) : Bool of {
           true =>
-            halt-error("Member '" ++ x ++ "' shadows local variable in surrounding scope") --> _
+            name(x) --> name;
+            halt-error("Member '" ++ name ++ "' shadows local variable in surrounding scope") --> _
           false =>
         }
     }
@@ -103,7 +107,8 @@ rules
       false =>
         case path-strictly-lexical(x-path) : Bool of {
           true =>
-            halt-error("Member '" ++ x ++ "' shadows member defined in surrounding scope") --> _
+            name(x) --> name;
+            halt-error("Member '" ++ name ++ "' shadows member defined in surrounding scope") --> _
           false =>
         }
     }
@@ -115,7 +120,8 @@ rules
       false =>
         case (path-lexical(x-path) : Bool, path-strictly-lexical(x-path) : Bool) of {
           (true, false) =>
-            halt-error("Member '" ++ x ++ "' shadows member inherited into surrounding scope") --> _
+            name(x) --> name;
+            halt-error("Member '" ++ name ++ "' shadows member inherited into surrounding scope") --> _
           otherwise =>
         }
     }

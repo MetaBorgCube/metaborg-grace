@@ -13,10 +13,10 @@ signature
     LInherit
   
   sort aliases
-    LAliases = Map(String, String)
-    LExcludes = Map(String, String)
-    LSlots = List(String)
-    LMethods = List((String * Declaration))
+    LAliases = Map(Identifier, Identifier)
+    LExcludes = Map(Identifier, Identifier)
+    LSlots = List(Identifier)
+    LMethods = List((Identifier * Declaration))
     
   constructors
     LObj: List(LInherit) * LSlots * LMethods -> Exp
@@ -31,13 +31,10 @@ signature
     desugar-inherit(Inherit) --> LInherit
     desugar-uses(List(Use)) --> List(LInherit)
     desugar-use(Use) --> LInherit
-    idents-to-slots(List(Identifier)) --> LSlots
     collect-methods(Code) --> LMethods
     
     alias-map(List(Alias)) --> LAliases
     exclude-map(List(Exclude)) --> LExcludes
-    
-    lmethods-to-names(LMethods) --> List(String)
     
 rules
 
@@ -45,11 +42,10 @@ rules
   where
     collect-methods(code) --> methods
 
-  desugar-obj(ObjectLS(inherit, uses, slotids, code)) --> LObj([inherit'|uses'], slots, methods)
+  desugar-obj(ObjectLS(inherit, uses, slots, code)) --> LObj([inherit'|uses'], slots, methods)
   where
     desugar-inherit(inherit) --> inherit';
     desugar-uses(uses) --> uses';
-    idents-to-slots(slotids) --> slots;
     collect-methods(code) --> methods
 
   desugar-inherit(InheritL(e, als, exs)) --> LInherit(e, alsmap, exsmap)
@@ -70,25 +66,19 @@ rules
   
   alias-map([]) --> {}
   
-  alias-map([AliasL(ID(x'), ID(x)) | xs]) --> {x' |--> x, xs-map}
+  alias-map([AliasL(x', x) | xs]) --> {x' |--> x, xs-map}
   where
     alias-map(xs) --> xs-map
   
   exclude-map([]) --> {}
   
-  exclude-map([ExcludeL(ID(x)) | xs]) --> {x |--> x, xs-map}
+  exclude-map([ExcludeL(x) | xs]) --> {x |--> x, xs-map}
   where
     exclude-map(xs) --> xs-map
 
-  idents-to-slots([]) --> []
-  
-  idents-to-slots([ID(s) | idents]) --> [s | ss]
-  where
-    idents-to-slots(idents) --> ss
-
   collect-methods([]) --> []
   
-  collect-methods([Declaration(m@MethodLS(ID(x), _, _, _, _, _, _, _)) | ms]) --> [(x, m) | ms']
+  collect-methods([Declaration(m@MethodLS(x, _, _, _, _, _, _, _)) | ms]) --> [(x, m) | ms']
   where
     collect-methods(ms) --> ms'
   

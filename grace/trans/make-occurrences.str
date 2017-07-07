@@ -41,7 +41,7 @@ rules
     desugar-objects;
     desugar-constructors;
     desugar-methods
-    //make-occurrences
+//    make-occurrences
 
 // -------------
 
@@ -105,7 +105,7 @@ rules
           [SlotWrite(<mk-slotname> fid, MCallL(ID("$pv"), []))]))
   
   mk-slotname:
-    ID(x) -> ID($[_#_slot_#_[x]])
+    ID(x) -> ID($[#_slot_#_[x]])
   
   mk-gettername:
     ID(x) -> ID(x)
@@ -114,7 +114,7 @@ rules
     ID(x) -> ID($[[x]:=(_)])
   
   mk-internal-settername:
-    ID(x) -> ID($[_#_set_#_[x]])
+    ID(x) -> ID($[#_set_#_[x]])
   
   mk-getter-annos =
     filter(?Public() + ?Confidential() + \ Readable() -> Public() \);

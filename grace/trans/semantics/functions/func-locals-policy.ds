@@ -22,15 +22,15 @@ signature
     enforce-closure-policy(Loc) --> U
     enforce-closure-policy-aux(Loc, List(V)) --> U
     enforce-closure-policy(Loc, V) --> U
-    enforce-closure-policy-aux(List(String)) --> U
+    enforce-closure-policy-aux(List(Identifier)) --> U
     enforce-block-policy(Closure) --> U
-    check-locals-duplicates(List(String)) --> U
-    check-locals-duplicates-aux(List(String)) --> Map(String, String)
-    check-local-shadow-local(String) --> U
-    check-local-shadow-member(String) --> U
-    check-local-shadow-inherited(String) --> U
+    check-locals-duplicates(List(Identifier)) --> U
+    check-locals-duplicates-aux(List(Identifier)) --> Map(Identifier, Identifier)
+    check-local-shadow-local(Identifier) --> U
+    check-local-shadow-member(Identifier) --> U
+    check-local-shadow-inherited(Identifier) --> U
     
-    idents-to-strings(List(Identifier)) --> List(String)
+//    idents-to-strings(List(Identifier)) --> List(String)
 
 rules
   
@@ -59,9 +59,9 @@ rules
   
   enforce-closure-policy(S, ClosVis(Clos(_, O, params, locals, _, _), _)) --> U()
   where
-    idents-to-strings(params ++ locals) --> xs;
-    check-locals-duplicates(xs) --> _;
-    S, O |- enforce-closure-policy-aux(xs) --> _
+    params ++ locals => vars;
+    check-locals-duplicates(vars) --> _;
+    S, O |- enforce-closure-policy-aux(vars) --> _
 
   enforce-block-policy(Block(S, clos)) --> enforce-closure-policy(S, ClosVis(clos, Pub()))
 
@@ -80,7 +80,8 @@ rules
     check-locals-duplicates-aux(xs) --> x-map;
     case x-map[x?] of {
       true =>
-        halt-error("Duplicate local variable '" ++ x ++ "'") --> _
+        name(x) --> name;
+        halt-error("Duplicate local variable '" ++ name ++ "'") --> _
       false =>
     }
 
@@ -100,7 +101,8 @@ rules
       false =>
         case is-local(x) : Bool of {
           true =>
-            halt-error("Variable '" ++ x ++ "' is already declared in an enclosing method") --> _
+            name(x) --> name;
+            halt-error("Variable '" ++ name ++ "' is already declared in an enclosing method") --> _
           false =>
         }
     }
@@ -115,12 +117,14 @@ rules
           true =>
             case path-local(path) : Bool of {
               true =>
-                halt-error("Variable '" ++ x ++ "' shadows member in surrounding object") --> _
+                name(x) --> name;
+                halt-error("Variable '" ++ name ++ "' shadows member in surrounding object") --> _
               false =>
             };
             case path-strictly-lexical(path) : Bool of {
               true =>
-                halt-error("Variable '" ++ x ++ "' shadows member in enclosing scope") --> _
+                name(x) --> name;
+                halt-error("Variable '" ++ name ++ "' shadows member in enclosing scope") --> _
               false =>
             }
           false =>
@@ -137,12 +141,14 @@ rules
           true =>
             case path-strictly-inherited(path) : Bool of {
               true =>
-                halt-error("Variable '" ++ x ++ "' shadows inherited member") --> _
+                name(x) --> name;
+                halt-error("Variable '" ++ name ++ "' shadows inherited member") --> _
               false =>
             };
             case (path-lexical(path) : Bool, path-strictly-lexical(path) : Bool) of {
               (true, false) =>
-                halt-error("Variable '" ++ x ++ "' shadows member inherited into a surrounding scope") --> _
+                name(x) --> name;
+                halt-error("Variable '" ++ name ++ "' shadows member inherited into a surrounding scope") --> _
               otherwise =>
             }
           false =>
@@ -150,10 +156,3 @@ rules
     }
     
 
-  idents-to-strings([]) --> []
-  
-  idents-to-strings([WildCard() | xs]) --> idents-to-strings(xs)
-  
-  idents-to-strings([ID(x) | xs]) --> [x | xs']
-  where
-    idents-to-strings(xs) --> xs'

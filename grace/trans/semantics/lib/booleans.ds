@@ -36,16 +36,16 @@ rules
   where
     case b of {
       BoolV(true) =>
-        call-qualified(e1, "apply", []) --> v
+        call-qualified(e1, mk-identifier("apply"), []) --> v
       otherwise =>
-        call-qualified(e2, "apply", []) --> v
+        call-qualified(e2, mk-identifier("apply"), []) --> v
     }
   
   bool-call(b, "ifTrue(_)", [e]) --> v
   where
     case b of {
       BoolV(true) =>
-        call-qualified(e, "apply", []) --> v
+        call-qualified(e, mk-identifier("apply"), []) --> v
       otherwise =>
         DoneV() => v
     }
@@ -54,7 +54,7 @@ rules
   where
     case b of {
       BoolV(false) =>
-        call-qualified(e, "apply", []) --> v
+        call-qualified(e, mk-identifier("apply"), []) --> v
       otherwise =>
         DoneV() => v
     }

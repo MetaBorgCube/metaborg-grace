@@ -30,3 +30,13 @@ signature
         -> Exp
     SlotWrite: Identifier * Exp -> Statement
     SlotRead: Identifier -> Statement
+
+  arrows
+    name(Identifier) --> String
+    mk-identifier(String) --> Identifier
+    
+rules
+
+  name(ID(x)) --> x
+
+  mk-identifier(x) --> ID(x)

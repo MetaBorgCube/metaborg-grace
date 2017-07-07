@@ -9,8 +9,8 @@ imports
   
 signature
   arrows
-    call-unqualified(String, List(V)) --> V
-    call-qualified(V, String, List(V)) --> V
+    call-unqualified(Identifier, List(V)) --> V
+    call-qualified(V, Identifier, List(V)) --> V
     
     call(Closure, List(V)) --> V
     RCode --> V
@@ -44,11 +44,13 @@ rules
   // block as receiver of apply method  
   call-qualified(BlockV(clos), x, vs) --> v
   where
-    str-starts-with(x, "apply") --> true;
+    str-starts-with(name(x), "apply") --> true;
     call(clos, vs) --> v
   
   // block as receiver of asString method
-  call-qualified(BlockV(_), "asString", []) --> StringV("block<SOMELOCATION>")
+  call-qualified(BlockV(_), x, []) --> StringV("block<SOMELOCATION>")
+  where
+    name(x) --> "asString"
   
   // local variable read 
   call-qualified(DoneV(), x, []) --> read-local(x)
@@ -56,8 +58,9 @@ rules
   // local variable assign
   call-qualified(DoneV(), x, [v]) --> DoneV()
   where
-    str-ends-with(x, ":=(_)") --> true;
-    write-local(str-rm-suffix(x, ":=(_)"), v) --> _
+    name(x) --> name;
+    str-ends-with(name, ":=(_)") --> true;
+    write-local(mk-identifier(str-rm-suffix(name, ":=(_)")), v) --> _
 
   call(Block(S, clos), vs) --> v
   where

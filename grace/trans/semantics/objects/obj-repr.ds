@@ -23,9 +23,9 @@ signature
   
   sort aliases
     StoreData = Object
-    Attributes = Map(String, V)
-    Aliases = Map(String, String)
-    Excludes = Map(String, String)
+    Attributes = Map(Identifier, V)
+    Aliases = Map(Identifier, Identifier)
+    Excludes = Map(Identifier, Identifier)
     Parent = (Loc * Aliases * Excludes)
     Parents = List(Parent)
   
@@ -33,7 +33,7 @@ signature
     Obj: Outer * Parents * Attributes -> Object
   
   arrows
-    obj-constr-name() --> String
+    obj-constr-name() --> Identifier
     
     self-addr() --> Loc
     outer-addr() --> Loc
@@ -44,7 +44,7 @@ rules
   
   is-native(RefV(_)) --> false
   
-  obj-constr-name() --> "#ctr"
+  obj-constr-name() --> ID("#ctr")
 
   S |- self-addr() --> S
 

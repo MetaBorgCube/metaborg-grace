@@ -50,16 +50,17 @@ signature
     nativePrint: V -> V
 
   arrows
-    call-qualified-proxy(V, String, List(Exp)) --> V
+    call-qualified-proxy(V, Identifier, List(Exp)) --> V
 
 rules
 
-  MCallL(ID(x), es) --> v_res
+  MCallL(x, es) --> v_res
   where
-    case x of {
+    name(x) --> name;
+    case name of {
       "print(_)" =>
         es => [e];
-        nativePrint(call-qualified-proxy(e, "asString", [])) => v_res
+        nativePrint(call-qualified-proxy(e, mk-identifier("asString"), [])) => v_res
         
       "while(_)do(_)" =>
         es => [e1, e2];
@@ -69,13 +70,13 @@ rules
         call-unqualified(x, es) --> v_res
     }
 
-  EB E() |- MCallRecvL(e, ID(x), es) --> call-qualified-proxy(e, x, es)
+  EB E() |- MCallRecvL(e, x, es) --> call-qualified-proxy(e, x, es)
   
   call-qualified-proxy(recv, x, es) --> v
   where
     case is-native(recv) : Bool of {
       true =>
-        native-call(recv, x, es) --> v
+        native-call(recv, name(x), es) --> v
       otherwise =>
         call-qualified(recv, x, es) --> v
     }

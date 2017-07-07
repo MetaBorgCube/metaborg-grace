@@ -4,15 +4,14 @@ imports
   semantics/frames/frames-api
 
 signature
+//  constructors
+//    Occurrence: Namespace * Name * TermIndex -> Occurrence
   
-  constructors
-    Occurrence: Namespace * Name * TermIndex -> Occurrence
-  
-  sorts Namespace constructors
-    DefaultNamespace: Namespace
-    
-  sorts TermIndex constructors
-    TermIndex: Int -> TermIndex
+//  sorts Namespace constructors
+//    DefaultNamespace: Namespace
+//    
+//  sorts TermIndex constructors
+//    TermIndex: Int -> TermIndex
 
   constructors
     Addr: Frame * Occurrence -> Addr

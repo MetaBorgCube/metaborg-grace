@@ -72,7 +72,7 @@ rules
     read(S') --> Obj(O, parents, attrs);
     update(S', Obj(O, [(S, alias-map, exclude-map) | parents], attrs)) --> _
   
-  EB B(S) |- MCallRecvL(e, ID(x), es) --> v
+  EB B(S) |- MCallRecvL(e, x, es) --> v
   where
     EB E() |- e --> recv;
     EB E() |- es --> vs;

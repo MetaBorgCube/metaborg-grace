@@ -7,7 +7,7 @@ imports
 
 signature
   sort aliases
-    Env = Map(String, VAddr)
+    Env = Map(Identifier, VAddr)
     
   components
     VH: VHeap
@@ -17,13 +17,13 @@ signature
     bind-locals(List(Identifier)) --> U
     bind-locals(List(Identifier), List(V)) --> U
 
-    bind-local(String, V) --> U
+    bind-local(Identifier, V) --> U
     
     default-values(List(Identifier)) --> List(V)
 
-    is-local(String) --> Bool
-    read-local(String) --> V
-    write-local(String, V) --> U
+    is-local(Identifier) --> Bool
+    read-local(Identifier) --> V
+    write-local(Identifier, V) --> U
     
 rules
 
@@ -33,7 +33,7 @@ rules
   
   bind-locals([WildCard() | ids], [_ | vs]) --> bind-locals(ids, vs)
   
-  bind-locals([ID(x) | ids], [v | vs]) --> bind-locals(ids, vs)
+  bind-locals([x@ID(_) | ids], [v | vs]) --> bind-locals(ids, vs)
   where
     bind-local(x, v) --> U()
 
@@ -48,11 +48,17 @@ rules
     default-value() --> v;
     default-values(ids) --> vs
   
-  is-local(x) :: E --> is-local :: E
+  is-local(x) :: E --> E[lx?] :: E
   where
     ":=(_)" => bind_suffix;
-    is-local as E[str-rm-suffix(x, bind_suffix)?] if str-ends-with(x, bind_suffix)
-             or E[x?]
+    name(x) --> name;
+    case str-ends-with(name, bind_suffix) : Bool of {
+      true =>
+        mk-identifier(str-rm-suffix(name, bind_suffix)) --> lx
+      otherwise =>
+        x => lx
+        
+    }
 
   read-local(x) :: E --> v-read(E[x]) :: E
   

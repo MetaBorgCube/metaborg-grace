@@ -9,16 +9,16 @@ signature
     PIDX : Int
     
   arrows
-    resolve-top(String, Self) --> ResPath
+    resolve-top(Identifier, Self) --> ResPath
     
-    resolve(String, Self) --> ResPath
+    resolve(Identifier, Self) --> ResPath
     
-    resolve-in-parent(String, Parent) --> ResPath
+    resolve-in-parent(Identifier, Parent) --> ResPath
     
-    resolve-in-outer(String, Self) --> ResPath
-    resolve-in-parents(String, Parents) --> ResPath
+    resolve-in-outer(Identifier, Self) --> ResPath
+    resolve-in-parents(Identifier, Parents) --> ResPath
     
-    disambiguate-paths(String, ResPath, ResPath) --> ResPath
+    disambiguate-paths(Identifier, ResPath, ResPath) --> ResPath
 
 rules
 
@@ -27,7 +27,8 @@ rules
     resolve(x, S') --> path;
     case path of {
       [] =>
-        halt-error("Unknown method " ++ x) --> _
+        name(x) --> name;
+        halt-error("Unknown method " ++ name) --> _
       otherwise =>
     }
 
@@ -115,7 +116,8 @@ rules
     path-strictly-lexical(o) --> strictly-lexical;
     case (strictly-inherited, strictly-lexical) of {
       (true, true) =>
-        halt-error(x ++ " is both inherited, and defined in an enclosing scope") --> _
+        name(x) --> name;
+        halt-error(name ++ " is both inherited, and defined in an enclosing scope") --> _
       otherwise =>
     }
   
