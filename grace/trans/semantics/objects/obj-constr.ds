@@ -4,8 +4,9 @@ imports
   trans/semantics/objects/obj-desugar
   trans/semantics/objects/obj-repr
   trans/semantics/objects/obj-init
-  trans/semantics/store
+//  trans/semantics/store
   trans/semantics/objects/obj-members-policy
+//  trans/semantics/frames/frames-adapter
   
 signature
   sorts
@@ -15,18 +16,24 @@ signature
     // regular evaluation mode
     E: EvalMode
     // object building mode. carries the address of the object being constructed
-    B: Loc -> EvalMode
+    B: Frame -> EvalMode
   
   components
     EB : EvalMode
   
   arrows
-    Exp -bld-> Loc
-    add-parents(Loc, List(LInherit)) --> U
-    add-parent(Loc, LInherit) --> U
-    add-slots(Loc, LSlots) --> U
-    add-methods(Loc, LMethods) --> U
-    add-methods-aux(Loc, List(String), LMethods) --> U
+    Exp -bld-> Frame
+    List(LInherit) -bld-> List(Frame)
+    defaults(List(Identifier)) --> Map(Occurrence, Val)
+    mk-closures(LMethods) --> Map(Occurrence, Val)
+    
+//  arrows
+//    Exp -bld-> Loc
+//    add-parents(Loc, List(LInherit)) --> U
+//    add-parent(Loc, LInherit) --> U
+//    add-slots(Loc, LSlots) --> U
+//    add-methods(Loc, LMethods) --> U
+//    add-methods-aux(Loc, List(String), LMethods) --> U
     
 rules
 
@@ -40,12 +47,27 @@ rules
 
   o@ObjectLS(_, _, _, _) --> desugar-obj(o)
   
-  S |- o@LObj(_, _, _) --> RefV(S')
+  o@LObj(_, _, _) --> RefV(S')
   where
-    o -bld-> S';
+    o -bld-> F;
 //    enforce-closure-policy(S') --> _;
     // TODO: outer might not be necessary
     S S', O S |- init-obj(S') --> _
+
+  S, O |- LObj(parents, slots, methods) -bld-> F
+  where
+    parents -bld-> import-Fs;
+    { P() |--> [O], I() |--> import-Fs } => links;
+    defaults(slots) --> slots-map;
+    mk-closures(methods) --> methods-map;
+    initFrame(links, {slots-map, methods-map}) --> F
+
+//  LObj(parents, slots, methods) -bld-> F
+//  where
+//    init-slots(slots) --> islots;
+//    mk-closures(methods) --> closures
+    
+
   
   S, EB |- LObj(parents, slots, methods) -bld-> S'
   where

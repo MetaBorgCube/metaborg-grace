@@ -1,9 +1,11 @@
 module semantics/frames/frames-adapter
 
 imports
-  semantics/signatures
   semantics/frames/frames-impl
+  semantics/signatures
+  semantics/values
   
 signature
   sort aliases
     Occurrence = Identifier
+    Val = V
