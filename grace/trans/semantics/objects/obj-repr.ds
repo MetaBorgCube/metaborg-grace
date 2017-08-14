@@ -1,58 +1,57 @@
 module trans/semantics/objects/obj-repr
 
 imports
-//  trans/semantics/store
+  trans/semantics/store
   trans/semantics/values
   trans/semantics/functions/functions
-//  trans/semantics/lib/lib
-  trans/semantics/frames/frames-adapter
+  trans/semantics/lib/lib
   
 signature
   components
-    S : Frame
-    O : Frame
-//  
-//  constructors
-//    RefV: Loc -> V {implicit}
-//  
-//  sorts
-//    Object
-//  
-//  sort aliases
-//    StoreData = Object
-//    Attributes = Map(Identifier, V)
-//    Aliases = Map(Identifier, Identifier)
-//    Excludes = Map(Identifier, Identifier)
-//    Parent = (Loc * Aliases * Excludes)
-//    Parents = List(Parent)
-//  
-//  constructors
-//    //   outer * supers * members
-//    Obj: Loc * Parents * Attributes -> Object
-//  
-//  arrows
-//    obj-constr-name() --> Identifier
-//    
-//    self-addr() --> Loc
-//    outer-addr() --> Loc
-//    outer-addr(Loc) --> Loc
-//    bogus-addr() --> Loc
-//    
-//rules
-//  
-//  is-native(RefV(_)) --> false
-//  
-//  obj-constr-name() --> ID("#ctr")
-//
-//  S |- self-addr() --> S
-//
-//  O |- outer-addr() --> O
-//  
-//  outer-addr(S) --> O
-//  where
-//    read(S) --> Obj(O, _, _)
-//  
-//  bogus-addr() --> -99
+    S : Loc
+    O : Loc
+  
+  constructors
+    RefV: Loc -> V {implicit}
+  
+  sorts
+    Object
+  
+  sort aliases
+    StoreData = Object
+    Attributes = Map(Identifier, V)
+    Aliases = Map(Identifier, Identifier)
+    Excludes = Map(Identifier, Identifier)
+    Parent = (Loc * Aliases * Excludes)
+    Parents = List(Parent)
+  
+  constructors
+    //   outer * supers * members
+    Obj: Loc * Parents * Attributes -> Object
+  
+  arrows
+    obj-constr-name() --> Identifier
+    
+    self-addr() --> Loc
+    outer-addr() --> Loc
+    outer-addr(Loc) --> Loc
+    bogus-addr() --> Loc
+    
+rules
+  
+  is-native(RefV(_)) --> false
+  
+  obj-constr-name() --> ID("#ctr")
+
+  S |- self-addr() --> S
+
+  O |- outer-addr() --> O
+  
+  outer-addr(S) --> O
+  where
+    read(S) --> Obj(O, _, _)
+  
+  bogus-addr() --> -99
 
   
   
