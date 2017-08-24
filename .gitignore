@@ -49,8 +49,6 @@ grace.interpreter/.project
 .externalToolBuilders/
 
 # Locally stored "Eclipse launch configurations"
-grace/*.launch
-grace.interpreter/*.launch
 
 # PyDev specific (Python IDE for Eclipse)
 *.pydevproject
